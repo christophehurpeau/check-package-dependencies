@@ -1,0 +1,17 @@
+{
+  "pob": {
+    "project": {
+      "type": "lib"
+    },
+    "renovate": {
+      "enable": true
+    },
+    "lib": {
+      "documentation": true,
+      "testing": {
+        "ci": true,
+        "codecov": true
+      }
+    }
+  }
+}

@@ -1,0 +1,67 @@
+name: Node CI
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [12.x, 14.x, 15.x]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: node_modules
+          key: v2-dependencies--${{ matrix.node-version }}-${{ runner.OS }}-${{ hashFiles('yarn.lock') }}
+          restore-keys: |
+            v2-dependencies--${{ matrix.node-version }}-${{ runner.OS }}-
+            v2-dependencies--${{ matrix.node-version }}-
+
+      - name: Install Dependencies
+        run: yarn install --prefer-offline --pure-lockfile
+
+      - name: Checks
+        run: yarn run checks
+
+      - name: Prettier
+        run: yarn run lint:prettier
+        if: startsWith(matrix.node-version, '14.')
+
+      - name: Eslint
+        run: yarn run lint:eslint
+        if: startsWith(matrix.node-version, '14.')
+
+      - name: Typescript
+        run: yarn run tsc
+        if: startsWith(matrix.node-version, '14.')
+
+      - name: Test
+        run: yarn run test
+        env:
+          CI: true
+
+      - name: Documentation
+        run: yarn run generate:docs
+        if: startsWith(matrix.node-version, '14.')
+        env:
+          CI: true
+
+      - name: Send results to codecov
+        uses: codecov/codecov-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+        if: startsWith(matrix.node-version, '14.')
+
+      - name: Check nothing was forgotten before commit
+        if: startsWith(matrix.node-version, '14.')
+        run: yarn run repository-check-dirty

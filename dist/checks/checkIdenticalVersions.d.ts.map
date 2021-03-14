@@ -1,0 +1,1 @@
+{"version":3,"file":"checkIdenticalVersions.d.ts","sourceRoot":"","sources":["../../src/checks/checkIdenticalVersions.ts"],"names":[],"mappings":"AAEA,OAAO,KAAK,EAAE,eAAe,EAAE,WAAW,EAAE,MAAM,uBAAuB,CAAC;AAE1E,wBAAgB,sBAAsB,CACpC,GAAG,EAAE,WAAW,EAChB,WAAW,EAAE,MAAM,EACnB,IAAI,EAAE,eAAe,EACrB,IAAI,EAAE,MAAM,CAAC,MAAM,EAAE,MAAM,EAAE,CAAC,EAC9B,YAAY,GAAE,MAAM,EAAO,GAC1B,IAAI,CA8BN"}

@@ -1,0 +1,20 @@
+{
+  "extends": "./tsconfig.json",
+
+  "compilerOptions": {
+    "rootDirs": [],
+    "rootDir": "src",
+    "isolatedModules": false
+  },
+
+  "typedocOptions": {
+    "entryPoints": ["src/index.ts"],
+    "exclude": ["src/**/*.test.ts", "src/**/__tests__/**"],
+    "readme": "README.md",
+    "out": "docs",
+    "excludePrivate": true,
+    "gitRevision": "master"
+  },
+
+  "exclude": ["src/**/*.test.ts", "src/**/__tests__/**"]
+}
