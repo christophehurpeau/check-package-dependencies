@@ -14,6 +14,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+## 1.0.0 (2021-03-14)
+
+
+### Features
+
+* rewrite in typescript ([d7354fc](https://www.github.com/christophehurpeau/check-package-dependencies/commit/d7354fce348fc6003a618031570993f436aaa7ab))
+
 ## [0.1.2](https://github.com/christophehurpeau/pob/compare/check-package-dependencies@0.1.1...check-package-dependencies@0.1.2) (2021-03-13)
 
 
