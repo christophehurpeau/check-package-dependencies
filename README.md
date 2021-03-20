@@ -20,7 +20,7 @@ npm install --save-dev check-package-dependencies
 
 Based on my experience, I often saw issues with duplicate dependencies like two versions of babel, or two versions a react library that cannot share a context, peer dependencies not respected. I wrote specific script inside each repository for a long time, but they tend to be hard to maintain, hard to read, and not generic enough.
 
-I you have any idea, or bug, please open an issue. I plan to rewrite this package in typescript with tests when I'll have a better idea of the issues of this first draft implementation.
+I you have any idea, or found bug, please open an issue.
 
 ### Try it with cli
 
