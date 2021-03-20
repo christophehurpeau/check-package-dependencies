@@ -24,11 +24,10 @@ I you have any idea, or bug, please open an issue. I plan to rewrite this packag
 
 ### Try it with cli
 
-Install globally and check `package.json` in current directory:
+Use npx to try and check `package.json` in current directory:
 
 ```bash
-npm install -g check-package-dependencies
-check-package-dependencies
+npx check-package-dependencies
 ```
 
 ### Uses Cases
