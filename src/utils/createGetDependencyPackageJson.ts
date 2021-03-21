@@ -37,8 +37,10 @@ export function createGetDependencyPackageJson({
           throw err;
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        const match = / in (.*\/package.json)$/.exec(err.message);
+        const match = / in (.*\/package.json)($|\simported from)/.exec(
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          err.message,
+        );
 
         if (match) {
           const [, matchPackageJson] = match;
