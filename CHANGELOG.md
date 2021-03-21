@@ -14,6 +14,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+### [1.0.1](https://www.github.com/christophehurpeau/check-package-dependencies/compare/v1.0.0...v1.0.1) (2021-03-21)
+
+
+### Bug Fixes
+
+* improve regexp for detecting path in ERR_PACKAGE_PATH_NOT_EXPORTED error ([81efce3](https://www.github.com/christophehurpeau/check-package-dependencies/commit/81efce3c605fe63e810dfe3a0cbb740742d83d64))
+
 ## 1.0.0 (2021-03-14)
 
 
