@@ -14,6 +14,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+### [1.2.1](https://www.github.com/christophehurpeau/check-package-dependencies/compare/v1.2.0...v1.2.1) (2021-03-23)
+
+
+### Bug Fixes
+
+* internalWarnedForDuplicate use in workspace root pkg ([fcff2ba](https://www.github.com/christophehurpeau/check-package-dependencies/commit/fcff2baa55accb3dc3064ae56bb8579b42cd6842))
+
 ## [1.2.0](https://www.github.com/christophehurpeau/check-package-dependencies/compare/v1.1.0...v1.2.0) (2021-03-23)
 
 
