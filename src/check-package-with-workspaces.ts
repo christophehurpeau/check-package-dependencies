@@ -95,8 +95,8 @@ export function createCheckPackageWithWorkspaces(
           internalWarnedForDuplicate: warnedForDuplicate,
         });
         checkDirectDuplicateDependencies(
-          pkg,
-          pkgPathName,
+          checkPackage.pkg,
+          checkPackage.pkgPathName,
           'devDependencies',
           ['devDependencies', 'dependencies'],
           pkg,

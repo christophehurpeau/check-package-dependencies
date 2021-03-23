@@ -590,7 +590,7 @@ function createCheckPackageWithWorkspaces(pkgDirectoryPath = '.') {
           checkResolutionMessage,
           internalWarnedForDuplicate: warnedForDuplicate
         });
-        checkDirectDuplicateDependencies(pkg, pkgPathName, 'devDependencies', ['devDependencies', 'dependencies'], pkg, [], warnedForDuplicate);
+        checkDirectDuplicateDependencies(checkPackage.pkg, checkPackage.pkgPathName, 'devDependencies', ['devDependencies', 'dependencies'], pkg, [], warnedForDuplicate);
       });
       checkWarnedFor(createReportError('Recommended Checks', pkgPathName), directDuplicateDependenciesOnlyWarnsFor, warnedForDuplicate);
       return this;
