@@ -91,6 +91,7 @@
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="checkpackageapi.html#checknodependencies" class="tsd-kind-icon">check<wbr>NoDependencies</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="checkpackageapi.html#checkrecommended" class="tsd-kind-icon">check<wbr>Recommended</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="checkpackageapi.html#checkresolutionshasexplanation" class="tsd-kind-icon">check<wbr>Resolutions<wbr>Has<wbr>Explanation</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="checkpackageapi.html#checksatisfiesversionsbetweendependencies" class="tsd-kind-icon">check<wbr>Satisfies<wbr>Versions<wbr>Between<wbr>Dependencies</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="checkpackageapi.html#checksatisfiesversionsfromdependency" class="tsd-kind-icon">check<wbr>Satisfies<wbr>Versions<wbr>From<wbr>Dependency</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="checkpackageapi.html#checksatisfiesversionsindevdependenciesofdependency" class="tsd-kind-icon">check<wbr>Satisfies<wbr>Versions<wbr>InDev<wbr>Dependencies<wbr>OfDependency</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="checkpackageapi.html#getdependencypackagejson" class="tsd-kind-icon">get<wbr>Dependency<wbr>Package<wbr>Json</a></li>
@@ -470,6 +471,54 @@
 					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="checksatisfiesversionsbetweendependencies" class="tsd-anchor"></a>
+					<h3>check<wbr>Satisfies<wbr>Versions<wbr>Between<wbr>Dependencies</h3>
+					<div class="tsd-signature tsd-kind-icon">check<wbr>Satisfies<wbr>Versions<wbr>Between<wbr>Dependencies<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">(</span>depName1<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, depName2<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, dependencies<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{ </span>dependencies<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">; </span>devDependencies<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">; </span>resolutions<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><a href="checkpackageapi.html" class="tsd-signature-type" data-tsd-kind="Interface">CheckPackageApi</a></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/christophehurpeau/check-package-dependencies/blob/master/src/check-package.ts#L108">check-package.ts:108</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-type-declaration">
+						<h4>Type declaration</h4>
+						<ul class="tsd-parameters">
+							<li class="tsd-parameter-signature">
+								<ul class="tsd-signatures tsd-kind-type-literal tsd-parent-kind-interface">
+									<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">(</span>depName1<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, depName2<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, dependencies<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{ </span>dependencies<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">; </span>devDependencies<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">; </span>resolutions<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="checkpackageapi.html" class="tsd-signature-type" data-tsd-kind="Interface">CheckPackageApi</a></li>
+								</ul>
+								<ul class="tsd-descriptions">
+									<li class="tsd-description">
+										<h4 class="tsd-parameters-title">Parameters</h4>
+										<ul class="tsd-parameters">
+											<li>
+												<h5>depName1: <span class="tsd-signature-type">string</span></h5>
+											</li>
+											<li>
+												<h5>depName2: <span class="tsd-signature-type">string</span></h5>
+											</li>
+											<li>
+												<h5>dependencies: <span class="tsd-signature-symbol">{ </span>dependencies<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">; </span>devDependencies<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">; </span>resolutions<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> }</span></h5>
+												<ul class="tsd-parameters">
+													<li class="tsd-parameter">
+														<h5><span class="tsd-flag ts-flagOptional">Optional</span> dependencies<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></h5>
+													</li>
+													<li class="tsd-parameter">
+														<h5><span class="tsd-flag ts-flagOptional">Optional</span> dev<wbr>Dependencies<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></h5>
+													</li>
+													<li class="tsd-parameter">
+														<h5><span class="tsd-flag ts-flagOptional">Optional</span> resolutions<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></h5>
+													</li>
+												</ul>
+											</li>
+										</ul>
+										<h4 class="tsd-returns-title">Returns <a href="checkpackageapi.html" class="tsd-signature-type" data-tsd-kind="Interface">CheckPackageApi</a></h4>
+									</li>
+								</ul>
+							</li>
+						</ul>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
 					<a name="checksatisfiesversionsfromdependency" class="tsd-anchor"></a>
 					<h3>check<wbr>Satisfies<wbr>Versions<wbr>From<wbr>Dependency</h3>
 					<div class="tsd-signature tsd-kind-icon">check<wbr>Satisfies<wbr>Versions<wbr>From<wbr>Dependency<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">(</span>depName<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, dependencies<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{ </span>dependencies<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">; </span>devDependencies<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">; </span>resolutions<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><a href="checkpackageapi.html" class="tsd-signature-type" data-tsd-kind="Interface">CheckPackageApi</a></div>
@@ -678,6 +727,9 @@
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
 								<a href="checkpackageapi.html#checkresolutionshasexplanation" class="tsd-kind-icon">check<wbr>Resolutions<wbr>Has<wbr>Explanation</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="checkpackageapi.html#checksatisfiesversionsbetweendependencies" class="tsd-kind-icon">check<wbr>Satisfies<wbr>Versions<wbr>Between<wbr>Dependencies</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
 								<a href="checkpackageapi.html#checksatisfiesversionsfromdependency" class="tsd-kind-icon">check<wbr>Satisfies<wbr>Versions<wbr>From<wbr>Dependency</a>
