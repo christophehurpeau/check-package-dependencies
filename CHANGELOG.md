@@ -14,6 +14,14 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+### [1.1.1](https://www.github.com/christophehurpeau/check-package-dependencies/compare/v1.1.0...v1.1.1) (2021-03-23)
+
+
+### Bug Fixes
+
+* missing docs ([c728f26](https://www.github.com/christophehurpeau/check-package-dependencies/commit/c728f261b885225541ee6031c052b24a401e781d))
+* use report error and clearer message when a dependency is missing the dependency ([c6215e2](https://www.github.com/christophehurpeau/check-package-dependencies/commit/c6215e24b06492b2d7a0dcac44e005de73e9faa9))
+
 ## [1.1.0](https://www.github.com/christophehurpeau/check-package-dependencies/compare/v1.0.1...v1.1.0) (2021-03-23)
 
 
