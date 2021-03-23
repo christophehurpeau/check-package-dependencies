@@ -573,14 +573,15 @@ function createCheckPackageWithWorkspaces(pkgDirectoryPath = '.') {
       directDuplicateDependenciesOnlyWarnsFor,
       checkResolutionMessage
     } = {}) {
+      const warnedForDuplicate = new Set();
       checkPackage.checkNoDependencies();
       checkPackage.checkRecommended({
         isLibrary: false,
         peerDependenciesOnlyWarnsFor,
         directDuplicateDependenciesOnlyWarnsFor,
-        checkResolutionMessage
+        checkResolutionMessage,
+        internalWarnedForDuplicate: warnedForDuplicate
       });
-      const warnedForDuplicate = new Set();
       checksWorkspaces.forEach((checkPackage, id) => {
         checkPackage.checkRecommended({
           isLibrary: isLibrary(id),

@@ -77,15 +77,16 @@ export function createCheckPackageWithWorkspaces(
       directDuplicateDependenciesOnlyWarnsFor,
       checkResolutionMessage,
     } = {}) {
+      const warnedForDuplicate = new Set<string>();
       checkPackage.checkNoDependencies();
       checkPackage.checkRecommended({
         isLibrary: false,
         peerDependenciesOnlyWarnsFor,
         directDuplicateDependenciesOnlyWarnsFor,
         checkResolutionMessage,
+        internalWarnedForDuplicate: warnedForDuplicate,
       });
 
-      const warnedForDuplicate = new Set<string>();
       checksWorkspaces.forEach((checkPackage, id) => {
         checkPackage.checkRecommended({
           isLibrary: isLibrary(id),
