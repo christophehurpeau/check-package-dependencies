@@ -9,6 +9,7 @@ export interface CheckPackageWithWorkspacesRecommendedOptions {
 export interface CheckPackageWithWorkspacesApi {
     checkRecommended: (options?: CheckPackageWithWorkspacesRecommendedOptions) => CheckPackageWithWorkspacesApi;
     forRoot: (callback: (checkPackage: CheckPackageApi) => void) => CheckPackageWithWorkspacesApi;
+    forEach: (callback: (checkPackage: CheckPackageApi) => void) => CheckPackageWithWorkspacesApi;
     for: (id: string, callback: (checkPackage: CheckPackageApi) => void) => CheckPackageWithWorkspacesApi;
 }
 export declare function createCheckPackageWithWorkspaces(pkgDirectoryPath?: string): CheckPackageWithWorkspacesApi;

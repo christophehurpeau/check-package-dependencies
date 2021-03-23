@@ -8,9 +8,7 @@ import {
   checkWarnedFor,
 } from './checks/checkDirectDuplicateDependencies';
 import type { CheckResolutionMessage } from './checks/checkResolutionsHasExplanation';
-import { readPkgJson } from './utils/createGetDependencyPackageJson';
 import { createReportError } from './utils/createReportError';
-import type { PackageJson } from './utils/packageTypes';
 
 export interface CheckPackageWithWorkspacesRecommendedOptions {
   isLibrary?: (pkgName: string) => boolean;
@@ -25,6 +23,9 @@ export interface CheckPackageWithWorkspacesApi {
   ) => CheckPackageWithWorkspacesApi;
 
   forRoot: (
+    callback: (checkPackage: CheckPackageApi) => void,
+  ) => CheckPackageWithWorkspacesApi;
+  forEach: (
     callback: (checkPackage: CheckPackageApi) => void,
   ) => CheckPackageWithWorkspacesApi;
   for: (
@@ -48,13 +49,7 @@ export function createCheckPackageWithWorkspaces(
     throw new Error('Package is missing "workspaces"');
   }
 
-  const workspaces: {
-    id: string;
-    pkgDirname: string;
-    pkgDirectoryPath: string;
-    pkgPath: string;
-    pkg: PackageJson;
-  }[] = [];
+  const workspacePackagesPaths: string[] = [];
 
   if (pkgWorkspaces) {
     pkgWorkspaces.forEach((pattern) => {
@@ -63,24 +58,16 @@ export function createCheckPackageWithWorkspaces(
         const stat = fs.statSync(pathMatch);
         if (!stat.isDirectory()) return;
         const pkgDirectoryPath = path.relative(process.cwd(), pathMatch);
-        const pkgPath = path.join(pkgDirectoryPath, 'package.json');
-        const pkg = readPkgJson(pkgPath);
-        workspaces.push({
-          id: pkg.name,
-          pkgDirname: pathMatch,
-          pkgDirectoryPath,
-          pkgPath,
-          pkg,
-        });
+        workspacePackagesPaths.push(pkgDirectoryPath);
       });
     });
   }
 
   const checksWorkspaces = new Map<string, CheckPackageApi>(
-    workspaces.map(({ id, pkgDirectoryPath }) => [
-      id,
-      createCheckPackage(pkgDirectoryPath),
-    ]),
+    workspacePackagesPaths.map((pkgDirectoryPath) => {
+      const checkPkg = createCheckPackage(pkgDirectoryPath);
+      return [checkPkg.pkg.name, checkPkg];
+    }),
   );
 
   return {
@@ -129,6 +116,13 @@ export function createCheckPackageWithWorkspaces(
 
     forRoot(callback) {
       callback(checkPackage);
+      return this;
+    },
+
+    forEach(callback) {
+      checksWorkspaces.forEach((checkPackage) => {
+        callback(checkPackage);
+      });
       return this;
     },
 

@@ -560,7 +560,7 @@ function createCheckPackageWithWorkspaces(pkgDirectoryPath = '.') {
     throw new Error('Package is missing "workspaces"');
   }
 
-  const workspaces = [];
+  const workspacePackagesPaths = [];
 
   if (pkgWorkspaces) {
     pkgWorkspaces.forEach(pattern => {
@@ -569,23 +569,15 @@ function createCheckPackageWithWorkspaces(pkgDirectoryPath = '.') {
         const stat = fs__default.statSync(pathMatch);
         if (!stat.isDirectory()) return;
         const pkgDirectoryPath = path__default.relative(process.cwd(), pathMatch);
-        const pkgPath = path__default.join(pkgDirectoryPath, 'package.json');
-        const pkg = readPkgJson(pkgPath);
-        workspaces.push({
-          id: pkg.name,
-          pkgDirname: pathMatch,
-          pkgDirectoryPath,
-          pkgPath,
-          pkg
-        });
+        workspacePackagesPaths.push(pkgDirectoryPath);
       });
     });
   }
 
-  const checksWorkspaces = new Map(workspaces.map(({
-    id,
-    pkgDirectoryPath
-  }) => [id, createCheckPackage(pkgDirectoryPath)]));
+  const checksWorkspaces = new Map(workspacePackagesPaths.map(pkgDirectoryPath => {
+    const checkPkg = createCheckPackage(pkgDirectoryPath);
+    return [checkPkg.pkg.name, checkPkg];
+  }));
   return {
     checkRecommended({
       isLibrary = () => false,
@@ -617,6 +609,13 @@ function createCheckPackageWithWorkspaces(pkgDirectoryPath = '.') {
 
     forRoot(callback) {
       callback(checkPackage);
+      return this;
+    },
+
+    forEach(callback) {
+      checksWorkspaces.forEach(checkPackage => {
+        callback(checkPackage);
+      });
       return this;
     },
 
