@@ -20,9 +20,10 @@ export function checkSatisfiesVersionsFromDependency(
   depKeys.forEach((depKey) => {
     const range = dependencies[depKey];
     if (!range) {
-      throw new Error(
-        `Unexpected missing dependency range in "${depPkg.name}" for "${depKey}".`,
+      reportError(
+        `Unexpected missing dependency "${depKey}" in "${depPkg.name}".`,
       );
+      return;
     }
 
     const version = pkgDependencies[depKey];

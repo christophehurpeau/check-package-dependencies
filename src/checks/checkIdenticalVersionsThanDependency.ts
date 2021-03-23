@@ -20,7 +20,7 @@ export function checkIdenticalVersionsThanDependency(
     const version = dependencies[depKey];
     if (!version) {
       reportError(
-        `Unexpected missing dependency version in "${depPkg.name}" for "${depKey}".`,
+        `Unexpected missing dependency "${depKey}" in "${depPkg.name}".`,
       );
       return;
     }

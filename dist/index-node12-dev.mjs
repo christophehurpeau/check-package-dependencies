@@ -123,7 +123,7 @@ function checkIdenticalVersionsThanDependency(pkg, pkgPathName, type, depKeys, d
     const version = dependencies[depKey];
 
     if (!version) {
-      reportError(`Unexpected missing dependency version in "${depPkg.name}" for "${depKey}".`);
+      reportError(`Unexpected missing dependency "${depKey}" in "${depPkg.name}".`);
       return;
     }
 
@@ -221,7 +221,8 @@ function checkSatisfiesVersionsFromDependency(pkg, pkgPathName, type, depKeys, d
     const range = dependencies[depKey];
 
     if (!range) {
-      throw new Error(`Unexpected missing dependency range in "${depPkg.name}" for "${depKey}".`);
+      reportError(`Unexpected missing dependency "${depKey}" in "${depPkg.name}".`);
+      return;
     }
 
     const version = pkgDependencies[depKey];
