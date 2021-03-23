@@ -105,6 +105,15 @@ export interface CheckPackageApi {
     dependencies?: Record<string, string[]>;
     devDependencies?: Record<string, string[]>;
   }) => CheckPackageApi;
+  checkSatisfiesVersionsBetweenDependencies: (
+    depName1: string,
+    depName2: string,
+    dependencies: {
+      resolutions?: string[];
+      dependencies?: string[];
+      devDependencies?: string[];
+    },
+  ) => CheckPackageApi;
 }
 
 export function createCheckPackage(pkgDirectoryPath = '.'): CheckPackageApi {
@@ -428,6 +437,36 @@ export function createCheckPackage(pkgDirectoryPath = '.'): CheckPackageApi {
           pkgPathName,
           'devDependencies',
           devDependencies,
+        );
+      }
+      return this;
+    },
+
+    checkSatisfiesVersionsBetweenDependencies(
+      depName1,
+      depName2,
+      { dependencies, devDependencies },
+    ) {
+      const depPkg1 = getDependencyPackageJson(depName1);
+      const depPkg2 = getDependencyPackageJson(depName2);
+      if (dependencies) {
+        checkSatisfiesVersionsFromDependency(
+          depPkg2,
+          pkgPathName,
+          'dependencies',
+          dependencies,
+          depPkg1,
+          depPkg1.dependencies,
+        );
+      }
+      if (devDependencies) {
+        checkSatisfiesVersionsFromDependency(
+          depPkg2,
+          pkgPathName,
+          'devDependencies',
+          devDependencies,
+          depPkg1,
+          depPkg1.dependencies,
         );
       }
       return this;

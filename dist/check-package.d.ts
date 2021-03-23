@@ -60,6 +60,11 @@ export interface CheckPackageApi {
         dependencies?: Record<string, string[]>;
         devDependencies?: Record<string, string[]>;
     }) => CheckPackageApi;
+    checkSatisfiesVersionsBetweenDependencies: (depName1: string, depName2: string, dependencies: {
+        resolutions?: string[];
+        dependencies?: string[];
+        devDependencies?: string[];
+    }) => CheckPackageApi;
 }
 export declare function createCheckPackage(pkgDirectoryPath?: string): CheckPackageApi;
 //# sourceMappingURL=check-package.d.ts.map

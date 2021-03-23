@@ -512,6 +512,24 @@ function createCheckPackage(pkgDirectoryPath = '.') {
       }
 
       return this;
+    },
+
+    checkSatisfiesVersionsBetweenDependencies(depName1, depName2, {
+      dependencies,
+      devDependencies
+    }) {
+      const depPkg1 = getDependencyPackageJson(depName1);
+      const depPkg2 = getDependencyPackageJson(depName2);
+
+      if (dependencies) {
+        checkSatisfiesVersionsFromDependency(depPkg2, pkgPathName, 'dependencies', dependencies, depPkg1, depPkg1.dependencies);
+      }
+
+      if (devDependencies) {
+        checkSatisfiesVersionsFromDependency(depPkg2, pkgPathName, 'devDependencies', devDependencies, depPkg1, depPkg1.dependencies);
+      }
+
+      return this;
     }
 
   };
