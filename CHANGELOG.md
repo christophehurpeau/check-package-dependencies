@@ -14,6 +14,14 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+## [1.1.0](https://www.github.com/christophehurpeau/check-package-dependencies/compare/v1.0.1...v1.1.0) (2021-03-23)
+
+
+### Features
+
+* add checkSatisfiesVersionsBetweenDependencies ([6b9a201](https://www.github.com/christophehurpeau/check-package-dependencies/commit/6b9a2017c0e02b199f9d56d2792fbaeedf5fccd5))
+* **deps:** update dependency type-fest to v1 ([#22](https://www.github.com/christophehurpeau/check-package-dependencies/issues/22)) ([da34b8f](https://www.github.com/christophehurpeau/check-package-dependencies/commit/da34b8f9be325fbd70f86ae4d314a1bd79ca8d8b))
+
 ### [1.0.1](https://www.github.com/christophehurpeau/check-package-dependencies/compare/v1.0.0...v1.0.1) (2021-03-21)
 
 
