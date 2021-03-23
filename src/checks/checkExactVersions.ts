@@ -17,7 +17,6 @@ export function checkExactVersions(
         `Unexpected range dependency in "${type}" for "${depKey}"`,
         `expecting "${version}" to be exact "${version.slice(1)}".`,
       );
-      return;
     }
   }
 }

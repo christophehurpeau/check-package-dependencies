@@ -74,6 +74,7 @@
     "transform": {
       "^.+\\.ts$": "babel-jest"
     },
+    "automock": false,
     "testEnvironment": "node",
     "setupFiles": [
       "./test-setup.js"
