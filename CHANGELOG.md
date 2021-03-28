@@ -14,6 +14,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+### [1.2.2](https://www.github.com/christophehurpeau/check-package-dependencies/compare/v1.2.1...v1.2.2) (2021-03-28)
+
+
+### Bug Fixes
+
+* ignore checking when range starts with file: ([fe5d3d8](https://www.github.com/christophehurpeau/check-package-dependencies/commit/fe5d3d80015c795b77ee8f1b189c8929644f2ec6))
+
 ### [1.2.1](https://www.github.com/christophehurpeau/check-package-dependencies/compare/v1.2.0...v1.2.1) (2021-03-23)
 
 
