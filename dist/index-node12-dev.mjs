@@ -52,7 +52,7 @@ function checkDirectDuplicateDependencies(pkg, pkgPathName, depType, searchIn, d
       versions.forEach((version, index) => {
         var _pkg$resolutions;
 
-        if (version.startsWith('file:')) return;
+        if (version.startsWith('file:') || range.startsWith('file:')) return;
 
         if (intersects(version, range)) {
           return;

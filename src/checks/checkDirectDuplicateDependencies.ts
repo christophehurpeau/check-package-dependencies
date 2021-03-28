@@ -53,7 +53,7 @@ export function checkDirectDuplicateDependencies(
       );
 
       versions.forEach((version, index) => {
-        if (version.startsWith('file:')) return;
+        if (version.startsWith('file:') || range.startsWith('file:')) return;
 
         if (intersects(version, range)) {
           return;
