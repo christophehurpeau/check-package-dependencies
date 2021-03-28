@@ -1,6 +1,6 @@
 {
   "name": "check-package-dependencies",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Check package dependencies for duplicates, peer dependencies satisfaction and more early",
   "keywords": [
     "package.json"

@@ -14,6 +14,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+### [1.2.3](https://www.github.com/christophehurpeau/check-package-dependencies/compare/v1.2.2...v1.2.3) (2021-03-28)
+
+
+### Bug Fixes
+
+* warn when exact version not respected on workspaces ([a8d5019](https://www.github.com/christophehurpeau/check-package-dependencies/commit/a8d5019a782093512b91f258c1f317c1ee4d89b8))
+
 ### [1.2.2](https://www.github.com/christophehurpeau/check-package-dependencies/compare/v1.2.1...v1.2.2) (2021-03-28)
 
 
