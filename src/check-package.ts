@@ -36,9 +36,14 @@ export interface CheckRecommendedOptions {
   isLibrary?: boolean;
   peerDependenciesOnlyWarnsFor?: string[];
   directDuplicateDependenciesOnlyWarnsFor?: string[];
+  exactVersionsOnlyWarnsFor?: string[];
   checkResolutionMessage?: CheckResolutionMessage;
   /** @internal */
   internalWarnedForDuplicate?: Set<string>;
+}
+
+export interface CheckExactVersionsOptions {
+  onlyWarnsFor?: string[];
 }
 
 export interface CheckPackageApi {
@@ -51,9 +56,13 @@ export interface CheckPackageApi {
   /** @internal */
   getDependencyPackageJson: GetDependencyPackageJson;
 
-  checkExactVersions: () => CheckPackageApi;
-  checkExactVersionsForLibrary: () => CheckPackageApi;
-  checkExactDevVersions: () => CheckPackageApi;
+  checkExactVersions: (options?: CheckExactVersionsOptions) => CheckPackageApi;
+  checkExactVersionsForLibrary: (
+    options?: CheckExactVersionsOptions,
+  ) => CheckPackageApi;
+  checkExactDevVersions: (
+    options?: CheckExactVersionsOptions,
+  ) => CheckPackageApi;
   checkNoDependencies: (
     type?: DependencyTypes,
     moveToSuggestion?: DependencyTypes,
@@ -131,20 +140,20 @@ export function createCheckPackage(pkgDirectoryPath = '.'): CheckPackageApi {
     pkgDirname,
     pkgPathName,
     getDependencyPackageJson,
-    checkExactVersions() {
-      checkExactVersions(pkg, pkgPathName, 'dependencies');
-      checkExactVersions(pkg, pkgPathName, 'devDependencies');
-      checkExactVersions(pkg, pkgPathName, 'resolutions');
+    checkExactVersions({ onlyWarnsFor } = {}) {
+      checkExactVersions(pkg, pkgPathName, 'dependencies', onlyWarnsFor);
+      checkExactVersions(pkg, pkgPathName, 'devDependencies', onlyWarnsFor);
+      checkExactVersions(pkg, pkgPathName, 'resolutions', onlyWarnsFor);
       return this;
     },
-    checkExactVersionsForLibrary() {
-      checkExactVersions(pkg, pkgPathName, 'devDependencies');
-      checkExactVersions(pkg, pkgPathName, 'resolutions');
+    checkExactVersionsForLibrary({ onlyWarnsFor } = {}) {
+      checkExactVersions(pkg, pkgPathName, 'devDependencies', onlyWarnsFor);
+      checkExactVersions(pkg, pkgPathName, 'resolutions', onlyWarnsFor);
       return this;
     },
 
-    checkExactDevVersions() {
-      checkExactVersions(pkg, pkgPathName, 'devDependencies');
+    checkExactDevVersions({ onlyWarnsFor } = {}) {
+      checkExactVersions(pkg, pkgPathName, 'devDependencies', onlyWarnsFor);
       return this;
     },
 
@@ -249,13 +258,16 @@ export function createCheckPackage(pkgDirectoryPath = '.'): CheckPackageApi {
       isLibrary = false,
       peerDependenciesOnlyWarnsFor,
       directDuplicateDependenciesOnlyWarnsFor,
+      exactVersionsOnlyWarnsFor,
       checkResolutionMessage,
       internalWarnedForDuplicate,
     } = {}) {
       if (isLibrary) {
-        this.checkExactVersionsForLibrary();
+        this.checkExactVersionsForLibrary({
+          onlyWarnsFor: exactVersionsOnlyWarnsFor,
+        });
       } else {
-        this.checkExactVersions();
+        this.checkExactVersions({ onlyWarnsFor: exactVersionsOnlyWarnsFor });
       }
 
       this.checkDirectPeerDependencies({

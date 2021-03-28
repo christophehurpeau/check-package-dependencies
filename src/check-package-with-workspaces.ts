@@ -92,6 +92,7 @@ export function createCheckPackageWithWorkspaces(
           isLibrary: isLibrary(id),
           peerDependenciesOnlyWarnsFor,
           directDuplicateDependenciesOnlyWarnsFor,
+          exactVersionsOnlyWarnsFor: [...checksWorkspaces.keys()],
           checkResolutionMessage,
           internalWarnedForDuplicate: warnedForDuplicate,
         });

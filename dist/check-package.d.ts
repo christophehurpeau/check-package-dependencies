@@ -14,9 +14,13 @@ export interface CheckRecommendedOptions {
     isLibrary?: boolean;
     peerDependenciesOnlyWarnsFor?: string[];
     directDuplicateDependenciesOnlyWarnsFor?: string[];
+    exactVersionsOnlyWarnsFor?: string[];
     checkResolutionMessage?: CheckResolutionMessage;
     /** @internal */
     internalWarnedForDuplicate?: Set<string>;
+}
+export interface CheckExactVersionsOptions {
+    onlyWarnsFor?: string[];
 }
 export interface CheckPackageApi {
     /** @internal */
@@ -27,9 +31,9 @@ export interface CheckPackageApi {
     pkgPathName: string;
     /** @internal */
     getDependencyPackageJson: GetDependencyPackageJson;
-    checkExactVersions: () => CheckPackageApi;
-    checkExactVersionsForLibrary: () => CheckPackageApi;
-    checkExactDevVersions: () => CheckPackageApi;
+    checkExactVersions: (options?: CheckExactVersionsOptions) => CheckPackageApi;
+    checkExactVersionsForLibrary: (options?: CheckExactVersionsOptions) => CheckPackageApi;
+    checkExactDevVersions: (options?: CheckExactVersionsOptions) => CheckPackageApi;
     checkNoDependencies: (type?: DependencyTypes, moveToSuggestion?: DependencyTypes) => CheckPackageApi;
     checkDirectPeerDependencies: (options?: CheckDirectPeerDependenciesOptions) => CheckPackageApi;
     checkDirectDuplicateDependencies: (options?: CheckDirectDuplicateDependenciesOptions) => CheckPackageApi;

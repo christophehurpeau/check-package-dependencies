@@ -87,14 +87,14 @@ function checkDirectDuplicateDependencies(pkg, pkgPathName, depType, searchIn, d
   }
 }
 
-function checkExactVersions(pkg, pkgPathName, type) {
+function checkExactVersions(pkg, pkgPathName, type, onlyWarnsFor = []) {
   const pkgDependencies = pkg[type];
   if (!pkgDependencies) return;
   const reportError = createReportError('Exact versions', pkgPathName);
 
   for (const [depKey, version] of Object.entries(pkgDependencies)) {
     if (version.startsWith('^') || version.startsWith('~')) {
-      reportError(`Unexpected range dependency in "${type}" for "${depKey}"`, `expecting "${version}" to be exact "${version.slice(1)}".`);
+      reportError(`Unexpected range dependency in "${type}" for "${depKey}"`, `expecting "${version}" to be exact "${version.slice(1)}".`, onlyWarnsFor.includes(depKey));
     }
   }
 }
@@ -306,21 +306,27 @@ function createCheckPackage(pkgDirectoryPath = '.') {
     pkgPathName,
     getDependencyPackageJson,
 
-    checkExactVersions() {
-      checkExactVersions(pkg, pkgPathName, 'dependencies');
-      checkExactVersions(pkg, pkgPathName, 'devDependencies');
-      checkExactVersions(pkg, pkgPathName, 'resolutions');
+    checkExactVersions({
+      onlyWarnsFor
+    } = {}) {
+      checkExactVersions(pkg, pkgPathName, 'dependencies', onlyWarnsFor);
+      checkExactVersions(pkg, pkgPathName, 'devDependencies', onlyWarnsFor);
+      checkExactVersions(pkg, pkgPathName, 'resolutions', onlyWarnsFor);
       return this;
     },
 
-    checkExactVersionsForLibrary() {
-      checkExactVersions(pkg, pkgPathName, 'devDependencies');
-      checkExactVersions(pkg, pkgPathName, 'resolutions');
+    checkExactVersionsForLibrary({
+      onlyWarnsFor
+    } = {}) {
+      checkExactVersions(pkg, pkgPathName, 'devDependencies', onlyWarnsFor);
+      checkExactVersions(pkg, pkgPathName, 'resolutions', onlyWarnsFor);
       return this;
     },
 
-    checkExactDevVersions() {
-      checkExactVersions(pkg, pkgPathName, 'devDependencies');
+    checkExactDevVersions({
+      onlyWarnsFor
+    } = {}) {
+      checkExactVersions(pkg, pkgPathName, 'devDependencies', onlyWarnsFor);
       return this;
     },
 
@@ -396,13 +402,18 @@ function createCheckPackage(pkgDirectoryPath = '.') {
       isLibrary = false,
       peerDependenciesOnlyWarnsFor,
       directDuplicateDependenciesOnlyWarnsFor,
+      exactVersionsOnlyWarnsFor,
       checkResolutionMessage,
       internalWarnedForDuplicate
     } = {}) {
       if (isLibrary) {
-        this.checkExactVersionsForLibrary();
+        this.checkExactVersionsForLibrary({
+          onlyWarnsFor: exactVersionsOnlyWarnsFor
+        });
       } else {
-        this.checkExactVersions();
+        this.checkExactVersions({
+          onlyWarnsFor: exactVersionsOnlyWarnsFor
+        });
       }
 
       this.checkDirectPeerDependencies({
@@ -598,6 +609,7 @@ function createCheckPackageWithWorkspaces(pkgDirectoryPath = '.') {
           isLibrary: isLibrary(id),
           peerDependenciesOnlyWarnsFor,
           directDuplicateDependenciesOnlyWarnsFor,
+          exactVersionsOnlyWarnsFor: [...checksWorkspaces.keys()],
           checkResolutionMessage,
           internalWarnedForDuplicate: warnedForDuplicate
         });

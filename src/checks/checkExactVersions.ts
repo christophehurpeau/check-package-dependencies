@@ -5,6 +5,7 @@ export function checkExactVersions(
   pkg: PackageJson,
   pkgPathName: string,
   type: DependencyTypes,
+  onlyWarnsFor: string[] = [],
 ): void {
   const pkgDependencies = pkg[type];
   if (!pkgDependencies) return;
@@ -16,6 +17,7 @@ export function checkExactVersions(
       reportError(
         `Unexpected range dependency in "${type}" for "${depKey}"`,
         `expecting "${version}" to be exact "${version.slice(1)}".`,
+        onlyWarnsFor.includes(depKey),
       );
     }
   }
