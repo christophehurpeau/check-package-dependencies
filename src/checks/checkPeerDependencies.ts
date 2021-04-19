@@ -28,7 +28,9 @@ export function checkPeerDependencies(
       }
       reportError(
         `Missing "${peerDepKey}" peer dependency from "${depPkg.name}" in ${type}`,
-        `it should satisfies "${range}"`,
+        `it should satisfies "${range}" and be in ${allowedPeerIn.join(
+          ' or ',
+        )}`,
         onlyWarnsFor.includes(peerDepKey),
       );
     } else {

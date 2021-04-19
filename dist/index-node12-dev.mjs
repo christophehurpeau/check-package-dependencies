@@ -169,7 +169,7 @@ function checkPeerDependencies(pkg, pkgPathName, type, allowedPeerIn, depPkg, on
         return;
       }
 
-      reportError(`Missing "${peerDepKey}" peer dependency from "${depPkg.name}" in ${type}`, `it should satisfies "${range}"`, onlyWarnsFor.includes(peerDepKey));
+      reportError(`Missing "${peerDepKey}" peer dependency from "${depPkg.name}" in ${type}`, `it should satisfies "${range}" and be in ${allowedPeerIn.join(' or ')}`, onlyWarnsFor.includes(peerDepKey));
     } else {
       const versions = versionsIn.map(type => pkg[type][peerDepKey]);
 
@@ -333,7 +333,7 @@ function createCheckPackage(pkgDirectoryPath = '.') {
         allowedPeerIn: ['devDependencies', 'dependencies']
       }, {
         type: 'dependencies',
-        allowedPeerIn: isLibrary ? ['devDependencies', 'dependencies'] : ['dependencies']
+        allowedPeerIn: isLibrary ? ['dependencies', 'peerDependencies'] : ['dependencies']
       }];
       checks.forEach(({
         type,

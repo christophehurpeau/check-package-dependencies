@@ -177,7 +177,7 @@ export function createCheckPackage(pkgDirectoryPath = '.'): CheckPackageApi {
         {
           type: 'dependencies',
           allowedPeerIn: isLibrary
-            ? ['devDependencies', 'dependencies']
+            ? ['dependencies', 'peerDependencies']
             : ['dependencies'],
         },
       ];
