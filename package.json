@@ -8,7 +8,7 @@
   "author": "Christophe Hurpeau <christophe@hurpeau.com> (http://christophe.hurpeau.com/)",
   "license": "ISC",
   "repository": "https://github.com/christophehurpeau/check-package-dependencies.git",
-  "homepage": "https://github.com/christophehurpeau/pob",
+  "homepage": "https://github.com/christophehurpeau/check-package-dependencies",
   "engines": {
     "node": ">=12.10.0"
   },
