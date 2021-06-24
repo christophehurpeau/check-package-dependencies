@@ -485,10 +485,10 @@
     resolve-global "1.0.0"
     yargs "^16.2.0"
 
-"@commitlint/config-conventional@^12.0.0":
-  version "12.0.1"
-  resolved "https://registry.yarnpkg.com/@commitlint/config-conventional/-/config-conventional-12.0.1.tgz#7bf3bbf68bda967c5165135ebe8f2055decf1a83"
-  integrity sha512-1ZhB135lh47zVmf1orwcjxuKuam11fJIH/bdVxW9XiQv8XPwC6iIp19knfl8FcOT78AVBnes1z6EVxgUeP2/4Q==
+"@commitlint/config-conventional@^12.0.1":
+  version "12.1.4"
+  resolved "https://registry.yarnpkg.com/@commitlint/config-conventional/-/config-conventional-12.1.4.tgz#95bbab622f117a8a3e49f95917b08655040c66a8"
+  integrity sha512-ZIdzmdy4o4WyqywMEpprRCrehjCSQrHkaRTVZV411GyLigFQHlEBSJITAihLAWe88Qy/8SyoIe5uKvAsV5vRqQ==
   dependencies:
     conventional-changelog-conventionalcommits "^4.3.1"
 
@@ -830,12 +830,12 @@
     "@nodelib/fs.scandir" "2.1.4"
     fastq "^1.6.0"
 
-"@pob/commitlint-config@2.1.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@pob/commitlint-config/-/commitlint-config-2.1.0.tgz#22b4d34992c841e7d640844f5cde71006da7e70a"
-  integrity sha512-TEt9HYmhwvmFlBekpehtSDEAqm1B3awPI2XetFd2i6hSI9JLTVXnKyuXW40CWD02w+0XE8neB+NWv+xUhYReJQ==
+"@pob/commitlint-config@2.2.0":
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/@pob/commitlint-config/-/commitlint-config-2.2.0.tgz#b88788fbe400a4bfa0dd50b3cbe79462df58da71"
+  integrity sha512-xuSZFpR71NyYqROpTh0eNnKxF0zf5I1hKTRKN8SS6dwl9eiN6mnapOV8TsZVs2mSVgrYkFSUxAqyvSt6O7uCrA==
   dependencies:
-    "@commitlint/config-conventional" "^12.0.0"
+    "@commitlint/config-conventional" "^12.0.1"
 
 "@pob/eslint-config-node@43.1.0":
   version "43.1.0"
