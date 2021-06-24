@@ -845,12 +845,12 @@
     "@pob/use-eslint-plugin" "^43.2.0"
     eslint-plugin-node "^11.1.0"
 
-"@pob/eslint-config-typescript-node@43.0.0":
-  version "43.0.0"
-  resolved "https://registry.yarnpkg.com/@pob/eslint-config-typescript-node/-/eslint-config-typescript-node-43.0.0.tgz#e8e128877dec1dc4b416f04960b8518ad8b9e38f"
-  integrity sha512-jPKLYKuvIwWYVxMbuCYm+OLBiqAWdtIG/AQfZoKaTe+mB/k0UQ1cOVoRqwYPFV6xr7nL7Zf+M+4GQEgcLdv5kA==
+"@pob/eslint-config-typescript-node@43.2.0":
+  version "43.2.0"
+  resolved "https://registry.yarnpkg.com/@pob/eslint-config-typescript-node/-/eslint-config-typescript-node-43.2.0.tgz#0dff5e2c6e737dd9ebc8f072a2691f92759430b9"
+  integrity sha512-FRIUUNQ7llqAYqOxjzNCJBnUObgrwtYsdEiU5mgPPDv6Ee3diFpPFYkO1HTkFQ4gjOG50aIJQ88iZ0O+4d+agg==
   dependencies:
-    "@pob/use-eslint-plugin" "^43.0.0"
+    "@pob/use-eslint-plugin" "^43.2.0"
     eslint-plugin-node "^11.1.0"
 
 "@pob/eslint-config-typescript@43.0.0":
