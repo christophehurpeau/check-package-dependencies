@@ -76,6 +76,57 @@ function checkDirectDuplicateDependencies(pkg, pkgPathName, depType, searchIn, d
   }
 }
 
+function checkPeerDependencies(pkg, pkgPathName, type, allowedPeerIn, depPkg, onlyWarnsFor = []) {
+  const {
+    peerDependencies,
+    peerDependenciesMeta
+  } = depPkg;
+  if (!peerDependencies) return;
+  const reportError = createReportError('Peer Dependencies', pkgPathName);
+  const allowedPeerInExisting = allowedPeerIn.filter(type => pkg[type]);
+
+  for (const [peerDepKey, range] of Object.entries(peerDependencies)) {
+    const versionsIn = allowedPeerInExisting.filter(type => pkg[type][peerDepKey]);
+
+    if (versionsIn.length === 0) {
+      const peerDependenciesMetaPeerDep = peerDependenciesMeta === null || peerDependenciesMeta === void 0 ? void 0 : peerDependenciesMeta[peerDepKey];
+
+      if (peerDependenciesMetaPeerDep !== null && peerDependenciesMetaPeerDep !== void 0 && peerDependenciesMetaPeerDep.optional) {
+        return;
+      }
+
+      reportError(`Missing "${peerDepKey}" peer dependency from "${depPkg.name}" in ${type}`, `it should satisfies "${range}" and be in ${allowedPeerIn.join(' or ')}`, onlyWarnsFor.includes(peerDepKey));
+    } else {
+      const versions = versionsIn.map(type => pkg[type][peerDepKey]);
+      versions.forEach((version, index) => {
+        const minVersionOfVersion = minVersion(version);
+
+        if (!minVersionOfVersion || !satisfies(minVersionOfVersion, range)) {
+          reportError(`Invalid "${peerDepKey}" peer dependency`, `"${version}" (in ${allowedPeerInExisting[index]}) should satisfies "${range}" from "${depPkg.name}" ${type}`, onlyWarnsFor.includes(peerDepKey));
+        }
+      });
+    }
+  }
+}
+
+const getAllowedPeerInFromType = (depPkgType, isLibrary) => {
+  switch (depPkgType) {
+    case 'devDependencies':
+      return ['devDependencies', 'dependencies'];
+
+    case 'dependencies':
+    case 'optionalDependencies':
+      return isLibrary ? ['dependencies', 'peerDependencies'] : ['dependencies'];
+  }
+};
+
+function checkDirectPeerDependencies(isLibrary, pkg, pkgPathName, depPkgType, depPkg, onlyWarnsFor = []) {
+  if (depPkg.peerDependencies) {
+    checkPeerDependencies(pkg, pkgPathName, depPkgType, getAllowedPeerInFromType(depPkgType, isLibrary), depPkg, onlyWarnsFor);
+  } // TODO optionalPeerDependency
+
+}
+
 function checkExactVersions(pkg, pkgPathName, type, onlyWarnsFor = []) {
   const pkgDependencies = pkg[type];
   if (!pkgDependencies) return;
@@ -148,45 +199,6 @@ function checkNoDependencies(pkg, pkgPath, type = 'dependencies', moveToSuggesti
   if (!pkgDependencies) return;
   const reportError = createReportError('No dependencies', pkgPath);
   reportError(`Unexpected ${type}`, `you should move them in ${moveToSuggestion}`);
-}
-
-function checkPeerDependencies(pkg, pkgPathName, type, allowedPeerIn, depPkg, onlyWarnsFor = []) {
-  const {
-    peerDependencies,
-    peerDependenciesMeta
-  } = depPkg;
-  if (!peerDependencies) return;
-  const reportError = createReportError('Peer Dependencies', pkgPathName);
-  const allowedPeerInExisting = allowedPeerIn.filter(type => pkg[type]);
-
-  for (const [peerDepKey, range] of Object.entries(peerDependencies)) {
-    const versionsIn = allowedPeerInExisting.filter(type => pkg[type][peerDepKey]);
-
-    if (versionsIn.length === 0) {
-      const peerDependenciesMetaPeerDep = peerDependenciesMeta === null || peerDependenciesMeta === void 0 ? void 0 : peerDependenciesMeta[peerDepKey];
-
-      if (peerDependenciesMetaPeerDep !== null && peerDependenciesMetaPeerDep !== void 0 && peerDependenciesMetaPeerDep.optional) {
-        return;
-      }
-
-      reportError(`Missing "${peerDepKey}" peer dependency from "${depPkg.name}" in ${type}`, `it should satisfies "${range}" and be in ${allowedPeerIn.join(' or ')}`, onlyWarnsFor.includes(peerDepKey));
-    } else {
-      const versions = versionsIn.map(type => pkg[type][peerDepKey]);
-
-      if (versions.length > 1) {
-        reportError(`${peerDepKey} is present in both devDependencies and dependencies`, 'place it only in dependencies');
-        return;
-      }
-
-      versions.forEach((version, index) => {
-        const minVersionOfVersion = minVersion(version);
-
-        if (!minVersionOfVersion || !satisfies(minVersionOfVersion, range)) {
-          reportError(`Invalid "${peerDepKey}" peer dependency`, `"${version}" (in ${allowedPeerInExisting[index]}) should satisfies "${range}" from "${depPkg.name}" ${type}`, onlyWarnsFor.includes(peerDepKey));
-        }
-      });
-    }
-  }
 }
 
 function checkResolutionsHasExplanation(pkg, pkgPathName, checkMessage, getDependencyPackageJson) {
@@ -282,6 +294,7 @@ function createGetDependencyPackageJson({
 }
 
 /* eslint-disable max-lines */
+const regularDependencyTypes = ['devDependencies', 'dependencies', 'optionalDependencies'];
 function createCheckPackage(pkgDirectoryPath = '.') {
   const pkgDirname = path.resolve(pkgDirectoryPath);
   const pkgPathName = `${pkgDirectoryPath}/package.json`;
@@ -325,26 +338,16 @@ function createCheckPackage(pkgDirectoryPath = '.') {
     },
 
     checkDirectPeerDependencies({
-      isLibrary,
+      isLibrary = false,
       onlyWarnsFor
     } = {}) {
-      const checks = [{
-        type: 'devDependencies',
-        allowedPeerIn: ['devDependencies', 'dependencies']
-      }, {
-        type: 'dependencies',
-        allowedPeerIn: isLibrary ? ['dependencies', 'peerDependencies'] : ['dependencies']
-      }];
-      checks.forEach(({
-        type,
-        allowedPeerIn
-      }) => {
-        if (!pkg[type]) return;
-        getKeys(pkg[type]).forEach(depName => {
+      regularDependencyTypes.forEach(depType => {
+        if (!pkg[depType]) return;
+        getKeys(pkg[depType]).forEach(depName => {
           const depPkg = getDependencyPackageJson(depName);
 
           if (depPkg.peerDependencies) {
-            checkPeerDependencies(pkg, pkgPathName, type, allowedPeerIn, depPkg, onlyWarnsFor);
+            checkDirectPeerDependencies(isLibrary, pkg, pkgPathName, depType, depPkg, onlyWarnsFor);
           } // TODO optionalPeerDependency
 
         });
