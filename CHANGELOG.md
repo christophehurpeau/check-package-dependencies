@@ -14,6 +14,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+### [1.2.5](https://www.github.com/christophehurpeau/check-package-dependencies/compare/v1.2.4...v1.2.5) (2021-06-27)
+
+
+### Bug Fixes
+
+* allow peer to be used in both dependencies and peerDependencies ([130cf50](https://www.github.com/christophehurpeau/check-package-dependencies/commit/130cf5015ca0ddd1c2e09c5fdb77966f2a622702))
+
 ### [1.2.4](https://www.github.com/christophehurpeau/check-package-dependencies/compare/v1.2.3...v1.2.4) (2021-04-19)
 
 
