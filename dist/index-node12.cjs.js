@@ -1,5 +1,4 @@
 'use strict';
-
 Object.defineProperty(exports, '__esModule', { value: true });
 
 const path = require('path');
@@ -185,7 +184,8 @@ function checkPeerDependencies(pkg, pkgPathName, type, allowedPeerIn, depPkg, on
       const versions = versionsIn.map(type => pkg[type][peerDepKey]);
 
       if (versions.length > 1) {
-        reportError(`${peerDepKey} is present in both devDependencies and dependencies`, 'place it only in dependencies');
+        console.log(pkg)
+        reportError(`${peerDepKey} is present in ${versionsIn.join(', ')}`, 'place it only in dependencies');
         return;
       }
 

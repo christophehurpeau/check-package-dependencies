@@ -4,11 +4,11 @@ import {
   checkDirectDuplicateDependencies,
   checkWarnedFor,
 } from './checks/checkDirectDuplicateDependencies';
+import { checkDirectPeerDependencies } from './checks/checkDirectPeerDependencies';
 import { checkExactVersions } from './checks/checkExactVersions';
 import { checkIdenticalVersions } from './checks/checkIdenticalVersions';
 import { checkIdenticalVersionsThanDependency } from './checks/checkIdenticalVersionsThanDependency';
 import { checkNoDependencies } from './checks/checkNoDependencies';
-import { checkPeerDependencies } from './checks/checkPeerDependencies';
 import type { CheckResolutionMessage } from './checks/checkResolutionsHasExplanation';
 import { checkResolutionsHasExplanation } from './checks/checkResolutionsHasExplanation';
 import { checkSatisfiesVersionsFromDependency } from './checks/checkSatisfiesVersionsFromDependency';
@@ -19,7 +19,17 @@ import {
 } from './utils/createGetDependencyPackageJson';
 import { createReportError } from './utils/createReportError';
 import { getKeys } from './utils/object';
-import type { DependencyTypes, PackageJson } from './utils/packageTypes';
+import type {
+  RegularDependencyTypes,
+  DependencyTypes,
+  PackageJson,
+} from './utils/packageTypes';
+
+const regularDependencyTypes: RegularDependencyTypes[] = [
+  'devDependencies',
+  'dependencies',
+  'optionalDependencies',
+];
 
 export interface CheckDirectPeerDependenciesOptions {
   isLibrary?: boolean;
@@ -165,32 +175,17 @@ export function createCheckPackage(pkgDirectoryPath = '.'): CheckPackageApi {
       return this;
     },
 
-    checkDirectPeerDependencies({ isLibrary, onlyWarnsFor } = {}) {
-      const checks: {
-        type: DependencyTypes;
-        allowedPeerIn: DependencyTypes[];
-      }[] = [
-        {
-          type: 'devDependencies',
-          allowedPeerIn: ['devDependencies', 'dependencies'],
-        },
-        {
-          type: 'dependencies',
-          allowedPeerIn: isLibrary
-            ? ['dependencies', 'peerDependencies']
-            : ['dependencies'],
-        },
-      ];
-      checks.forEach(({ type, allowedPeerIn }) => {
-        if (!pkg[type]) return;
-        getKeys(pkg[type]).forEach((depName) => {
+    checkDirectPeerDependencies({ isLibrary = false, onlyWarnsFor } = {}) {
+      regularDependencyTypes.forEach((depType) => {
+        if (!pkg[depType]) return;
+        getKeys(pkg[depType]).forEach((depName) => {
           const depPkg = getDependencyPackageJson(depName);
           if (depPkg.peerDependencies) {
-            checkPeerDependencies(
+            checkDirectPeerDependencies(
+              isLibrary,
               pkg,
               pkgPathName,
-              type,
-              allowedPeerIn,
+              depType,
               depPkg,
               onlyWarnsFor,
             );

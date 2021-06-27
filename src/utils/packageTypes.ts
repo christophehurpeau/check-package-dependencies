@@ -1,8 +1,12 @@
 import type { Except, PackageJson as PackageJsonFromTypeFest } from 'type-fest';
 
-export type DependencyTypes =
+export type RegularDependencyTypes =
   | 'dependencies'
   | 'devDependencies'
+  | 'optionalDependencies';
+
+export type DependencyTypes =
+  | RegularDependencyTypes
   | 'peerDependencies'
   | 'resolutions';
 

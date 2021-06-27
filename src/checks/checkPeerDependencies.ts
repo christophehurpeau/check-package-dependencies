@@ -38,13 +38,6 @@ export function checkPeerDependencies(
         (type) =>
           (pkg[type] as NonNullable<typeof pkg[DependencyTypes]>)[peerDepKey],
       );
-      if (versions.length > 1) {
-        reportError(
-          `${peerDepKey} is present in both devDependencies and dependencies`,
-          'place it only in dependencies',
-        );
-        return;
-      }
 
       versions.forEach((version, index) => {
         const minVersionOfVersion = minVersion(version);
