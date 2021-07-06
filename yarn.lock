@@ -905,15 +905,15 @@
     "@pob/sort-pkg" "^2.2.0"
     prettier "^2.1.2"
 
-"@pob/root@3.3.0":
-  version "3.3.0"
-  resolved "https://registry.yarnpkg.com/@pob/root/-/root-3.3.0.tgz#cac607598edaee05b4f386c3a32407aae287cb7b"
-  integrity sha512-A31y3sY4/zs4byUj6HqjgxQIyO5oRGIpxcsj9AxEcJDlPofTo0+CzFvmcWv2JieniBwfnwxpkUkPfNkU9U69OQ==
+"@pob/root@4.1.0":
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/@pob/root/-/root-4.1.0.tgz#367607000badbb4c9ab696774f4bb9f4af89b07e"
+  integrity sha512-ZBmhQrTED/GpOiW4TPQn0mGWDDz+1UVSvLg2Y7a7E9DuOAsbz6MWmQQW2cDe2EidBdK+FNgCvlo6XOphPOPIJQ==
   dependencies:
     "@commitlint/cli" "12.1.4"
     "@pob/pretty-eslint-config" "^1.0.1"
     "@pob/pretty-pkg" "^2.1.0"
-    cross-env "^7.0.2"
+    husky "^7.0.0"
     lint-staged "11.0.0"
     repository-check-dirty "^2.0.1"
     semver "^7.1.2"
@@ -2086,13 +2086,6 @@ cosmiconfig@^7.0.0:
     path-type "^4.0.0"
     yaml "^1.10.0"
 
-cross-env@^7.0.2:
-  version "7.0.3"
-  resolved "https://registry.yarnpkg.com/cross-env/-/cross-env-7.0.3.tgz#865264b29677dc015ba8418918965dd232fc54cf"
-  integrity sha512-+/HKd6EgcQCJGh2PSjZuUitQBQynKor4wrFbRg4DtAgS1aWO+gU52xpH7M9ScGgXSYmAVS9bIJ8EzuaGw0oNAw==
-  dependencies:
-    cross-spawn "^7.0.1"
-
 cross-spawn@^6.0.0:
   version "6.0.5"
   resolved "https://registry.yarnpkg.com/cross-spawn/-/cross-spawn-6.0.5.tgz#4a5ec7c64dfae22c3a14124dbacdee846d80cbc4"
@@ -2104,7 +2097,7 @@ cross-spawn@^6.0.0:
     shebang-command "^1.2.0"
     which "^1.2.9"
 
-cross-spawn@^7.0.0, cross-spawn@^7.0.1, cross-spawn@^7.0.2, cross-spawn@^7.0.3:
+cross-spawn@^7.0.0, cross-spawn@^7.0.2, cross-spawn@^7.0.3:
   version "7.0.3"
   resolved "https://registry.yarnpkg.com/cross-spawn/-/cross-spawn-7.0.3.tgz#f73a85b9d5d41d045551c177e2882d4ac85728a6"
   integrity sha512-iRDPJKUPVEND7dHPO8rkbOnPpyDygcDFtWjpeWNCgy8WP2rXcxXL8TskReQl6OrB2G7+UJrags1q15Fudc7G6w==
@@ -3202,6 +3195,11 @@ husky@4.3.8:
     please-upgrade-node "^3.2.0"
     slash "^3.0.0"
     which-pm-runs "^1.0.0"
+
+husky@^7.0.0:
+  version "7.0.1"
+  resolved "https://registry.yarnpkg.com/husky/-/husky-7.0.1.tgz#579f4180b5da4520263e8713cc832942b48e1f1c"
+  integrity sha512-gceRaITVZ+cJH9sNHqx5tFwbzlLCVxtVZcusME8JYQ8Edy5mpGDOqD8QBCdMhpyo9a+JXddnujQ4rpY2Ff9SJA==
 
 iconv-lite@0.4.24:
   version "0.4.24"
