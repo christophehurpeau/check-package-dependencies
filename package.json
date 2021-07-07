@@ -123,7 +123,7 @@
     "eslint-plugin-unicorn": "25.0.1",
     "husky": "4.3.8",
     "jest": "26.6.3",
-    "pob-babel": "26.8.0",
+    "pob-babel": "27.0.3",
     "pob-lcov-reporter": "4.0.1",
     "prettier": "2.3.2",
     "rollup": "2.52.8",
