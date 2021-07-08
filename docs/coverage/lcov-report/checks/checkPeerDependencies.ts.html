@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">72.22% </span>
+                <span class="strong">70.59% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>13/18</span>
+                <span class='fraction'>12/17</span>
             </div>
         
             
@@ -107,11 +107,7 @@
 <a name='L48'></a><a href='#L48'>48</a>
 <a name='L49'></a><a href='#L49'>49</a>
 <a name='L50'></a><a href='#L50'>50</a>
-<a name='L51'></a><a href='#L51'>51</a>
-<a name='L52'></a><a href='#L52'>52</a>
-<a name='L53'></a><a href='#L53'>53</a>
-<a name='L54'></a><a href='#L54'>54</a>
-<a name='L55'></a><a href='#L55'>55</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L51'></a><a href='#L51'>51</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -131,7 +127,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
@@ -147,10 +142,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">2x</span>
@@ -185,8 +177,7 @@ export function checkPeerDependencies(
 &nbsp;
   for (const [peerDepKey, range] of Object.entries(peerDependencies)) {
     const versionsIn = allowedPeerInExisting.filter(
-      (type) =&gt;
-        (pkg[type] as NonNullable&lt;typeof pkg[DependencyTypes]&gt;)[peerDepKey],
+      (type) =&gt; pkg[type]![peerDepKey],
     );
     <span class="missing-if-branch" title="if path not taken" >I</span>if (versionsIn.length === 0) {
       const peerDependenciesMetaPeerDep = <span class="cstat-no" title="statement not covered" >peerDependenciesMeta?.[peerDepKey];</span>
@@ -201,10 +192,7 @@ export function checkPeerDependencies(
         onlyWarnsFor.includes(peerDepKey),
       );
     } else {
-      const versions = versionsIn.map(
-        (type) =&gt;
-          (pkg[type] as NonNullable&lt;typeof pkg[DependencyTypes]&gt;)[peerDepKey],
-      );
+      const versions = versionsIn.map((type) =&gt; pkg[type]![peerDepKey]);
 &nbsp;
       versions.forEach((version, index) =&gt; {
         const minVersionOfVersion = minVersion(version);
