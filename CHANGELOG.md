@@ -14,6 +14,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+### [1.2.6](https://www.github.com/christophehurpeau/check-package-dependencies/compare/v1.2.5...v1.2.6) (2021-07-08)
+
+
+### Bug Fixes
+
+* exports package.json ([5b390b0](https://www.github.com/christophehurpeau/check-package-dependencies/commit/5b390b022429b35af451a31026f4af31ba0a60cc))
+
 ### [1.2.5](https://www.github.com/christophehurpeau/check-package-dependencies/compare/v1.2.4...v1.2.5) (2021-06-27)
 
 
