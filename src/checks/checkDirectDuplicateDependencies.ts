@@ -38,19 +38,14 @@ export function checkDirectDuplicateDependencies(
   const searchInExisting = searchIn.filter((type) => pkg[type]);
 
   for (const [depKey, range] of Object.entries(dependencies)) {
-    const versionsIn = searchInExisting.filter(
-      (type) => (pkg[type] as NonNullable<typeof pkg[DependencyTypes]>)[depKey],
-    );
+    const versionsIn = searchInExisting.filter((type) => pkg[type]![depKey]);
 
     if (versionsIn.length > 1) {
       reportError(
         `${depKey} is present in both devDependencies and dependencies, please place it only in dependencies`,
       );
     } else {
-      const versions = versionsIn.map(
-        (type) =>
-          (pkg[type] as NonNullable<typeof pkg[DependencyTypes]>)[depKey],
-      );
+      const versions = versionsIn.map((type) => pkg[type]![depKey]);
 
       versions.forEach((version, index) => {
         if (version.startsWith('file:') || range.startsWith('file:')) return;

@@ -18,8 +18,7 @@ export function checkPeerDependencies(
 
   for (const [peerDepKey, range] of Object.entries(peerDependencies)) {
     const versionsIn = allowedPeerInExisting.filter(
-      (type) =>
-        (pkg[type] as NonNullable<typeof pkg[DependencyTypes]>)[peerDepKey],
+      (type) => pkg[type]![peerDepKey],
     );
     if (versionsIn.length === 0) {
       const peerDependenciesMetaPeerDep = peerDependenciesMeta?.[peerDepKey];
@@ -34,10 +33,7 @@ export function checkPeerDependencies(
         onlyWarnsFor.includes(peerDepKey),
       );
     } else {
-      const versions = versionsIn.map(
-        (type) =>
-          (pkg[type] as NonNullable<typeof pkg[DependencyTypes]>)[peerDepKey],
-      );
+      const versions = versionsIn.map((type) => pkg[type]![peerDepKey]);
 
       versions.forEach((version, index) => {
         const minVersionOfVersion = minVersion(version);
