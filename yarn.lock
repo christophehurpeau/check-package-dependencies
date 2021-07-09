@@ -851,12 +851,12 @@
   dependencies:
     "@commitlint/config-conventional" "^12.0.1"
 
-"@pob/eslint-config-node@43.2.0":
-  version "43.2.0"
-  resolved "https://registry.yarnpkg.com/@pob/eslint-config-node/-/eslint-config-node-43.2.0.tgz#d5bfca8bed333c913b0cf579c29b400c84a2f6ce"
-  integrity sha512-xHA2YKzA8IqfB29Gd5r+7wEL/JxUFI5aci0mceR7qcXJwSg1Y2UCi0av20LQBnuVLR3vAaGqsUrUxRZNzdkDjg==
+"@pob/eslint-config-node@44.0.2":
+  version "44.0.2"
+  resolved "https://registry.yarnpkg.com/@pob/eslint-config-node/-/eslint-config-node-44.0.2.tgz#7801a166e860de9b66683f960f068486c5d84748"
+  integrity sha512-WpKxeykainATltODxLXKBTfvYFJwlIqe9s23+zXj3a4qIYcWXcxFp8Q84NqiXTeA4ub1GmhCORQF7H34/FfjGw==
   dependencies:
-    "@pob/use-eslint-plugin" "^43.2.0"
+    "@pob/use-eslint-plugin" "^44.0.0"
     eslint-plugin-node "^11.1.0"
 
 "@pob/eslint-config-typescript-node@43.2.0":
@@ -946,6 +946,11 @@
   version "43.2.0"
   resolved "https://registry.yarnpkg.com/@pob/use-eslint-plugin/-/use-eslint-plugin-43.2.0.tgz#eacd18b5a0bcac047f5ded21f77952d1f2750306"
   integrity sha512-DLtlCV1RGfEoQl6jwnTA8DhrmI0bVToXJsM8N2jN0bL7Pz+VH7ZURhQ7v79WdGobQ1SkSfRHyOuBDdw5yP31PA==
+
+"@pob/use-eslint-plugin@^44.0.0":
+  version "44.0.0"
+  resolved "https://registry.yarnpkg.com/@pob/use-eslint-plugin/-/use-eslint-plugin-44.0.0.tgz#b0c042fcf1cffe19eb2eb1c82cd103ec04532b7e"
+  integrity sha512-/LeOqbJmGWZF0TZhdjq8Dg+SjhDGuQXoKy6kh3XgjLqp1QbgAl/3oOK7NDnA2dj6HSOWzsVDLtjuPTGhQcANuw==
 
 "@rollup/plugin-babel@^5.2.2":
   version "5.3.0"
