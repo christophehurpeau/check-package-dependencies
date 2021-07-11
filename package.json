@@ -30,7 +30,7 @@
   "scripts": {
     "build": "pob-build && yarn run build:definitions",
     "build:definitions": "tsc -p tsconfig.build.json",
-    "checks": "node scripts/check-package.js",
+    "checks": "node scripts/check-package.mjs",
     "clean": "rm -Rf dist",
     "generate:api": "typedoc --tsconfig tsconfig.doc.json",
     "generate:docs": "rm -Rf docs ; yarn run generate:api ; touch docs/.nojekyll && yarn run generate:test-coverage",
