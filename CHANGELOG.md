@@ -14,6 +14,14 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+### [1.2.7](https://www.github.com/christophehurpeau/check-package-dependencies/compare/v1.2.6...v1.2.7) (2021-07-11)
+
+
+### Bug Fixes
+
+* dont export mjs version of this lib ([c6ea1b1](https://www.github.com/christophehurpeau/check-package-dependencies/commit/c6ea1b152c25446788953a18368902c8a7c38880))
+* use semver as default export ([fe63dae](https://www.github.com/christophehurpeau/check-package-dependencies/commit/fe63dae679e29fc0b30a8801bd3f4247e2aee9b9))
+
 ### [1.2.6](https://www.github.com/christophehurpeau/check-package-dependencies/compare/v1.2.5...v1.2.6) (2021-07-08)
 
 
