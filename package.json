@@ -24,9 +24,7 @@
     }
   },
   "sideEffects": false,
-  "bin": {
-    "check-package-dependencies": "./bin/check-package-dependencies.js"
-  },
+  "bin": "./bin/check-package-dependencies.js",
   "scripts": {
     "build": "pob-build && yarn run build:definitions",
     "build:definitions": "tsc -p tsconfig.build.json",

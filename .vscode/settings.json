@@ -1,6 +1,8 @@
 {
-  "typescript.tsdk": "node_modules/typescript/lib",
-
+  "search.exclude": {
+    "**/.yarn": true,
+    "**/.pnp.*": true
+  },
   // save config
   "editor.formatOnSave": true,
   "eslint.codeActionsOnSave.mode": "all",
