@@ -9,10 +9,10 @@
   "license": "ISC",
   "repository": "https://github.com/christophehurpeau/check-package-dependencies.git",
   "homepage": "https://github.com/christophehurpeau/check-package-dependencies",
+  "type": "commonjs",
   "engines": {
-    "node": ">=12.10.0"
+    "node": "^12.20.0 || ^14.13.1 || >=16.0.0"
   },
-  "main": "./index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     "./package.json": "./package.json",
@@ -23,8 +23,6 @@
       }
     }
   },
-  "module:node": "./dist/index-node12.mjs",
-  "module:node-dev": "./dist/index-node12-dev.mjs",
   "sideEffects": false,
   "bin": {
     "check-package-dependencies": "./bin/check-package-dependencies.js"
@@ -41,7 +39,7 @@
     "lint:eslint": "eslint --ext .js,.mjs,.ts --report-unused-disable-directives --quiet *.js src bin scripts",
     "lint:prettier": "prettier --check .",
     "test": "jest",
-    "test:watch": "jest",
+    "test:watch": "jest --watch",
     "watch": "pob-watch"
   },
   "prettier": {
@@ -99,12 +97,10 @@
   },
   "devDependencies": {
     "@babel/core": "7.14.6",
-    "@pob/commitlint-config": "2.2.0",
-    "@pob/eslint-config": "43.2.0",
-    "@pob/eslint-config-node": "43.2.0",
-    "@pob/eslint-config-typescript": "43.2.0",
-    "@pob/eslint-config-typescript-node": "43.2.0",
-    "@pob/root": "4.1.0",
+    "@pob/commitlint-config": "3.0.0",
+    "@pob/eslint-config": "45.0.2",
+    "@pob/eslint-config-typescript": "45.0.2",
+    "@pob/root": "5.0.0",
     "@types/glob": "7.1.4",
     "@types/jest": "26.0.24",
     "@types/semver": "7.3.7",
@@ -116,10 +112,10 @@
     "eslint-import-resolver-node": "0.3.4",
     "eslint-plugin-import": "2.23.4",
     "eslint-plugin-node": "11.1.0",
-    "eslint-plugin-unicorn": "29.0.0",
+    "eslint-plugin-unicorn": "34.0.1",
     "jest": "26.6.3",
-    "pob-babel": "27.0.3",
-    "pob-lcov-reporter": "4.0.1",
+    "pob-babel": "28.0.2",
+    "pob-lcov-reporter": "5.0.0",
     "prettier": "2.3.2",
     "rollup": "2.53.1",
     "typedoc": "0.21.2",

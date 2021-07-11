@@ -2,7 +2,7 @@
 
 const path = require('path');
 
-module.exports = (api) => {
+module.exports = function babelConfig(api) {
   const isTest = api.env('test');
 
   if (!isTest) return {};
