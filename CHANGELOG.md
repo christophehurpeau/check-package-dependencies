@@ -14,6 +14,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+### [2.0.2](https://www.github.com/christophehurpeau/check-package-dependencies/compare/v2.0.1...v2.0.2) (2021-07-11)
+
+
+### Bug Fixes
+
+* add main field for eslint ([a3961be](https://www.github.com/christophehurpeau/check-package-dependencies/commit/a3961be34be1b025f5cb6edfa2b82e5ec5db745f))
+
 ### [2.0.1](https://www.github.com/christophehurpeau/check-package-dependencies/compare/v2.0.0...v2.0.1) (2021-07-11)
 
 
