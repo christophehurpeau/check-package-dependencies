@@ -844,10 +844,10 @@
     "@nodelib/fs.scandir" "2.1.4"
     fastq "^1.6.0"
 
-"@pob/commitlint-config@2.2.0":
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/@pob/commitlint-config/-/commitlint-config-2.2.0.tgz#b88788fbe400a4bfa0dd50b3cbe79462df58da71"
-  integrity sha512-xuSZFpR71NyYqROpTh0eNnKxF0zf5I1hKTRKN8SS6dwl9eiN6mnapOV8TsZVs2mSVgrYkFSUxAqyvSt6O7uCrA==
+"@pob/commitlint-config@3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@pob/commitlint-config/-/commitlint-config-3.0.0.tgz#31b320db8d3e2ed8b34a7c000bcd2ebd25602e05"
+  integrity sha512-PIHDXDE9sXcZ9xymMNoY6cgNJM4Opdva5u9c4kn1mIPeyhKIBWBdpXjR1Al34Bd2zm5Uy2eV5iRxSqx9vbSz/A==
   dependencies:
     "@commitlint/config-conventional" "^12.0.1"
 
