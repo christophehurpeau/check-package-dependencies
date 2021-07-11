@@ -18,12 +18,8 @@
     "./package.json": "./package.json",
     ".": {
       "node": {
-        "development": {
-          "import": "./dist/index-node12-dev.mjs",
-          "require": "./dist/index-node12-dev.cjs.js"
-        },
-        "import": "./dist/index-node12.mjs",
-        "require": "./dist/index-node12.cjs.js"
+        "development": "./dist/index-node12-dev.cjs.js",
+        "default": "./dist/index-node12.cjs.js"
       }
     }
   },
@@ -87,8 +83,7 @@
         "target": "node",
         "version": "12",
         "formats": [
-          "cjs",
-          "es"
+          "cjs"
         ]
       }
     ],
