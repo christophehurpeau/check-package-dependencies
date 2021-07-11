@@ -64,7 +64,11 @@ function checkDirectDuplicateDependencies(pkg, pkgPathName, depType, searchIn, d
       versions.forEach((version, index) => {
         var _pkg$resolutions;
 
-        if (version.startsWith('file:') || range.startsWith('file:')) return;
+        if (version.startsWith('file:') || range.startsWith('file:')) return; // https://yarnpkg.com/features/workspaces#workspace-ranges-workspace
+
+        if (version.startsWith('workspace:') || range.startsWith('workspace:')) {
+          return;
+        }
 
         if (semver__default.intersects(version, range)) {
           return;

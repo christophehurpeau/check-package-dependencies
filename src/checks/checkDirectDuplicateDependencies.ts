@@ -49,6 +49,13 @@ export function checkDirectDuplicateDependencies(
 
       versions.forEach((version, index) => {
         if (version.startsWith('file:') || range.startsWith('file:')) return;
+        // https://yarnpkg.com/features/workspaces#workspace-ranges-workspace
+        if (
+          version.startsWith('workspace:') ||
+          range.startsWith('workspace:')
+        ) {
+          return;
+        }
 
         if (semver.intersects(version, range)) {
           return;
