@@ -14,6 +14,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+### [2.0.1](https://www.github.com/christophehurpeau/check-package-dependencies/compare/v2.0.0...v2.0.1) (2021-07-11)
+
+
+### Bug Fixes
+
+* ignore workspace in version or range ([96284e8](https://www.github.com/christophehurpeau/check-package-dependencies/commit/96284e8debfaf81bf81ee6ae4362b9bb09c33580))
+
 ## [2.0.0](https://www.github.com/christophehurpeau/check-package-dependencies/compare/v1.2.7...v2.0.0) (2021-07-11)
 
 
