@@ -1,0 +1,45 @@
+name: Regenerate Documentation on typedoc update2
+
+on:
+  push:
+    branches:
+      - 'renovate/typedoc-**'
+
+jobs:
+  run-generate-docs2:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: |
+            .yarn/unplugged
+            .yarn/build-state.yml
+            .yarn/install-state.gz
+          key: v2-dependencies--${{ matrix.node-version }}-${{ runner.OS }}-${{ hashFiles('yarn.lock') }}
+          restore-keys: |
+            v2-dependencies--${{ matrix.node-version }}-${{ runner.OS }}-
+            v2-dependencies--${{ matrix.node-version }}-
+
+      - name: Check Dependencies
+        run: yarn install --immutable
+
+      - name: Run Generate Documentation
+        run: yarn generate:docs
+
+      - name: Check for modified files
+        id: git-check-modified
+        run: echo ::set-output name=modified::$(if git diff-index --quiet HEAD --; then echo "no"; else echo "yes"; fi)
+
+      - name: Commit report
+        if: steps.git-check-modified.outputs.modified == 'yes'
+        run: |
+          git add .
+          git config --global user.name 'Christophe Hurpeau'
+          git config --global user.email 'christophehurpeau@users.noreply.github.com'
+          git commit -m "docs: update generated doc"
+          git push
