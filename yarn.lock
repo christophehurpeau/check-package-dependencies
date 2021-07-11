@@ -893,17 +893,17 @@
     "@pob/sort-pkg" "^3.0.0"
     prettier "^2.1.2"
 
-"@pob/root@5.0.0":
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/@pob/root/-/root-5.0.0.tgz#a31ed7f5290d3cc14885137de7c10c4c190360d0"
-  integrity sha512-qMm0vcvah4Ea7cu7V2j/E9fnYFbL3aAukTiX1/R2hY/ds8XTe1qBXvhEwwo7UsDDDTdojBGL8VrB7IhFcVs3yQ==
+"@pob/root@5.0.1":
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/@pob/root/-/root-5.0.1.tgz#10e0d7ead7e288f85d84f483139690b7b4923e1d"
+  integrity sha512-6qIz4KLdT+ik4u/J6Qw5Z7Ny7ZMbw8M/esUe2yg/V3V3E/C6E2X/ciJzw6fr/6syQxHpNbUmmSO3hGrWSTh8+Q==
   dependencies:
     "@commitlint/cli" "12.1.4"
     "@pob/pretty-eslint-config" "^2.0.0"
     "@pob/pretty-pkg" "^3.0.0"
     husky "^7.0.0"
     lint-staged "11.0.0"
-    repository-check-dirty "^3.0.0"
+    repository-check-dirty "^3.0.1"
     semver "^7.1.2"
     which-pm-runs "1.0.0"
     yarn-deduplicate "3.1.0"
@@ -5057,10 +5057,10 @@ repeat-string@^1.6.1:
   resolved "https://registry.yarnpkg.com/repeat-string/-/repeat-string-1.6.1.tgz#8dcae470e1c88abc2d600fff4a776286da75e637"
   integrity sha1-jcrkcOHIirwtYA//Sndihtp15jc=
 
-repository-check-dirty@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/repository-check-dirty/-/repository-check-dirty-3.0.0.tgz#423b77de99c0497663cfd78e77f291364d348da9"
-  integrity sha512-WvS1NYhrab87/hQwcgYD+AdYOy74VrmsMTXn5HqdUmouf66zvkxcCbrz+/hunbKRvlhbVRG/zoMVg5ohhuwRxQ==
+repository-check-dirty@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/repository-check-dirty/-/repository-check-dirty-3.0.1.tgz#6ae624eb9b247a25b635d681ce07d378e0cc7244"
+  integrity sha512-GorKQd8yeUwuD/cYPE9Ksp/6WLFA/lzQ3wtwDVwUqPZKnZqAHa/9e3oKBzJAmdib0HMGN3he9vgePLoQ90v2LQ==
 
 request-promise-core@1.1.4:
   version "1.1.4"
