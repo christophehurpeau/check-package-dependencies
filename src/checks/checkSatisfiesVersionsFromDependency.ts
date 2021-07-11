@@ -1,4 +1,4 @@
-import { satisfies, minVersion } from 'semver';
+import semver from 'semver';
 import { createReportError } from '../utils/createReportError';
 import type { DependencyTypes, PackageJson } from '../utils/packageTypes';
 
@@ -35,8 +35,11 @@ export function checkSatisfiesVersionsFromDependency(
         onlyWarnsFor.includes(depKey),
       );
     } else {
-      const minVersionOfVersion = minVersion(version);
-      if (!minVersionOfVersion || !satisfies(minVersionOfVersion, range)) {
+      const minVersionOfVersion = semver.minVersion(version);
+      if (
+        !minVersionOfVersion ||
+        !semver.satisfies(minVersionOfVersion, range)
+      ) {
         reportError(
           `Invalid "${depKey}" in ${type}`,
           `"${version}" (in "${depKey}") should satisfies "${range}" from "${depPkg.name}" ${depKey}.`,

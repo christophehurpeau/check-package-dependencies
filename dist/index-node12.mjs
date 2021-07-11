@@ -1,5 +1,5 @@
 import path from 'path';
-import { intersects, minVersion, satisfies } from 'semver';
+import semver from 'semver';
 import chalk from 'chalk';
 import fs, { readFileSync } from 'fs';
 import glob from 'glob';
@@ -54,7 +54,7 @@ function checkDirectDuplicateDependencies(pkg, pkgPathName, depType, searchIn, d
 
         if (version.startsWith('file:') || range.startsWith('file:')) return;
 
-        if (intersects(version, range)) {
+        if (semver.intersects(version, range)) {
           return;
         } // Ignore reporting duplicate when there's a resolution for it
 
@@ -99,9 +99,9 @@ function checkPeerDependencies(pkg, pkgPathName, type, allowedPeerIn, depPkg, on
     } else {
       const versions = versionsIn.map(type => pkg[type][peerDepKey]);
       versions.forEach((version, index) => {
-        const minVersionOfVersion = minVersion(version);
+        const minVersionOfVersion = semver.minVersion(version);
 
-        if (!minVersionOfVersion || !satisfies(minVersionOfVersion, range)) {
+        if (!minVersionOfVersion || !semver.satisfies(minVersionOfVersion, range)) {
           reportError(`Invalid "${peerDepKey}" peer dependency`, `"${version}" (in ${allowedPeerInExisting[index]}) should satisfies "${range}" from "${depPkg.name}" ${type}`, onlyWarnsFor.includes(peerDepKey));
         }
       });
@@ -241,9 +241,9 @@ function checkSatisfiesVersionsFromDependency(pkg, pkgPathName, type, depKeys, d
     if (!version) {
       reportError(`Missing "${depKey}" in ${type}`, `should satisfies "${range}" from "${depPkg.name}" ${depKey}.`, onlyWarnsFor.includes(depKey));
     } else {
-      const minVersionOfVersion = minVersion(version);
+      const minVersionOfVersion = semver.minVersion(version);
 
-      if (!minVersionOfVersion || !satisfies(minVersionOfVersion, range)) {
+      if (!minVersionOfVersion || !semver.satisfies(minVersionOfVersion, range)) {
         reportError(`Invalid "${depKey}" in ${type}`, `"${version}" (in "${depKey}") should satisfies "${range}" from "${depPkg.name}" ${depKey}.`, onlyWarnsFor.includes(depKey));
       }
     }

@@ -11,6 +11,7 @@ const glob = require('glob');
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e['default'] : e; }
 
 const path__default = /*#__PURE__*/_interopDefaultLegacy(path);
+const semver__default = /*#__PURE__*/_interopDefaultLegacy(semver);
 const chalk__default = /*#__PURE__*/_interopDefaultLegacy(chalk);
 const fs__default = /*#__PURE__*/_interopDefaultLegacy(fs);
 const glob__default = /*#__PURE__*/_interopDefaultLegacy(glob);
@@ -65,7 +66,7 @@ function checkDirectDuplicateDependencies(pkg, pkgPathName, depType, searchIn, d
 
         if (version.startsWith('file:') || range.startsWith('file:')) return;
 
-        if (semver.intersects(version, range)) {
+        if (semver__default.intersects(version, range)) {
           return;
         } // Ignore reporting duplicate when there's a resolution for it
 
@@ -110,9 +111,9 @@ function checkPeerDependencies(pkg, pkgPathName, type, allowedPeerIn, depPkg, on
     } else {
       const versions = versionsIn.map(type => pkg[type][peerDepKey]);
       versions.forEach((version, index) => {
-        const minVersionOfVersion = semver.minVersion(version);
+        const minVersionOfVersion = semver__default.minVersion(version);
 
-        if (!minVersionOfVersion || !semver.satisfies(minVersionOfVersion, range)) {
+        if (!minVersionOfVersion || !semver__default.satisfies(minVersionOfVersion, range)) {
           reportError(`Invalid "${peerDepKey}" peer dependency`, `"${version}" (in ${allowedPeerInExisting[index]}) should satisfies "${range}" from "${depPkg.name}" ${type}`, onlyWarnsFor.includes(peerDepKey));
         }
       });
@@ -252,9 +253,9 @@ function checkSatisfiesVersionsFromDependency(pkg, pkgPathName, type, depKeys, d
     if (!version) {
       reportError(`Missing "${depKey}" in ${type}`, `should satisfies "${range}" from "${depPkg.name}" ${depKey}.`, onlyWarnsFor.includes(depKey));
     } else {
-      const minVersionOfVersion = semver.minVersion(version);
+      const minVersionOfVersion = semver__default.minVersion(version);
 
-      if (!minVersionOfVersion || !semver.satisfies(minVersionOfVersion, range)) {
+      if (!minVersionOfVersion || !semver__default.satisfies(minVersionOfVersion, range)) {
         reportError(`Invalid "${depKey}" in ${type}`, `"${version}" (in "${depKey}") should satisfies "${range}" from "${depPkg.name}" ${depKey}.`, onlyWarnsFor.includes(depKey));
       }
     }

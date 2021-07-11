@@ -1,4 +1,4 @@
-import { satisfies, minVersion } from 'semver';
+import semver from 'semver';
 import { createReportError } from '../utils/createReportError';
 import type { PackageJson, DependencyTypes } from '../utils/packageTypes';
 
@@ -36,8 +36,11 @@ export function checkPeerDependencies(
       const versions = versionsIn.map((type) => pkg[type]![peerDepKey]);
 
       versions.forEach((version, index) => {
-        const minVersionOfVersion = minVersion(version);
-        if (!minVersionOfVersion || !satisfies(minVersionOfVersion, range)) {
+        const minVersionOfVersion = semver.minVersion(version);
+        if (
+          !minVersionOfVersion ||
+          !semver.satisfies(minVersionOfVersion, range)
+        ) {
           reportError(
             `Invalid "${peerDepKey}" peer dependency`,
             `"${version}" (in ${allowedPeerInExisting[index]}) should satisfies "${range}" from "${depPkg.name}" ${type}`,

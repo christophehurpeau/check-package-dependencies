@@ -1,4 +1,4 @@
-import { intersects } from 'semver';
+import semver from 'semver';
 import type { ReportError } from '../utils/createReportError';
 import { createReportError } from '../utils/createReportError';
 import type { PackageJson, DependencyTypes } from '../utils/packageTypes';
@@ -50,7 +50,7 @@ export function checkDirectDuplicateDependencies(
       versions.forEach((version, index) => {
         if (version.startsWith('file:') || range.startsWith('file:')) return;
 
-        if (intersects(version, range)) {
+        if (semver.intersects(version, range)) {
           return;
         }
 
