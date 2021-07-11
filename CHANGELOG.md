@@ -14,6 +14,17 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+## [2.0.0](https://www.github.com/christophehurpeau/check-package-dependencies/compare/v1.2.7...v2.0.0) (2021-07-11)
+
+
+### ⚠ BREAKING CHANGES
+
+* requires node that support module
+
+### Miscellaneous Chores
+
+* update dev dependencies ([4c94bed](https://www.github.com/christophehurpeau/check-package-dependencies/commit/4c94bed5a014dfbdc9fa14dd664ed6a7a4df31a8))
+
 ### [1.2.7](https://www.github.com/christophehurpeau/check-package-dependencies/compare/v1.2.6...v1.2.7) (2021-07-11)
 
 
