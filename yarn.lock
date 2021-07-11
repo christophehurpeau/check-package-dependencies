@@ -891,56 +891,56 @@
     eslint-plugin-import "^2.22.1"
     eslint-plugin-unicorn "^29.0.0"
 
-"@pob/pretty-eslint-config@^1.0.1":
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/@pob/pretty-eslint-config/-/pretty-eslint-config-1.0.1.tgz#00c62ff52170098ee125a5d8574fa0c70c4d974e"
-  integrity sha512-1ITTg5H7xr00TYz+z6Gl8pSoBZZekAJfVTMoDSqt1obguH2lYi5vW9D0p7Q/0U9qjfEOt4YPaITa82DeSTac2Q==
+"@pob/pretty-eslint-config@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@pob/pretty-eslint-config/-/pretty-eslint-config-2.0.0.tgz#af1aeb5b7aecf59553fd3857ccbd04a53531c6f8"
+  integrity sha512-lOwudHnKjvpPMRLPlcV0yn6rz8pd9Sd9r9a8DZdWKTBYS4Ion7zsMxzUwoJWziYG4K1zgROILcp+XaU6m6yvZw==
   dependencies:
-    "@pob/sort-eslint-config" "^1.0.1"
+    "@pob/sort-eslint-config" "^2.0.0"
     prettier "^2.1.2"
 
-"@pob/pretty-pkg@^2.1.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@pob/pretty-pkg/-/pretty-pkg-2.1.0.tgz#a8b9c2441c56eb0b8c5925d39f157f2c80c2bebf"
-  integrity sha512-7uulW1IhT5Twq/wy1vNykaI2iYB4HwVttJg2gJWkmXsij0b0n5KbNUSgdkcD6JkSvcI/98VOA+4rWYJFng6v0g==
+"@pob/pretty-pkg@^3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@pob/pretty-pkg/-/pretty-pkg-3.0.0.tgz#0dbebffbf4c6977819176830fb1c038de46e3421"
+  integrity sha512-GfFKhWbQsLJKE1dMRsdRF4y5bCdmzBUWNHvcL3jkn2/CNTH+sd8+t2ka1MnzAjrS0ntm7hI9cn7IKMx0lkURRA==
   dependencies:
-    "@pob/sort-pkg" "^2.2.0"
+    "@pob/sort-pkg" "^3.0.0"
     prettier "^2.1.2"
 
-"@pob/root@4.1.0":
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/@pob/root/-/root-4.1.0.tgz#367607000badbb4c9ab696774f4bb9f4af89b07e"
-  integrity sha512-ZBmhQrTED/GpOiW4TPQn0mGWDDz+1UVSvLg2Y7a7E9DuOAsbz6MWmQQW2cDe2EidBdK+FNgCvlo6XOphPOPIJQ==
+"@pob/root@5.0.0":
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/@pob/root/-/root-5.0.0.tgz#a31ed7f5290d3cc14885137de7c10c4c190360d0"
+  integrity sha512-qMm0vcvah4Ea7cu7V2j/E9fnYFbL3aAukTiX1/R2hY/ds8XTe1qBXvhEwwo7UsDDDTdojBGL8VrB7IhFcVs3yQ==
   dependencies:
     "@commitlint/cli" "12.1.4"
-    "@pob/pretty-eslint-config" "^1.0.1"
-    "@pob/pretty-pkg" "^2.1.0"
+    "@pob/pretty-eslint-config" "^2.0.0"
+    "@pob/pretty-pkg" "^3.0.0"
     husky "^7.0.0"
     lint-staged "11.0.0"
-    repository-check-dirty "^2.0.1"
+    repository-check-dirty "^3.0.0"
     semver "^7.1.2"
     which-pm-runs "1.0.0"
     yarn-deduplicate "3.1.0"
     yarnhook "^0.5.0"
 
-"@pob/sort-eslint-config@^1.0.1":
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/@pob/sort-eslint-config/-/sort-eslint-config-1.0.1.tgz#bb8aee27d0680b53ce82c52d62a45d49a406e759"
-  integrity sha512-ccmWLCi6XTEdmTtYWB4M4iteypyD7DkiRWmZYqAa1ixwHXNrOpQ7LEI31g3sH9Y3NuDyMnXA6V4Du6Eibmu67A==
+"@pob/sort-eslint-config@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@pob/sort-eslint-config/-/sort-eslint-config-2.0.0.tgz#2be32d1b8715679e7f9d2ea4c287ba152aceee43"
+  integrity sha512-HyMqvsV8DS9FIQUYG8T1Sj0sERbGmrRdAisK6JEUmFOmMPPkRQ5oJhpXliAg1a1PDvVxb+01n8MyK63EB8zWdQ==
   dependencies:
-    "@pob/sort-object" "^2.0.1"
+    "@pob/sort-object" "^3.0.0"
 
-"@pob/sort-object@^2.0.1":
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@pob/sort-object/-/sort-object-2.0.1.tgz#bb41d0f3afe9ae1fca1db1d834eabd421c1185d6"
-  integrity sha512-z9QlMv6/7sKKnXuadmkPr88bKWoJpEPWOa87lEp1kIbuchVSUDKBOdP8peG+Ms6DM3j4OUOf3qHqiJQLEkfb0w==
+"@pob/sort-object@^3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@pob/sort-object/-/sort-object-3.0.0.tgz#af537867f320e7cb8e5f43ace698478db3f5b35e"
+  integrity sha512-QCyesJnp+1D4Qezr9pgXPKyZAmauJ2bQCooDENAYlELD3LeZaPWG5T5/uL+zQmnKa6S8xPj0depUwYEss6w0pw==
 
-"@pob/sort-pkg@^2.2.0":
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/@pob/sort-pkg/-/sort-pkg-2.2.0.tgz#685e5e3b8bd3e5797ec36a0f36278881c6a53ecf"
-  integrity sha512-sI6C8mXKR2fzTfuazzhVPBZVGpn2kOocq8Sl1HmbcS04MPd5kFCAlehuxdxwRLXdCYtddbNbwgGv3M1OihtaNg==
+"@pob/sort-pkg@^3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@pob/sort-pkg/-/sort-pkg-3.0.0.tgz#67f594dc0aad5521d2c0983ee51da2028b9d2292"
+  integrity sha512-VZiW3BWyUn2h4LDCLIKyFxZcmSJibG6CguASYA9smd5BEavtBPDnpP2jLgfsIYHbHbhXFV17nUlEDKYclR/nsA==
   dependencies:
-    "@pob/sort-object" "^2.0.1"
+    "@pob/sort-object" "^3.0.0"
 
 "@pob/use-eslint-plugin@^43.2.0":
   version "43.2.0"
@@ -5070,10 +5070,10 @@ repeat-string@^1.6.1:
   resolved "https://registry.yarnpkg.com/repeat-string/-/repeat-string-1.6.1.tgz#8dcae470e1c88abc2d600fff4a776286da75e637"
   integrity sha1-jcrkcOHIirwtYA//Sndihtp15jc=
 
-repository-check-dirty@^2.0.1:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/repository-check-dirty/-/repository-check-dirty-2.0.1.tgz#011a5a869b53dc164e2a0313b657c4f1ac6afc68"
-  integrity sha512-/w3RHNDvSCGWIqxxtA8TT8QLLoPsc6HyCHq34PCM3LXV1ltle3Ckib+QhaanDKpyclaY9GKmxJXDxby/+jyXFg==
+repository-check-dirty@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/repository-check-dirty/-/repository-check-dirty-3.0.0.tgz#423b77de99c0497663cfd78e77f291364d348da9"
+  integrity sha512-WvS1NYhrab87/hQwcgYD+AdYOy74VrmsMTXn5HqdUmouf66zvkxcCbrz+/hunbKRvlhbVRG/zoMVg5ohhuwRxQ==
 
 request-promise-core@1.1.4:
   version "1.1.4"
