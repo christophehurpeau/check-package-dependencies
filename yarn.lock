@@ -1505,10 +1505,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/semver@npm:7.3.7":
-  version: 7.3.7
-  resolution: "@types/semver@npm:7.3.7"
-  checksum: fff3d8f012454d1e0faf9dbbbbbb9cd9657d9f85ee0fef112984dffa85937c5001774838954a7b88fcc06b85500c10300956059aba0211687a520468ec09901c
+"@types/semver@npm:7.3.8":
+  version: 7.3.8
+  resolution: "@types/semver@npm:7.3.8"
+  checksum: b352963163bfd8bb24537a6069d02a64c0b0edbb9eec87f189042d1e08cbbbee1439629bb87c5626a5ff6617546e466846ae5d7a3ae67430520bd64fbae621c7
   languageName: node
   linkType: hard
 
@@ -2585,7 +2585,7 @@ __metadata:
     "@pob/root": 5.1.1
     "@types/glob": 7.1.4
     "@types/jest": 26.0.24
-    "@types/semver": 7.3.7
+    "@types/semver": 7.3.8
     "@typescript-eslint/eslint-plugin": 4.28.4
     "@typescript-eslint/parser": 4.28.4
     babel-jest: 26.6.3
