@@ -1161,21 +1161,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pob/eslint-config@npm:45.0.2, @pob/eslint-config@npm:^45.0.2":
-  version: 45.0.2
-  resolution: "@pob/eslint-config@npm:45.0.2"
+"@pob/eslint-config@npm:45.1.0, @pob/eslint-config@npm:^45.0.2":
+  version: 45.1.0
+  resolution: "@pob/eslint-config@npm:45.1.0"
   dependencies:
-    "@pob/use-eslint-plugin": ^45.0.0
+    "@pob/use-eslint-plugin": ^45.1.0
     eslint-config-airbnb-base: ^14.2.1
-    eslint-config-prettier: ^7.1.0
+    eslint-config-prettier: ^8.0.0
     eslint-plugin-import: ^2.22.1
     eslint-plugin-node: ^11.1.0
-    eslint-plugin-unicorn: ^34.0.1
+    eslint-plugin-unicorn: ^35.0.0
   peerDependencies:
     eslint: ^7.30.0
     eslint-plugin-import: ^2.22.1
     eslint-plugin-node: ^11.1.0
-    eslint-plugin-unicorn: ^34.0.1
+    eslint-plugin-unicorn: ^35.0.0
   peerDependenciesMeta:
     eslint-plugin-import:
       optional: true
@@ -1183,7 +1183,7 @@ __metadata:
       optional: true
     eslint-plugin-unicorn:
       optional: true
-  checksum: a0c7d851d7cc4df1461f6e6aaee526bd61f4b9f953d003a42119e2573175b46ae7f549cd298f9db9075f29a52332c7cb6d26ad3475b9b115fcfc70363092d530
+  checksum: 394ad1c6a615da4e34a1942f68148e09c878a2b973e0c9f3abeae03105149cf7bb1363814c399ff0f3b0fe3ce59ae683903ba1a9ce03e332429d8e29983c082a
   languageName: node
   linkType: hard
 
@@ -1262,10 +1262,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pob/use-eslint-plugin@npm:^45.0.0":
-  version: 45.0.0
-  resolution: "@pob/use-eslint-plugin@npm:45.0.0"
-  checksum: 0c0a972fc2d24ba1790a11be0954ad689034edb0d9f4826dad797dae84dc61cbe324c4f60bc456e60c6b393baea7ed398582bf5da976caaf0c42acd9e394a291
+"@pob/use-eslint-plugin@npm:^45.0.0, @pob/use-eslint-plugin@npm:^45.1.0":
+  version: 45.1.0
+  resolution: "@pob/use-eslint-plugin@npm:45.1.0"
+  checksum: 20bfa3e0597b2c109d4e48c70111d2c429f7e459c8946d75ed5b2ece89661d2b2aa4b1eebd49affd503b53350ada205efb8aa2db7abc82a6289cae3bbb058dc9
   languageName: node
   linkType: hard
 
@@ -2609,7 +2609,7 @@ __metadata:
   dependencies:
     "@babel/core": 7.15.5
     "@pob/commitlint-config": 3.1.1
-    "@pob/eslint-config": 45.0.2
+    "@pob/eslint-config": 45.1.0
     "@pob/eslint-config-typescript": 45.0.2
     "@pob/root": 5.1.1
     "@types/glob": 7.1.4
@@ -3420,6 +3420,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"eslint-config-prettier@npm:^8.0.0":
+  version: 8.3.0
+  resolution: "eslint-config-prettier@npm:8.3.0"
+  peerDependencies:
+    eslint: ">=7.0.0"
+  bin:
+    eslint-config-prettier: bin/cli.js
+  checksum: 94ccbb50fb67e5e47e8ba6cfa257b5cbf53619990ab13f46b99518cfe9b900394b93bdf6ffedbde1a8e2997d301b0fbd73a6b4202146bc53475dfb30a8c812f2
+  languageName: node
+  linkType: hard
+
 "eslint-import-resolver-node@npm:0.3.6, eslint-import-resolver-node@npm:^0.3.6":
   version: 0.3.6
   resolution: "eslint-import-resolver-node@npm:0.3.6"
@@ -3493,7 +3504,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-unicorn@npm:34.0.1, eslint-plugin-unicorn@npm:^34.0.1":
+"eslint-plugin-unicorn@npm:34.0.1":
   version: 34.0.1
   resolution: "eslint-plugin-unicorn@npm:34.0.1"
   dependencies:
@@ -3512,6 +3523,28 @@ __metadata:
   peerDependencies:
     eslint: ">=7.28.0"
   checksum: da2254ff2c4a3a23da6a0ac39e2d799f4858004e2e04b3774ef9cb45732a056d6f8fe6c7212640403bf6cbc28f1631de1514a4b7815f28a855fa865f042686f2
+  languageName: node
+  linkType: hard
+
+"eslint-plugin-unicorn@npm:^35.0.0":
+  version: 35.0.0
+  resolution: "eslint-plugin-unicorn@npm:35.0.0"
+  dependencies:
+    "@babel/helper-validator-identifier": ^7.14.9
+    ci-info: ^3.2.0
+    clean-regexp: ^1.0.0
+    eslint-template-visitor: ^2.3.2
+    eslint-utils: ^3.0.0
+    is-builtin-module: ^3.1.0
+    lodash: ^4.17.21
+    pluralize: ^8.0.0
+    read-pkg-up: ^7.0.1
+    regexp-tree: ^0.1.23
+    safe-regex: ^2.1.1
+    semver: ^7.3.5
+  peerDependencies:
+    eslint: ">=7.28.0"
+  checksum: d8fa5d533c16558562ab65e17bc545acbfa1507d0b4324b1fbeea98b5772fb911af9d371497e5e89ad2aa98707ac2a334e2da336bcaa29306d492d662d04a677
   languageName: node
   linkType: hard
 
