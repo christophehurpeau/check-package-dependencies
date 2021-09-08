@@ -2421,7 +2421,7 @@ __metadata:
     eslint-import-resolver-node: 0.3.6
     eslint-plugin-import: 2.24.2
     eslint-plugin-node: 11.1.0
-    eslint-plugin-unicorn: 34.0.1
+    eslint-plugin-unicorn: 35.0.0
     glob: ^7.1.6
     jest: 27.1.1
     pob-babel: 28.0.2
@@ -3146,7 +3146,29 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-unicorn@npm:34.0.1, eslint-plugin-unicorn@npm:^34.0.1":
+"eslint-plugin-unicorn@npm:35.0.0":
+  version: 35.0.0
+  resolution: "eslint-plugin-unicorn@npm:35.0.0"
+  dependencies:
+    "@babel/helper-validator-identifier": ^7.14.9
+    ci-info: ^3.2.0
+    clean-regexp: ^1.0.0
+    eslint-template-visitor: ^2.3.2
+    eslint-utils: ^3.0.0
+    is-builtin-module: ^3.1.0
+    lodash: ^4.17.21
+    pluralize: ^8.0.0
+    read-pkg-up: ^7.0.1
+    regexp-tree: ^0.1.23
+    safe-regex: ^2.1.1
+    semver: ^7.3.5
+  peerDependencies:
+    eslint: ">=7.28.0"
+  checksum: d8fa5d533c16558562ab65e17bc545acbfa1507d0b4324b1fbeea98b5772fb911af9d371497e5e89ad2aa98707ac2a334e2da336bcaa29306d492d662d04a677
+  languageName: node
+  linkType: hard
+
+"eslint-plugin-unicorn@npm:^34.0.1":
   version: 34.0.1
   resolution: "eslint-plugin-unicorn@npm:34.0.1"
   dependencies:
