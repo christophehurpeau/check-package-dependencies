@@ -92,7 +92,7 @@
     "chalk": "^4.1.0",
     "glob": "^7.1.6",
     "semver": "^7.3.4",
-    "type-fest": "^1.0.0"
+    "type-fest": "^2.0.0"
   },
   "devDependencies": {
     "@babel/core": "7.15.5",

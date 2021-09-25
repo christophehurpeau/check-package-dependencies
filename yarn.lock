@@ -2428,7 +2428,7 @@ __metadata:
     prettier: 2.4.1
     rollup: 2.57.0
     semver: ^7.3.4
-    type-fest: ^1.0.0
+    type-fest: ^2.0.0
     typedoc: 0.22.4
     typescript: 4.4.3
   bin:
@@ -7051,10 +7051,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"type-fest@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "type-fest@npm:1.0.0"
-  checksum: 0afb320bae1d80182cc6cd3ad009c8cb995a1be0632c63666f4c8865ccfa018605382767a72a831e700b1152ffccdd9470229342c8754f95ec81078eba411245
+"type-fest@npm:^2.0.0":
+  version: 2.3.4
+  resolution: "type-fest@npm:2.3.4"
+  checksum: 95b5930587f52d467aacc88db0a39e947b2913d896bc382c1a43a0bba78624774c1725448ab5c0161e02ed9ac496cb351486b42a407158b40e7f3aee282d5b69
   languageName: node
   linkType: hard
 
