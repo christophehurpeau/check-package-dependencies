@@ -31,7 +31,7 @@ export function createGetDependencyPackageJson({
         pkg = require(require.resolve(`${pkgDepName}/package.json`, {
           paths: [pkgDirname],
         }));
-      } catch (err) {
+      } catch (err: any) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         if (err.code !== 'ERR_PACKAGE_PATH_NOT_EXPORTED') {
           throw err;

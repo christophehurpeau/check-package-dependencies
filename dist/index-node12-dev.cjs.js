@@ -8,7 +8,7 @@ const chalk = require('chalk');
 const fs = require('fs');
 const glob = require('glob');
 
-function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e['default'] : e; }
+function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e["default"] : e; }
 
 const path__default = /*#__PURE__*/_interopDefaultLegacy(path);
 const semver__default = /*#__PURE__*/_interopDefaultLegacy(semver);

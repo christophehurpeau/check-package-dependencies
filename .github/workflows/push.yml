@@ -31,7 +31,7 @@ jobs:
             v2-dependencies--${{ matrix.node-version }}-
 
       - name: Check Dependencies
-        run: yarn install --immutable
+        run: yarn install --immutable --immutable-cache
 
       - name: Checks
         run: yarn run checks
@@ -60,7 +60,7 @@ jobs:
           CI: true
 
       - name: Send results to codecov
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v2
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
         if: startsWith(matrix.node-version, '14.')
