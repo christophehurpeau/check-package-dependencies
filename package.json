@@ -112,7 +112,7 @@
     "eslint-import-resolver-node": "0.3.6",
     "eslint-plugin-import": "2.25.2",
     "eslint-plugin-node": "11.1.0",
-    "eslint-plugin-unicorn": "35.0.0",
+    "eslint-plugin-unicorn": "37.0.1",
     "jest": "27.3.1",
     "pob-babel": "28.3.0",
     "pob-lcov-reporter": "5.2.0",
