@@ -108,7 +108,7 @@
     "@typescript-eslint/parser": "4.33.0",
     "babel-jest": "27.3.1",
     "babel-preset-latest-node": "5.5.1",
-    "eslint": "7.32.0",
+    "eslint": "8.1.0",
     "eslint-import-resolver-node": "0.3.6",
     "eslint-plugin-import": "2.25.2",
     "eslint-plugin-node": "11.1.0",
