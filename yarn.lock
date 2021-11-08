@@ -2451,7 +2451,7 @@ __metadata:
     eslint-import-resolver-node: 0.3.6
     eslint-plugin-import: 2.25.2
     eslint-plugin-node: 11.1.0
-    eslint-plugin-unicorn: 35.0.0
+    eslint-plugin-unicorn: 38.0.1
     glob: ^7.1.6
     jest: 27.3.1
     pob-babel: 28.3.0
@@ -3199,7 +3199,32 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-unicorn@npm:35.0.0, eslint-plugin-unicorn@npm:^35.0.0":
+"eslint-plugin-unicorn@npm:38.0.1":
+  version: 38.0.1
+  resolution: "eslint-plugin-unicorn@npm:38.0.1"
+  dependencies:
+    "@babel/helper-validator-identifier": ^7.14.9
+    ci-info: ^3.2.0
+    clean-regexp: ^1.0.0
+    eslint-template-visitor: ^2.3.2
+    eslint-utils: ^3.0.0
+    esquery: ^1.4.0
+    indent-string: 4
+    is-builtin-module: ^3.1.0
+    lodash: ^4.17.21
+    pluralize: ^8.0.0
+    read-pkg-up: ^7.0.1
+    regexp-tree: ^0.1.23
+    safe-regex: ^2.1.1
+    semver: ^7.3.5
+    strip-indent: ^3.0.0
+  peerDependencies:
+    eslint: ">=7.32.0"
+  checksum: 79792b724a8fcfb089221eae12f0b76471a4d0f0a72bb16076a5650068901f48391c3da401eef1c62dfabff5ec96abe3a77b4b93774d43724b922de1ad581350
+  languageName: node
+  linkType: hard
+
+"eslint-plugin-unicorn@npm:^35.0.0":
   version: 35.0.0
   resolution: "eslint-plugin-unicorn@npm:35.0.0"
   dependencies:
@@ -3995,7 +4020,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"indent-string@npm:^4.0.0":
+"indent-string@npm:4, indent-string@npm:^4.0.0":
   version: 4.0.0
   resolution: "indent-string@npm:4.0.0"
   checksum: 824cfb9929d031dabf059bebfe08cf3137365e112019086ed3dcff6a0a7b698cb80cf67ccccde0e25b9e2d7527aa6cc1fed1ac490c752162496caba3e6699612
