@@ -110,7 +110,7 @@
     "babel-preset-latest-node": "5.5.1",
     "eslint": "7.32.0",
     "eslint-import-resolver-node": "0.3.6",
-    "eslint-plugin-import": "2.25.2",
+    "eslint-plugin-import": "2.25.3",
     "eslint-plugin-node": "11.1.0",
     "eslint-plugin-unicorn": "35.0.0",
     "jest": "27.3.1",
