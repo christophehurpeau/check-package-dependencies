@@ -1,1 +1,4 @@
-yarn yarnhook
+
+if [ -n "$(git diff HEAD@{1}..HEAD@{0} -- yarn.lock)" ]; then
+  yarn install --immutable --immutable-cache || true
+fi

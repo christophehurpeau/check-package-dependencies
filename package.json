@@ -38,6 +38,7 @@
     "lint": "yarn run lint:prettier && tsc && yarn run lint:eslint",
     "lint:eslint": "eslint --report-unused-disable-directives --resolve-plugins-relative-to . --quiet *.{js,cjs,mjs} src bin scripts",
     "lint:prettier": "prettier --check .",
+    "postinstallDev": "pob-root-postinstall",
     "test": "jest",
     "test:watch": "jest --watch",
     "watch": "pob-watch"
