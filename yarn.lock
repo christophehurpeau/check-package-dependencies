@@ -2013,10 +2013,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"babel-plugin-fix-class-properties-uninitialized@npm:^4.1.0":
-  version: 4.1.0
-  resolution: "babel-plugin-fix-class-properties-uninitialized@npm:4.1.0"
-  checksum: 0aa5104d43feecec7364feede278430f9ce12477fde69f280d6aa311965c8d654bb1fdaf70e4fc83c6064ca82e8c70802ebffe6039f81c7565a222f1e0bc2a21
+"babel-plugin-fix-class-properties-uninitialized@npm:^4.2.0":
+  version: 4.2.0
+  resolution: "babel-plugin-fix-class-properties-uninitialized@npm:4.2.0"
+  checksum: 79ec94e2c78e059c678f60b5e058bbefb51c08e856602d3296e4eabe2bce4b6ec85661966b5d0bdf0c853efffb5163e18d3e67dc04e2c3e2af28b3cb1c07822c
   languageName: node
   linkType: hard
 
@@ -2102,10 +2102,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"babel-plugin-pob-babel@npm:^3.1.1":
-  version: 3.1.1
-  resolution: "babel-plugin-pob-babel@npm:3.1.1"
-  checksum: ecba11d0adeb62fefa62bfa547a69f278e3322cc527fa8abd032a40985066db13b44bc4e6ec71f6edf5ef7a615ad1468e84799a528b98f7f84c4092d97ff284a
+"babel-plugin-pob-babel@npm:^3.2.0":
+  version: 3.2.0
+  resolution: "babel-plugin-pob-babel@npm:3.2.0"
+  checksum: 769d8fc345400fb5cfe4ef8976acbd5e9741b5c30f263cafbe7dca8c9a145a77238faa6097d04e7e7cb86051d96ccddc947cffdf7225c328e409bd34490673a0
   languageName: node
   linkType: hard
 
@@ -2236,9 +2236,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"babel-preset-pob-env@npm:^6.3.0":
-  version: 6.3.0
-  resolution: "babel-preset-pob-env@npm:6.3.0"
+"babel-preset-pob-env@npm:^6.4.0":
+  version: 6.4.0
+  resolution: "babel-preset-pob-env@npm:6.4.0"
   dependencies:
     "@babel/plugin-proposal-class-properties": ^7.14.5
     "@babel/plugin-proposal-nullish-coalescing-operator": ^7.14.5
@@ -2246,14 +2246,14 @@ __metadata:
     "@babel/plugin-syntax-dynamic-import": ^7.8.3
     "@babel/preset-typescript": ^7.14.5
     babel-plugin-discard-module-references: ^1.1.2
-    babel-plugin-fix-class-properties-uninitialized: ^4.1.0
+    babel-plugin-fix-class-properties-uninitialized: ^4.2.0
     babel-plugin-import-export-rename: ^1.0.1
     babel-plugin-minify-replace: ^0.5.0
-    babel-plugin-pob-babel: ^3.1.1
+    babel-plugin-pob-babel: ^3.2.0
     babel-preset-optimizations: ^2.0.0
   peerDependencies:
     "@babel/core": ^7.11.6
-  checksum: 12b4043c56619ebd47ea2b5840377c3317966b4b01680d90f3626f10ec4851a93248b7baa81ac33ea2e37f5d911cb65e5519c63717717ee3e21ba3fa5a4042ee
+  checksum: 1ef3ce9eb4df219d79bf682cada86ca8a0dbace7336280828c90880866e417c3623359b3eddaca24aef8a058eaeb3c7be9b8bbda1703a962426cdeb087c848f9
   languageName: node
   linkType: hard
 
@@ -2454,8 +2454,8 @@ __metadata:
     eslint-plugin-unicorn: 35.0.0
     glob: ^7.1.6
     jest: 27.3.1
-    pob-babel: 28.4.0
-    pob-lcov-reporter: 5.3.0
+    pob-babel: 28.5.0
+    pob-lcov-reporter: 5.4.0
     prettier: 2.4.1
     rollup: 2.59.0
     semver: ^7.3.4
@@ -5938,9 +5938,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pob-babel@npm:28.4.0":
-  version: 28.4.0
-  resolution: "pob-babel@npm:28.4.0"
+"pob-babel@npm:28.5.0":
+  version: 28.5.0
+  resolution: "pob-babel@npm:28.5.0"
   dependencies:
     "@babel/plugin-transform-runtime": ^7.13.10
     "@rollup/plugin-babel": ^5.2.2
@@ -5948,7 +5948,7 @@ __metadata:
     "@rollup/plugin-node-resolve": ^13.0.0
     babel-preset-latest-node: ^5.5.1
     babel-preset-modern-browsers: ^15.0.2
-    babel-preset-pob-env: ^6.3.0
+    babel-preset-pob-env: ^6.4.0
     minimist-argv: ^1.1.0
     rollup: ^2.47.0
     rollup-config-external-dependencies: ^2.0.0
@@ -5960,18 +5960,18 @@ __metadata:
   bin:
     pob-build: bin/pob-build.js
     pob-watch: bin/pob-watch.js
-  checksum: c47909c16c1c23d3613093da51161aef2076875e515c57a41b0d088a4cc19d00944f8ba67dc050e14356d63cd621f9563160ceea0b0caf7584c45d305f61507a
+  checksum: bdd13cfc35c9d84b8854e3e329a631416bb7a4beb2e2128e77fd54e15acd1f87731d853a678175945844adc8976a92dc916111c4b090bb0b713c3714ca245288
   languageName: node
   linkType: hard
 
-"pob-lcov-reporter@npm:5.3.0":
-  version: 5.3.0
-  resolution: "pob-lcov-reporter@npm:5.3.0"
+"pob-lcov-reporter@npm:5.4.0":
+  version: 5.4.0
+  resolution: "pob-lcov-reporter@npm:5.4.0"
   dependencies:
     istanbul-reports: ^3.0.2
   peerDependencies:
     jest: ^26.0.1 || ^27.0.6
-  checksum: 6b12f6d0ac27c57f7a89f6ceb3659aa4c142ed47b207dab89d8d8047e512da90e7f2a1569cf054d3c178f9b04f424879e3215f3b24ec91044d56c30eb0574e15
+  checksum: 02faa41f855fbe4fe8868a93e4fee26d6a2d44afd572c971be2a819ea1ce3c0afe82c6c70438e454c6f279ceb7c414b7953b6d71a08354c4b7f38ca6d07e8b8c
   languageName: node
   linkType: hard
 
