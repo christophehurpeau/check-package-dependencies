@@ -40,7 +40,7 @@ export function createCheckPackageWithWorkspaces(
   const checkPackage = createCheckPackage(pkgDirectoryPath);
   const { pkg, pkgDirname, pkgPathName } = checkPackage;
 
-  const pkgWorkspaces: undefined | string[] =
+  const pkgWorkspaces: string[] | undefined =
     pkg.workspaces && !Array.isArray(pkg.workspaces)
       ? pkg.workspaces.packages
       : pkg.workspaces;
@@ -57,15 +57,15 @@ export function createCheckPackageWithWorkspaces(
       match.forEach((pathMatch) => {
         const stat = fs.statSync(pathMatch);
         if (!stat.isDirectory()) return;
-        const pkgDirectoryPath = path.relative(process.cwd(), pathMatch);
-        workspacePackagesPaths.push(pkgDirectoryPath);
+        const subPkgDirectoryPath = path.relative(process.cwd(), pathMatch);
+        workspacePackagesPaths.push(subPkgDirectoryPath);
       });
     });
   }
 
   const checksWorkspaces = new Map<string, CheckPackageApi>(
-    workspacePackagesPaths.map((pkgDirectoryPath) => {
-      const checkPkg = createCheckPackage(pkgDirectoryPath);
+    workspacePackagesPaths.map((subPkgDirectoryPath) => {
+      const checkPkg = createCheckPackage(subPkgDirectoryPath);
       return [checkPkg.pkg.name, checkPkg];
     }),
   );
@@ -87,8 +87,8 @@ export function createCheckPackageWithWorkspaces(
         internalWarnedForDuplicate: warnedForDuplicate,
       });
 
-      checksWorkspaces.forEach((checkPackage, id) => {
-        checkPackage.checkRecommended({
+      checksWorkspaces.forEach((checkSubPackage, id) => {
+        checkSubPackage.checkRecommended({
           isLibrary: isLibrary(id),
           peerDependenciesOnlyWarnsFor,
           directDuplicateDependenciesOnlyWarnsFor,
@@ -97,8 +97,8 @@ export function createCheckPackageWithWorkspaces(
           internalWarnedForDuplicate: warnedForDuplicate,
         });
         checkDirectDuplicateDependencies(
-          checkPackage.pkg,
-          checkPackage.pkgPathName,
+          checkSubPackage.pkg,
+          checkSubPackage.pkgPathName,
           'devDependencies',
           ['devDependencies', 'dependencies'],
           pkg,
@@ -109,8 +109,8 @@ export function createCheckPackageWithWorkspaces(
 
       checkWarnedFor(
         createReportError('Recommended Checks', pkgPathName),
-        directDuplicateDependenciesOnlyWarnsFor,
         warnedForDuplicate,
+        directDuplicateDependenciesOnlyWarnsFor,
       );
 
       return this;
@@ -122,8 +122,8 @@ export function createCheckPackageWithWorkspaces(
     },
 
     forEach(callback) {
-      checksWorkspaces.forEach((checkPackage) => {
-        callback(checkPackage);
+      checksWorkspaces.forEach((checkSubPackage) => {
+        callback(checkSubPackage);
       });
       return this;
     },

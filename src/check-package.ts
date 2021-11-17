@@ -232,7 +232,7 @@ export function createCheckPackage(pkgDirectoryPath = '.'): CheckPackageApi {
           'Direct Duplicate Dependencies',
           pkgPathName,
         );
-        checkWarnedFor(reportError, onlyWarnsFor, warnedForInternal);
+        checkWarnedFor(reportError, warnedForInternal, onlyWarnsFor);
       }
       return this;
     },

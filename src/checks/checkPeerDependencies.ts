@@ -14,11 +14,14 @@ export function checkPeerDependencies(
   if (!peerDependencies) return;
   const reportError = createReportError('Peer Dependencies', pkgPathName);
 
-  const allowedPeerInExisting = allowedPeerIn.filter((type) => pkg[type]);
+  const allowedPeerInExisting = allowedPeerIn.filter(
+    (allowedPeerInType) => pkg[allowedPeerInType],
+  );
 
   for (const [peerDepKey, range] of Object.entries(peerDependencies)) {
     const versionsIn = allowedPeerInExisting.filter(
-      (type) => pkg[type]![peerDepKey],
+      (allowedPeerInExistingType) =>
+        pkg[allowedPeerInExistingType]![peerDepKey],
     );
     if (versionsIn.length === 0) {
       const peerDependenciesMetaPeerDep = peerDependenciesMeta?.[peerDepKey];
@@ -33,7 +36,9 @@ export function checkPeerDependencies(
         onlyWarnsFor.includes(peerDepKey),
       );
     } else {
-      const versions = versionsIn.map((type) => pkg[type]![peerDepKey]);
+      const versions = versionsIn.map(
+        (versionsInType) => pkg[versionsInType]![peerDepKey],
+      );
 
       versions.forEach((version, index) => {
         const minVersionOfVersion = semver.minVersion(version);

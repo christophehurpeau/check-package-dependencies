@@ -5,8 +5,8 @@ import type { PackageJson, DependencyTypes } from '../utils/packageTypes';
 
 export function checkWarnedFor(
   reportError: ReportError,
-  onlyWarnsFor: string[] = [],
   warnedFor: Set<string>,
+  onlyWarnsFor: string[] = [],
 ): void {
   onlyWarnsFor.forEach((depName) => {
     if (!warnedFor.has(depName)) {
@@ -80,6 +80,6 @@ export function checkDirectDuplicateDependencies(
   }
 
   if (!warnedForInternal) {
-    checkWarnedFor(reportError, onlyWarnsFor, warnedFor);
+    checkWarnedFor(reportError, warnedFor, onlyWarnsFor);
   }
 }
