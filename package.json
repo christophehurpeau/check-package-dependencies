@@ -103,7 +103,7 @@
     "@pob/eslint-config-typescript": "46.0.0",
     "@pob/root": "5.7.2",
     "@types/glob": "7.2.0",
-    "@types/jest": "27.0.2",
+    "@types/jest": "27.0.3",
     "@types/semver": "7.3.9",
     "@typescript-eslint/eslint-plugin": "4.33.0",
     "@typescript-eslint/parser": "4.33.0",
