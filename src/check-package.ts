@@ -190,7 +190,6 @@ export function createCheckPackage(pkgDirectoryPath = '.'): CheckPackageApi {
               onlyWarnsFor,
             );
           }
-          // TODO optionalPeerDependency
         });
       });
       return this;

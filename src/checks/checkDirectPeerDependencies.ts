@@ -38,5 +38,4 @@ export function checkDirectPeerDependencies(
       onlyWarnsFor,
     );
   }
-  // TODO optionalPeerDependency
 }
