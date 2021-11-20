@@ -40,7 +40,7 @@ function createReportError(title, pkgPathName) {
   };
 }
 
-function checkWarnedFor(reportError, onlyWarnsFor = [], warnedFor) {
+function checkWarnedFor(reportError, warnedFor, onlyWarnsFor = []) {
   onlyWarnsFor.forEach(depName => {
     if (!warnedFor.has(depName)) {
       reportError(`Invalid "${depName}" in "onlyWarnsFor" but no warning was raised`);
@@ -88,7 +88,7 @@ function checkDirectDuplicateDependencies(pkg, pkgPathName, depType, searchIn, d
   }
 
   if (!warnedForInternal) {
-    checkWarnedFor(reportError, onlyWarnsFor, warnedFor);
+    checkWarnedFor(reportError, warnedFor, onlyWarnsFor);
   }
 }
 
@@ -99,10 +99,10 @@ function checkPeerDependencies(pkg, pkgPathName, type, allowedPeerIn, depPkg, on
   } = depPkg;
   if (!peerDependencies) return;
   const reportError = createReportError('Peer Dependencies', pkgPathName);
-  const allowedPeerInExisting = allowedPeerIn.filter(type => pkg[type]);
+  const allowedPeerInExisting = allowedPeerIn.filter(allowedPeerInType => pkg[allowedPeerInType]);
 
   for (const [peerDepKey, range] of Object.entries(peerDependencies)) {
-    const versionsIn = allowedPeerInExisting.filter(type => pkg[type][peerDepKey]);
+    const versionsIn = allowedPeerInExisting.filter(allowedPeerInExistingType => pkg[allowedPeerInExistingType][peerDepKey]);
 
     if (versionsIn.length === 0) {
       const peerDependenciesMetaPeerDep = peerDependenciesMeta === null || peerDependenciesMeta === void 0 ? void 0 : peerDependenciesMeta[peerDepKey];
@@ -113,7 +113,7 @@ function checkPeerDependencies(pkg, pkgPathName, type, allowedPeerIn, depPkg, on
 
       reportError(`Missing "${peerDepKey}" peer dependency from "${depPkg.name}" in ${type}`, `it should satisfies "${range}" and be in ${allowedPeerIn.join(' or ')}`, onlyWarnsFor.includes(peerDepKey));
     } else {
-      const versions = versionsIn.map(type => pkg[type][peerDepKey]);
+      const versions = versionsIn.map(versionsInType => pkg[versionsInType][peerDepKey]);
       versions.forEach((version, index) => {
         const minVersionOfVersion = semver__default.minVersion(version);
 
@@ -139,8 +139,7 @@ const getAllowedPeerInFromType = (depPkgType, isLibrary) => {
 function checkDirectPeerDependencies(isLibrary, pkg, pkgPathName, depPkgType, depPkg, onlyWarnsFor = []) {
   if (depPkg.peerDependencies) {
     checkPeerDependencies(pkg, pkgPathName, depPkgType, getAllowedPeerInFromType(depPkgType, isLibrary), depPkg, onlyWarnsFor);
-  } // TODO optionalPeerDependency
-
+  }
 }
 
 function checkExactVersions(pkg, pkgPathName, type, onlyWarnsFor = []) {
@@ -287,13 +286,13 @@ function createGetDependencyPackageJson({
           paths: [pkgDirname]
         }));
       } catch (err) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        if (!(err instanceof Error)) throw err;
+
         if (err.code !== 'ERR_PACKAGE_PATH_NOT_EXPORTED') {
           throw err;
         }
 
-        const match = / in (.*\/package.json)($|\simported from)/.exec( // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        err.message);
+        const match = / in (.*\/package.json)($|\simported from)/.exec(err.message);
 
         if (match) {
           const [, matchPackageJson] = match;
@@ -364,8 +363,7 @@ function createCheckPackage(pkgDirectoryPath = '.') {
 
           if (depPkg.peerDependencies) {
             checkDirectPeerDependencies(isLibrary, pkg, pkgPathName, depType, depPkg, onlyWarnsFor);
-          } // TODO optionalPeerDependency
-
+          }
         });
       });
       return this;
@@ -395,7 +393,7 @@ function createCheckPackage(pkgDirectoryPath = '.') {
 
       if (!warnedForInternal) {
         const reportError = createReportError('Direct Duplicate Dependencies', pkgPathName);
-        checkWarnedFor(reportError, onlyWarnsFor, warnedForInternal);
+        checkWarnedFor(reportError, warnedForInternal, onlyWarnsFor);
       }
 
       return this;
@@ -586,14 +584,14 @@ function createCheckPackageWithWorkspaces(pkgDirectoryPath = '.') {
       match.forEach(pathMatch => {
         const stat = fs__default.statSync(pathMatch);
         if (!stat.isDirectory()) return;
-        const pkgDirectoryPath = path__default.relative(process.cwd(), pathMatch);
-        workspacePackagesPaths.push(pkgDirectoryPath);
+        const subPkgDirectoryPath = path__default.relative(process.cwd(), pathMatch);
+        workspacePackagesPaths.push(subPkgDirectoryPath);
       });
     });
   }
 
-  const checksWorkspaces = new Map(workspacePackagesPaths.map(pkgDirectoryPath => {
-    const checkPkg = createCheckPackage(pkgDirectoryPath);
+  const checksWorkspaces = new Map(workspacePackagesPaths.map(subPkgDirectoryPath => {
+    const checkPkg = createCheckPackage(subPkgDirectoryPath);
     return [checkPkg.pkg.name, checkPkg];
   }));
   return {
@@ -612,8 +610,8 @@ function createCheckPackageWithWorkspaces(pkgDirectoryPath = '.') {
         checkResolutionMessage,
         internalWarnedForDuplicate: warnedForDuplicate
       });
-      checksWorkspaces.forEach((checkPackage, id) => {
-        checkPackage.checkRecommended({
+      checksWorkspaces.forEach((checkSubPackage, id) => {
+        checkSubPackage.checkRecommended({
           isLibrary: isLibrary(id),
           peerDependenciesOnlyWarnsFor,
           directDuplicateDependenciesOnlyWarnsFor,
@@ -621,9 +619,9 @@ function createCheckPackageWithWorkspaces(pkgDirectoryPath = '.') {
           checkResolutionMessage,
           internalWarnedForDuplicate: warnedForDuplicate
         });
-        checkDirectDuplicateDependencies(checkPackage.pkg, checkPackage.pkgPathName, 'devDependencies', ['devDependencies', 'dependencies'], pkg, [], warnedForDuplicate);
+        checkDirectDuplicateDependencies(checkSubPackage.pkg, checkSubPackage.pkgPathName, 'devDependencies', ['devDependencies', 'dependencies'], pkg, [], warnedForDuplicate);
       });
-      checkWarnedFor(createReportError('Recommended Checks', pkgPathName), directDuplicateDependenciesOnlyWarnsFor, warnedForDuplicate);
+      checkWarnedFor(createReportError('Recommended Checks', pkgPathName), warnedForDuplicate, directDuplicateDependenciesOnlyWarnsFor);
       return this;
     },
 
@@ -633,8 +631,8 @@ function createCheckPackageWithWorkspaces(pkgDirectoryPath = '.') {
     },
 
     forEach(callback) {
-      checksWorkspaces.forEach(checkPackage => {
-        callback(checkPackage);
+      checksWorkspaces.forEach(checkSubPackage => {
+        callback(checkSubPackage);
       });
       return this;
     },

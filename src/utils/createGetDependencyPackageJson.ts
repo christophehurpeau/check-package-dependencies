@@ -31,14 +31,17 @@ export function createGetDependencyPackageJson({
         pkg = require(require.resolve(`${pkgDepName}/package.json`, {
           paths: [pkgDirname],
         }));
-      } catch (err: any) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        if (err.code !== 'ERR_PACKAGE_PATH_NOT_EXPORTED') {
+      } catch (err: unknown) {
+        if (!(err instanceof Error)) throw err;
+
+        if (
+          (err as NodeJS.ErrnoException).code !==
+          'ERR_PACKAGE_PATH_NOT_EXPORTED'
+        ) {
           throw err;
         }
 
         const match = / in (.*\/package.json)($|\simported from)/.exec(
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           err.message,
         );
 
