@@ -119,7 +119,7 @@
     "pob-lcov-reporter": "5.4.0",
     "prettier": "2.4.1",
     "rollup": "2.60.1",
-    "typedoc": "0.22.9",
+    "typedoc": "0.22.10",
     "typescript": "4.4.4"
   }
 }
