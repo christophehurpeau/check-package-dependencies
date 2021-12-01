@@ -114,7 +114,7 @@
     "eslint-plugin-import": "2.25.3",
     "eslint-plugin-node": "11.1.0",
     "eslint-plugin-unicorn": "38.0.1",
-    "jest": "27.4.2",
+    "jest": "27.4.3",
     "pob-babel": "28.5.0",
     "pob-lcov-reporter": "5.4.0",
     "prettier": "2.5.0",
