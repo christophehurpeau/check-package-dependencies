@@ -2461,7 +2461,7 @@ __metadata:
     eslint-plugin-unicorn: 38.0.1
     glob: ^7.1.6
     jest: 27.4.3
-    pob-babel: 28.5.0
+    pob-babel: 28.6.0
     pob-lcov-reporter: 5.4.0
     prettier: 2.5.1
     rollup: 2.60.2
@@ -5946,9 +5946,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pob-babel@npm:28.5.0":
-  version: 28.5.0
-  resolution: "pob-babel@npm:28.5.0"
+"pob-babel@npm:28.6.0":
+  version: 28.6.0
+  resolution: "pob-babel@npm:28.6.0"
   dependencies:
     "@babel/plugin-transform-runtime": ^7.13.10
     "@rollup/plugin-babel": ^5.2.2
@@ -5968,7 +5968,7 @@ __metadata:
   bin:
     pob-build: bin/pob-build.js
     pob-watch: bin/pob-watch.js
-  checksum: bdd13cfc35c9d84b8854e3e329a631416bb7a4beb2e2128e77fd54e15acd1f87731d853a678175945844adc8976a92dc916111c4b090bb0b713c3714ca245288
+  checksum: cc3076c0fd0cee2e8ea67339d3577317636e7776fa33878b4c65af857dd094a1e2b65c3d9e24dbaa80b5099e6044d721b2bf74883275820a1c3bc53ef44e9e34
   languageName: node
   linkType: hard
 
