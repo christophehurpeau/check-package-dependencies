@@ -13,7 +13,7 @@
   "engines": {
     "node": "^12.20.0 || ^14.13.1 || >=16.0.0"
   },
-  "packageManager": "yarn@3.1.0",
+  "packageManager": "yarn@3.1.1",
   "main": "./dist/index-node12.cjs.js",
   "types": "./dist/index.d.ts",
   "exports": {
