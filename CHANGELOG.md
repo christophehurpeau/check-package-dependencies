@@ -14,6 +14,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+## [2.2.0](https://www.github.com/christophehurpeau/check-package-dependencies/compare/v2.1.0...v2.2.0) (2021-12-06)
+
+
+### Features
+
+* allow to check identical version in other dep types ([e157111](https://www.github.com/christophehurpeau/check-package-dependencies/commit/e157111f5384b46c9d99d0ac8917f98b775dc975))
+
 ## [2.1.0](https://www.github.com/christophehurpeau/check-package-dependencies/compare/v2.0.2...v2.1.0) (2021-12-04)
 
 
