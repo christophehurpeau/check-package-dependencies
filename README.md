@@ -91,7 +91,10 @@ createCheckPackage(/* '.' */)
   // The react-dom version should match react, so this check will ensure it does
   .checkIdenticalVersions({
     dependencies: {
-      react: ['react-dom'],
+      react: {
+        dependencies: ['react-dom'],
+        devDependencies: ['react-test-renderer'],
+      },
     },
   });
 ```

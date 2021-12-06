@@ -6,7 +6,7 @@ export function checkIdenticalVersions(
   pkg: PackageJson,
   pkgPathName: string,
   type: DependencyTypes,
-  deps: Record<string, string[]>,
+  deps: Record<string, string[] | Partial<Record<DependencyTypes, string[]>>>,
   onlyWarnsFor: string[] = [],
 ): void {
   const pkgDependencies = pkg[type] || {};
@@ -19,23 +19,31 @@ export function checkIdenticalVersions(
       return;
     }
 
-    deps[depKey].forEach((depKeyIdentical) => {
-      const value = pkgDependencies[depKeyIdentical];
-      if (!value) {
-        reportError(
-          `Missing "${depKeyIdentical}" in ${type}`,
-          `it should be "${version}".`,
-          onlyWarnsFor.includes(depKey),
-        );
-      }
+    const depConfigArrayOrObject = deps[depKey];
+    const depConfig = Array.isArray(depConfigArrayOrObject)
+      ? { [type]: depConfigArrayOrObject }
+      : depConfigArrayOrObject;
 
-      if (value !== version) {
-        reportError(
-          `Invalid "${depKeyIdentical}" in ${type}`,
-          `expecting "${value}" be "${version}".`,
-          onlyWarnsFor.includes(depKey),
-        );
-      }
+    getKeys(depConfig).forEach((depKeyType) => {
+      const pkgDependenciesType = pkg[depKeyType] || {};
+      depConfig[depKeyType]?.forEach((depKeyIdentical) => {
+        const value = pkgDependenciesType[depKeyIdentical];
+        if (!value) {
+          reportError(
+            `Missing "${depKeyIdentical}" in ${depKeyType}`,
+            `it should be "${version}".`,
+            onlyWarnsFor.includes(depKey),
+          );
+        }
+
+        if (value !== version) {
+          reportError(
+            `Invalid "${depKeyIdentical}" in ${depKeyType}`,
+            `expecting "${value}" be "${version}".`,
+            onlyWarnsFor.includes(depKey),
+          );
+        }
+      });
     });
   });
 }
