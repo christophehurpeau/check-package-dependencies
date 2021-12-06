@@ -167,16 +167,25 @@ function checkIdenticalVersions(pkg, pkgPathName, type, deps, onlyWarnsFor = [])
       return;
     }
 
-    deps[depKey].forEach(depKeyIdentical => {
-      const value = pkgDependencies[depKeyIdentical];
+    const depConfigArrayOrObject = deps[depKey];
+    const depConfig = Array.isArray(depConfigArrayOrObject) ? {
+      [type]: depConfigArrayOrObject
+    } : depConfigArrayOrObject;
+    getKeys(depConfig).forEach(depKeyType => {
+      var _depConfig$depKeyType;
 
-      if (!value) {
-        reportError(`Missing "${depKeyIdentical}" in ${type}`, `it should be "${version}".`, onlyWarnsFor.includes(depKey));
-      }
+      const pkgDependenciesType = pkg[depKeyType] || {};
+      (_depConfig$depKeyType = depConfig[depKeyType]) === null || _depConfig$depKeyType === void 0 ? void 0 : _depConfig$depKeyType.forEach(depKeyIdentical => {
+        const value = pkgDependenciesType[depKeyIdentical];
 
-      if (value !== version) {
-        reportError(`Invalid "${depKeyIdentical}" in ${type}`, `expecting "${value}" be "${version}".`, onlyWarnsFor.includes(depKey));
-      }
+        if (!value) {
+          reportError(`Missing "${depKeyIdentical}" in ${depKeyType}`, `it should be "${version}".`, onlyWarnsFor.includes(depKey));
+        }
+
+        if (value !== version) {
+          reportError(`Invalid "${depKeyIdentical}" in ${depKeyType}`, `expecting "${value}" be "${version}".`, onlyWarnsFor.includes(depKey));
+        }
+      });
     });
   });
 }
