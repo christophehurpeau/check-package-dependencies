@@ -5,7 +5,7 @@
 const {
   createCheckPackage,
   createCheckPackageWithWorkspaces,
-} = require('../dist/index-node12.cjs');
+} = require('../dist/index-node14.cjs');
 
 const checkPackage = createCheckPackage();
 if (checkPackage.pkg.workspaces) {
