@@ -96,7 +96,7 @@
     "@babel/core": "7.16.0",
     "@pob/commitlint-config": "4.0.0",
     "@pob/eslint-config": "47.1.0",
-    "@pob/eslint-config-typescript": "47.1.0",
+    "@pob/eslint-config-typescript": "48.0.4",
     "@pob/root": "6.0.0",
     "@types/glob": "7.2.0",
     "@types/jest": "27.0.3",
