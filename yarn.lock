@@ -1236,7 +1236,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rollup/plugin-replace@npm:3.0.0, @rollup/plugin-replace@npm:^3.0.0":
+"@rollup/plugin-replace@npm:3.0.0":
   version: 3.0.0
   resolution: "@rollup/plugin-replace@npm:3.0.0"
   dependencies:
@@ -2371,7 +2371,7 @@ __metadata:
     "@pob/eslint-config": 47.1.0
     "@pob/eslint-config-typescript": 47.1.0
     "@pob/root": 6.0.0
-    "@rollup/plugin-replace": ^3.0.0
+    "@rollup/plugin-replace": 3.0.0
     "@types/glob": 7.2.0
     "@types/jest": 27.0.3
     "@types/semver": 7.3.9
