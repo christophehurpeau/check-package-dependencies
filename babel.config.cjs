@@ -9,6 +9,6 @@ module.exports = function babelConfig(api) {
 
   return {
     only: [path.resolve(__dirname, 'src')],
-    presets: [require.resolve('pob-babel/preset')],
+    presets: [[require.resolve('pob-babel/preset'), { modules: 'commonjs' }]],
   };
 };

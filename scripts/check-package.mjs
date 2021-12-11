@@ -1,4 +1,4 @@
-import { createCheckPackage } from '../dist/index-node12.cjs.js';
+import { createCheckPackage } from '../dist/index-node14.cjs.js';
 
 createCheckPackage().checkRecommended({
   isLibrary: true,
