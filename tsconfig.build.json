@@ -12,5 +12,10 @@
     "declarationMap": true
   },
 
-  "exclude": ["dist/**", "src/**/*.test.ts", "src/**/__tests__/**"]
+  "exclude": [
+    "dist/**",
+    "src/test-setup.ts",
+    "src/**/*.test.ts",
+    "src/**/__tests__/**"
+  ]
 }
