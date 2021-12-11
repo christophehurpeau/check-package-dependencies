@@ -14,6 +14,22 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+## [3.0.0](https://www.github.com/christophehurpeau/check-package-dependencies/compare/v2.2.1...v3.0.0) (2021-12-11)
+
+
+### ⚠ BREAKING CHANGES
+
+* requires node 14
+
+### Features
+
+* drop node 12 ([ef56e15](https://www.github.com/christophehurpeau/check-package-dependencies/commit/ef56e1572d886d73c7e0fcc6698ef622463be7fc))
+
+
+### Bug Fixes
+
+* bin script ([736bad3](https://www.github.com/christophehurpeau/check-package-dependencies/commit/736bad37e65f664f1b77e9388681fe96f6d2f166))
+
 ### [2.2.1](https://www.github.com/christophehurpeau/check-package-dependencies/compare/v2.2.0...v2.2.1) (2021-12-06)
 
 
