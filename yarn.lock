@@ -2157,9 +2157,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"babel-preset-pob-env@npm:^7.1.1":
-  version: 7.1.1
-  resolution: "babel-preset-pob-env@npm:7.1.1"
+"babel-preset-pob-env@npm:^7.1.3":
+  version: 7.1.3
+  resolution: "babel-preset-pob-env@npm:7.1.3"
   dependencies:
     "@babel/plugin-proposal-nullish-coalescing-operator": ^7.16.0
     "@babel/plugin-proposal-optional-chaining": ^7.16.0
@@ -2171,7 +2171,7 @@ __metadata:
     babel-preset-optimizations: ^2.0.0
   peerDependencies:
     "@babel/core": ^7.11.6
-  checksum: 127e1344232112cc5a5c34474545e2aecd26af852b27019e9dce9aecfbf9d1445692dd3066fd6c1711e530e4bbf637e350cad364aae259e84ae51c00b2ce9ef6
+  checksum: 53107ffb2cb213370072bf9386976d0850271792bc575f8a851541189b4259342294a700047d52ff95776132d39e619de2b4900785e495e72cd49548cc1a9375
   languageName: node
   linkType: hard
 
@@ -2364,7 +2364,7 @@ __metadata:
     eslint: 8.4.1
     glob: ^7.1.6
     jest: 27.4.4
-    pob-babel: 29.3.0
+    pob-babel: 29.4.1
     pob-lcov-reporter: 6.0.0
     prettier: 2.5.1
     semver: ^7.3.4
@@ -5855,9 +5855,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pob-babel@npm:29.3.0":
-  version: 29.3.0
-  resolution: "pob-babel@npm:29.3.0"
+"pob-babel@npm:29.4.1":
+  version: 29.4.1
+  resolution: "pob-babel@npm:29.4.1"
   dependencies:
     "@babel/core": 7.16.0
     "@babel/plugin-transform-runtime": 7.16.4
@@ -5867,7 +5867,7 @@ __metadata:
     "@rollup/plugin-replace": 3.0.0
     "@rollup/plugin-run": 2.1.0
     babel-preset-modern-browsers: ^15.0.2
-    babel-preset-pob-env: ^7.1.1
+    babel-preset-pob-env: ^7.1.3
     minimist-argv: ^1.1.0
     rollup: 2.61.1
     rollup-config-external-dependencies: ^2.0.0
@@ -5879,7 +5879,7 @@ __metadata:
     pob-build: bin/pob-build.js
     pob-watch: bin/pob-watch.js
     rollup: bin/rollup.cjs
-  checksum: 98ab0ac76ea310ab9e0427ec382ffe6ba3c6527e216125ede9103241fa7c2d61c0b24aa1dc303d19a638a77660c8fdc3f6947b33e169f43e7b57191fa286b29f
+  checksum: 0c70d313311129b0f23181bca8f7838e4ab3f74e6bbb1a4cd733ab4de5c01460ab9fcd02a582275b9d50897e3d94d59cb44fdf5665b9645d332672300178c451
   languageName: node
   linkType: hard
 
