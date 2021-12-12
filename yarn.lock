@@ -2365,7 +2365,7 @@ __metadata:
     eslint: 8.4.1
     glob: ^7.1.6
     jest: 27.4.4
-    pob-babel: 29.4.1
+    pob-babel: 29.4.2
     pob-lcov-reporter: 6.0.0
     prettier: 2.5.1
     semver: ^7.3.4
@@ -5856,9 +5856,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pob-babel@npm:29.4.1":
-  version: 29.4.1
-  resolution: "pob-babel@npm:29.4.1"
+"pob-babel@npm:29.4.2":
+  version: 29.4.2
+  resolution: "pob-babel@npm:29.4.2"
   dependencies:
     "@babel/core": 7.16.0
     "@babel/plugin-transform-runtime": 7.16.4
@@ -5880,7 +5880,7 @@ __metadata:
     pob-build: bin/pob-build.js
     pob-watch: bin/pob-watch.js
     rollup: bin/rollup.cjs
-  checksum: 0c70d313311129b0f23181bca8f7838e4ab3f74e6bbb1a4cd733ab4de5c01460ab9fcd02a582275b9d50897e3d94d59cb44fdf5665b9645d332672300178c451
+  checksum: 9e0ae47d2752a8c4b28a8ae1c2cf495807c97f037572c75d2540051df2c96a74b91049aef97ad00b0d4bc22fd5141d17e5a9cbd484020260f08b582165f2cc6f
   languageName: node
   linkType: hard
 
