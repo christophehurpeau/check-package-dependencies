@@ -1,5 +1,6 @@
 /* eslint-disable max-lines */
 import path from 'path';
+import util from 'util';
 import {
   checkDirectDuplicateDependencies,
   checkWarnedFor,
@@ -16,6 +17,7 @@ import type { GetDependencyPackageJson } from './utils/createGetDependencyPackag
 import {
   createGetDependencyPackageJson,
   readPkgJson,
+  writePkgJson,
 } from './utils/createGetDependencyPackageJson';
 import { createReportError } from './utils/createReportError';
 import { getKeys } from './utils/object';
@@ -30,6 +32,10 @@ const regularDependencyTypes: RegularDependencyTypes[] = [
   'dependencies',
   'optionalDependencies',
 ];
+
+export interface CreateCheckPackageOptions {
+  tryToAutoFix?: boolean;
+}
 
 export interface CheckDirectPeerDependenciesOptions {
   isLibrary?: boolean;
@@ -135,11 +141,28 @@ export interface CheckPackageApi {
   ) => CheckPackageApi;
 }
 
-export function createCheckPackage(pkgDirectoryPath = '.'): CheckPackageApi {
+export function createCheckPackage(
+  pkgDirectoryPath = '.',
+  { tryToAutoFix = false }: CreateCheckPackageOptions = {},
+): CheckPackageApi {
   const pkgDirname = path.resolve(pkgDirectoryPath);
   const pkgPath = `${pkgDirname}/package.json`;
   const pkgPathName = `${pkgDirectoryPath}/package.json`;
   const pkg = readPkgJson(pkgPath);
+  const copyPkg: PackageJson = JSON.parse(JSON.stringify(pkg)) as PackageJson;
+
+  if (
+    process.env.CI &&
+    process.env.CHECK_PACKAGE_DEPENDENCIES_ENABLE_CI_AUTOFIX !== 'true'
+  ) {
+    tryToAutoFix = false;
+  }
+
+  const writePackageIfChanged = (): void => {
+    if (!tryToAutoFix) return;
+    if (util.isDeepStrictEqual(pkg, copyPkg)) return;
+    writePkgJson(pkgPath, pkg);
+  };
 
   const getDependencyPackageJson = createGetDependencyPackageJson({
     pkgDirname,
@@ -151,19 +174,40 @@ export function createCheckPackage(pkgDirectoryPath = '.'): CheckPackageApi {
     pkgPathName,
     getDependencyPackageJson,
     checkExactVersions({ onlyWarnsFor } = {}) {
-      checkExactVersions(pkg, pkgPathName, 'dependencies', onlyWarnsFor);
-      checkExactVersions(pkg, pkgPathName, 'devDependencies', onlyWarnsFor);
-      checkExactVersions(pkg, pkgPathName, 'resolutions', onlyWarnsFor);
+      checkExactVersions(pkg, pkgPathName, 'dependencies', {
+        onlyWarnsFor,
+        tryToAutoFix,
+      });
+      checkExactVersions(pkg, pkgPathName, 'devDependencies', {
+        onlyWarnsFor,
+        tryToAutoFix,
+      });
+      checkExactVersions(pkg, pkgPathName, 'resolutions', {
+        onlyWarnsFor,
+        tryToAutoFix,
+      });
+      writePackageIfChanged();
       return this;
     },
     checkExactVersionsForLibrary({ onlyWarnsFor } = {}) {
-      checkExactVersions(pkg, pkgPathName, 'devDependencies', onlyWarnsFor);
-      checkExactVersions(pkg, pkgPathName, 'resolutions', onlyWarnsFor);
+      checkExactVersions(pkg, pkgPathName, 'devDependencies', {
+        onlyWarnsFor,
+        tryToAutoFix,
+      });
+      checkExactVersions(pkg, pkgPathName, 'resolutions', {
+        onlyWarnsFor,
+        tryToAutoFix,
+      });
+      writePackageIfChanged();
       return this;
     },
 
     checkExactDevVersions({ onlyWarnsFor } = {}) {
-      checkExactVersions(pkg, pkgPathName, 'devDependencies', onlyWarnsFor);
+      checkExactVersions(pkg, pkgPathName, 'devDependencies', {
+        onlyWarnsFor,
+        tryToAutoFix,
+      });
+      writePackageIfChanged();
       return this;
     },
 

@@ -1,6 +1,9 @@
 import type { CheckResolutionMessage } from './checks/checkResolutionsHasExplanation';
 import type { GetDependencyPackageJson } from './utils/createGetDependencyPackageJson';
 import type { DependencyTypes, PackageJson } from './utils/packageTypes';
+export interface CreateCheckPackageOptions {
+    tryToAutoFix?: boolean;
+}
 export interface CheckDirectPeerDependenciesOptions {
     isLibrary?: boolean;
     onlyWarnsFor?: string[];
@@ -70,5 +73,5 @@ export interface CheckPackageApi {
         devDependencies?: string[];
     }) => CheckPackageApi;
 }
-export declare function createCheckPackage(pkgDirectoryPath?: string): CheckPackageApi;
+export declare function createCheckPackage(pkgDirectoryPath?: string, { tryToAutoFix }?: CreateCheckPackageOptions): CheckPackageApi;
 //# sourceMappingURL=check-package.d.ts.map

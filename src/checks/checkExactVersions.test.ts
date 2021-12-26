@@ -40,7 +40,7 @@ describe('checkExactVersions', () => {
       { name: 'test', devDependencies: { test: '^1.0.0' } },
       'path',
       'devDependencies',
-      ['test'],
+      { onlyWarnsFor: ['test'] },
     );
     expect(createReportError).toHaveBeenCalled();
     expect(mockReportError).toHaveBeenCalledTimes(1);

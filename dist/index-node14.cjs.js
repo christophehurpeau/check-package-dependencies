@@ -6,6 +6,7 @@ const path = require('path');
 const semver = require('semver');
 const chalk = require('chalk');
 const fs = require('fs');
+const util = require('util');
 const glob = require('glob');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e["default"] : e; }
@@ -14,6 +15,7 @@ const path__default = /*#__PURE__*/_interopDefaultLegacy(path);
 const semver__default = /*#__PURE__*/_interopDefaultLegacy(semver);
 const chalk__default = /*#__PURE__*/_interopDefaultLegacy(chalk);
 const fs__default = /*#__PURE__*/_interopDefaultLegacy(fs);
+const util__default = /*#__PURE__*/_interopDefaultLegacy(util);
 const glob__default = /*#__PURE__*/_interopDefaultLegacy(glob);
 
 /* eslint-disable no-console */
@@ -140,14 +142,23 @@ function checkDirectPeerDependencies(isLibrary, pkg, pkgPathName, depPkgType, de
   }
 }
 
-function checkExactVersions(pkg, pkgPathName, type, onlyWarnsFor = []) {
+function checkExactVersions(pkg, pkgPathName, type, {
+  onlyWarnsFor = [],
+  tryToAutoFix = false
+} = {}) {
   const pkgDependencies = pkg[type];
   if (!pkgDependencies) return;
   const reportError = createReportError('Exact versions', pkgPathName);
 
   for (const [depKey, version] of Object.entries(pkgDependencies)) {
     if (version.startsWith('^') || version.startsWith('~')) {
-      reportError(`Unexpected range dependency in "${type}" for "${depKey}"`, `expecting "${version}" to be exact "${version.slice(1)}".`, onlyWarnsFor.includes(depKey));
+      const shouldOnlyWarn = onlyWarnsFor.includes(depKey);
+
+      if (!shouldOnlyWarn && tryToAutoFix) {
+        pkgDependencies[depKey] = version.slice(1);
+      } else {
+        reportError(`Unexpected range dependency in "${type}" for "${depKey}"`, `expecting "${version}" to be exact "${version.slice(1)}".`, shouldOnlyWarn);
+      }
     }
   }
 }
@@ -273,6 +284,9 @@ function checkSatisfiesVersionsFromDependency(pkg, pkgPathName, type, depKeys, d
 function readPkgJson(packagePath) {
   return JSON.parse(fs.readFileSync(packagePath, 'utf-8'));
 }
+function writePkgJson(packagePath, pkg) {
+  fs.writeFileSync(packagePath, JSON.stringify(pkg));
+}
 function createGetDependencyPackageJson({
   pkgDirname,
   nodeModulesPackagePathCache = new Map()
@@ -315,10 +329,25 @@ function createGetDependencyPackageJson({
 
 /* eslint-disable max-lines */
 const regularDependencyTypes = ['devDependencies', 'dependencies', 'optionalDependencies'];
-function createCheckPackage(pkgDirectoryPath = '.') {
+function createCheckPackage(pkgDirectoryPath = '.', {
+  tryToAutoFix = false
+} = {}) {
   const pkgDirname = path__default.resolve(pkgDirectoryPath);
+  const pkgPath = `${pkgDirname}/package.json`;
   const pkgPathName = `${pkgDirectoryPath}/package.json`;
-  const pkg = readPkgJson(`${pkgDirname}/package.json`);
+  const pkg = readPkgJson(pkgPath);
+  const copyPkg = JSON.parse(JSON.stringify(pkg));
+
+  if (process.env.CI && process.env.CHECK_PACKAGE_DEPENDENCIES_ENABLE_CI_AUTOFIX !== 'true') {
+    tryToAutoFix = false;
+  }
+
+  const writePackageIfChanged = () => {
+    if (!tryToAutoFix) return;
+    if (util__default.isDeepStrictEqual(pkg, copyPkg)) return;
+    writePkgJson(pkgPath, pkg);
+  };
+
   const getDependencyPackageJson = createGetDependencyPackageJson({
     pkgDirname
   });
@@ -331,24 +360,45 @@ function createCheckPackage(pkgDirectoryPath = '.') {
     checkExactVersions({
       onlyWarnsFor
     } = {}) {
-      checkExactVersions(pkg, pkgPathName, 'dependencies', onlyWarnsFor);
-      checkExactVersions(pkg, pkgPathName, 'devDependencies', onlyWarnsFor);
-      checkExactVersions(pkg, pkgPathName, 'resolutions', onlyWarnsFor);
+      checkExactVersions(pkg, pkgPathName, 'dependencies', {
+        onlyWarnsFor,
+        tryToAutoFix
+      });
+      checkExactVersions(pkg, pkgPathName, 'devDependencies', {
+        onlyWarnsFor,
+        tryToAutoFix
+      });
+      checkExactVersions(pkg, pkgPathName, 'resolutions', {
+        onlyWarnsFor,
+        tryToAutoFix
+      });
+      writePackageIfChanged();
       return this;
     },
 
     checkExactVersionsForLibrary({
       onlyWarnsFor
     } = {}) {
-      checkExactVersions(pkg, pkgPathName, 'devDependencies', onlyWarnsFor);
-      checkExactVersions(pkg, pkgPathName, 'resolutions', onlyWarnsFor);
+      checkExactVersions(pkg, pkgPathName, 'devDependencies', {
+        onlyWarnsFor,
+        tryToAutoFix
+      });
+      checkExactVersions(pkg, pkgPathName, 'resolutions', {
+        onlyWarnsFor,
+        tryToAutoFix
+      });
+      writePackageIfChanged();
       return this;
     },
 
     checkExactDevVersions({
       onlyWarnsFor
     } = {}) {
-      checkExactVersions(pkg, pkgPathName, 'devDependencies', onlyWarnsFor);
+      checkExactVersions(pkg, pkgPathName, 'devDependencies', {
+        onlyWarnsFor,
+        tryToAutoFix
+      });
+      writePackageIfChanged();
       return this;
     },
 

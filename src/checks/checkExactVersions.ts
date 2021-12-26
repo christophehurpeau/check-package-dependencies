@@ -1,11 +1,16 @@
 import { createReportError } from '../utils/createReportError';
 import type { PackageJson, DependencyTypes } from '../utils/packageTypes';
 
+export interface CheckExactVersionsOptions {
+  onlyWarnsFor?: string[];
+  tryToAutoFix?: boolean;
+}
+
 export function checkExactVersions(
   pkg: PackageJson,
   pkgPathName: string,
   type: DependencyTypes,
-  onlyWarnsFor: string[] = [],
+  { onlyWarnsFor = [], tryToAutoFix = false }: CheckExactVersionsOptions = {},
 ): void {
   const pkgDependencies = pkg[type];
   if (!pkgDependencies) return;
@@ -14,11 +19,16 @@ export function checkExactVersions(
 
   for (const [depKey, version] of Object.entries(pkgDependencies)) {
     if (version.startsWith('^') || version.startsWith('~')) {
-      reportError(
-        `Unexpected range dependency in "${type}" for "${depKey}"`,
-        `expecting "${version}" to be exact "${version.slice(1)}".`,
-        onlyWarnsFor.includes(depKey),
-      );
+      const shouldOnlyWarn = onlyWarnsFor.includes(depKey);
+      if (!shouldOnlyWarn && tryToAutoFix) {
+        pkgDependencies[depKey] = version.slice(1);
+      } else {
+        reportError(
+          `Unexpected range dependency in "${type}" for "${depKey}"`,
+          `expecting "${version}" to be exact "${version.slice(1)}".`,
+          shouldOnlyWarn,
+        );
+      }
     }
   }
 }
