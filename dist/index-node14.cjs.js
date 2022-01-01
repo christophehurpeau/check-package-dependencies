@@ -3,19 +3,19 @@
 Object.defineProperty(exports, '__esModule', { value: true });
 
 const path = require('path');
+const util = require('util');
 const semver = require('semver');
 const chalk = require('chalk');
 const fs = require('fs');
-const util = require('util');
 const glob = require('glob');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e["default"] : e; }
 
 const path__default = /*#__PURE__*/_interopDefaultLegacy(path);
+const util__default = /*#__PURE__*/_interopDefaultLegacy(util);
 const semver__default = /*#__PURE__*/_interopDefaultLegacy(semver);
 const chalk__default = /*#__PURE__*/_interopDefaultLegacy(chalk);
 const fs__default = /*#__PURE__*/_interopDefaultLegacy(fs);
-const util__default = /*#__PURE__*/_interopDefaultLegacy(util);
 const glob__default = /*#__PURE__*/_interopDefaultLegacy(glob);
 
 /* eslint-disable no-console */
