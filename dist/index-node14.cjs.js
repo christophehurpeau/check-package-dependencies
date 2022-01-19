@@ -117,7 +117,9 @@ function checkPeerDependencies(pkg, pkgPathName, type, allowedPeerIn, depPkg, on
       versions.forEach((version, index) => {
         const minVersionOfVersion = semver__default.minVersion(version);
 
-        if (!minVersionOfVersion || !semver__default.satisfies(minVersionOfVersion, range)) {
+        if (!minVersionOfVersion || !semver__default.satisfies(minVersionOfVersion, range, {
+          includePrerelease: true
+        })) {
           reportError(`Invalid "${peerDepKey}" peer dependency`, `"${version}" (in ${allowedPeerInExisting[index]}) should satisfies "${range}" from "${depPkg.name}" ${type}`, onlyWarnsFor.includes(peerDepKey));
         }
       });
@@ -274,7 +276,9 @@ function checkSatisfiesVersionsFromDependency(pkg, pkgPathName, type, depKeys, d
     } else {
       const minVersionOfVersion = semver__default.minVersion(version);
 
-      if (!minVersionOfVersion || !semver__default.satisfies(minVersionOfVersion, range)) {
+      if (!minVersionOfVersion || !semver__default.satisfies(minVersionOfVersion, range, {
+        includePrerelease: true
+      })) {
         reportError(`Invalid "${depKey}" in ${type}`, `"${version}" (in "${depKey}") should satisfies "${range}" from "${depPkg.name}" ${depKey}.`, onlyWarnsFor.includes(depKey));
       }
     }
