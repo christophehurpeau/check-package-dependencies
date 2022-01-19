@@ -68,7 +68,7 @@ describe('checkDirectPeerDependencies', () => {
     expect(mockReportError).not.toHaveBeenCalled();
   });
 
-  it('should not report error when peer dependency value is a beta', () => {
+  it('should not report error when dependency value is a beta', () => {
     checkDirectPeerDependencies(
       false,
       {
