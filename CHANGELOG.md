@@ -14,6 +14,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+### [3.0.2](https://github.com/christophehurpeau/check-package-dependencies/compare/v3.0.1...v3.0.2) (2022-01-19)
+
+
+### Bug Fixes
+
+* beta in direct duplicate dependencies ([bab86e1](https://github.com/christophehurpeau/check-package-dependencies/commit/bab86e15ccf9a72fee48f0be0ae9bb074eb6fd09))
+
 ### [3.0.1](https://github.com/christophehurpeau/check-package-dependencies/compare/v3.0.0...v3.0.1) (2022-01-19)
 
 
