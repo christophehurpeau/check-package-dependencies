@@ -14,6 +14,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+### [3.0.1](https://github.com/christophehurpeau/check-package-dependencies/compare/v3.0.0...v3.0.1) (2022-01-19)
+
+
+### Bug Fixes
+
+* supports prereleases ([8c49a05](https://github.com/christophehurpeau/check-package-dependencies/commit/8c49a05fa79697544b08f9dc06c329b757f2e4ae))
+
 ## [3.0.0](https://www.github.com/christophehurpeau/check-package-dependencies/compare/v2.2.1...v3.0.0) (2021-12-11)
 
 
