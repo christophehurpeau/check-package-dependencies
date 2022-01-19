@@ -70,7 +70,11 @@ function checkDirectDuplicateDependencies(pkg, pkgPathName, depType, searchIn, d
           return;
         }
 
-        if (semver__default.intersects(version, range)) {
+        if (semver__default.satisfies(version, range, {
+          includePrerelease: true
+        }) || semver__default.intersects(version, range, {
+          includePrerelease: true
+        })) {
           return;
         } // Ignore reporting duplicate when there's a resolution for it
 
