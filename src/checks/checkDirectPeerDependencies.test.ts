@@ -68,6 +68,26 @@ describe('checkDirectPeerDependencies', () => {
     expect(mockReportError).not.toHaveBeenCalled();
   });
 
+  it('should not report error when peer dependency value is a beta', () => {
+    checkDirectPeerDependencies(
+      false,
+      {
+        name: 'test',
+        devDependencies: {
+          rollup: '^1.0.0-beta.0',
+          'some-lib-using-rollup': '1.0.0',
+        },
+      },
+      'path',
+      'devDependencies',
+      {
+        name: 'some-lib-using-rollup',
+        peerDependencies: { rollup: '*' },
+      },
+    );
+    expect(mockReportError).not.toHaveBeenCalled();
+  });
+
   it('should allow lib to have peer in both dependencies and peerDependencies', () => {
     checkDirectPeerDependencies(
       true,

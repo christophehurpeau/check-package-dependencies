@@ -44,7 +44,9 @@ export function checkPeerDependencies(
         const minVersionOfVersion = semver.minVersion(version);
         if (
           !minVersionOfVersion ||
-          !semver.satisfies(minVersionOfVersion, range)
+          !semver.satisfies(minVersionOfVersion, range, {
+            includePrerelease: true,
+          })
         ) {
           reportError(
             `Invalid "${peerDepKey}" peer dependency`,

@@ -38,7 +38,9 @@ export function checkSatisfiesVersionsFromDependency(
       const minVersionOfVersion = semver.minVersion(version);
       if (
         !minVersionOfVersion ||
-        !semver.satisfies(minVersionOfVersion, range)
+        !semver.satisfies(minVersionOfVersion, range, {
+          includePrerelease: true,
+        })
       ) {
         reportError(
           `Invalid "${depKey}" in ${type}`,
