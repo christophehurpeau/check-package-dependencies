@@ -57,7 +57,14 @@ export function checkDirectDuplicateDependencies(
           return;
         }
 
-        if (semver.intersects(version, range)) {
+        if (
+          semver.satisfies(version, range, {
+            includePrerelease: true,
+          }) ||
+          semver.intersects(version, range, {
+            includePrerelease: true,
+          })
+        ) {
           return;
         }
 
