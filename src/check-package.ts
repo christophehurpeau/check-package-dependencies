@@ -1,6 +1,7 @@
 /* eslint-disable max-lines */
 import path from 'path';
 import util from 'util';
+import type { OnlyWarnsFor } from 'utils/shouldOnlyWarnFor';
 import {
   checkDirectDuplicateDependencies,
   checkWarnedFor,
@@ -39,11 +40,11 @@ export interface CreateCheckPackageOptions {
 
 export interface CheckDirectPeerDependenciesOptions {
   isLibrary?: boolean;
-  onlyWarnsFor?: string[];
+  onlyWarnsFor?: OnlyWarnsFor;
 }
 
 export interface CheckDirectDuplicateDependenciesOptions {
-  onlyWarnsFor?: string[];
+  onlyWarnsFor?: OnlyWarnsFor;
   /** @internal */
   internalWarnedForDuplicate?: Set<string>;
 }
@@ -52,9 +53,9 @@ export interface CheckRecommendedOptions {
   isLibrary?: boolean;
   /** default is true for libraries, false otherwise */
   allowRangeVersionsInDependencies?: boolean;
-  peerDependenciesOnlyWarnsFor?: string[];
-  directDuplicateDependenciesOnlyWarnsFor?: string[];
-  exactVersionsOnlyWarnsFor?: string[];
+  peerDependenciesOnlyWarnsFor?: OnlyWarnsFor;
+  directDuplicateDependenciesOnlyWarnsFor?: OnlyWarnsFor;
+  exactVersionsOnlyWarnsFor?: OnlyWarnsFor;
   checkResolutionMessage?: CheckResolutionMessage;
   /** @internal */
   internalWarnedForDuplicate?: Set<string>;
@@ -62,7 +63,7 @@ export interface CheckRecommendedOptions {
 
 export interface CheckExactVersionsOptions {
   allowRangeVersionsInDependencies?: boolean;
-  onlyWarnsFor?: string[];
+  onlyWarnsFor?: OnlyWarnsFor;
 }
 
 export interface CheckPackageApi {

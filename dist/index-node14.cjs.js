@@ -6,6 +6,7 @@ const path = require('path');
 const util = require('util');
 const semver = require('semver');
 const chalk = require('chalk');
+const shouldOnlyWarnFor$1 = require('utils/shouldOnlyWarnFor');
 const fs = require('fs');
 const glob = require('glob');
 
@@ -41,6 +42,8 @@ function createReportError(title, pkgPathName) {
     }
   };
 }
+
+const shouldOnlyWarnFor = (dependencyName, onlyWarnsFor) => onlyWarnsFor.includes(dependencyName);
 
 function checkWarnedFor(reportError, warnedFor, onlyWarnsFor = []) {
   onlyWarnsFor.forEach(depName => {
@@ -84,9 +87,9 @@ function checkDirectDuplicateDependencies(pkg, pkgPathName, depType, searchIn, d
         }
 
         const versionInType = versionsIn[index];
-        const shouldWarns = onlyWarnsFor.includes(depKey);
-        if (shouldWarns) warnedFor.add(depKey);
-        reportError(`Invalid duplicate dependency "${depKey}"`, `"${versions[0]}" (in ${versionInType}) should satisfies "${range}" from "${depPkg.name}" ${depType}.`, shouldWarns);
+        const shouldOnlyWarn = shouldOnlyWarnFor(depKey, onlyWarnsFor);
+        if (shouldOnlyWarn) warnedFor.add(depKey);
+        reportError(`Invalid duplicate dependency "${depKey}"`, `"${versions[0]}" (in ${versionInType}) should satisfies "${range}" from "${depPkg.name}" ${depType}.`, shouldOnlyWarn);
       });
     }
   }
@@ -115,7 +118,7 @@ function checkPeerDependencies(pkg, pkgPathName, type, allowedPeerIn, depPkg, on
         return;
       }
 
-      reportError(`Missing "${peerDepKey}" peer dependency from "${depPkg.name}" in ${type}`, `it should satisfies "${range}" and be in ${allowedPeerIn.join(' or ')}`, onlyWarnsFor.includes(peerDepKey));
+      reportError(`Missing "${peerDepKey}" peer dependency from "${depPkg.name}" in ${type}`, `it should satisfies "${range}" and be in ${allowedPeerIn.join(' or ')}`, shouldOnlyWarnFor(peerDepKey, onlyWarnsFor));
     } else {
       const versions = versionsIn.map(versionsInType => pkg[versionsInType][peerDepKey]);
       versions.forEach((version, index) => {
@@ -124,7 +127,7 @@ function checkPeerDependencies(pkg, pkgPathName, type, allowedPeerIn, depPkg, on
         if (!minVersionOfVersion || !semver__default.satisfies(minVersionOfVersion, range, {
           includePrerelease: true
         })) {
-          reportError(`Invalid "${peerDepKey}" peer dependency`, `"${version}" (in ${allowedPeerInExisting[index]}) should satisfies "${range}" from "${depPkg.name}" ${type}`, onlyWarnsFor.includes(peerDepKey));
+          reportError(`Invalid "${peerDepKey}" peer dependency`, `"${version}" (in ${allowedPeerInExisting[index]}) should satisfies "${range}" from "${depPkg.name}" ${type}`, shouldOnlyWarnFor(peerDepKey, onlyWarnsFor));
         }
       });
     }
@@ -148,6 +151,8 @@ function checkDirectPeerDependencies(isLibrary, pkg, pkgPathName, depPkgType, de
   }
 }
 
+const isVersionRange = version => version.startsWith('^') || version.startsWith('~');
+
 function checkExactVersions(pkg, pkgPathName, type, {
   onlyWarnsFor = [],
   tryToAutoFix = false
@@ -156,14 +161,14 @@ function checkExactVersions(pkg, pkgPathName, type, {
   if (!pkgDependencies) return;
   const reportError = createReportError('Exact versions', pkgPathName);
 
-  for (const [depKey, version] of Object.entries(pkgDependencies)) {
-    if (version.startsWith('^') || version.startsWith('~')) {
-      const shouldOnlyWarn = onlyWarnsFor.includes(depKey);
+  for (const [dependencyName, version] of Object.entries(pkgDependencies)) {
+    if (isVersionRange(version)) {
+      const shouldOnlyWarn = shouldOnlyWarnFor$1.shouldOnlyWarnFor(dependencyName, onlyWarnsFor);
 
       if (!shouldOnlyWarn && tryToAutoFix) {
-        pkgDependencies[depKey] = version.slice(1);
+        pkgDependencies[dependencyName] = version.slice(1);
       } else {
-        reportError(`Unexpected range dependency in "${type}" for "${depKey}"`, `expecting "${version}" to be exact "${version.slice(1)}".`, shouldOnlyWarn);
+        reportError(`Unexpected range dependency in "${type}" for "${dependencyName}"`, `expecting "${version}" to be exact "${version.slice(1)}".`, shouldOnlyWarn);
       }
     }
   }
@@ -192,11 +197,11 @@ function checkIdenticalVersions(pkg, pkgPathName, type, deps, onlyWarnsFor = [])
         const value = pkgDependenciesType[depKeyIdentical];
 
         if (!value) {
-          reportError(`Missing "${depKeyIdentical}" in ${depKeyType}`, `it should be "${version}".`, onlyWarnsFor.includes(depKey));
+          reportError(`Missing "${depKeyIdentical}" in ${depKeyType}`, `it should be "${version}".`, shouldOnlyWarnFor(depKey, onlyWarnsFor));
         }
 
         if (value !== version) {
-          reportError(`Invalid "${depKeyIdentical}" in ${depKeyType}`, `expecting "${value}" be "${version}".`, onlyWarnsFor.includes(depKey));
+          reportError(`Invalid "${depKeyIdentical}" in ${depKeyType}`, `expecting "${value}" be "${version}".`, shouldOnlyWarnFor(depKey, onlyWarnsFor));
         }
       });
     });
@@ -222,11 +227,11 @@ function checkIdenticalVersionsThanDependency(pkg, pkgPathName, type, depKeys, d
     const value = pkgDependencies[depKey];
 
     if (!value) {
-      reportError(`Missing "${depKey}" in ${type}`, `expecting to be "${version}".`, onlyWarnsFor.includes(depKey));
+      reportError(`Missing "${depKey}" in ${type}`, `expecting to be "${version}".`, shouldOnlyWarnFor(depKey, onlyWarnsFor));
     }
 
     if (value !== version) {
-      reportError(`Invalid "${depKey}" in ${type}`, `expecting "${value}" to be "${version}".`, onlyWarnsFor.includes(depKey));
+      reportError(`Invalid "${depKey}" in ${type}`, `expecting "${value}" to be "${version}".`, shouldOnlyWarnFor(depKey, onlyWarnsFor));
     }
   });
 }
@@ -276,14 +281,14 @@ function checkSatisfiesVersionsFromDependency(pkg, pkgPathName, type, depKeys, d
     const version = pkgDependencies[depKey];
 
     if (!version) {
-      reportError(`Missing "${depKey}" in ${type}`, `should satisfies "${range}" from "${depPkg.name}" ${depKey}.`, onlyWarnsFor.includes(depKey));
+      reportError(`Missing "${depKey}" in ${type}`, `should satisfies "${range}" from "${depPkg.name}" ${depKey}.`, shouldOnlyWarnFor$1.shouldOnlyWarnFor(depKey, onlyWarnsFor));
     } else {
       const minVersionOfVersion = semver__default.minVersion(version);
 
       if (!minVersionOfVersion || !semver__default.satisfies(minVersionOfVersion, range, {
         includePrerelease: true
       })) {
-        reportError(`Invalid "${depKey}" in ${type}`, `"${version}" (in "${depKey}") should satisfies "${range}" from "${depPkg.name}" ${depKey}.`, onlyWarnsFor.includes(depKey));
+        reportError(`Invalid "${depKey}" in ${type}`, `"${version}" (in "${depKey}") should satisfies "${range}" from "${depPkg.name}" ${depKey}.`, shouldOnlyWarnFor$1.shouldOnlyWarnFor(depKey, onlyWarnsFor));
       }
     }
   });

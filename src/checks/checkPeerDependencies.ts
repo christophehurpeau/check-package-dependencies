@@ -1,6 +1,7 @@
 import semver from 'semver';
 import { createReportError } from '../utils/createReportError';
 import type { PackageJson, DependencyTypes } from '../utils/packageTypes';
+import { shouldOnlyWarnFor } from '../utils/shouldOnlyWarnFor';
 
 export function checkPeerDependencies(
   pkg: PackageJson,
@@ -33,7 +34,7 @@ export function checkPeerDependencies(
         `it should satisfies "${range}" and be in ${allowedPeerIn.join(
           ' or ',
         )}`,
-        onlyWarnsFor.includes(peerDepKey),
+        shouldOnlyWarnFor(peerDepKey, onlyWarnsFor),
       );
     } else {
       const versions = versionsIn.map(
@@ -51,7 +52,7 @@ export function checkPeerDependencies(
           reportError(
             `Invalid "${peerDepKey}" peer dependency`,
             `"${version}" (in ${allowedPeerInExisting[index]}) should satisfies "${range}" from "${depPkg.name}" ${type}`,
-            onlyWarnsFor.includes(peerDepKey),
+            shouldOnlyWarnFor(peerDepKey, onlyWarnsFor),
           );
         }
       });

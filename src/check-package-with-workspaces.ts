@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import glob from 'glob';
+import type { OnlyWarnsFor } from 'utils/shouldOnlyWarnFor';
 import type { CheckPackageApi } from './check-package';
 import { createCheckPackage } from './check-package';
 import {
@@ -13,9 +14,9 @@ import { createReportError } from './utils/createReportError';
 export interface CheckPackageWithWorkspacesRecommendedOptions {
   isLibrary?: (pkgName: string) => boolean;
   allowRangeVersionsInLibraries?: boolean;
-  peerDependenciesOnlyWarnsFor?: string[];
-  directDuplicateDependenciesOnlyWarnsFor?: string[];
-  monorepoDirectDuplicateDependenciesOnlyWarnsFor?: string[];
+  peerDependenciesOnlyWarnsFor?: OnlyWarnsFor;
+  directDuplicateDependenciesOnlyWarnsFor?: OnlyWarnsFor;
+  monorepoDirectDuplicateDependenciesOnlyWarnsFor?: OnlyWarnsFor;
   checkResolutionMessage?: CheckResolutionMessage;
 }
 

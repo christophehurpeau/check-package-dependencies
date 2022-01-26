@@ -2,6 +2,7 @@ import semver from 'semver';
 import type { ReportError } from '../utils/createReportError';
 import { createReportError } from '../utils/createReportError';
 import type { PackageJson, DependencyTypes } from '../utils/packageTypes';
+import { shouldOnlyWarnFor } from '../utils/shouldOnlyWarnFor';
 
 export function checkWarnedFor(
   reportError: ReportError,
@@ -75,13 +76,13 @@ export function checkDirectDuplicateDependencies(
         }
 
         const versionInType = versionsIn[index];
-        const shouldWarns = onlyWarnsFor.includes(depKey);
-        if (shouldWarns) warnedFor.add(depKey);
+        const shouldOnlyWarn = shouldOnlyWarnFor(depKey, onlyWarnsFor);
+        if (shouldOnlyWarn) warnedFor.add(depKey);
 
         reportError(
           `Invalid duplicate dependency "${depKey}"`,
           `"${versions[0]}" (in ${versionInType}) should satisfies "${range}" from "${depPkg.name}" ${depType}.`,
-          shouldWarns,
+          shouldOnlyWarn,
         );
       });
     }

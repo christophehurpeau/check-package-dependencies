@@ -1,6 +1,7 @@
 import semver from 'semver';
 import { createReportError } from '../utils/createReportError';
 import type { DependencyTypes, PackageJson } from '../utils/packageTypes';
+import { shouldOnlyWarnFor } from '../utils/shouldOnlyWarnFor';
 
 export function checkSatisfiesVersionsFromDependency(
   pkg: PackageJson,
@@ -32,7 +33,7 @@ export function checkSatisfiesVersionsFromDependency(
       reportError(
         `Missing "${depKey}" in ${type}`,
         `should satisfies "${range}" from "${depPkg.name}" ${depKey}.`,
-        onlyWarnsFor.includes(depKey),
+        shouldOnlyWarnFor(depKey, onlyWarnsFor),
       );
     } else {
       const minVersionOfVersion = semver.minVersion(version);
@@ -45,7 +46,7 @@ export function checkSatisfiesVersionsFromDependency(
         reportError(
           `Invalid "${depKey}" in ${type}`,
           `"${version}" (in "${depKey}") should satisfies "${range}" from "${depPkg.name}" ${depKey}.`,
-          onlyWarnsFor.includes(depKey),
+          shouldOnlyWarnFor(depKey, onlyWarnsFor),
         );
       }
     }

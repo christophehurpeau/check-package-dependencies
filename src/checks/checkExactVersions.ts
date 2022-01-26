@@ -1,8 +1,10 @@
+import type { OnlyWarnsFor } from 'utils/shouldOnlyWarnFor';
 import { createReportError } from '../utils/createReportError';
 import type { PackageJson, DependencyTypes } from '../utils/packageTypes';
+import { shouldOnlyWarnFor } from '../utils/shouldOnlyWarnFor';
 
 export interface CheckExactVersionsOptions {
-  onlyWarnsFor?: string[];
+  onlyWarnsFor?: OnlyWarnsFor;
   tryToAutoFix?: boolean;
 }
 
@@ -20,14 +22,14 @@ export function checkExactVersions(
 
   const reportError = createReportError('Exact versions', pkgPathName);
 
-  for (const [depKey, version] of Object.entries(pkgDependencies)) {
+  for (const [dependencyName, version] of Object.entries(pkgDependencies)) {
     if (isVersionRange(version)) {
-      const shouldOnlyWarn = onlyWarnsFor.includes(depKey);
+      const shouldOnlyWarn = shouldOnlyWarnFor(dependencyName, onlyWarnsFor);
       if (!shouldOnlyWarn && tryToAutoFix) {
-        pkgDependencies[depKey] = version.slice(1);
+        pkgDependencies[dependencyName] = version.slice(1);
       } else {
         reportError(
-          `Unexpected range dependency in "${type}" for "${depKey}"`,
+          `Unexpected range dependency in "${type}" for "${dependencyName}"`,
           `expecting "${version}" to be exact "${version.slice(1)}".`,
           shouldOnlyWarn,
         );
