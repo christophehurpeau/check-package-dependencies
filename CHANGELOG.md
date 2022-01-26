@@ -14,6 +14,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+## [3.1.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v3.0.2...v3.1.0) (2022-01-26)
+
+
+### Features
+
+* add option monorepoDirectDuplicateDependenciesOnlyWarnsFor ([0fa6149](https://github.com/christophehurpeau/check-package-dependencies/commit/0fa614935786cda310f2007a60833f642c981009))
+
 ### [3.0.2](https://github.com/christophehurpeau/check-package-dependencies/compare/v3.0.1...v3.0.2) (2022-01-19)
 
 
