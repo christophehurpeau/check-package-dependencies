@@ -25,6 +25,7 @@ export function checkDirectDuplicateDependencies(
   depPkg: PackageJson,
   onlyWarnsFor: string[] = [],
   warnedForInternal?: Set<string>,
+  reportErrorNamePrefix = '',
 ): void {
   const dependencies = depPkg[depType];
   if (!dependencies) return;
@@ -32,7 +33,7 @@ export function checkDirectDuplicateDependencies(
   const warnedFor = warnedForInternal || new Set<string>();
 
   const reportError = createReportError(
-    'Direct Duplicate Dependencies',
+    `${reportErrorNamePrefix}Direct Duplicate Dependencies`,
     pkgPathName,
   );
   const searchInExisting = searchIn.filter((type) => pkg[type]);

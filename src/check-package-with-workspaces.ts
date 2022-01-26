@@ -14,6 +14,7 @@ export interface CheckPackageWithWorkspacesRecommendedOptions {
   isLibrary?: (pkgName: string) => boolean;
   peerDependenciesOnlyWarnsFor?: string[];
   directDuplicateDependenciesOnlyWarnsFor?: string[];
+  monorepoDirectDuplicateDependenciesOnlyWarnsFor?: string[];
   checkResolutionMessage?: CheckResolutionMessage;
 }
 
@@ -75,8 +76,10 @@ export function createCheckPackageWithWorkspaces(
       isLibrary = () => false,
       peerDependenciesOnlyWarnsFor,
       directDuplicateDependenciesOnlyWarnsFor,
+      monorepoDirectDuplicateDependenciesOnlyWarnsFor,
       checkResolutionMessage,
     } = {}) {
+      const monorepoWarnedForDuplicate = new Set<string>();
       const warnedForDuplicate = new Set<string>();
       checkPackage.checkNoDependencies();
       checkPackage.checkRecommended({
@@ -102,8 +105,9 @@ export function createCheckPackageWithWorkspaces(
           'devDependencies',
           ['devDependencies', 'dependencies'],
           pkg,
-          [],
-          warnedForDuplicate,
+          monorepoDirectDuplicateDependenciesOnlyWarnsFor,
+          monorepoWarnedForDuplicate,
+          'Monorepo ',
         );
       });
 

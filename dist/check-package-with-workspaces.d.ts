@@ -4,6 +4,7 @@ export interface CheckPackageWithWorkspacesRecommendedOptions {
     isLibrary?: (pkgName: string) => boolean;
     peerDependenciesOnlyWarnsFor?: string[];
     directDuplicateDependenciesOnlyWarnsFor?: string[];
+    monorepoDirectDuplicateDependenciesOnlyWarnsFor?: string[];
     checkResolutionMessage?: CheckResolutionMessage;
 }
 export interface CheckPackageWithWorkspacesApi {

@@ -49,11 +49,11 @@ function checkWarnedFor(reportError, warnedFor, onlyWarnsFor = []) {
     }
   });
 }
-function checkDirectDuplicateDependencies(pkg, pkgPathName, depType, searchIn, depPkg, onlyWarnsFor = [], warnedForInternal) {
+function checkDirectDuplicateDependencies(pkg, pkgPathName, depType, searchIn, depPkg, onlyWarnsFor = [], warnedForInternal, reportErrorNamePrefix = '') {
   const dependencies = depPkg[depType];
   if (!dependencies) return;
   const warnedFor = warnedForInternal || new Set();
-  const reportError = createReportError('Direct Duplicate Dependencies', pkgPathName);
+  const reportError = createReportError(`${reportErrorNamePrefix}Direct Duplicate Dependencies`, pkgPathName);
   const searchInExisting = searchIn.filter(type => pkg[type]);
 
   for (const [depKey, range] of Object.entries(dependencies)) {
@@ -662,8 +662,10 @@ function createCheckPackageWithWorkspaces(pkgDirectoryPath = '.') {
       isLibrary = () => false,
       peerDependenciesOnlyWarnsFor,
       directDuplicateDependenciesOnlyWarnsFor,
+      monorepoDirectDuplicateDependenciesOnlyWarnsFor,
       checkResolutionMessage
     } = {}) {
+      const monorepoWarnedForDuplicate = new Set();
       const warnedForDuplicate = new Set();
       checkPackage.checkNoDependencies();
       checkPackage.checkRecommended({
@@ -682,7 +684,7 @@ function createCheckPackageWithWorkspaces(pkgDirectoryPath = '.') {
           checkResolutionMessage,
           internalWarnedForDuplicate: warnedForDuplicate
         });
-        checkDirectDuplicateDependencies(checkSubPackage.pkg, checkSubPackage.pkgPathName, 'devDependencies', ['devDependencies', 'dependencies'], pkg, [], warnedForDuplicate);
+        checkDirectDuplicateDependencies(checkSubPackage.pkg, checkSubPackage.pkgPathName, 'devDependencies', ['devDependencies', 'dependencies'], pkg, monorepoDirectDuplicateDependenciesOnlyWarnsFor, monorepoWarnedForDuplicate, 'Monorepo ');
       });
       checkWarnedFor(createReportError('Recommended Checks', pkgPathName), warnedForDuplicate, directDuplicateDependenciesOnlyWarnsFor);
       return this;
