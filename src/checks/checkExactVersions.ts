@@ -6,6 +6,9 @@ export interface CheckExactVersionsOptions {
   tryToAutoFix?: boolean;
 }
 
+const isVersionRange = (version: string): boolean =>
+  version.startsWith('^') || version.startsWith('~');
+
 export function checkExactVersions(
   pkg: PackageJson,
   pkgPathName: string,
@@ -18,7 +21,7 @@ export function checkExactVersions(
   const reportError = createReportError('Exact versions', pkgPathName);
 
   for (const [depKey, version] of Object.entries(pkgDependencies)) {
-    if (version.startsWith('^') || version.startsWith('~')) {
+    if (isVersionRange(version)) {
       const shouldOnlyWarn = onlyWarnsFor.includes(depKey);
       if (!shouldOnlyWarn && tryToAutoFix) {
         pkgDependencies[depKey] = version.slice(1);
