@@ -12,6 +12,7 @@ import { createReportError } from './utils/createReportError';
 
 export interface CheckPackageWithWorkspacesRecommendedOptions {
   isLibrary?: (pkgName: string) => boolean;
+  allowRangeVersionsInLibraries?: boolean;
   peerDependenciesOnlyWarnsFor?: string[];
   directDuplicateDependenciesOnlyWarnsFor?: string[];
   monorepoDirectDuplicateDependenciesOnlyWarnsFor?: string[];
@@ -74,6 +75,7 @@ export function createCheckPackageWithWorkspaces(
   return {
     checkRecommended({
       isLibrary = () => false,
+      allowRangeVersionsInLibraries = true,
       peerDependenciesOnlyWarnsFor,
       directDuplicateDependenciesOnlyWarnsFor,
       monorepoDirectDuplicateDependenciesOnlyWarnsFor,
@@ -91,8 +93,12 @@ export function createCheckPackageWithWorkspaces(
       });
 
       checksWorkspaces.forEach((checkSubPackage, id) => {
+        const isPackageALibrary = isLibrary(id);
         checkSubPackage.checkRecommended({
-          isLibrary: isLibrary(id),
+          isLibrary: isPackageALibrary,
+          allowRangeVersionsInDependencies: isPackageALibrary
+            ? allowRangeVersionsInLibraries
+            : false,
           peerDependenciesOnlyWarnsFor,
           directDuplicateDependenciesOnlyWarnsFor,
           exactVersionsOnlyWarnsFor: [...checksWorkspaces.keys()],

@@ -15,6 +15,8 @@ export interface CheckDirectDuplicateDependenciesOptions {
 }
 export interface CheckRecommendedOptions {
     isLibrary?: boolean;
+    /** default is true for libraries, false otherwise */
+    allowRangeVersionsInDependencies?: boolean;
     peerDependenciesOnlyWarnsFor?: string[];
     directDuplicateDependenciesOnlyWarnsFor?: string[];
     exactVersionsOnlyWarnsFor?: string[];
@@ -23,6 +25,7 @@ export interface CheckRecommendedOptions {
     internalWarnedForDuplicate?: Set<string>;
 }
 export interface CheckExactVersionsOptions {
+    allowRangeVersionsInDependencies?: boolean;
     onlyWarnsFor?: string[];
 }
 export interface CheckPackageApi {

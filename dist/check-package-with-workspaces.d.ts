@@ -2,6 +2,7 @@ import type { CheckPackageApi } from './check-package';
 import type { CheckResolutionMessage } from './checks/checkResolutionsHasExplanation';
 export interface CheckPackageWithWorkspacesRecommendedOptions {
     isLibrary?: (pkgName: string) => boolean;
+    allowRangeVersionsInLibraries?: boolean;
     peerDependenciesOnlyWarnsFor?: string[];
     directDuplicateDependenciesOnlyWarnsFor?: string[];
     monorepoDirectDuplicateDependenciesOnlyWarnsFor?: string[];

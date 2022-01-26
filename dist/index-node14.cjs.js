@@ -366,12 +366,16 @@ function createCheckPackage(pkgDirectoryPath = '.', {
     getDependencyPackageJson,
 
     checkExactVersions({
-      onlyWarnsFor
+      onlyWarnsFor,
+      allowRangeVersionsInDependencies = true
     } = {}) {
-      checkExactVersions(pkg, pkgPathName, 'dependencies', {
-        onlyWarnsFor,
-        tryToAutoFix
-      });
+      if (!allowRangeVersionsInDependencies) {
+        checkExactVersions(pkg, pkgPathName, 'dependencies', {
+          onlyWarnsFor,
+          tryToAutoFix
+        });
+      }
+
       checkExactVersions(pkg, pkgPathName, 'devDependencies', {
         onlyWarnsFor,
         tryToAutoFix
@@ -384,6 +388,7 @@ function createCheckPackage(pkgDirectoryPath = '.', {
       return this;
     },
 
+    /** @deprecated use checkExactVersions({ allowRangeVersionsInDependencies: true })  */
     checkExactVersionsForLibrary({
       onlyWarnsFor
     } = {}) {
@@ -469,22 +474,17 @@ function createCheckPackage(pkgDirectoryPath = '.', {
 
     checkRecommended({
       isLibrary = false,
+      allowRangeVersionsInDependencies = isLibrary,
       peerDependenciesOnlyWarnsFor,
       directDuplicateDependenciesOnlyWarnsFor,
       exactVersionsOnlyWarnsFor,
       checkResolutionMessage,
       internalWarnedForDuplicate
     } = {}) {
-      if (isLibrary) {
-        this.checkExactVersionsForLibrary({
-          onlyWarnsFor: exactVersionsOnlyWarnsFor
-        });
-      } else {
-        this.checkExactVersions({
-          onlyWarnsFor: exactVersionsOnlyWarnsFor
-        });
-      }
-
+      this.checkExactVersions({
+        allowRangeVersionsInDependencies,
+        onlyWarnsFor: exactVersionsOnlyWarnsFor
+      });
       this.checkDirectPeerDependencies({
         isLibrary,
         onlyWarnsFor: peerDependenciesOnlyWarnsFor
@@ -660,6 +660,7 @@ function createCheckPackageWithWorkspaces(pkgDirectoryPath = '.') {
   return {
     checkRecommended({
       isLibrary = () => false,
+      allowRangeVersionsInLibraries = true,
       peerDependenciesOnlyWarnsFor,
       directDuplicateDependenciesOnlyWarnsFor,
       monorepoDirectDuplicateDependenciesOnlyWarnsFor,
@@ -676,8 +677,10 @@ function createCheckPackageWithWorkspaces(pkgDirectoryPath = '.') {
         internalWarnedForDuplicate: warnedForDuplicate
       });
       checksWorkspaces.forEach((checkSubPackage, id) => {
+        const isPackageALibrary = isLibrary(id);
         checkSubPackage.checkRecommended({
-          isLibrary: isLibrary(id),
+          isLibrary: isPackageALibrary,
+          allowRangeVersionsInDependencies: isPackageALibrary ? allowRangeVersionsInLibraries : false,
           peerDependenciesOnlyWarnsFor,
           directDuplicateDependenciesOnlyWarnsFor,
           exactVersionsOnlyWarnsFor: [...checksWorkspaces.keys()],

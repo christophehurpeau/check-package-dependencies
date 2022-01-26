@@ -50,6 +50,8 @@ export interface CheckDirectDuplicateDependenciesOptions {
 
 export interface CheckRecommendedOptions {
   isLibrary?: boolean;
+  /** default is true for libraries, false otherwise */
+  allowRangeVersionsInDependencies?: boolean;
   peerDependenciesOnlyWarnsFor?: string[];
   directDuplicateDependenciesOnlyWarnsFor?: string[];
   exactVersionsOnlyWarnsFor?: string[];
@@ -59,6 +61,7 @@ export interface CheckRecommendedOptions {
 }
 
 export interface CheckExactVersionsOptions {
+  allowRangeVersionsInDependencies?: boolean;
   onlyWarnsFor?: string[];
 }
 
@@ -173,11 +176,16 @@ export function createCheckPackage(
     pkgDirname,
     pkgPathName,
     getDependencyPackageJson,
-    checkExactVersions({ onlyWarnsFor } = {}) {
-      checkExactVersions(pkg, pkgPathName, 'dependencies', {
-        onlyWarnsFor,
-        tryToAutoFix,
-      });
+    checkExactVersions({
+      onlyWarnsFor,
+      allowRangeVersionsInDependencies = true,
+    } = {}) {
+      if (!allowRangeVersionsInDependencies) {
+        checkExactVersions(pkg, pkgPathName, 'dependencies', {
+          onlyWarnsFor,
+          tryToAutoFix,
+        });
+      }
       checkExactVersions(pkg, pkgPathName, 'devDependencies', {
         onlyWarnsFor,
         tryToAutoFix,
@@ -189,6 +197,7 @@ export function createCheckPackage(
       writePackageIfChanged();
       return this;
     },
+    /** @deprecated use checkExactVersions({ allowRangeVersionsInDependencies: true })  */
     checkExactVersionsForLibrary({ onlyWarnsFor } = {}) {
       checkExactVersions(pkg, pkgPathName, 'devDependencies', {
         onlyWarnsFor,
@@ -294,19 +303,17 @@ export function createCheckPackage(
 
     checkRecommended({
       isLibrary = false,
+      allowRangeVersionsInDependencies = isLibrary,
       peerDependenciesOnlyWarnsFor,
       directDuplicateDependenciesOnlyWarnsFor,
       exactVersionsOnlyWarnsFor,
       checkResolutionMessage,
       internalWarnedForDuplicate,
     } = {}) {
-      if (isLibrary) {
-        this.checkExactVersionsForLibrary({
-          onlyWarnsFor: exactVersionsOnlyWarnsFor,
-        });
-      } else {
-        this.checkExactVersions({ onlyWarnsFor: exactVersionsOnlyWarnsFor });
-      }
+      this.checkExactVersions({
+        allowRangeVersionsInDependencies,
+        onlyWarnsFor: exactVersionsOnlyWarnsFor,
+      });
 
       this.checkDirectPeerDependencies({
         isLibrary,
