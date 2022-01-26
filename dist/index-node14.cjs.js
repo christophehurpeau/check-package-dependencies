@@ -6,7 +6,6 @@ const path = require('path');
 const util = require('util');
 const semver = require('semver');
 const chalk = require('chalk');
-const shouldOnlyWarnFor$1 = require('utils/shouldOnlyWarnFor');
 const fs = require('fs');
 const glob = require('glob');
 
@@ -163,7 +162,7 @@ function checkExactVersions(pkg, pkgPathName, type, {
 
   for (const [dependencyName, version] of Object.entries(pkgDependencies)) {
     if (isVersionRange(version)) {
-      const shouldOnlyWarn = shouldOnlyWarnFor$1.shouldOnlyWarnFor(dependencyName, onlyWarnsFor);
+      const shouldOnlyWarn = shouldOnlyWarnFor(dependencyName, onlyWarnsFor);
 
       if (!shouldOnlyWarn && tryToAutoFix) {
         pkgDependencies[dependencyName] = version.slice(1);
@@ -281,14 +280,14 @@ function checkSatisfiesVersionsFromDependency(pkg, pkgPathName, type, depKeys, d
     const version = pkgDependencies[depKey];
 
     if (!version) {
-      reportError(`Missing "${depKey}" in ${type}`, `should satisfies "${range}" from "${depPkg.name}" ${depKey}.`, shouldOnlyWarnFor$1.shouldOnlyWarnFor(depKey, onlyWarnsFor));
+      reportError(`Missing "${depKey}" in ${type}`, `should satisfies "${range}" from "${depPkg.name}" ${depKey}.`, shouldOnlyWarnFor(depKey, onlyWarnsFor));
     } else {
       const minVersionOfVersion = semver__default.minVersion(version);
 
       if (!minVersionOfVersion || !semver__default.satisfies(minVersionOfVersion, range, {
         includePrerelease: true
       })) {
-        reportError(`Invalid "${depKey}" in ${type}`, `"${version}" (in "${depKey}") should satisfies "${range}" from "${depPkg.name}" ${depKey}.`, shouldOnlyWarnFor$1.shouldOnlyWarnFor(depKey, onlyWarnsFor));
+        reportError(`Invalid "${depKey}" in ${type}`, `"${version}" (in "${depKey}") should satisfies "${range}" from "${depPkg.name}" ${depKey}.`, shouldOnlyWarnFor(depKey, onlyWarnsFor));
       }
     }
   });
