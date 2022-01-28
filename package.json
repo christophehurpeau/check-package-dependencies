@@ -100,7 +100,7 @@
     "@types/glob": "7.2.0",
     "@types/jest": "27.4.0",
     "@types/semver": "7.3.9",
-    "eslint": "8.7.0",
+    "eslint": "8.8.0",
     "jest": "27.4.7",
     "pob-babel": "29.8.0",
     "prettier": "2.5.1",
