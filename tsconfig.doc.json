@@ -3,8 +3,7 @@
 
   "compilerOptions": {
     "rootDirs": [],
-    "rootDir": "src",
-    "isolatedModules": false
+    "rootDir": "src"
   },
 
   "typedocOptions": {
