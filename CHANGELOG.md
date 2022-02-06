@@ -14,6 +14,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+## [3.2.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v3.1.0...v3.2.0) (2022-02-06)
+
+
+### Features
+
+* add allowRangeVersionsInDependencies option ([fc5bc18](https://github.com/christophehurpeau/check-package-dependencies/commit/fc5bc189688f7bd2c3553825bfa862b2ef2f1dec))
+
 ## [3.1.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v3.0.2...v3.1.0) (2022-01-26)
 
 
