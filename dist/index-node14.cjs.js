@@ -150,9 +150,12 @@ function checkDirectPeerDependencies(isLibrary, pkg, pkgPathName, depPkgType, de
   }
 }
 
+/* eslint-disable complexity */
+
 const isVersionRange = version => version.startsWith('^') || version.startsWith('~');
 
 function checkExactVersions(pkg, pkgPathName, type, {
+  getDependencyPackageJson,
   onlyWarnsFor = [],
   tryToAutoFix = false
 } = {}) {
@@ -164,8 +167,24 @@ function checkExactVersions(pkg, pkgPathName, type, {
     if (isVersionRange(version)) {
       const shouldOnlyWarn = shouldOnlyWarnFor(dependencyName, onlyWarnsFor);
 
-      if (!shouldOnlyWarn && tryToAutoFix) {
-        pkgDependencies[dependencyName] = version.slice(1);
+      if (!shouldOnlyWarn && tryToAutoFix && getDependencyPackageJson) {
+        let resolvedDep;
+
+        try {
+          resolvedDep = getDependencyPackageJson(dependencyName);
+        } catch {
+          resolvedDep = null;
+        }
+
+        if (!resolvedDep || !resolvedDep.version) {
+          reportError(`Unexpected range dependency in "${type}" for "${dependencyName}"`, `expecting "${version}" to be exact, autofix failed to resolve "${dependencyName}".`, shouldOnlyWarn);
+        } else if (!semver__default.satisfies(resolvedDep.version, version, {
+          includePrerelease: true
+        })) {
+          reportError(`Unexpected range dependency in "${type}" for "${dependencyName}"`, `expecting "${version}" to be exact, autofix failed as "${dependencyName}"'s resolved version is "${resolvedDep.version}" and doesn't satisfies "${version}".`, shouldOnlyWarn);
+        } else {
+          pkgDependencies[dependencyName] = resolvedDep.version;
+        }
       } else {
         reportError(`Unexpected range dependency in "${type}" for "${dependencyName}"`, `expecting "${version}" to be exact "${version.slice(1)}".`, shouldOnlyWarn);
       }
@@ -376,17 +395,20 @@ function createCheckPackage(pkgDirectoryPath = '.', {
       if (!allowRangeVersionsInDependencies) {
         checkExactVersions(pkg, pkgPathName, 'dependencies', {
           onlyWarnsFor,
-          tryToAutoFix
+          tryToAutoFix,
+          getDependencyPackageJson
         });
       }
 
       checkExactVersions(pkg, pkgPathName, 'devDependencies', {
         onlyWarnsFor,
-        tryToAutoFix
+        tryToAutoFix,
+        getDependencyPackageJson
       });
       checkExactVersions(pkg, pkgPathName, 'resolutions', {
         onlyWarnsFor,
-        tryToAutoFix
+        tryToAutoFix,
+        getDependencyPackageJson
       });
       writePackageIfChanged();
       return this;
@@ -398,11 +420,13 @@ function createCheckPackage(pkgDirectoryPath = '.', {
     } = {}) {
       checkExactVersions(pkg, pkgPathName, 'devDependencies', {
         onlyWarnsFor,
-        tryToAutoFix
+        tryToAutoFix,
+        getDependencyPackageJson
       });
       checkExactVersions(pkg, pkgPathName, 'resolutions', {
         onlyWarnsFor,
-        tryToAutoFix
+        tryToAutoFix,
+        getDependencyPackageJson
       });
       writePackageIfChanged();
       return this;
@@ -413,7 +437,8 @@ function createCheckPackage(pkgDirectoryPath = '.', {
     } = {}) {
       checkExactVersions(pkg, pkgPathName, 'devDependencies', {
         onlyWarnsFor,
-        tryToAutoFix
+        tryToAutoFix,
+        getDependencyPackageJson
       });
       writePackageIfChanged();
       return this;
@@ -630,8 +655,8 @@ function createCheckPackage(pkgDirectoryPath = '.', {
   };
 }
 
-function createCheckPackageWithWorkspaces(pkgDirectoryPath = '.') {
-  const checkPackage = createCheckPackage(pkgDirectoryPath);
+function createCheckPackageWithWorkspaces(pkgDirectoryPath = '.', createCheckPackageOptions = {}) {
+  const checkPackage = createCheckPackage(pkgDirectoryPath, createCheckPackageOptions);
   const {
     pkg,
     pkgDirname,
@@ -658,7 +683,7 @@ function createCheckPackageWithWorkspaces(pkgDirectoryPath = '.') {
   }
 
   const checksWorkspaces = new Map(workspacePackagesPaths.map(subPkgDirectoryPath => {
-    const checkPkg = createCheckPackage(subPkgDirectoryPath);
+    const checkPkg = createCheckPackage(subPkgDirectoryPath, createCheckPackageOptions);
     return [checkPkg.pkg.name, checkPkg];
   }));
   return {

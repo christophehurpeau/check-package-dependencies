@@ -1,5 +1,5 @@
 import type { OnlyWarnsFor } from 'utils/shouldOnlyWarnFor';
-import type { CheckPackageApi } from './check-package';
+import type { CheckPackageApi, CreateCheckPackageOptions } from './check-package';
 import type { CheckResolutionMessage } from './checks/checkResolutionsHasExplanation';
 export interface CheckPackageWithWorkspacesRecommendedOptions {
     isLibrary?: (pkgName: string) => boolean;
@@ -15,5 +15,5 @@ export interface CheckPackageWithWorkspacesApi {
     forEach: (callback: (checkPackage: CheckPackageApi) => void) => CheckPackageWithWorkspacesApi;
     for: (id: string, callback: (checkPackage: CheckPackageApi) => void) => CheckPackageWithWorkspacesApi;
 }
-export declare function createCheckPackageWithWorkspaces(pkgDirectoryPath?: string): CheckPackageWithWorkspacesApi;
+export declare function createCheckPackageWithWorkspaces(pkgDirectoryPath?: string, createCheckPackageOptions?: CreateCheckPackageOptions): CheckPackageWithWorkspacesApi;
 //# sourceMappingURL=check-package-with-workspaces.d.ts.map
