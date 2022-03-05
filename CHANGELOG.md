@@ -14,6 +14,19 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+## [3.3.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v3.2.0...v3.3.0) (2022-03-05)
+
+
+### Features
+
+* add createCheckPackageOptions to createCheckPackageWithWorkspaces ([5168959](https://github.com/christophehurpeau/check-package-dependencies/commit/51689594e79fddce803866d8819be1282d740f19))
+
+
+### Bug Fixes
+
+* better implementation of autofix and add tests ([0abf7cc](https://github.com/christophehurpeau/check-package-dependencies/commit/0abf7ccdd47341f53b933b888a89255a50237d77))
+* format package.json ([3747ff8](https://github.com/christophehurpeau/check-package-dependencies/commit/3747ff89a07c0e56e2600df08f057e75414627b8))
+
 ## [3.2.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v3.1.0...v3.2.0) (2022-02-06)
 
 
