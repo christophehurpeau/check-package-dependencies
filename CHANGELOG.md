@@ -14,6 +14,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+## [3.4.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v3.3.0...v3.4.0) (2022-03-05)
+
+
+### Features
+
+* support npm: in version ([51959c2](https://github.com/christophehurpeau/check-package-dependencies/commit/51959c20d66082783eae9321e25065ba4d349cb3))
+
 ## [3.3.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v3.2.0...v3.3.0) (2022-03-05)
 
 
