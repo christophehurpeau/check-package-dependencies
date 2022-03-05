@@ -86,6 +86,65 @@ describe('checkExactVersions', () => {
       'expecting "~1.0.0" to be exact "1.0.0".',
       false,
     );
-    expect(mockReportError);
+  });
+
+  it('should fix and remove range', () => {
+    const getDependencyPackageJsonMock = jest
+      .fn()
+      .mockReturnValueOnce({ name: 'test1', version: '1.0.1' });
+    const pkg = { name: 'test', devDependencies: { test1: '~1.0.0' } };
+    checkExactVersions(pkg, 'path', 'devDependencies', {
+      tryToAutoFix: true,
+      getDependencyPackageJson: getDependencyPackageJsonMock,
+    });
+    expect(createReportError).toHaveBeenCalled();
+    expect(mockReportError).toHaveBeenCalledTimes(0);
+    expect(getDependencyPackageJsonMock).toHaveBeenCalled();
+    expect(pkg).toStrictEqual({
+      name: 'test',
+      devDependencies: { test1: '1.0.1' },
+    });
+  });
+
+  it('should error if autofix failed as package does not exists', () => {
+    const getDependencyPackageJsonMock = jest
+      .fn()
+      .mockImplementationOnce(() => {
+        throw new Error('Module not found');
+      });
+    const pkg = { name: 'test', devDependencies: { test1: '~1.0.0' } };
+    checkExactVersions(pkg, 'path', 'devDependencies', {
+      tryToAutoFix: true,
+      getDependencyPackageJson: getDependencyPackageJsonMock,
+    });
+    expect(createReportError).toHaveBeenCalled();
+    expect(getDependencyPackageJsonMock).toHaveBeenCalled();
+    expect(mockReportError).toHaveBeenCalledTimes(1);
+    expect(mockReportError).toHaveBeenNthCalledWith(
+      1,
+      'Unexpected range dependency in "devDependencies" for "test1"',
+      'expecting "~1.0.0" to be exact, autofix failed to resolve "test1".',
+      false,
+    );
+  });
+
+  it("should error if autofix failed because version doesn't match range", () => {
+    const getDependencyPackageJsonMock = jest
+      .fn()
+      .mockReturnValueOnce({ name: 'test1', version: '2.0.0' });
+    const pkg = { name: 'test', devDependencies: { test1: '~1.0.0' } };
+    checkExactVersions(pkg, 'path', 'devDependencies', {
+      tryToAutoFix: true,
+      getDependencyPackageJson: getDependencyPackageJsonMock,
+    });
+    expect(createReportError).toHaveBeenCalled();
+    expect(getDependencyPackageJsonMock).toHaveBeenCalled();
+    expect(mockReportError).toHaveBeenCalledTimes(1);
+    expect(mockReportError).toHaveBeenNthCalledWith(
+      1,
+      'Unexpected range dependency in "devDependencies" for "test1"',
+      'expecting "~1.0.0" to be exact, autofix failed as "test1"\'s resolved version is "2.0.0" and doesn\'t satisfies "~1.0.0".',
+      false,
+    );
   });
 });

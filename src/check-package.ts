@@ -185,15 +185,18 @@ export function createCheckPackage(
         checkExactVersions(pkg, pkgPathName, 'dependencies', {
           onlyWarnsFor,
           tryToAutoFix,
+          getDependencyPackageJson,
         });
       }
       checkExactVersions(pkg, pkgPathName, 'devDependencies', {
         onlyWarnsFor,
         tryToAutoFix,
+        getDependencyPackageJson,
       });
       checkExactVersions(pkg, pkgPathName, 'resolutions', {
         onlyWarnsFor,
         tryToAutoFix,
+        getDependencyPackageJson,
       });
       writePackageIfChanged();
       return this;
@@ -203,10 +206,12 @@ export function createCheckPackage(
       checkExactVersions(pkg, pkgPathName, 'devDependencies', {
         onlyWarnsFor,
         tryToAutoFix,
+        getDependencyPackageJson,
       });
       checkExactVersions(pkg, pkgPathName, 'resolutions', {
         onlyWarnsFor,
         tryToAutoFix,
+        getDependencyPackageJson,
       });
       writePackageIfChanged();
       return this;
@@ -216,6 +221,7 @@ export function createCheckPackage(
       checkExactVersions(pkg, pkgPathName, 'devDependencies', {
         onlyWarnsFor,
         tryToAutoFix,
+        getDependencyPackageJson,
       });
       writePackageIfChanged();
       return this;
