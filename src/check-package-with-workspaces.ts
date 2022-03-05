@@ -2,7 +2,10 @@ import fs from 'fs';
 import path from 'path';
 import glob from 'glob';
 import type { OnlyWarnsFor } from 'utils/shouldOnlyWarnFor';
-import type { CheckPackageApi } from './check-package';
+import type {
+  CheckPackageApi,
+  CreateCheckPackageOptions,
+} from './check-package';
 import { createCheckPackage } from './check-package';
 import {
   checkDirectDuplicateDependencies,
@@ -39,8 +42,12 @@ export interface CheckPackageWithWorkspacesApi {
 
 export function createCheckPackageWithWorkspaces(
   pkgDirectoryPath = '.',
+  createCheckPackageOptions: CreateCheckPackageOptions = {},
 ): CheckPackageWithWorkspacesApi {
-  const checkPackage = createCheckPackage(pkgDirectoryPath);
+  const checkPackage = createCheckPackage(
+    pkgDirectoryPath,
+    createCheckPackageOptions,
+  );
   const { pkg, pkgDirname, pkgPathName } = checkPackage;
 
   const pkgWorkspaces: string[] | undefined =
@@ -68,7 +75,10 @@ export function createCheckPackageWithWorkspaces(
 
   const checksWorkspaces = new Map<string, CheckPackageApi>(
     workspacePackagesPaths.map((subPkgDirectoryPath) => {
-      const checkPkg = createCheckPackage(subPkgDirectoryPath);
+      const checkPkg = createCheckPackage(
+        subPkgDirectoryPath,
+        createCheckPackageOptions,
+      );
       return [checkPkg.pkg.name, checkPkg];
     }),
   );
