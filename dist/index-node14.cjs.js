@@ -316,7 +316,7 @@ function readPkgJson(packagePath) {
   return JSON.parse(fs.readFileSync(packagePath, 'utf-8'));
 }
 function writePkgJson(packagePath, pkg) {
-  fs.writeFileSync(packagePath, JSON.stringify(pkg));
+  fs.writeFileSync(packagePath, JSON.stringify(pkg, null, 2));
 }
 function createGetDependencyPackageJson({
   pkgDirname,
