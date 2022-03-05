@@ -147,4 +147,25 @@ describe('checkExactVersions', () => {
       false,
     );
   });
+
+  it('should support npm: prefix', () => {
+    checkExactVersions(
+      {
+        name: 'test',
+        devDependencies: {
+          rollupv1: 'npm:rollup@^1.0.1',
+        },
+      },
+      'path',
+      'devDependencies',
+    );
+    expect(createReportError).toHaveBeenCalled();
+    expect(mockReportError).toHaveBeenCalledTimes(1);
+    expect(mockReportError).toHaveBeenNthCalledWith(
+      1,
+      'Unexpected range dependency in "devDependencies" for "rollupv1"',
+      'expecting "^1.0.1" to be exact "1.0.1".',
+      false,
+    );
+  });
 });

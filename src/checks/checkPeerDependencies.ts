@@ -42,6 +42,10 @@ export function checkPeerDependencies(
       );
 
       versions.forEach((version, index) => {
+        if (version.startsWith('npm:')) {
+          return;
+        }
+
         const minVersionOfVersion = semver.minVersion(version);
         if (
           !minVersionOfVersion ||

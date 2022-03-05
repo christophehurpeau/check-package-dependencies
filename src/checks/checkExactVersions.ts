@@ -30,7 +30,17 @@ export function checkExactVersions(
 
   const reportError = createReportError('Exact versions', pkgPathName);
 
-  for (const [dependencyName, version] of Object.entries(pkgDependencies)) {
+  for (const [dependencyName, versionConst] of Object.entries(
+    pkgDependencies,
+  )) {
+    let version = versionConst;
+    if (version.startsWith('npm:')) {
+      const match = /^npm:.*@(.*)$/.exec(version);
+      if (!match) throw new Error(`Invalid version match: ${version}`);
+      const [, realVersion] = match;
+      version = realVersion;
+    }
+
     if (isVersionRange(version)) {
       const shouldOnlyWarn = shouldOnlyWarnFor(dependencyName, onlyWarnsFor);
       if (!shouldOnlyWarn && tryToAutoFix && getDependencyPackageJson) {

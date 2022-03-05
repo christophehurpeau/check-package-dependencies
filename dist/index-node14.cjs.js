@@ -121,6 +121,10 @@ function checkPeerDependencies(pkg, pkgPathName, type, allowedPeerIn, depPkg, on
     } else {
       const versions = versionsIn.map(versionsInType => pkg[versionsInType][peerDepKey]);
       versions.forEach((version, index) => {
+        if (version.startsWith('npm:')) {
+          return;
+        }
+
         const minVersionOfVersion = semver__default.minVersion(version);
 
         if (!minVersionOfVersion || !semver__default.satisfies(minVersionOfVersion, range, {
@@ -163,7 +167,16 @@ function checkExactVersions(pkg, pkgPathName, type, {
   if (!pkgDependencies) return;
   const reportError = createReportError('Exact versions', pkgPathName);
 
-  for (const [dependencyName, version] of Object.entries(pkgDependencies)) {
+  for (const [dependencyName, versionConst] of Object.entries(pkgDependencies)) {
+    let version = versionConst;
+
+    if (version.startsWith('npm:')) {
+      const match = /^npm:.*@(.*)$/.exec(version);
+      if (!match) throw new Error(`Invalid version match: ${version}`);
+      const [, realVersion] = match;
+      version = realVersion;
+    }
+
     if (isVersionRange(version)) {
       const shouldOnlyWarn = shouldOnlyWarnFor(dependencyName, onlyWarnsFor);
 
