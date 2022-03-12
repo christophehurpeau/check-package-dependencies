@@ -195,6 +195,7 @@ const isVersionRange = version => version.startsWith('^') || version.startsWith(
 function checkExactVersions(pkg, pkgPathName, types, {
   getDependencyPackageJson,
   onlyWarnsForCheck,
+  internalExactVersionsIgnore,
   tryToAutoFix = false
 }) {
   const reportError = createReportError('Exact versions', pkgPathName);
@@ -213,6 +214,10 @@ function checkExactVersions(pkg, pkgPathName, types, {
       }
 
       if (isVersionRange(version)) {
+        if (internalExactVersionsIgnore?.includes(dependencyName)) {
+          return;
+        }
+
         const shouldOnlyWarn = onlyWarnsForCheck.shouldWarnsFor(dependencyName);
 
         if (!shouldOnlyWarn && tryToAutoFix && getDependencyPackageJson) {
@@ -527,11 +532,13 @@ function createCheckPackage(pkgDirectoryPath = '.', {
 
     checkExactVersions({
       onlyWarnsFor,
+      internalExactVersionsIgnore,
       allowRangeVersionsInDependencies = true
     } = {}) {
       const onlyWarnsForCheck = createOnlyWarnsForArrayCheck('checkExactVersions.onlyWarnsFor', onlyWarnsFor);
       checkExactVersions(pkg, pkgPathName, !allowRangeVersionsInDependencies ? ['dependencies', 'devDependencies', 'resolutions'] : ['devDependencies', 'resolutions'], {
         onlyWarnsForCheck,
+        internalExactVersionsIgnore,
         tryToAutoFix
       });
       writePackageIfChanged();
@@ -605,6 +612,7 @@ function createCheckPackage(pkgDirectoryPath = '.', {
       peerDependenciesOnlyWarnsFor,
       directDuplicateDependenciesOnlyWarnsFor,
       exactVersionsOnlyWarnsFor,
+      internalExactVersionsIgnore,
       checkResolutionMessage
     } = {}) {
       let internalMissingPeerDependenciesOnlyWarnsFor = peerDependenciesOnlyWarnsFor;
@@ -648,7 +656,8 @@ function createCheckPackage(pkgDirectoryPath = '.', {
 
       this.checkExactVersions({
         allowRangeVersionsInDependencies,
-        onlyWarnsFor: exactVersionsOnlyWarnsFor
+        onlyWarnsFor: exactVersionsOnlyWarnsFor,
+        internalExactVersionsIgnore
       });
       this.checkDirectPeerDependencies({
         isLibrary,
@@ -794,6 +803,7 @@ function createCheckPackage(pkgDirectoryPath = '.', {
   };
 }
 
+/* eslint-disable max-lines */
 function createCheckPackageWithWorkspaces(pkgDirectoryPath = '.', createCheckPackageOptions = {}) {
   const checkPackage = createCheckPackage(pkgDirectoryPath, createCheckPackageOptions);
   const {
@@ -831,6 +841,10 @@ function createCheckPackageWithWorkspaces(pkgDirectoryPath = '.', createCheckPac
       onlyWarnsForInRootPackage,
       onlyWarnsForInMonorepoPackages,
       onlyWarnsForInDependencies,
+      onlyWarnsForInRootDependencies = onlyWarnsForInDependencies,
+      onlyWarnsForInMonorepoPackagesDependencies = onlyWarnsForInDependencies ? {
+        '*': onlyWarnsForInDependencies
+      } : {},
       peerDependenciesOnlyWarnsFor,
       directDuplicateDependenciesOnlyWarnsFor,
       monorepoDirectDuplicateDependenciesOnlyWarnsFor,
@@ -848,11 +862,12 @@ function createCheckPackageWithWorkspaces(pkgDirectoryPath = '.', createCheckPac
       checkPackage.checkRecommended({
         isLibrary: false,
         onlyWarnsForInPackage: onlyWarnsForInRootPackage,
-        onlyWarnsForInDependencies,
+        onlyWarnsForInDependencies: onlyWarnsForInRootDependencies,
         peerDependenciesOnlyWarnsFor,
         directDuplicateDependenciesOnlyWarnsFor,
         checkResolutionMessage
       });
+      const monorepoDirectDuplicateDependenciesOnlyWarnsForCheck = createOnlyWarnsForMappingCheck('monorepoDirectDuplicateDependenciesOnlyWarnsFor', monorepoDirectDuplicateDependenciesOnlyWarnsFor);
       checksWorkspaces.forEach((checkSubPackage, id) => {
         const isPackageALibrary = isLibrary(id);
         checkSubPackage.checkRecommended({
@@ -861,15 +876,16 @@ function createCheckPackageWithWorkspaces(pkgDirectoryPath = '.', createCheckPac
           onlyWarnsForInPackage: onlyWarnsForInMonorepoPackages ? { ...onlyWarnsForInMonorepoPackages['*'],
             ...onlyWarnsForInMonorepoPackages[checkSubPackage.pkg.name]
           } : undefined,
-          onlyWarnsForInDependencies,
+          onlyWarnsForInDependencies: onlyWarnsForInMonorepoPackagesDependencies[checkSubPackage.pkg.name],
           peerDependenciesOnlyWarnsFor,
           directDuplicateDependenciesOnlyWarnsFor,
-          exactVersionsOnlyWarnsFor: [...checksWorkspaces.keys()],
+          internalExactVersionsIgnore: [...checksWorkspaces.keys()],
           checkResolutionMessage
-        }); // TODO fix check onlyWarnFor
-
-        checkDirectDuplicateDependencies(checkSubPackage.pkg, checkSubPackage.pkgPathName, 'devDependencies', checkSubPackage.getDependencyPackageJson, createOnlyWarnsForMappingCheck('monorepoDirectDuplicateDependenciesOnlyWarnsFor', monorepoDirectDuplicateDependenciesOnlyWarnsFor), 'Monorepo ');
+        });
+        const reportMonorepoDDDError = createReportError('Monorepo Direct Duplicate Dependencies', checkSubPackage.pkgPathName);
+        checkDuplicateDependencies(reportMonorepoDDDError, checkSubPackage.pkg, 'devDependencies', ['dependencies', 'devDependencies'], pkg, monorepoDirectDuplicateDependenciesOnlyWarnsForCheck.createFor(checkSubPackage.pkg.name));
       });
+      reportNotWarnedForMapping(createReportError('Monorepo Direct Duplicate Dependencies', checkPackage.pkgPathName), monorepoDirectDuplicateDependenciesOnlyWarnsForCheck);
       return this;
     },
 

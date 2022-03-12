@@ -6,11 +6,12 @@ import {
   reportNotWarnedFor,
 } from '../utils/createReportError';
 import type { PackageJson, DependencyTypes } from '../utils/packageTypes';
-import type { OnlyWarnsForCheck } from '../utils/warnForUtils';
+import type { OnlyWarnsFor, OnlyWarnsForCheck } from '../utils/warnForUtils';
 
 export interface CheckExactVersionsOptions {
   getDependencyPackageJson?: GetDependencyPackageJson;
   onlyWarnsForCheck: OnlyWarnsForCheck;
+  internalExactVersionsIgnore?: OnlyWarnsFor;
   tryToAutoFix?: boolean;
 }
 
@@ -24,6 +25,7 @@ export function checkExactVersions(
   {
     getDependencyPackageJson,
     onlyWarnsForCheck,
+    internalExactVersionsIgnore,
     tryToAutoFix = false,
   }: CheckExactVersionsOptions,
 ): void {
@@ -45,6 +47,9 @@ export function checkExactVersions(
       }
 
       if (isVersionRange(version)) {
+        if (internalExactVersionsIgnore?.includes(dependencyName)) {
+          return;
+        }
         const shouldOnlyWarn = onlyWarnsForCheck.shouldWarnsFor(dependencyName);
         if (!shouldOnlyWarn && tryToAutoFix && getDependencyPackageJson) {
           let resolvedDep;

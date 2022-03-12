@@ -39,12 +39,16 @@ export interface CheckRecommendedOptions {
     directDuplicateDependenciesOnlyWarnsFor?: OnlyWarnsFor;
     /** @deprecated use onlyWarnsForInPackage option */
     exactVersionsOnlyWarnsFor?: OnlyWarnsFor;
+    /** @internal */
+    internalExactVersionsIgnore?: OnlyWarnsFor;
     /** function to check the value in the "resolutionExplained" key in package.json */
     checkResolutionMessage?: CheckResolutionMessage;
 }
 export interface CheckExactVersionsOptions {
     allowRangeVersionsInDependencies?: boolean;
     onlyWarnsFor?: OnlyWarnsFor;
+    /** @internal */
+    internalExactVersionsIgnore?: OnlyWarnsFor;
 }
 export interface CheckPackageApi {
     /** @internal */

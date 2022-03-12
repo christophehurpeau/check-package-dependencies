@@ -5,6 +5,7 @@ interface OnlyWarnsForInMonorepoPackageCheckPackageRecommendedOption extends Onl
     duplicateDirectDependency: OnlyWarnsForInDependencyCheckPackageRecommendedOption['duplicateDirectDependency'];
 }
 declare type OnlyWarnsForInMonorepoPackagesCheckPackageRecommendedOption = Record<'*' | string, OnlyWarnsForInMonorepoPackageCheckPackageRecommendedOption>;
+declare type OnlyWarnsForInMonorepoPackagesDependenciesCheckPackageRecommendedOption = Record<string, OnlyWarnsForInDependenciesCheckPackageRecommendedOption>;
 export interface CheckPackageWithWorkspacesRecommendedOptions {
     isLibrary?: (pkgName: string) => boolean;
     allowRangeVersionsInLibraries?: boolean;
@@ -15,7 +16,10 @@ export interface CheckPackageWithWorkspacesRecommendedOptions {
     monorepoDirectDuplicateDependenciesOnlyWarnsFor?: OnlyWarnsForOptionalDependencyMapping;
     onlyWarnsForInRootPackage?: OnlyWarnsForInPackageCheckPackageRecommendedOption;
     onlyWarnsForInMonorepoPackages?: OnlyWarnsForInMonorepoPackagesCheckPackageRecommendedOption;
+    /** @deprecated use onlyWarnsForInRootDependencies */
     onlyWarnsForInDependencies?: OnlyWarnsForInDependenciesCheckPackageRecommendedOption;
+    onlyWarnsForInRootDependencies?: OnlyWarnsForInDependenciesCheckPackageRecommendedOption;
+    onlyWarnsForInMonorepoPackagesDependencies?: OnlyWarnsForInMonorepoPackagesDependenciesCheckPackageRecommendedOption;
     checkResolutionMessage?: CheckResolutionMessage;
 }
 export interface CheckPackageWithWorkspacesApi {

@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import fs from 'fs';
 import path from 'path';
 import glob from 'glob';
@@ -9,8 +10,12 @@ import type {
   OnlyWarnsForInPackageCheckPackageRecommendedOption,
 } from './check-package';
 import { createCheckPackage } from './check-package';
-import { checkDirectDuplicateDependencies } from './checks/checkDirectDuplicateDependencies';
+import { checkDuplicateDependencies } from './checks/checkDuplicateDependencies';
 import type { CheckResolutionMessage } from './checks/checkResolutionsHasExplanation';
+import {
+  createReportError,
+  reportNotWarnedForMapping,
+} from './utils/createReportError';
 import type {
   OnlyWarnsFor,
   OnlyWarnsForOptionalDependencyMapping,
@@ -28,6 +33,9 @@ type OnlyWarnsForInMonorepoPackagesCheckPackageRecommendedOption = Record<
   OnlyWarnsForInMonorepoPackageCheckPackageRecommendedOption
 >;
 
+type OnlyWarnsForInMonorepoPackagesDependenciesCheckPackageRecommendedOption =
+  Record<string, OnlyWarnsForInDependenciesCheckPackageRecommendedOption>;
+
 export interface CheckPackageWithWorkspacesRecommendedOptions {
   isLibrary?: (pkgName: string) => boolean;
   allowRangeVersionsInLibraries?: boolean;
@@ -38,7 +46,10 @@ export interface CheckPackageWithWorkspacesRecommendedOptions {
   monorepoDirectDuplicateDependenciesOnlyWarnsFor?: OnlyWarnsForOptionalDependencyMapping;
   onlyWarnsForInRootPackage?: OnlyWarnsForInPackageCheckPackageRecommendedOption;
   onlyWarnsForInMonorepoPackages?: OnlyWarnsForInMonorepoPackagesCheckPackageRecommendedOption;
+  /** @deprecated use onlyWarnsForInRootDependencies */
   onlyWarnsForInDependencies?: OnlyWarnsForInDependenciesCheckPackageRecommendedOption;
+  onlyWarnsForInRootDependencies?: OnlyWarnsForInDependenciesCheckPackageRecommendedOption;
+  onlyWarnsForInMonorepoPackagesDependencies?: OnlyWarnsForInMonorepoPackagesDependenciesCheckPackageRecommendedOption;
   checkResolutionMessage?: CheckResolutionMessage;
 }
 
@@ -109,6 +120,10 @@ export function createCheckPackageWithWorkspaces(
       onlyWarnsForInRootPackage,
       onlyWarnsForInMonorepoPackages,
       onlyWarnsForInDependencies,
+      onlyWarnsForInRootDependencies = onlyWarnsForInDependencies,
+      onlyWarnsForInMonorepoPackagesDependencies = onlyWarnsForInDependencies
+        ? { '*': onlyWarnsForInDependencies }
+        : {},
       peerDependenciesOnlyWarnsFor,
       directDuplicateDependenciesOnlyWarnsFor,
       monorepoDirectDuplicateDependenciesOnlyWarnsFor,
@@ -129,11 +144,17 @@ export function createCheckPackageWithWorkspaces(
       checkPackage.checkRecommended({
         isLibrary: false,
         onlyWarnsForInPackage: onlyWarnsForInRootPackage,
-        onlyWarnsForInDependencies,
+        onlyWarnsForInDependencies: onlyWarnsForInRootDependencies,
         peerDependenciesOnlyWarnsFor,
         directDuplicateDependenciesOnlyWarnsFor,
         checkResolutionMessage,
       });
+
+      const monorepoDirectDuplicateDependenciesOnlyWarnsForCheck =
+        createOnlyWarnsForMappingCheck(
+          'monorepoDirectDuplicateDependenciesOnlyWarnsFor',
+          monorepoDirectDuplicateDependenciesOnlyWarnsFor,
+        );
 
       checksWorkspaces.forEach((checkSubPackage, id) => {
         const isPackageALibrary = isLibrary(id);
@@ -148,26 +169,38 @@ export function createCheckPackageWithWorkspaces(
                 ...onlyWarnsForInMonorepoPackages[checkSubPackage.pkg.name],
               }
             : undefined,
-          onlyWarnsForInDependencies,
+          onlyWarnsForInDependencies:
+            onlyWarnsForInMonorepoPackagesDependencies[
+              checkSubPackage.pkg.name
+            ],
           peerDependenciesOnlyWarnsFor,
           directDuplicateDependenciesOnlyWarnsFor,
-          exactVersionsOnlyWarnsFor: [...checksWorkspaces.keys()],
+          internalExactVersionsIgnore: [...checksWorkspaces.keys()],
           checkResolutionMessage,
         });
 
-        // TODO fix check onlyWarnFor
-        checkDirectDuplicateDependencies(
-          checkSubPackage.pkg,
+        const reportMonorepoDDDError = createReportError(
+          'Monorepo Direct Duplicate Dependencies',
           checkSubPackage.pkgPathName,
+        );
+        checkDuplicateDependencies(
+          reportMonorepoDDDError,
+          checkSubPackage.pkg,
           'devDependencies',
-          checkSubPackage.getDependencyPackageJson,
-          createOnlyWarnsForMappingCheck(
-            'monorepoDirectDuplicateDependenciesOnlyWarnsFor',
-            monorepoDirectDuplicateDependenciesOnlyWarnsFor,
+          ['dependencies', 'devDependencies'],
+          pkg,
+          monorepoDirectDuplicateDependenciesOnlyWarnsForCheck.createFor(
+            checkSubPackage.pkg.name,
           ),
-          'Monorepo ',
         );
       });
+      reportNotWarnedForMapping(
+        createReportError(
+          'Monorepo Direct Duplicate Dependencies',
+          checkPackage.pkgPathName,
+        ),
+        monorepoDirectDuplicateDependenciesOnlyWarnsForCheck,
+      );
 
       return this;
     },

@@ -76,6 +76,8 @@ export interface CheckRecommendedOptions {
   directDuplicateDependenciesOnlyWarnsFor?: OnlyWarnsFor;
   /** @deprecated use onlyWarnsForInPackage option */
   exactVersionsOnlyWarnsFor?: OnlyWarnsFor;
+  /** @internal */
+  internalExactVersionsIgnore?: OnlyWarnsFor;
   /** function to check the value in the "resolutionExplained" key in package.json */
   checkResolutionMessage?: CheckResolutionMessage;
 }
@@ -83,6 +85,8 @@ export interface CheckRecommendedOptions {
 export interface CheckExactVersionsOptions {
   allowRangeVersionsInDependencies?: boolean;
   onlyWarnsFor?: OnlyWarnsFor;
+  /** @internal */
+  internalExactVersionsIgnore?: OnlyWarnsFor;
 }
 
 export interface CheckPackageApi {
@@ -198,6 +202,7 @@ export function createCheckPackage(
     getDependencyPackageJson,
     checkExactVersions({
       onlyWarnsFor,
+      internalExactVersionsIgnore,
       allowRangeVersionsInDependencies = true,
     } = {}) {
       const onlyWarnsForCheck = createOnlyWarnsForArrayCheck(
@@ -212,6 +217,7 @@ export function createCheckPackage(
           : ['devDependencies', 'resolutions'],
         {
           onlyWarnsForCheck,
+          internalExactVersionsIgnore,
           tryToAutoFix,
         },
       );
@@ -323,6 +329,7 @@ export function createCheckPackage(
       peerDependenciesOnlyWarnsFor,
       directDuplicateDependenciesOnlyWarnsFor,
       exactVersionsOnlyWarnsFor,
+      internalExactVersionsIgnore,
       checkResolutionMessage,
     } = {}) {
       let internalMissingPeerDependenciesOnlyWarnsFor: OnlyWarnsForOptionalDependencyMapping =
@@ -383,6 +390,7 @@ export function createCheckPackage(
       this.checkExactVersions({
         allowRangeVersionsInDependencies,
         onlyWarnsFor: exactVersionsOnlyWarnsFor,
+        internalExactVersionsIgnore,
       });
 
       this.checkDirectPeerDependencies({
