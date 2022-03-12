@@ -14,6 +14,59 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+## [4.0.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v3.5.0...v4.0.0) (2022-03-12)
+
+
+### ⚠ BREAKING CHANGES
+
+* requires node 14
+* requires node that support module
+
+### Features
+
+* add .forEach ([333b617](https://github.com/christophehurpeau/check-package-dependencies/commit/333b61782aade735f7f7db0346453fe1bfa64ba8))
+* add allowRangeVersionsInDependencies option ([fc5bc18](https://github.com/christophehurpeau/check-package-dependencies/commit/fc5bc189688f7bd2c3553825bfa862b2ef2f1dec))
+* add checkSatisfiesVersionsBetweenDependencies ([6b9a201](https://github.com/christophehurpeau/check-package-dependencies/commit/6b9a2017c0e02b199f9d56d2792fbaeedf5fccd5))
+* add createCheckPackageOptions to createCheckPackageWithWorkspaces ([5168959](https://github.com/christophehurpeau/check-package-dependencies/commit/51689594e79fddce803866d8819be1282d740f19))
+* add option monorepoDirectDuplicateDependenciesOnlyWarnsFor ([0fa6149](https://github.com/christophehurpeau/check-package-dependencies/commit/0fa614935786cda310f2007a60833f642c981009))
+* allow to check identical version in other dep types ([e157111](https://github.com/christophehurpeau/check-package-dependencies/commit/e157111f5384b46c9d99d0ac8917f98b775dc975))
+* better warns for checks ([18c47ef](https://github.com/christophehurpeau/check-package-dependencies/commit/18c47ef54d8ef566bec0f10cabf5c10a77c34a51))
+* **deps:** update dependency type-fest to v1 ([#22](https://github.com/christophehurpeau/check-package-dependencies/issues/22)) ([da34b8f](https://github.com/christophehurpeau/check-package-dependencies/commit/da34b8f9be325fbd70f86ae4d314a1bd79ca8d8b))
+* **deps:** update dependency type-fest to v2 ([#143](https://github.com/christophehurpeau/check-package-dependencies/issues/143)) ([faf6286](https://github.com/christophehurpeau/check-package-dependencies/commit/faf6286adf8646869b29fb03a9770ca86352e73e))
+* drop node 12 ([ef56e15](https://github.com/christophehurpeau/check-package-dependencies/commit/ef56e1572d886d73c7e0fcc6698ef622463be7fc))
+* rewrite in typescript ([236eae9](https://github.com/christophehurpeau/check-package-dependencies/commit/236eae9d320d80dc5356452de52ffd8434cf2d15))
+* support npm: in version ([51959c2](https://github.com/christophehurpeau/check-package-dependencies/commit/51959c20d66082783eae9321e25065ba4d349cb3))
+
+
+### Bug Fixes
+
+* add main field for eslint ([a3961be](https://github.com/christophehurpeau/check-package-dependencies/commit/a3961be34be1b025f5cb6edfa2b82e5ec5db745f))
+* allow peer to be used in both dependencies and peerDependencies ([130cf50](https://github.com/christophehurpeau/check-package-dependencies/commit/130cf5015ca0ddd1c2e09c5fdb77966f2a622702))
+* allow peerDependencies to also be in peerDependencies for libraries but not in devDependencies ([25269a7](https://github.com/christophehurpeau/check-package-dependencies/commit/25269a7b731c22cb4eb1660c6f64dbba215eda2d))
+* beta in direct duplicate dependencies ([bab86e1](https://github.com/christophehurpeau/check-package-dependencies/commit/bab86e15ccf9a72fee48f0be0ae9bb074eb6fd09))
+* better implementation of autofix and add tests ([0abf7cc](https://github.com/christophehurpeau/check-package-dependencies/commit/0abf7ccdd47341f53b933b888a89255a50237d77))
+* bin script ([736bad3](https://github.com/christophehurpeau/check-package-dependencies/commit/736bad37e65f664f1b77e9388681fe96f6d2f166))
+* build ([04ebf5f](https://github.com/christophehurpeau/check-package-dependencies/commit/04ebf5f4e506144023985c9d2190939137f8dd7a))
+* checkExactVersions report multiple errors ([fb716e0](https://github.com/christophehurpeau/check-package-dependencies/commit/fb716e09cbfc2ea605c75fcbb6d8ba8e155e065d))
+* chek direct duplicate dependencies in workspaces ([4904ca9](https://github.com/christophehurpeau/check-package-dependencies/commit/4904ca97ea7073d64afc2840a57ae2cbdf64be8b))
+* dont export mjs version of this lib ([c6ea1b1](https://github.com/christophehurpeau/check-package-dependencies/commit/c6ea1b152c25446788953a18368902c8a7c38880))
+* exports package.json ([5b390b0](https://github.com/christophehurpeau/check-package-dependencies/commit/5b390b022429b35af451a31026f4af31ba0a60cc))
+* format package.json ([3747ff8](https://github.com/christophehurpeau/check-package-dependencies/commit/3747ff89a07c0e56e2600df08f057e75414627b8))
+* ignore checking when range starts with file: ([fe5d3d8](https://github.com/christophehurpeau/check-package-dependencies/commit/fe5d3d80015c795b77ee8f1b189c8929644f2ec6))
+* ignore workspace in version or range ([96284e8](https://github.com/christophehurpeau/check-package-dependencies/commit/96284e8debfaf81bf81ee6ae4362b9bb09c33580))
+* improve regexp for detecting path in ERR_PACKAGE_PATH_NOT_EXPORTED error ([81efce3](https://github.com/christophehurpeau/check-package-dependencies/commit/81efce3c605fe63e810dfe3a0cbb740742d83d64))
+* internalWarnedForDuplicate use in workspace root pkg ([fcff2ba](https://github.com/christophehurpeau/check-package-dependencies/commit/fcff2baa55accb3dc3064ae56bb8579b42cd6842))
+* missing docs ([c728f26](https://github.com/christophehurpeau/check-package-dependencies/commit/c728f261b885225541ee6031c052b24a401e781d))
+* supports prereleases ([8c49a05](https://github.com/christophehurpeau/check-package-dependencies/commit/8c49a05fa79697544b08f9dc06c329b757f2e4ae))
+* use report error and clearer message when a dependency is missing the dependency ([c6215e2](https://github.com/christophehurpeau/check-package-dependencies/commit/c6215e24b06492b2d7a0dcac44e005de73e9faa9))
+* use semver as default export ([fe63dae](https://github.com/christophehurpeau/check-package-dependencies/commit/fe63dae679e29fc0b30a8801bd3f4247e2aee9b9))
+* warn when exact version not respected on workspaces ([a8d5019](https://github.com/christophehurpeau/check-package-dependencies/commit/a8d5019a782093512b91f258c1f317c1ee4d89b8))
+
+
+### Miscellaneous Chores
+
+* update dev dependencies ([4c94bed](https://github.com/christophehurpeau/check-package-dependencies/commit/4c94bed5a014dfbdc9fa14dd664ed6a7a4df31a8))
+
 ## [3.5.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v3.4.0...v3.5.0) (2022-03-12)
 
 
