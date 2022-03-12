@@ -4,8 +4,8 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 const path = require('path');
 const util = require('util');
-const semver = require('semver');
 const chalk = require('chalk');
+const semver = require('semver');
 const fs = require('fs');
 const glob = require('glob');
 
@@ -13,10 +13,13 @@ function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'defau
 
 const path__default = /*#__PURE__*/_interopDefaultLegacy(path);
 const util__default = /*#__PURE__*/_interopDefaultLegacy(util);
-const semver__default = /*#__PURE__*/_interopDefaultLegacy(semver);
 const chalk__default = /*#__PURE__*/_interopDefaultLegacy(chalk);
+const semver__default = /*#__PURE__*/_interopDefaultLegacy(semver);
 const fs__default = /*#__PURE__*/_interopDefaultLegacy(fs);
 const glob__default = /*#__PURE__*/_interopDefaultLegacy(glob);
+
+const getKeys = o => Object.keys(o);
+const getEntries = o => Object.entries(o);
 
 /* eslint-disable no-console */
 let titleDisplayed = null;
@@ -41,21 +44,23 @@ function createReportError(title, pkgPathName) {
     }
   };
 }
+function reportNotWarnedFor(reportError, onlyWarnsForCheck) {
+  const notWarnedFor = onlyWarnsForCheck.getNotWarnedFor();
 
-const shouldOnlyWarnFor = (dependencyName, onlyWarnsFor) => onlyWarnsFor.includes(dependencyName);
-
-function checkWarnedFor(reportError, warnedFor, onlyWarnsFor = []) {
-  onlyWarnsFor.forEach(depName => {
-    if (!warnedFor.has(depName)) {
-      reportError(`Invalid "${depName}" in "onlyWarnsFor" but no warning was raised`);
-    }
+  if (notWarnedFor.length > 0) {
+    reportError(`Invalid config in "${onlyWarnsForCheck.configName}"`, `no warning was raised for ${notWarnedFor.map(depName => `"${depName}"`).join(', ')}`, false);
+  }
+}
+function reportNotWarnedForMapping(reportError, onlyWarnsForMappingCheck) {
+  const notWarnedForMapping = onlyWarnsForMappingCheck.getNotWarnedFor();
+  getEntries(notWarnedForMapping).forEach(([depNameOrStar, notWarnedFor]) => {
+    reportError(`Invalid config in "${onlyWarnsForMappingCheck.configName}" for "${depNameOrStar}"`, `no warning was raised for ${notWarnedFor.map(depName => `"${depName}"`).join(', ')}`);
   });
 }
-function checkDirectDuplicateDependencies(pkg, pkgPathName, depType, searchIn, depPkg, onlyWarnsFor = [], warnedForInternal, reportErrorNamePrefix = '') {
+
+function checkDuplicateDependencies(reportError, pkg, depType, searchIn, depPkg, onlyWarnsForCheck) {
   const dependencies = depPkg[depType];
   if (!dependencies) return;
-  const warnedFor = warnedForInternal || new Set();
-  const reportError = createReportError(`${reportErrorNamePrefix}Direct Duplicate Dependencies`, pkgPathName);
   const searchInExisting = searchIn.filter(type => pkg[type]);
 
   for (const [depKey, range] of Object.entries(dependencies)) {
@@ -86,25 +91,39 @@ function checkDirectDuplicateDependencies(pkg, pkgPathName, depType, searchIn, d
         }
 
         const versionInType = versionsIn[index];
-        const shouldOnlyWarn = shouldOnlyWarnFor(depKey, onlyWarnsFor);
-        if (shouldOnlyWarn) warnedFor.add(depKey);
-        reportError(`Invalid duplicate dependency "${depKey}"`, `"${versions[0]}" (in ${versionInType}) should satisfies "${range}" from "${depPkg.name}" ${depType}.`, shouldOnlyWarn);
+        reportError(`Invalid duplicate dependency "${depKey}"`, `"${versions[0]}" (in ${versionInType}) should satisfies "${range}" from "${depPkg.name}" ${depType}.`, onlyWarnsForCheck.shouldWarnsFor(depKey));
       });
     }
   }
-
-  if (!warnedForInternal) {
-    checkWarnedFor(reportError, warnedFor, onlyWarnsFor);
-  }
 }
 
-function checkPeerDependencies(pkg, pkgPathName, type, allowedPeerIn, depPkg, onlyWarnsFor = []) {
+function checkDirectDuplicateDependencies(pkg, pkgPathName, depType, getDependencyPackageJson, onlyWarnsForCheck, reportErrorNamePrefix = '') {
+  const reportError = createReportError(`${reportErrorNamePrefix}Direct Duplicate Dependencies`, pkgPathName);
+  [{
+    type: 'devDependencies',
+    searchIn: ['devDependencies', 'dependencies']
+  }, {
+    type: 'dependencies',
+    searchIn: ['devDependencies', 'dependencies']
+  }].forEach(({
+    type,
+    searchIn
+  }) => {
+    if (!pkg[type]) return;
+    getKeys(pkg[type]).forEach(depName => {
+      const depPkg = getDependencyPackageJson(depName);
+      checkDuplicateDependencies(reportError, pkg, depType, searchIn, depPkg, onlyWarnsForCheck.createFor(depName));
+    });
+  });
+  reportNotWarnedForMapping(reportError, onlyWarnsForCheck);
+}
+
+function checkPeerDependencies(pkg, reportError, type, allowedPeerIn, depPkg, missingOnlyWarnsForCheck, invalidOnlyWarnsForCheck) {
   const {
     peerDependencies,
     peerDependenciesMeta
   } = depPkg;
   if (!peerDependencies) return;
-  const reportError = createReportError('Peer Dependencies', pkgPathName);
   const allowedPeerInExisting = allowedPeerIn.filter(allowedPeerInType => pkg[allowedPeerInType]);
 
   for (const [peerDepKey, range] of Object.entries(peerDependencies)) {
@@ -117,7 +136,7 @@ function checkPeerDependencies(pkg, pkgPathName, type, allowedPeerIn, depPkg, on
         return;
       }
 
-      reportError(`Missing "${peerDepKey}" peer dependency from "${depPkg.name}" in ${type}`, `it should satisfies "${range}" and be in ${allowedPeerIn.join(' or ')}`, shouldOnlyWarnFor(peerDepKey, onlyWarnsFor));
+      reportError(`Missing "${peerDepKey}" peer dependency from "${depPkg.name}" in ${type}`, `it should satisfies "${range}" and be in ${allowedPeerIn.join(' or ')}`, missingOnlyWarnsForCheck.shouldWarnsFor(peerDepKey));
     } else {
       const versions = versionsIn.map(versionsInType => pkg[versionsInType][peerDepKey]);
       versions.forEach((version, index) => {
@@ -130,12 +149,14 @@ function checkPeerDependencies(pkg, pkgPathName, type, allowedPeerIn, depPkg, on
         if (!minVersionOfVersion || !semver__default.satisfies(minVersionOfVersion, range, {
           includePrerelease: true
         })) {
-          reportError(`Invalid "${peerDepKey}" peer dependency`, `"${version}" (in ${allowedPeerInExisting[index]}) should satisfies "${range}" from "${depPkg.name}" ${type}`, shouldOnlyWarnFor(peerDepKey, onlyWarnsFor));
+          reportError(`Invalid "${peerDepKey}" peer dependency`, `"${version}" (in ${allowedPeerInExisting[index]}) should satisfies "${range}" from "${depPkg.name}" ${type}`, invalidOnlyWarnsForCheck.shouldWarnsFor(peerDepKey));
         }
       });
     }
   }
 }
+
+const regularDependencyTypes = ['devDependencies', 'dependencies', 'optionalDependencies'];
 
 const getAllowedPeerInFromType = (depPkgType, isLibrary) => {
   switch (depPkgType) {
@@ -148,9 +169,22 @@ const getAllowedPeerInFromType = (depPkgType, isLibrary) => {
   }
 };
 
-function checkDirectPeerDependencies(isLibrary, pkg, pkgPathName, depPkgType, depPkg, onlyWarnsFor = []) {
-  if (depPkg.peerDependencies) {
-    checkPeerDependencies(pkg, pkgPathName, depPkgType, getAllowedPeerInFromType(depPkgType, isLibrary), depPkg, onlyWarnsFor);
+function checkDirectPeerDependencies(isLibrary, pkg, pkgPathName, getDependencyPackageJson, missingOnlyWarnsForCheck, invalidOnlyWarnsForCheck) {
+  const reportError = createReportError('Peer Dependencies', pkgPathName);
+  regularDependencyTypes.forEach(depType => {
+    if (!pkg[depType]) return;
+    getKeys(pkg[depType]).forEach(depName => {
+      const depPkg = getDependencyPackageJson(depName);
+
+      if (depPkg.peerDependencies) {
+        checkPeerDependencies(pkg, reportError, depType, getAllowedPeerInFromType(depType, isLibrary), depPkg, missingOnlyWarnsForCheck.createFor(depName), invalidOnlyWarnsForCheck.createFor(depName));
+      }
+    });
+  });
+  reportNotWarnedForMapping(reportError, missingOnlyWarnsForCheck);
+
+  if (missingOnlyWarnsForCheck !== invalidOnlyWarnsForCheck) {
+    reportNotWarnedForMapping(reportError, invalidOnlyWarnsForCheck);
   }
 }
 
@@ -158,56 +192,57 @@ function checkDirectPeerDependencies(isLibrary, pkg, pkgPathName, depPkgType, de
 
 const isVersionRange = version => version.startsWith('^') || version.startsWith('~');
 
-function checkExactVersions(pkg, pkgPathName, type, {
+function checkExactVersions(pkg, pkgPathName, types, {
   getDependencyPackageJson,
-  onlyWarnsFor = [],
+  onlyWarnsForCheck,
   tryToAutoFix = false
-} = {}) {
-  const pkgDependencies = pkg[type];
-  if (!pkgDependencies) return;
+}) {
   const reportError = createReportError('Exact versions', pkgPathName);
+  types.forEach(type => {
+    const pkgDependencies = pkg[type];
+    if (!pkgDependencies) return;
 
-  for (const [dependencyName, versionConst] of Object.entries(pkgDependencies)) {
-    let version = versionConst;
+    for (const [dependencyName, versionConst] of Object.entries(pkgDependencies)) {
+      let version = versionConst;
 
-    if (version.startsWith('npm:')) {
-      const match = /^npm:.*@(.*)$/.exec(version);
-      if (!match) throw new Error(`Invalid version match: ${version}`);
-      const [, realVersion] = match;
-      version = realVersion;
-    }
+      if (version.startsWith('npm:')) {
+        const match = /^npm:.*@(.*)$/.exec(version);
+        if (!match) throw new Error(`Invalid version match: ${version}`);
+        const [, realVersion] = match;
+        version = realVersion;
+      }
 
-    if (isVersionRange(version)) {
-      const shouldOnlyWarn = shouldOnlyWarnFor(dependencyName, onlyWarnsFor);
+      if (isVersionRange(version)) {
+        const shouldOnlyWarn = onlyWarnsForCheck.shouldWarnsFor(dependencyName);
 
-      if (!shouldOnlyWarn && tryToAutoFix && getDependencyPackageJson) {
-        let resolvedDep;
+        if (!shouldOnlyWarn && tryToAutoFix && getDependencyPackageJson) {
+          let resolvedDep;
 
-        try {
-          resolvedDep = getDependencyPackageJson(dependencyName);
-        } catch {
-          resolvedDep = null;
-        }
+          try {
+            resolvedDep = getDependencyPackageJson(dependencyName);
+          } catch {
+            resolvedDep = null;
+          }
 
-        if (!resolvedDep || !resolvedDep.version) {
-          reportError(`Unexpected range dependency in "${type}" for "${dependencyName}"`, `expecting "${version}" to be exact, autofix failed to resolve "${dependencyName}".`, shouldOnlyWarn);
-        } else if (!semver__default.satisfies(resolvedDep.version, version, {
-          includePrerelease: true
-        })) {
-          reportError(`Unexpected range dependency in "${type}" for "${dependencyName}"`, `expecting "${version}" to be exact, autofix failed as "${dependencyName}"'s resolved version is "${resolvedDep.version}" and doesn't satisfies "${version}".`, shouldOnlyWarn);
+          if (!resolvedDep || !resolvedDep.version) {
+            reportError(`Unexpected range dependency in "${type}" for "${dependencyName}"`, `expecting "${version}" to be exact, autofix failed to resolve "${dependencyName}".`, shouldOnlyWarn);
+          } else if (!semver__default.satisfies(resolvedDep.version, version, {
+            includePrerelease: true
+          })) {
+            reportError(`Unexpected range dependency in "${type}" for "${dependencyName}"`, `expecting "${version}" to be exact, autofix failed as "${dependencyName}"'s resolved version is "${resolvedDep.version}" and doesn't satisfies "${version}".`, shouldOnlyWarn);
+          } else {
+            pkgDependencies[dependencyName] = resolvedDep.version;
+          }
         } else {
-          pkgDependencies[dependencyName] = resolvedDep.version;
+          reportError(`Unexpected range dependency in "${type}" for "${dependencyName}"`, `expecting "${version}" to be exact "${version.slice(1)}".`, shouldOnlyWarn);
         }
-      } else {
-        reportError(`Unexpected range dependency in "${type}" for "${dependencyName}"`, `expecting "${version}" to be exact "${version.slice(1)}".`, shouldOnlyWarn);
       }
     }
-  }
+  });
+  reportNotWarnedFor(reportError, onlyWarnsForCheck);
 }
 
-const getKeys = o => Object.keys(o);
-
-function checkIdenticalVersions(pkg, pkgPathName, type, deps, onlyWarnsFor = []) {
+function checkIdenticalVersions(pkg, pkgPathName, type, deps, onlyWarnsForCheck) {
   const pkgDependencies = pkg[type] || {};
   const reportError = createReportError('Identical Versions', pkgPathName);
   getKeys(deps).forEach(depKey => {
@@ -228,18 +263,18 @@ function checkIdenticalVersions(pkg, pkgPathName, type, deps, onlyWarnsFor = [])
         const value = pkgDependenciesType[depKeyIdentical];
 
         if (!value) {
-          reportError(`Missing "${depKeyIdentical}" in ${depKeyType}`, `it should be "${version}".`, shouldOnlyWarnFor(depKey, onlyWarnsFor));
+          reportError(`Missing "${depKeyIdentical}" in ${depKeyType}`, `it should be "${version}".`, onlyWarnsForCheck?.shouldWarnsFor(depKey));
         }
 
         if (value !== version) {
-          reportError(`Invalid "${depKeyIdentical}" in ${depKeyType}`, `expecting "${value}" be "${version}".`, shouldOnlyWarnFor(depKey, onlyWarnsFor));
+          reportError(`Invalid "${depKeyIdentical}" in ${depKeyType}`, `expecting "${value}" be "${version}".`, onlyWarnsForCheck?.shouldWarnsFor(depKey));
         }
       });
     });
   });
 }
 
-function checkIdenticalVersionsThanDependency(pkg, pkgPathName, type, depKeys, depPkg, dependencies = {}, onlyWarnsFor = []) {
+function checkIdenticalVersionsThanDependency(pkg, pkgPathName, type, depKeys, depPkg, dependencies = {}, onlyWarnsForCheck) {
   const pkgDependencies = pkg[type] || {};
   const reportError = createReportError(`Same Versions than ${depPkg.name}`, pkgPathName);
   depKeys.forEach(depKey => {
@@ -258,11 +293,11 @@ function checkIdenticalVersionsThanDependency(pkg, pkgPathName, type, depKeys, d
     const value = pkgDependencies[depKey];
 
     if (!value) {
-      reportError(`Missing "${depKey}" in ${type}`, `expecting to be "${version}".`, shouldOnlyWarnFor(depKey, onlyWarnsFor));
+      reportError(`Missing "${depKey}" in ${type}`, `expecting to be "${version}".`, onlyWarnsForCheck?.shouldWarnsFor(depKey));
     }
 
     if (value !== version) {
-      reportError(`Invalid "${depKey}" in ${type}`, `expecting "${value}" to be "${version}".`, shouldOnlyWarnFor(depKey, onlyWarnsFor));
+      reportError(`Invalid "${depKey}" in ${type}`, `expecting "${value}" to be "${version}".`, onlyWarnsForCheck?.shouldWarnsFor(depKey));
     }
   });
 }
@@ -298,7 +333,7 @@ function checkResolutionsHasExplanation(pkg, pkgPathName, checkMessage, getDepen
   });
 }
 
-function checkSatisfiesVersionsFromDependency(pkg, pkgPathName, type, depKeys, depPkg, dependencies = {}, onlyWarnsFor = []) {
+function checkSatisfiesVersionsFromDependency(pkg, pkgPathName, type, depKeys, depPkg, dependencies = {}, onlyWarnsForCheck) {
   const pkgDependencies = pkg[type] || {};
   const reportError = createReportError(`Satisfies Versions from ${depPkg.name}`, pkgPathName);
   depKeys.forEach(depKey => {
@@ -312,14 +347,14 @@ function checkSatisfiesVersionsFromDependency(pkg, pkgPathName, type, depKeys, d
     const version = pkgDependencies[depKey];
 
     if (!version) {
-      reportError(`Missing "${depKey}" in ${type}`, `should satisfies "${range}" from "${depPkg.name}" ${depKey}.`, shouldOnlyWarnFor(depKey, onlyWarnsFor));
+      reportError(`Missing "${depKey}" in ${type}`, `should satisfies "${range}" from "${depPkg.name}" ${depKey}.`, onlyWarnsForCheck?.shouldWarnsFor(depKey));
     } else {
       const minVersionOfVersion = semver__default.minVersion(version);
 
       if (!minVersionOfVersion || !semver__default.satisfies(minVersionOfVersion, range, {
         includePrerelease: true
       })) {
-        reportError(`Invalid "${depKey}" in ${type}`, `"${version}" (in "${depKey}") should satisfies "${range}" from "${depPkg.name}" ${depKey}.`, shouldOnlyWarnFor(depKey, onlyWarnsFor));
+        reportError(`Invalid "${depKey}" in ${type}`, `"${version}" (in "${depKey}") should satisfies "${range}" from "${depPkg.name}" ${depKey}.`, onlyWarnsForCheck?.shouldWarnsFor(depKey));
       }
     }
   });
@@ -371,8 +406,97 @@ function createGetDependencyPackageJson({
   };
 }
 
-/* eslint-disable max-lines */
-const regularDependencyTypes = ['devDependencies', 'dependencies', 'optionalDependencies'];
+const createOnlyWarnsForArrayCheck = (configName, onlyWarnsFor = []) => {
+  const notWarnedFor = new Set(onlyWarnsFor);
+  return {
+    configName,
+    getNotWarnedFor: () => [...notWarnedFor],
+
+    shouldWarnsFor(dependencyName) {
+      if (onlyWarnsFor.includes(dependencyName)) {
+        notWarnedFor.delete(dependencyName);
+        return true;
+      }
+
+      return false;
+    }
+
+  };
+};
+
+const isMapping = onlyWarnsFor => {
+  return typeof onlyWarnsFor === 'object' && !Array.isArray(onlyWarnsFor);
+};
+
+const createOnlyWarnsForMappingCheck = (configName, onlyWarnsFor) => {
+  if (isMapping(onlyWarnsFor)) {
+    const notWarnedFor = Object.fromEntries(getEntries(onlyWarnsFor).map(([entryKey, entryValue]) => [entryKey, new Set(entryValue)]));
+    return {
+      configName,
+      getNotWarnedFor: () => Object.fromEntries(getEntries(notWarnedFor).filter(([key, set]) => set.size > 0).map(([key, set]) => [key, [...set]])),
+
+      createFor(dependencyNameLevel1) {
+        return {
+          configName,
+
+          getNotWarnedFor() {
+            throw new Error('Invalid call to getNotWarnedFor()');
+          },
+
+          shouldWarnsFor(dependencyName) {
+            if (onlyWarnsFor['*']?.includes(dependencyName)) {
+              notWarnedFor['*'].delete(dependencyName);
+              return true;
+            }
+
+            if (onlyWarnsFor[dependencyNameLevel1]?.includes(dependencyName)) {
+              notWarnedFor[dependencyNameLevel1].delete(dependencyName);
+              return true;
+            }
+
+            return false;
+          }
+
+        };
+      }
+
+    };
+  }
+
+  const arrayOnlyWarnsForCheck = createOnlyWarnsForArrayCheck(configName, onlyWarnsFor);
+  return {
+    configName,
+    getNotWarnedFor: () => {
+      const notWarnedFor = arrayOnlyWarnsForCheck.getNotWarnedFor();
+
+      if (notWarnedFor.length > 0) {
+        return {
+          '*': notWarnedFor
+        };
+      }
+
+      return {};
+    },
+
+    createFor() {
+      return {
+        configName,
+
+        getNotWarnedFor() {
+          throw new Error('Invalid call to getNotWarnedFor()');
+        },
+
+        shouldWarnsFor(dependencyName) {
+          return arrayOnlyWarnsForCheck.shouldWarnsFor(dependencyName);
+        }
+
+      };
+    }
+
+  };
+};
+
+/* eslint-disable complexity */
 function createCheckPackage(pkgDirectoryPath = '.', {
   tryToAutoFix = false
 } = {}) {
@@ -405,23 +529,10 @@ function createCheckPackage(pkgDirectoryPath = '.', {
       onlyWarnsFor,
       allowRangeVersionsInDependencies = true
     } = {}) {
-      if (!allowRangeVersionsInDependencies) {
-        checkExactVersions(pkg, pkgPathName, 'dependencies', {
-          onlyWarnsFor,
-          tryToAutoFix,
-          getDependencyPackageJson
-        });
-      }
-
-      checkExactVersions(pkg, pkgPathName, 'devDependencies', {
-        onlyWarnsFor,
-        tryToAutoFix,
-        getDependencyPackageJson
-      });
-      checkExactVersions(pkg, pkgPathName, 'resolutions', {
-        onlyWarnsFor,
-        tryToAutoFix,
-        getDependencyPackageJson
+      const onlyWarnsForCheck = createOnlyWarnsForArrayCheck('checkExactVersions.onlyWarnsFor', onlyWarnsFor);
+      checkExactVersions(pkg, pkgPathName, !allowRangeVersionsInDependencies ? ['dependencies', 'devDependencies', 'resolutions'] : ['devDependencies', 'resolutions'], {
+        onlyWarnsForCheck,
+        tryToAutoFix
       });
       writePackageIfChanged();
       return this;
@@ -431,13 +542,9 @@ function createCheckPackage(pkgDirectoryPath = '.', {
     checkExactVersionsForLibrary({
       onlyWarnsFor
     } = {}) {
-      checkExactVersions(pkg, pkgPathName, 'devDependencies', {
-        onlyWarnsFor,
-        tryToAutoFix,
-        getDependencyPackageJson
-      });
-      checkExactVersions(pkg, pkgPathName, 'resolutions', {
-        onlyWarnsFor,
+      const onlyWarnsForCheck = createOnlyWarnsForArrayCheck('checkExactVersionsForLibrary.onlyWarnsFor', onlyWarnsFor);
+      checkExactVersions(pkg, pkgPathName, ['devDependencies', 'resolutions'], {
+        onlyWarnsForCheck,
         tryToAutoFix,
         getDependencyPackageJson
       });
@@ -448,8 +555,9 @@ function createCheckPackage(pkgDirectoryPath = '.', {
     checkExactDevVersions({
       onlyWarnsFor
     } = {}) {
-      checkExactVersions(pkg, pkgPathName, 'devDependencies', {
-        onlyWarnsFor,
+      const onlyWarnsForCheck = createOnlyWarnsForArrayCheck('checkExactDevVersions.onlyWarnsFor', onlyWarnsFor);
+      checkExactVersions(pkg, pkgPathName, ['devDependencies'], {
+        onlyWarnsForCheck,
         tryToAutoFix,
         getDependencyPackageJson
       });
@@ -464,48 +572,23 @@ function createCheckPackage(pkgDirectoryPath = '.', {
 
     checkDirectPeerDependencies({
       isLibrary = false,
-      onlyWarnsFor
+      onlyWarnsFor: deprecatedOnlyWarnsFor,
+      missingOnlyWarnsFor = deprecatedOnlyWarnsFor,
+      invalidOnlyWarnsFor = deprecatedOnlyWarnsFor,
+      internalMissingConfigName = deprecatedOnlyWarnsFor ? 'onlyWarnsFor' : 'missingOnlyWarnsFor',
+      internalInvalidConfigName = deprecatedOnlyWarnsFor ? 'onlyWarnsFor' : 'invalidOnlyWarnsFor'
     } = {}) {
-      regularDependencyTypes.forEach(depType => {
-        if (!pkg[depType]) return;
-        getKeys(pkg[depType]).forEach(depName => {
-          const depPkg = getDependencyPackageJson(depName);
-
-          if (depPkg.peerDependencies) {
-            checkDirectPeerDependencies(isLibrary, pkg, pkgPathName, depType, depPkg, onlyWarnsFor);
-          }
-        });
-      });
+      const missingOnlyWarnsForCheck = createOnlyWarnsForMappingCheck(internalMissingConfigName, missingOnlyWarnsFor);
+      const invalidOnlyWarnsForCheck = internalInvalidConfigName === internalMissingConfigName ? missingOnlyWarnsForCheck : createOnlyWarnsForMappingCheck(internalInvalidConfigName, invalidOnlyWarnsFor);
+      checkDirectPeerDependencies(isLibrary, pkg, pkgPathName, getDependencyPackageJson, missingOnlyWarnsForCheck, invalidOnlyWarnsForCheck);
       return this;
     },
 
     checkDirectDuplicateDependencies({
       onlyWarnsFor,
-      internalWarnedForDuplicate
+      internalConfigName = 'onlyWarnsFor'
     } = {}) {
-      const warnedForInternal = internalWarnedForDuplicate || new Set();
-      [{
-        type: 'devDependencies',
-        searchIn: ['devDependencies', 'dependencies']
-      }, {
-        type: 'dependencies',
-        searchIn: ['devDependencies', 'dependencies']
-      }].forEach(({
-        type,
-        searchIn
-      }) => {
-        if (!pkg[type]) return;
-        getKeys(pkg[type]).forEach(depName => {
-          const depPkg = getDependencyPackageJson(depName);
-          checkDirectDuplicateDependencies(pkg, pkgPathName, 'dependencies', searchIn, depPkg, onlyWarnsFor, warnedForInternal);
-        });
-      });
-
-      if (!warnedForInternal) {
-        const reportError = createReportError('Direct Duplicate Dependencies', pkgPathName);
-        checkWarnedFor(reportError, warnedForInternal, onlyWarnsFor);
-      }
-
+      checkDirectDuplicateDependencies(pkg, pkgPathName, 'dependencies', getDependencyPackageJson, createOnlyWarnsForMappingCheck(internalConfigName, onlyWarnsFor));
       return this;
     },
 
@@ -516,24 +599,67 @@ function createCheckPackage(pkgDirectoryPath = '.', {
 
     checkRecommended({
       isLibrary = false,
+      onlyWarnsForInPackage,
+      onlyWarnsForInDependencies,
       allowRangeVersionsInDependencies = isLibrary,
       peerDependenciesOnlyWarnsFor,
       directDuplicateDependenciesOnlyWarnsFor,
       exactVersionsOnlyWarnsFor,
-      checkResolutionMessage,
-      internalWarnedForDuplicate
+      checkResolutionMessage
     } = {}) {
+      let internalMissingPeerDependenciesOnlyWarnsFor = peerDependenciesOnlyWarnsFor;
+      let internalInvalidPeerDependenciesOnlyWarnsFor = peerDependenciesOnlyWarnsFor;
+      let internalDirectDuplicateDependenciesOnlyWarnsFor = directDuplicateDependenciesOnlyWarnsFor;
+
+      if (onlyWarnsForInPackage) {
+        if (exactVersionsOnlyWarnsFor) {
+          console.warn('Ignoring "exactVersionsOnlyWarnsFor" as "onlyWarnsForInPackage" is used.');
+        }
+
+        exactVersionsOnlyWarnsFor = onlyWarnsForInPackage.exactVersions || {};
+      }
+
+      if (onlyWarnsForInDependencies) {
+        if (peerDependenciesOnlyWarnsFor) {
+          console.warn('Ignoring "peerDependenciesOnlyWarnsFor" as "onlyWarnsFor" is used.');
+        }
+
+        if (directDuplicateDependenciesOnlyWarnsFor) {
+          console.warn('Ignoring "directDuplicateDependenciesOnlyWarnsFor" as "onlyWarnsFor" is used.');
+        }
+
+        internalDirectDuplicateDependenciesOnlyWarnsFor = {};
+        internalMissingPeerDependenciesOnlyWarnsFor = {};
+        internalInvalidPeerDependenciesOnlyWarnsFor = {};
+        getEntries(onlyWarnsForInDependencies).forEach(([dependencyNameOrSpecialKey, onlyWarnsForValue]) => {
+          if (onlyWarnsForValue.duplicateDirectDependency) {
+            internalDirectDuplicateDependenciesOnlyWarnsFor[dependencyNameOrSpecialKey] = onlyWarnsForValue.duplicateDirectDependency;
+          }
+
+          if (onlyWarnsForValue.missingPeerDependency) {
+            internalMissingPeerDependenciesOnlyWarnsFor[dependencyNameOrSpecialKey] = onlyWarnsForValue.missingPeerDependency;
+          }
+
+          if (onlyWarnsForValue.invalidPeerDependencyVersion) {
+            internalInvalidPeerDependenciesOnlyWarnsFor[dependencyNameOrSpecialKey] = onlyWarnsForValue.invalidPeerDependencyVersion;
+          }
+        });
+      }
+
       this.checkExactVersions({
         allowRangeVersionsInDependencies,
         onlyWarnsFor: exactVersionsOnlyWarnsFor
       });
       this.checkDirectPeerDependencies({
         isLibrary,
-        onlyWarnsFor: peerDependenciesOnlyWarnsFor
+        missingOnlyWarnsFor: internalMissingPeerDependenciesOnlyWarnsFor,
+        invalidOnlyWarnsFor: internalInvalidPeerDependenciesOnlyWarnsFor,
+        internalMissingConfigName: peerDependenciesOnlyWarnsFor ? 'peerDependenciesOnlyWarnsFor' : 'onlyWarnsForInDependencies.missingPeerDependency',
+        internalInvalidConfigName: peerDependenciesOnlyWarnsFor ? 'peerDependenciesOnlyWarnsFor' : 'onlyWarnsForInDependencies.invalidPeerDependencyVersion'
       });
       this.checkDirectDuplicateDependencies({
-        onlyWarnsFor: directDuplicateDependenciesOnlyWarnsFor,
-        internalWarnedForDuplicate
+        onlyWarnsFor: internalDirectDuplicateDependenciesOnlyWarnsFor,
+        internalConfigName: directDuplicateDependenciesOnlyWarnsFor ? 'directDuplicateDependenciesOnlyWarnsFor' : 'onlyWarnsForInDependencies.duplicateDirectDependency'
       });
       this.checkResolutionsHasExplanation(checkResolutionMessage);
       return this;
@@ -672,8 +798,7 @@ function createCheckPackageWithWorkspaces(pkgDirectoryPath = '.', createCheckPac
   const checkPackage = createCheckPackage(pkgDirectoryPath, createCheckPackageOptions);
   const {
     pkg,
-    pkgDirname,
-    pkgPathName
+    pkgDirname
   } = checkPackage;
   const pkgWorkspaces = pkg.workspaces && !Array.isArray(pkg.workspaces) ? pkg.workspaces.packages : pkg.workspaces;
 
@@ -703,35 +828,48 @@ function createCheckPackageWithWorkspaces(pkgDirectoryPath = '.', createCheckPac
     checkRecommended({
       isLibrary = () => false,
       allowRangeVersionsInLibraries = true,
+      onlyWarnsForInRootPackage,
+      onlyWarnsForInMonorepoPackages,
+      onlyWarnsForInDependencies,
       peerDependenciesOnlyWarnsFor,
       directDuplicateDependenciesOnlyWarnsFor,
       monorepoDirectDuplicateDependenciesOnlyWarnsFor,
       checkResolutionMessage
     } = {}) {
-      const monorepoWarnedForDuplicate = new Set();
-      const warnedForDuplicate = new Set();
+      if (peerDependenciesOnlyWarnsFor) {
+        console.warn('Option "peerDependenciesOnlyWarnsFor" in checkRecommended() is deprecated. Use "onlyWarnsForInDependencies" instead.');
+      }
+
+      if (directDuplicateDependenciesOnlyWarnsFor) {
+        console.warn('Option "directDuplicateDependenciesOnlyWarnsFor" in checkRecommended() is deprecated. Use "onlyWarnsForInDependencies" instead.');
+      }
+
       checkPackage.checkNoDependencies();
       checkPackage.checkRecommended({
         isLibrary: false,
+        onlyWarnsForInPackage: onlyWarnsForInRootPackage,
+        onlyWarnsForInDependencies,
         peerDependenciesOnlyWarnsFor,
         directDuplicateDependenciesOnlyWarnsFor,
-        checkResolutionMessage,
-        internalWarnedForDuplicate: warnedForDuplicate
+        checkResolutionMessage
       });
       checksWorkspaces.forEach((checkSubPackage, id) => {
         const isPackageALibrary = isLibrary(id);
         checkSubPackage.checkRecommended({
           isLibrary: isPackageALibrary,
           allowRangeVersionsInDependencies: isPackageALibrary ? allowRangeVersionsInLibraries : false,
+          onlyWarnsForInPackage: onlyWarnsForInMonorepoPackages ? { ...onlyWarnsForInMonorepoPackages['*'],
+            ...onlyWarnsForInMonorepoPackages[checkSubPackage.pkg.name]
+          } : undefined,
+          onlyWarnsForInDependencies,
           peerDependenciesOnlyWarnsFor,
           directDuplicateDependenciesOnlyWarnsFor,
           exactVersionsOnlyWarnsFor: [...checksWorkspaces.keys()],
-          checkResolutionMessage,
-          internalWarnedForDuplicate: warnedForDuplicate
-        });
-        checkDirectDuplicateDependencies(checkSubPackage.pkg, checkSubPackage.pkgPathName, 'devDependencies', ['devDependencies', 'dependencies'], pkg, monorepoDirectDuplicateDependenciesOnlyWarnsFor, monorepoWarnedForDuplicate, 'Monorepo ');
+          checkResolutionMessage
+        }); // TODO fix check onlyWarnFor
+
+        checkDirectDuplicateDependencies(checkSubPackage.pkg, checkSubPackage.pkgPathName, 'devDependencies', checkSubPackage.getDependencyPackageJson, createOnlyWarnsForMappingCheck('monorepoDirectDuplicateDependenciesOnlyWarnsFor', monorepoDirectDuplicateDependenciesOnlyWarnsFor), 'Monorepo ');
       });
-      checkWarnedFor(createReportError('Recommended Checks', pkgPathName), warnedForDuplicate, directDuplicateDependenciesOnlyWarnsFor);
       return this;
     },
 

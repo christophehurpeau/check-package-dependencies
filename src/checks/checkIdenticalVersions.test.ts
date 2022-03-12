@@ -1,7 +1,10 @@
 import { createReportError } from '../utils/createReportError';
 import { checkIdenticalVersions } from './checkIdenticalVersions';
 
-jest.mock('../utils/createReportError');
+jest.mock('../utils/createReportError', () => ({
+  ...jest.requireActual('../utils/createReportError'),
+  createReportError: jest.fn(),
+}));
 
 const mockReportError = jest.fn();
 (createReportError as ReturnType<typeof jest.fn>).mockReturnValue(
@@ -53,7 +56,7 @@ describe('checkIdenticalVersions', () => {
       expect(mockReportError).toHaveBeenCalledWith(
         'Invalid "react-dom" in devDependencies',
         'expecting "1.0.1" be "1.0.0".',
-        false,
+        undefined,
       );
     });
   });
@@ -106,12 +109,12 @@ describe('checkIdenticalVersions', () => {
       expect(mockReportError).toHaveBeenCalledWith(
         'Invalid "react-dom" in dependencies',
         'expecting "1.0.1" be "1.0.0".',
-        false,
+        undefined,
       );
       expect(mockReportError).toHaveBeenCalledWith(
         'Invalid "react-test-renderer" in devDependencies',
         'expecting "1.0.1" be "1.0.0".',
-        false,
+        undefined,
       );
     });
   });

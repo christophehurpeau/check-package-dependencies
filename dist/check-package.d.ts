@@ -1,29 +1,46 @@
-import type { OnlyWarnsFor } from 'utils/shouldOnlyWarnFor';
 import type { CheckResolutionMessage } from './checks/checkResolutionsHasExplanation';
 import type { GetDependencyPackageJson } from './utils/createGetDependencyPackageJson';
 import type { DependencyTypes, PackageJson } from './utils/packageTypes';
+import type { OnlyWarnsForOptionalDependencyMapping, OnlyWarnsFor } from './utils/warnForUtils';
 export interface CreateCheckPackageOptions {
     tryToAutoFix?: boolean;
 }
 export interface CheckDirectPeerDependenciesOptions {
     isLibrary?: boolean;
-    onlyWarnsFor?: OnlyWarnsFor;
+    /** @deprecated use missingOnlyWarnsFor or invalidOnlyWarnsFor */
+    onlyWarnsFor?: OnlyWarnsForOptionalDependencyMapping;
+    missingOnlyWarnsFor?: OnlyWarnsForOptionalDependencyMapping;
+    invalidOnlyWarnsFor?: OnlyWarnsForOptionalDependencyMapping;
+    internalMissingConfigName?: string;
+    internalInvalidConfigName?: string;
 }
 export interface CheckDirectDuplicateDependenciesOptions {
-    onlyWarnsFor?: OnlyWarnsFor;
-    /** @internal */
-    internalWarnedForDuplicate?: Set<string>;
+    onlyWarnsFor?: OnlyWarnsForOptionalDependencyMapping;
+    internalConfigName?: string;
 }
+export interface OnlyWarnsForInPackageCheckPackageRecommendedOption {
+    exactVersions: OnlyWarnsFor;
+}
+export interface OnlyWarnsForInDependencyCheckPackageRecommendedOption {
+    duplicateDirectDependency: OnlyWarnsFor;
+    missingPeerDependency: OnlyWarnsFor;
+    invalidPeerDependencyVersion: OnlyWarnsFor;
+}
+export declare type OnlyWarnsForInDependenciesCheckPackageRecommendedOption = Record<'*' | string, OnlyWarnsForInDependencyCheckPackageRecommendedOption>;
 export interface CheckRecommendedOptions {
     isLibrary?: boolean;
     /** default is true for libraries, false otherwise */
     allowRangeVersionsInDependencies?: boolean;
+    onlyWarnsForInPackage?: OnlyWarnsForInPackageCheckPackageRecommendedOption;
+    onlyWarnsForInDependencies?: OnlyWarnsForInDependenciesCheckPackageRecommendedOption;
+    /** @deprecated use onlyWarnsForInDependencies option */
     peerDependenciesOnlyWarnsFor?: OnlyWarnsFor;
+    /** @deprecated use onlyWarnsForInDependencies option */
     directDuplicateDependenciesOnlyWarnsFor?: OnlyWarnsFor;
+    /** @deprecated use onlyWarnsForInPackage option */
     exactVersionsOnlyWarnsFor?: OnlyWarnsFor;
+    /** function to check the value in the "resolutionExplained" key in package.json */
     checkResolutionMessage?: CheckResolutionMessage;
-    /** @internal */
-    internalWarnedForDuplicate?: Set<string>;
 }
 export interface CheckExactVersionsOptions {
     allowRangeVersionsInDependencies?: boolean;

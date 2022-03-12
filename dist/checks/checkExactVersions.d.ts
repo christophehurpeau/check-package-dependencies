@@ -1,10 +1,10 @@
-import type { OnlyWarnsFor } from 'utils/shouldOnlyWarnFor';
 import type { GetDependencyPackageJson } from '../utils/createGetDependencyPackageJson';
 import type { PackageJson, DependencyTypes } from '../utils/packageTypes';
+import type { OnlyWarnsForCheck } from '../utils/warnForUtils';
 export interface CheckExactVersionsOptions {
     getDependencyPackageJson?: GetDependencyPackageJson;
-    onlyWarnsFor?: OnlyWarnsFor;
+    onlyWarnsForCheck: OnlyWarnsForCheck;
     tryToAutoFix?: boolean;
 }
-export declare function checkExactVersions(pkg: PackageJson, pkgPathName: string, type: DependencyTypes, { getDependencyPackageJson, onlyWarnsFor, tryToAutoFix, }?: CheckExactVersionsOptions): void;
+export declare function checkExactVersions(pkg: PackageJson, pkgPathName: string, types: DependencyTypes[], { getDependencyPackageJson, onlyWarnsForCheck, tryToAutoFix, }: CheckExactVersionsOptions): void;
 //# sourceMappingURL=checkExactVersions.d.ts.map

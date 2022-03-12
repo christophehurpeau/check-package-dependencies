@@ -1,94 +1,50 @@
-import semver from 'semver';
-import type { ReportError } from '../utils/createReportError';
-import { createReportError } from '../utils/createReportError';
+import type { GetDependencyPackageJson } from 'utils/createGetDependencyPackageJson';
+import {
+  reportNotWarnedForMapping,
+  createReportError,
+} from '../utils/createReportError';
+import { getKeys } from '../utils/object';
 import type { PackageJson, DependencyTypes } from '../utils/packageTypes';
-import { shouldOnlyWarnFor } from '../utils/shouldOnlyWarnFor';
-
-export function checkWarnedFor(
-  reportError: ReportError,
-  warnedFor: Set<string>,
-  onlyWarnsFor: string[] = [],
-): void {
-  onlyWarnsFor.forEach((depName) => {
-    if (!warnedFor.has(depName)) {
-      reportError(
-        `Invalid "${depName}" in "onlyWarnsFor" but no warning was raised`,
-      );
-    }
-  });
-}
+import type { OnlyWarnsForMappingCheck } from '../utils/warnForUtils';
+import { checkDuplicateDependencies } from './checkDuplicateDependencies';
 
 export function checkDirectDuplicateDependencies(
   pkg: PackageJson,
   pkgPathName: string,
   depType: DependencyTypes,
-  searchIn: DependencyTypes[],
-  depPkg: PackageJson,
-  onlyWarnsFor: string[] = [],
-  warnedForInternal?: Set<string>,
+  getDependencyPackageJson: GetDependencyPackageJson,
+  onlyWarnsForCheck: OnlyWarnsForMappingCheck,
   reportErrorNamePrefix = '',
 ): void {
-  const dependencies = depPkg[depType];
-  if (!dependencies) return;
-
-  const warnedFor = warnedForInternal || new Set<string>();
-
   const reportError = createReportError(
     `${reportErrorNamePrefix}Direct Duplicate Dependencies`,
     pkgPathName,
   );
-  const searchInExisting = searchIn.filter((type) => pkg[type]);
 
-  for (const [depKey, range] of Object.entries(dependencies)) {
-    const versionsIn = searchInExisting.filter((type) => pkg[type]![depKey]);
-
-    if (versionsIn.length > 1) {
-      reportError(
-        `${depKey} is present in both devDependencies and dependencies, please place it only in dependencies`,
+  const checks: {
+    type: DependencyTypes;
+    searchIn: DependencyTypes[];
+  }[] = [
+    {
+      type: 'devDependencies',
+      searchIn: ['devDependencies', 'dependencies'],
+    },
+    { type: 'dependencies', searchIn: ['devDependencies', 'dependencies'] },
+  ];
+  checks.forEach(({ type, searchIn }) => {
+    if (!pkg[type]) return;
+    getKeys(pkg[type]).forEach((depName) => {
+      const depPkg = getDependencyPackageJson(depName);
+      checkDuplicateDependencies(
+        reportError,
+        pkg,
+        depType,
+        searchIn,
+        depPkg,
+        onlyWarnsForCheck.createFor(depName),
       );
-    } else {
-      const versions = versionsIn.map((type) => pkg[type]![depKey]);
+    });
+  });
 
-      versions.forEach((version, index) => {
-        if (version.startsWith('file:') || range.startsWith('file:')) return;
-        // https://yarnpkg.com/features/workspaces#workspace-ranges-workspace
-        if (
-          version.startsWith('workspace:') ||
-          range.startsWith('workspace:')
-        ) {
-          return;
-        }
-
-        if (
-          semver.satisfies(version, range, {
-            includePrerelease: true,
-          }) ||
-          semver.intersects(version, range, {
-            includePrerelease: true,
-          })
-        ) {
-          return;
-        }
-
-        // Ignore reporting duplicate when there's a resolution for it
-        if (pkg.resolutions?.[depKey]) {
-          return;
-        }
-
-        const versionInType = versionsIn[index];
-        const shouldOnlyWarn = shouldOnlyWarnFor(depKey, onlyWarnsFor);
-        if (shouldOnlyWarn) warnedFor.add(depKey);
-
-        reportError(
-          `Invalid duplicate dependency "${depKey}"`,
-          `"${versions[0]}" (in ${versionInType}) should satisfies "${range}" from "${depPkg.name}" ${depType}.`,
-          shouldOnlyWarn,
-        );
-      });
-    }
-  }
-
-  if (!warnedForInternal) {
-    checkWarnedFor(reportError, warnedFor, onlyWarnsFor);
-  }
+  reportNotWarnedForMapping(reportError, onlyWarnsForCheck);
 }

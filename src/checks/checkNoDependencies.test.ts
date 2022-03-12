@@ -1,7 +1,10 @@
 import { createReportError } from '../utils/createReportError';
 import { checkNoDependencies } from './checkNoDependencies';
 
-jest.mock('../utils/createReportError');
+jest.mock('../utils/createReportError', () => ({
+  ...jest.requireActual('../utils/createReportError'),
+  createReportError: jest.fn(),
+}));
 
 const mockReportError = jest.fn();
 (createReportError as ReturnType<typeof jest.fn>).mockReturnValue(

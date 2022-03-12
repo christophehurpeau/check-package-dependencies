@@ -1,25 +1,43 @@
 import fs from 'fs';
 import path from 'path';
 import glob from 'glob';
-import type { OnlyWarnsFor } from 'utils/shouldOnlyWarnFor';
 import type {
-  CheckPackageApi,
   CreateCheckPackageOptions,
+  CheckPackageApi,
+  OnlyWarnsForInDependenciesCheckPackageRecommendedOption,
+  OnlyWarnsForInDependencyCheckPackageRecommendedOption,
+  OnlyWarnsForInPackageCheckPackageRecommendedOption,
 } from './check-package';
 import { createCheckPackage } from './check-package';
-import {
-  checkDirectDuplicateDependencies,
-  checkWarnedFor,
-} from './checks/checkDirectDuplicateDependencies';
+import { checkDirectDuplicateDependencies } from './checks/checkDirectDuplicateDependencies';
 import type { CheckResolutionMessage } from './checks/checkResolutionsHasExplanation';
-import { createReportError } from './utils/createReportError';
+import type {
+  OnlyWarnsFor,
+  OnlyWarnsForOptionalDependencyMapping,
+} from './utils/warnForUtils';
+import { createOnlyWarnsForMappingCheck } from './utils/warnForUtils';
+
+interface OnlyWarnsForInMonorepoPackageCheckPackageRecommendedOption
+  extends OnlyWarnsForInPackageCheckPackageRecommendedOption {
+  duplicateDirectDependency: OnlyWarnsForInDependencyCheckPackageRecommendedOption['duplicateDirectDependency'];
+}
+
+type OnlyWarnsForInMonorepoPackagesCheckPackageRecommendedOption = Record<
+  '*' | string,
+  OnlyWarnsForInMonorepoPackageCheckPackageRecommendedOption
+>;
 
 export interface CheckPackageWithWorkspacesRecommendedOptions {
   isLibrary?: (pkgName: string) => boolean;
   allowRangeVersionsInLibraries?: boolean;
+  /** @deprecated use onlyWarnsFor */
   peerDependenciesOnlyWarnsFor?: OnlyWarnsFor;
+  /** @deprecated use onlyWarnsFor */
   directDuplicateDependenciesOnlyWarnsFor?: OnlyWarnsFor;
-  monorepoDirectDuplicateDependenciesOnlyWarnsFor?: OnlyWarnsFor;
+  monorepoDirectDuplicateDependenciesOnlyWarnsFor?: OnlyWarnsForOptionalDependencyMapping;
+  onlyWarnsForInRootPackage?: OnlyWarnsForInPackageCheckPackageRecommendedOption;
+  onlyWarnsForInMonorepoPackages?: OnlyWarnsForInMonorepoPackagesCheckPackageRecommendedOption;
+  onlyWarnsForInDependencies?: OnlyWarnsForInDependenciesCheckPackageRecommendedOption;
   checkResolutionMessage?: CheckResolutionMessage;
 }
 
@@ -48,7 +66,7 @@ export function createCheckPackageWithWorkspaces(
     pkgDirectoryPath,
     createCheckPackageOptions,
   );
-  const { pkg, pkgDirname, pkgPathName } = checkPackage;
+  const { pkg, pkgDirname } = checkPackage;
 
   const pkgWorkspaces: string[] | undefined =
     pkg.workspaces && !Array.isArray(pkg.workspaces)
@@ -87,20 +105,33 @@ export function createCheckPackageWithWorkspaces(
     checkRecommended({
       isLibrary = () => false,
       allowRangeVersionsInLibraries = true,
+      onlyWarnsForInRootPackage,
+      onlyWarnsForInMonorepoPackages,
+      onlyWarnsForInDependencies,
       peerDependenciesOnlyWarnsFor,
       directDuplicateDependenciesOnlyWarnsFor,
       monorepoDirectDuplicateDependenciesOnlyWarnsFor,
       checkResolutionMessage,
     } = {}) {
-      const monorepoWarnedForDuplicate = new Set<string>();
-      const warnedForDuplicate = new Set<string>();
+      if (peerDependenciesOnlyWarnsFor) {
+        console.warn(
+          'Option "peerDependenciesOnlyWarnsFor" in checkRecommended() is deprecated. Use "onlyWarnsForInDependencies" instead.',
+        );
+      }
+      if (directDuplicateDependenciesOnlyWarnsFor) {
+        console.warn(
+          'Option "directDuplicateDependenciesOnlyWarnsFor" in checkRecommended() is deprecated. Use "onlyWarnsForInDependencies" instead.',
+        );
+      }
+
       checkPackage.checkNoDependencies();
       checkPackage.checkRecommended({
         isLibrary: false,
+        onlyWarnsForInPackage: onlyWarnsForInRootPackage,
+        onlyWarnsForInDependencies,
         peerDependenciesOnlyWarnsFor,
         directDuplicateDependenciesOnlyWarnsFor,
         checkResolutionMessage,
-        internalWarnedForDuplicate: warnedForDuplicate,
       });
 
       checksWorkspaces.forEach((checkSubPackage, id) => {
@@ -110,29 +141,32 @@ export function createCheckPackageWithWorkspaces(
           allowRangeVersionsInDependencies: isPackageALibrary
             ? allowRangeVersionsInLibraries
             : false,
+          onlyWarnsForInPackage: onlyWarnsForInMonorepoPackages
+            ? {
+                ...onlyWarnsForInMonorepoPackages['*'],
+                ...onlyWarnsForInMonorepoPackages[checkSubPackage.pkg.name],
+              }
+            : undefined,
+          onlyWarnsForInDependencies,
           peerDependenciesOnlyWarnsFor,
           directDuplicateDependenciesOnlyWarnsFor,
           exactVersionsOnlyWarnsFor: [...checksWorkspaces.keys()],
           checkResolutionMessage,
-          internalWarnedForDuplicate: warnedForDuplicate,
         });
+
+        // TODO fix check onlyWarnFor
         checkDirectDuplicateDependencies(
           checkSubPackage.pkg,
           checkSubPackage.pkgPathName,
           'devDependencies',
-          ['devDependencies', 'dependencies'],
-          pkg,
-          monorepoDirectDuplicateDependenciesOnlyWarnsFor,
-          monorepoWarnedForDuplicate,
+          checkSubPackage.getDependencyPackageJson,
+          createOnlyWarnsForMappingCheck(
+            'monorepoDirectDuplicateDependenciesOnlyWarnsFor',
+            monorepoDirectDuplicateDependenciesOnlyWarnsFor,
+          ),
           'Monorepo ',
         );
       });
-
-      checkWarnedFor(
-        createReportError('Recommended Checks', pkgPathName),
-        warnedForDuplicate,
-        directDuplicateDependenciesOnlyWarnsFor,
-      );
 
       return this;
     },

@@ -1,19 +1,19 @@
 import semver from 'semver';
-import { createReportError } from '../utils/createReportError';
+import type { ReportError } from '../utils/createReportError';
 import type { PackageJson, DependencyTypes } from '../utils/packageTypes';
-import { shouldOnlyWarnFor } from '../utils/shouldOnlyWarnFor';
+import type { OnlyWarnsForCheck } from '../utils/warnForUtils';
 
 export function checkPeerDependencies(
   pkg: PackageJson,
-  pkgPathName: string,
+  reportError: ReportError,
   type: DependencyTypes,
   allowedPeerIn: DependencyTypes[],
   depPkg: PackageJson,
-  onlyWarnsFor: string[] = [],
+  missingOnlyWarnsForCheck: OnlyWarnsForCheck,
+  invalidOnlyWarnsForCheck: OnlyWarnsForCheck,
 ): void {
   const { peerDependencies, peerDependenciesMeta } = depPkg;
   if (!peerDependencies) return;
-  const reportError = createReportError('Peer Dependencies', pkgPathName);
 
   const allowedPeerInExisting = allowedPeerIn.filter(
     (allowedPeerInType) => pkg[allowedPeerInType],
@@ -34,7 +34,7 @@ export function checkPeerDependencies(
         `it should satisfies "${range}" and be in ${allowedPeerIn.join(
           ' or ',
         )}`,
-        shouldOnlyWarnFor(peerDepKey, onlyWarnsFor),
+        missingOnlyWarnsForCheck.shouldWarnsFor(peerDepKey),
       );
     } else {
       const versions = versionsIn.map(
@@ -56,7 +56,7 @@ export function checkPeerDependencies(
           reportError(
             `Invalid "${peerDepKey}" peer dependency`,
             `"${version}" (in ${allowedPeerInExisting[index]}) should satisfies "${range}" from "${depPkg.name}" ${type}`,
-            shouldOnlyWarnFor(peerDepKey, onlyWarnsFor),
+            invalidOnlyWarnsForCheck.shouldWarnsFor(peerDepKey),
           );
         }
       });

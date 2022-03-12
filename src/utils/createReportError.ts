@@ -1,6 +1,11 @@
 /* eslint-disable no-console */
 
 import chalk from 'chalk';
+import { getEntries } from './object';
+import type {
+  OnlyWarnsForCheck,
+  OnlyWarnsForMappingCheck,
+} from './warnForUtils';
 
 export type ReportError = (
   msgTitle: string,
@@ -41,4 +46,35 @@ export function createReportError(
       process.exitCode = 1;
     }
   };
+}
+
+export function reportNotWarnedFor(
+  reportError: ReportError,
+  onlyWarnsForCheck: OnlyWarnsForCheck,
+): void {
+  const notWarnedFor = onlyWarnsForCheck.getNotWarnedFor();
+  if (notWarnedFor.length > 0) {
+    reportError(
+      `Invalid config in "${onlyWarnsForCheck.configName}"`,
+      `no warning was raised for ${notWarnedFor
+        .map((depName) => `"${depName}"`)
+        .join(', ')}`,
+      false,
+    );
+  }
+}
+
+export function reportNotWarnedForMapping(
+  reportError: ReportError,
+  onlyWarnsForMappingCheck: OnlyWarnsForMappingCheck,
+): void {
+  const notWarnedForMapping = onlyWarnsForMappingCheck.getNotWarnedFor();
+  getEntries(notWarnedForMapping).forEach(([depNameOrStar, notWarnedFor]) => {
+    reportError(
+      `Invalid config in "${onlyWarnsForMappingCheck.configName}" for "${depNameOrStar}"`,
+      `no warning was raised for ${notWarnedFor
+        .map((depName) => `"${depName}"`)
+        .join(', ')}`,
+    );
+  });
 }

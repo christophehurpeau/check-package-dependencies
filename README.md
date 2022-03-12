@@ -56,7 +56,13 @@ createCheckPackage(/* '.' */)
     isLibrary: false,
   })
   .checkDirectPeerDependencies({
-    onlyWarnsFor: [],
+    // Allow to only warn for not respected peer dependencies.
+    // Example: { '@babel/cli': ['@babel/core'] }
+    // Only warns for missing "@babel/core" peer dependency asked in "@babel/cli".
+    // You can also use "*" for any library
+    // { '*': ['semver'] }
+    missingOnlyWarnsFor: {},
+    invalidOnlyWarnsFor: {},
   })
   // Check that there are no duplicates among your dependencies and your devDependencies.
   // For example, If you use "@babel/core": "7.0.0" and one of your direct dependency requires "^7.0.1" (in dependencies, not peerDependency)
@@ -64,7 +70,7 @@ createCheckPackage(/* '.' */)
   // You will probably need to add warnings for common library where duplicate have low impact,
   // like type-fest or fast-deep-equal.
   .checkDirectDuplicateDependencies({
-    onlyWarnsFor: ['type-fest'],
+    onlyWarnsFor: { '*': 'type-fest' },
   })
   // Check that all your resolutions are also present in an "resolutionsExplained" field, forcing you to explain why the resolution was necessary
   .checkResolutionsHasExplanation()

@@ -1,11 +1,8 @@
+/* eslint-disable complexity */
 /* eslint-disable max-lines */
 import path from 'path';
 import util from 'util';
-import type { OnlyWarnsFor } from 'utils/shouldOnlyWarnFor';
-import {
-  checkDirectDuplicateDependencies,
-  checkWarnedFor,
-} from './checks/checkDirectDuplicateDependencies';
+import { checkDirectDuplicateDependencies } from './checks/checkDirectDuplicateDependencies';
 import { checkDirectPeerDependencies } from './checks/checkDirectPeerDependencies';
 import { checkExactVersions } from './checks/checkExactVersions';
 import { checkIdenticalVersions } from './checks/checkIdenticalVersions';
@@ -20,19 +17,17 @@ import {
   readPkgJson,
   writePkgJson,
 } from './utils/createGetDependencyPackageJson';
-import { createReportError } from './utils/createReportError';
-import { getKeys } from './utils/object';
+import { getEntries } from './utils/object';
+import type { DependencyTypes, PackageJson } from './utils/packageTypes';
 import type {
-  RegularDependencyTypes,
-  DependencyTypes,
-  PackageJson,
-} from './utils/packageTypes';
-
-const regularDependencyTypes: RegularDependencyTypes[] = [
-  'devDependencies',
-  'dependencies',
-  'optionalDependencies',
-];
+  OnlyWarnsForOptionalDependencyMapping,
+  OnlyWarnsFor,
+  OnlyWarnsForDependencyMapping,
+} from './utils/warnForUtils';
+import {
+  createOnlyWarnsForArrayCheck,
+  createOnlyWarnsForMappingCheck,
+} from './utils/warnForUtils';
 
 export interface CreateCheckPackageOptions {
   tryToAutoFix?: boolean;
@@ -40,25 +35,48 @@ export interface CreateCheckPackageOptions {
 
 export interface CheckDirectPeerDependenciesOptions {
   isLibrary?: boolean;
-  onlyWarnsFor?: OnlyWarnsFor;
+  /** @deprecated use missingOnlyWarnsFor or invalidOnlyWarnsFor */
+  onlyWarnsFor?: OnlyWarnsForOptionalDependencyMapping;
+  missingOnlyWarnsFor?: OnlyWarnsForOptionalDependencyMapping;
+  invalidOnlyWarnsFor?: OnlyWarnsForOptionalDependencyMapping;
+  internalMissingConfigName?: string;
+  internalInvalidConfigName?: string;
 }
 
 export interface CheckDirectDuplicateDependenciesOptions {
-  onlyWarnsFor?: OnlyWarnsFor;
-  /** @internal */
-  internalWarnedForDuplicate?: Set<string>;
+  onlyWarnsFor?: OnlyWarnsForOptionalDependencyMapping;
+  internalConfigName?: string;
 }
+
+export interface OnlyWarnsForInPackageCheckPackageRecommendedOption {
+  exactVersions: OnlyWarnsFor;
+}
+
+export interface OnlyWarnsForInDependencyCheckPackageRecommendedOption {
+  duplicateDirectDependency: OnlyWarnsFor;
+  missingPeerDependency: OnlyWarnsFor;
+  invalidPeerDependencyVersion: OnlyWarnsFor;
+}
+
+export type OnlyWarnsForInDependenciesCheckPackageRecommendedOption = Record<
+  '*' | string,
+  OnlyWarnsForInDependencyCheckPackageRecommendedOption
+>;
 
 export interface CheckRecommendedOptions {
   isLibrary?: boolean;
   /** default is true for libraries, false otherwise */
   allowRangeVersionsInDependencies?: boolean;
+  onlyWarnsForInPackage?: OnlyWarnsForInPackageCheckPackageRecommendedOption;
+  onlyWarnsForInDependencies?: OnlyWarnsForInDependenciesCheckPackageRecommendedOption;
+  /** @deprecated use onlyWarnsForInDependencies option */
   peerDependenciesOnlyWarnsFor?: OnlyWarnsFor;
+  /** @deprecated use onlyWarnsForInDependencies option */
   directDuplicateDependenciesOnlyWarnsFor?: OnlyWarnsFor;
+  /** @deprecated use onlyWarnsForInPackage option */
   exactVersionsOnlyWarnsFor?: OnlyWarnsFor;
+  /** function to check the value in the "resolutionExplained" key in package.json */
   checkResolutionMessage?: CheckResolutionMessage;
-  /** @internal */
-  internalWarnedForDuplicate?: Set<string>;
 }
 
 export interface CheckExactVersionsOptions {
@@ -181,35 +199,32 @@ export function createCheckPackage(
       onlyWarnsFor,
       allowRangeVersionsInDependencies = true,
     } = {}) {
-      if (!allowRangeVersionsInDependencies) {
-        checkExactVersions(pkg, pkgPathName, 'dependencies', {
-          onlyWarnsFor,
+      const onlyWarnsForCheck = createOnlyWarnsForArrayCheck(
+        'checkExactVersions.onlyWarnsFor',
+        onlyWarnsFor,
+      );
+      checkExactVersions(
+        pkg,
+        pkgPathName,
+        !allowRangeVersionsInDependencies
+          ? ['dependencies', 'devDependencies', 'resolutions']
+          : ['devDependencies', 'resolutions'],
+        {
+          onlyWarnsForCheck,
           tryToAutoFix,
-          getDependencyPackageJson,
-        });
-      }
-      checkExactVersions(pkg, pkgPathName, 'devDependencies', {
-        onlyWarnsFor,
-        tryToAutoFix,
-        getDependencyPackageJson,
-      });
-      checkExactVersions(pkg, pkgPathName, 'resolutions', {
-        onlyWarnsFor,
-        tryToAutoFix,
-        getDependencyPackageJson,
-      });
+        },
+      );
       writePackageIfChanged();
       return this;
     },
     /** @deprecated use checkExactVersions({ allowRangeVersionsInDependencies: true })  */
     checkExactVersionsForLibrary({ onlyWarnsFor } = {}) {
-      checkExactVersions(pkg, pkgPathName, 'devDependencies', {
+      const onlyWarnsForCheck = createOnlyWarnsForArrayCheck(
+        'checkExactVersionsForLibrary.onlyWarnsFor',
         onlyWarnsFor,
-        tryToAutoFix,
-        getDependencyPackageJson,
-      });
-      checkExactVersions(pkg, pkgPathName, 'resolutions', {
-        onlyWarnsFor,
+      );
+      checkExactVersions(pkg, pkgPathName, ['devDependencies', 'resolutions'], {
+        onlyWarnsForCheck,
         tryToAutoFix,
         getDependencyPackageJson,
       });
@@ -218,8 +233,12 @@ export function createCheckPackage(
     },
 
     checkExactDevVersions({ onlyWarnsFor } = {}) {
-      checkExactVersions(pkg, pkgPathName, 'devDependencies', {
+      const onlyWarnsForCheck = createOnlyWarnsForArrayCheck(
+        'checkExactDevVersions.onlyWarnsFor',
         onlyWarnsFor,
+      );
+      checkExactVersions(pkg, pkgPathName, ['devDependencies'], {
+        onlyWarnsForCheck,
         tryToAutoFix,
         getDependencyPackageJson,
       });
@@ -235,64 +254,51 @@ export function createCheckPackage(
       return this;
     },
 
-    checkDirectPeerDependencies({ isLibrary = false, onlyWarnsFor } = {}) {
-      regularDependencyTypes.forEach((depType) => {
-        if (!pkg[depType]) return;
-        getKeys(pkg[depType]).forEach((depName) => {
-          const depPkg = getDependencyPackageJson(depName);
-          if (depPkg.peerDependencies) {
-            checkDirectPeerDependencies(
-              isLibrary,
-              pkg,
-              pkgPathName,
-              depType,
-              depPkg,
-              onlyWarnsFor,
+    checkDirectPeerDependencies({
+      isLibrary = false,
+      onlyWarnsFor: deprecatedOnlyWarnsFor,
+      missingOnlyWarnsFor = deprecatedOnlyWarnsFor,
+      invalidOnlyWarnsFor = deprecatedOnlyWarnsFor,
+      internalMissingConfigName = deprecatedOnlyWarnsFor
+        ? 'onlyWarnsFor'
+        : 'missingOnlyWarnsFor',
+      internalInvalidConfigName = deprecatedOnlyWarnsFor
+        ? 'onlyWarnsFor'
+        : 'invalidOnlyWarnsFor',
+    } = {}) {
+      const missingOnlyWarnsForCheck = createOnlyWarnsForMappingCheck(
+        internalMissingConfigName,
+        missingOnlyWarnsFor,
+      );
+      const invalidOnlyWarnsForCheck =
+        internalInvalidConfigName === internalMissingConfigName
+          ? missingOnlyWarnsForCheck
+          : createOnlyWarnsForMappingCheck(
+              internalInvalidConfigName,
+              invalidOnlyWarnsFor,
             );
-          }
-        });
-      });
+      checkDirectPeerDependencies(
+        isLibrary,
+        pkg,
+        pkgPathName,
+        getDependencyPackageJson,
+        missingOnlyWarnsForCheck,
+        invalidOnlyWarnsForCheck,
+      );
       return this;
     },
 
     checkDirectDuplicateDependencies({
       onlyWarnsFor,
-      internalWarnedForDuplicate,
+      internalConfigName = 'onlyWarnsFor',
     } = {}) {
-      const warnedForInternal = internalWarnedForDuplicate || new Set();
-      const checks: {
-        type: DependencyTypes;
-        searchIn: DependencyTypes[];
-      }[] = [
-        {
-          type: 'devDependencies',
-          searchIn: ['devDependencies', 'dependencies'],
-        },
-        { type: 'dependencies', searchIn: ['devDependencies', 'dependencies'] },
-      ];
-      checks.forEach(({ type, searchIn }) => {
-        if (!pkg[type]) return;
-        getKeys(pkg[type]).forEach((depName) => {
-          const depPkg = getDependencyPackageJson(depName);
-          checkDirectDuplicateDependencies(
-            pkg,
-            pkgPathName,
-            'dependencies',
-            searchIn,
-            depPkg,
-            onlyWarnsFor,
-            warnedForInternal,
-          );
-        });
-      });
-
-      if (!warnedForInternal) {
-        const reportError = createReportError(
-          'Direct Duplicate Dependencies',
-          pkgPathName,
-        );
-        checkWarnedFor(reportError, warnedForInternal, onlyWarnsFor);
-      }
+      checkDirectDuplicateDependencies(
+        pkg,
+        pkgPathName,
+        'dependencies',
+        getDependencyPackageJson,
+        createOnlyWarnsForMappingCheck(internalConfigName, onlyWarnsFor),
+      );
       return this;
     },
 
@@ -310,13 +316,69 @@ export function createCheckPackage(
 
     checkRecommended({
       isLibrary = false,
+      onlyWarnsForInPackage,
+      onlyWarnsForInDependencies,
       allowRangeVersionsInDependencies = isLibrary,
       peerDependenciesOnlyWarnsFor,
       directDuplicateDependenciesOnlyWarnsFor,
       exactVersionsOnlyWarnsFor,
       checkResolutionMessage,
-      internalWarnedForDuplicate,
     } = {}) {
+      let internalMissingPeerDependenciesOnlyWarnsFor: OnlyWarnsForOptionalDependencyMapping =
+        peerDependenciesOnlyWarnsFor;
+      let internalInvalidPeerDependenciesOnlyWarnsFor: OnlyWarnsForOptionalDependencyMapping =
+        peerDependenciesOnlyWarnsFor;
+      let internalDirectDuplicateDependenciesOnlyWarnsFor: OnlyWarnsForOptionalDependencyMapping =
+        directDuplicateDependenciesOnlyWarnsFor;
+
+      if (onlyWarnsForInPackage) {
+        if (exactVersionsOnlyWarnsFor) {
+          console.warn(
+            'Ignoring "exactVersionsOnlyWarnsFor" as "onlyWarnsForInPackage" is used.',
+          );
+        }
+        exactVersionsOnlyWarnsFor = onlyWarnsForInPackage.exactVersions || {};
+      }
+      if (onlyWarnsForInDependencies) {
+        if (peerDependenciesOnlyWarnsFor) {
+          console.warn(
+            'Ignoring "peerDependenciesOnlyWarnsFor" as "onlyWarnsFor" is used.',
+          );
+        }
+        if (directDuplicateDependenciesOnlyWarnsFor) {
+          console.warn(
+            'Ignoring "directDuplicateDependenciesOnlyWarnsFor" as "onlyWarnsFor" is used.',
+          );
+        }
+
+        internalDirectDuplicateDependenciesOnlyWarnsFor = {};
+        internalMissingPeerDependenciesOnlyWarnsFor = {};
+        internalInvalidPeerDependenciesOnlyWarnsFor = {};
+
+        getEntries(onlyWarnsForInDependencies).forEach(
+          ([dependencyNameOrSpecialKey, onlyWarnsForValue]) => {
+            if (onlyWarnsForValue.duplicateDirectDependency) {
+              (
+                internalDirectDuplicateDependenciesOnlyWarnsFor as OnlyWarnsForDependencyMapping
+              )[dependencyNameOrSpecialKey] =
+                onlyWarnsForValue.duplicateDirectDependency;
+            }
+            if (onlyWarnsForValue.missingPeerDependency) {
+              (
+                internalMissingPeerDependenciesOnlyWarnsFor as OnlyWarnsForDependencyMapping
+              )[dependencyNameOrSpecialKey] =
+                onlyWarnsForValue.missingPeerDependency;
+            }
+            if (onlyWarnsForValue.invalidPeerDependencyVersion) {
+              (
+                internalInvalidPeerDependenciesOnlyWarnsFor as OnlyWarnsForDependencyMapping
+              )[dependencyNameOrSpecialKey] =
+                onlyWarnsForValue.invalidPeerDependencyVersion;
+            }
+          },
+        );
+      }
+
       this.checkExactVersions({
         allowRangeVersionsInDependencies,
         onlyWarnsFor: exactVersionsOnlyWarnsFor,
@@ -324,12 +386,21 @@ export function createCheckPackage(
 
       this.checkDirectPeerDependencies({
         isLibrary,
-        onlyWarnsFor: peerDependenciesOnlyWarnsFor,
+        missingOnlyWarnsFor: internalMissingPeerDependenciesOnlyWarnsFor,
+        invalidOnlyWarnsFor: internalInvalidPeerDependenciesOnlyWarnsFor,
+        internalMissingConfigName: peerDependenciesOnlyWarnsFor
+          ? 'peerDependenciesOnlyWarnsFor'
+          : 'onlyWarnsForInDependencies.missingPeerDependency',
+        internalInvalidConfigName: peerDependenciesOnlyWarnsFor
+          ? 'peerDependenciesOnlyWarnsFor'
+          : 'onlyWarnsForInDependencies.invalidPeerDependencyVersion',
       });
 
       this.checkDirectDuplicateDependencies({
-        onlyWarnsFor: directDuplicateDependenciesOnlyWarnsFor,
-        internalWarnedForDuplicate,
+        onlyWarnsFor: internalDirectDuplicateDependenciesOnlyWarnsFor,
+        internalConfigName: directDuplicateDependenciesOnlyWarnsFor
+          ? 'directDuplicateDependenciesOnlyWarnsFor'
+          : 'onlyWarnsForInDependencies.duplicateDirectDependency',
       });
 
       this.checkResolutionsHasExplanation(checkResolutionMessage);

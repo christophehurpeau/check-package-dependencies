@@ -1,7 +1,7 @@
 import semver from 'semver';
 import { createReportError } from '../utils/createReportError';
 import type { DependencyTypes, PackageJson } from '../utils/packageTypes';
-import { shouldOnlyWarnFor } from '../utils/shouldOnlyWarnFor';
+import type { OnlyWarnsForCheck } from '../utils/warnForUtils';
 
 export function checkSatisfiesVersionsFromDependency(
   pkg: PackageJson,
@@ -10,7 +10,7 @@ export function checkSatisfiesVersionsFromDependency(
   depKeys: string[],
   depPkg: PackageJson,
   dependencies: PackageJson[DependencyTypes] = {},
-  onlyWarnsFor: string[] = [],
+  onlyWarnsForCheck?: OnlyWarnsForCheck,
 ): void {
   const pkgDependencies = pkg[type] || {};
   const reportError = createReportError(
@@ -33,7 +33,7 @@ export function checkSatisfiesVersionsFromDependency(
       reportError(
         `Missing "${depKey}" in ${type}`,
         `should satisfies "${range}" from "${depPkg.name}" ${depKey}.`,
-        shouldOnlyWarnFor(depKey, onlyWarnsFor),
+        onlyWarnsForCheck?.shouldWarnsFor(depKey),
       );
     } else {
       const minVersionOfVersion = semver.minVersion(version);
@@ -46,7 +46,7 @@ export function checkSatisfiesVersionsFromDependency(
         reportError(
           `Invalid "${depKey}" in ${type}`,
           `"${version}" (in "${depKey}") should satisfies "${range}" from "${depPkg.name}" ${depKey}.`,
-          shouldOnlyWarnFor(depKey, onlyWarnsFor),
+          onlyWarnsForCheck?.shouldWarnsFor(depKey),
         );
       }
     }

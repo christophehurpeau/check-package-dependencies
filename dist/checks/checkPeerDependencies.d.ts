@@ -1,3 +1,5 @@
+import type { ReportError } from '../utils/createReportError';
 import type { PackageJson, DependencyTypes } from '../utils/packageTypes';
-export declare function checkPeerDependencies(pkg: PackageJson, pkgPathName: string, type: DependencyTypes, allowedPeerIn: DependencyTypes[], depPkg: PackageJson, onlyWarnsFor?: string[]): void;
+import type { OnlyWarnsForCheck } from '../utils/warnForUtils';
+export declare function checkPeerDependencies(pkg: PackageJson, reportError: ReportError, type: DependencyTypes, allowedPeerIn: DependencyTypes[], depPkg: PackageJson, missingOnlyWarnsForCheck: OnlyWarnsForCheck, invalidOnlyWarnsForCheck: OnlyWarnsForCheck): void;
 //# sourceMappingURL=checkPeerDependencies.d.ts.map

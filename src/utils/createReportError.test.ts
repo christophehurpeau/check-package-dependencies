@@ -1,4 +1,5 @@
-import { logMessage } from './createReportError';
+import { logMessage, reportNotWarnedForMapping } from './createReportError';
+import { createOnlyWarnsForMappingCheck } from './warnForUtils';
 
 describe('logMessage', () => {
   beforeEach(() => {
@@ -82,5 +83,54 @@ describe('logMessage', () => {
         ],
       }
     `);
+  });
+});
+
+describe('reportNotWarnedForMapping', () => {
+  const reportError = jest.fn();
+  beforeEach(() => {
+    reportError.mockReset();
+  });
+
+  test('it not report when warn is empty', () => {
+    const onlyWarnsForMappingCheck = createOnlyWarnsForMappingCheck('test', []);
+    reportNotWarnedForMapping(reportError, onlyWarnsForMappingCheck);
+    expect(reportError).not.toHaveBeenCalled();
+  });
+
+  test('it report when warn not empty as array', () => {
+    const onlyWarnsForMappingCheck = createOnlyWarnsForMappingCheck('test', [
+      'dep1',
+    ]);
+    reportNotWarnedForMapping(reportError, onlyWarnsForMappingCheck);
+    expect(reportError).toHaveBeenCalledTimes(1);
+    expect(reportError).toHaveBeenLastCalledWith(
+      'Invalid config in "test" for "*"',
+      'no warning was raised for "dep1"',
+    );
+  });
+
+  test('it report when warn not empty as record with star', () => {
+    const onlyWarnsForMappingCheck = createOnlyWarnsForMappingCheck('test', {
+      '*': ['dep1'],
+    });
+    reportNotWarnedForMapping(reportError, onlyWarnsForMappingCheck);
+    expect(reportError).toHaveBeenCalledTimes(1);
+    expect(reportError).toHaveBeenLastCalledWith(
+      'Invalid config in "test" for "*"',
+      'no warning was raised for "dep1"',
+    );
+  });
+
+  test('it report when warn not empty as record', () => {
+    const onlyWarnsForMappingCheck = createOnlyWarnsForMappingCheck('test', {
+      depKey: ['dep1'],
+    });
+    reportNotWarnedForMapping(reportError, onlyWarnsForMappingCheck);
+    expect(reportError).toHaveBeenCalledTimes(1);
+    expect(reportError).toHaveBeenLastCalledWith(
+      'Invalid config in "test" for "depKey"',
+      'no warning was raised for "dep1"',
+    );
   });
 });

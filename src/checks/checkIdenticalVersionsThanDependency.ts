@@ -1,6 +1,6 @@
 import { createReportError } from '../utils/createReportError';
 import type { PackageJson, DependencyTypes } from '../utils/packageTypes';
-import { shouldOnlyWarnFor } from '../utils/shouldOnlyWarnFor';
+import type { OnlyWarnsForCheck } from '../utils/warnForUtils';
 
 export function checkIdenticalVersionsThanDependency(
   pkg: PackageJson,
@@ -9,7 +9,7 @@ export function checkIdenticalVersionsThanDependency(
   depKeys: string[],
   depPkg: PackageJson,
   dependencies: PackageJson[DependencyTypes] = {},
-  onlyWarnsFor: string[] = [],
+  onlyWarnsForCheck?: OnlyWarnsForCheck,
 ): void {
   const pkgDependencies = pkg[type] || {};
   const reportError = createReportError(
@@ -40,7 +40,7 @@ export function checkIdenticalVersionsThanDependency(
       reportError(
         `Missing "${depKey}" in ${type}`,
         `expecting to be "${version}".`,
-        shouldOnlyWarnFor(depKey, onlyWarnsFor),
+        onlyWarnsForCheck?.shouldWarnsFor(depKey),
       );
     }
 
@@ -48,7 +48,7 @@ export function checkIdenticalVersionsThanDependency(
       reportError(
         `Invalid "${depKey}" in ${type}`,
         `expecting "${value}" to be "${version}".`,
-        shouldOnlyWarnFor(depKey, onlyWarnsFor),
+        onlyWarnsForCheck?.shouldWarnsFor(depKey),
       );
     }
   });

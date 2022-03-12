@@ -1,11 +1,21 @@
+/* eslint-disable max-lines */
 import { createReportError } from '../utils/createReportError';
+import { createOnlyWarnsForArrayCheck } from '../utils/warnForUtils';
 import { checkExactVersions } from './checkExactVersions';
 
-jest.mock('../utils/createReportError');
+jest.mock('../utils/createReportError', () => ({
+  ...jest.requireActual('../utils/createReportError'),
+  createReportError: jest.fn(),
+}));
 
 const mockReportError = jest.fn();
 (createReportError as ReturnType<typeof jest.fn>).mockReturnValue(
   mockReportError,
+);
+const onlyWarnsForConfigName = 'checkExactVersions.test.onlyWarnsFor';
+const emptyOnlyWarnsForCheck = createOnlyWarnsForArrayCheck(
+  onlyWarnsForConfigName,
+  [],
 );
 
 describe('checkExactVersions', () => {
@@ -16,7 +26,8 @@ describe('checkExactVersions', () => {
     checkExactVersions(
       { name: 'test', devDependencies: { test: '1.0.0' } },
       'path',
-      'devDependencies',
+      ['devDependencies'],
+      { onlyWarnsForCheck: emptyOnlyWarnsForCheck },
     );
     expect(createReportError).toHaveBeenCalledWith('Exact versions', 'path');
     expect(mockReportError).not.toHaveBeenCalled();
@@ -25,7 +36,8 @@ describe('checkExactVersions', () => {
     checkExactVersions(
       { name: 'test', devDependencies: { test: '^1.0.0' } },
       'path',
-      'devDependencies',
+      ['devDependencies'],
+      { onlyWarnsForCheck: emptyOnlyWarnsForCheck },
     );
     expect(createReportError).toHaveBeenCalled();
     expect(mockReportError).toHaveBeenCalledTimes(1);
@@ -39,8 +51,13 @@ describe('checkExactVersions', () => {
     checkExactVersions(
       { name: 'test', devDependencies: { test: '^1.0.0' } },
       'path',
-      'devDependencies',
-      { onlyWarnsFor: ['test'] },
+      ['devDependencies'],
+      {
+        onlyWarnsForCheck: createOnlyWarnsForArrayCheck(
+          onlyWarnsForConfigName,
+          ['test'],
+        ),
+      },
     );
     expect(createReportError).toHaveBeenCalled();
     expect(mockReportError).toHaveBeenCalledTimes(1);
@@ -55,7 +72,8 @@ describe('checkExactVersions', () => {
     checkExactVersions(
       { name: 'test', devDependencies: { test: '~1.0.0' } },
       'path',
-      'devDependencies',
+      ['devDependencies'],
+      { onlyWarnsForCheck: emptyOnlyWarnsForCheck },
     );
     expect(createReportError).toHaveBeenCalled();
     expect(mockReportError).toHaveBeenCalledTimes(1);
@@ -70,7 +88,8 @@ describe('checkExactVersions', () => {
     checkExactVersions(
       { name: 'test', devDependencies: { test1: '~1.0.0', test2: '~1.0.0' } },
       'path',
-      'devDependencies',
+      ['devDependencies'],
+      { onlyWarnsForCheck: emptyOnlyWarnsForCheck },
     );
     expect(createReportError).toHaveBeenCalled();
     expect(mockReportError).toHaveBeenCalledTimes(2);
@@ -93,7 +112,8 @@ describe('checkExactVersions', () => {
       .fn()
       .mockReturnValueOnce({ name: 'test1', version: '1.0.1' });
     const pkg = { name: 'test', devDependencies: { test1: '~1.0.0' } };
-    checkExactVersions(pkg, 'path', 'devDependencies', {
+    checkExactVersions(pkg, 'path', ['devDependencies'], {
+      onlyWarnsForCheck: emptyOnlyWarnsForCheck,
       tryToAutoFix: true,
       getDependencyPackageJson: getDependencyPackageJsonMock,
     });
@@ -113,7 +133,8 @@ describe('checkExactVersions', () => {
         throw new Error('Module not found');
       });
     const pkg = { name: 'test', devDependencies: { test1: '~1.0.0' } };
-    checkExactVersions(pkg, 'path', 'devDependencies', {
+    checkExactVersions(pkg, 'path', ['devDependencies'], {
+      onlyWarnsForCheck: emptyOnlyWarnsForCheck,
       tryToAutoFix: true,
       getDependencyPackageJson: getDependencyPackageJsonMock,
     });
@@ -133,7 +154,8 @@ describe('checkExactVersions', () => {
       .fn()
       .mockReturnValueOnce({ name: 'test1', version: '2.0.0' });
     const pkg = { name: 'test', devDependencies: { test1: '~1.0.0' } };
-    checkExactVersions(pkg, 'path', 'devDependencies', {
+    checkExactVersions(pkg, 'path', ['devDependencies'], {
+      onlyWarnsForCheck: emptyOnlyWarnsForCheck,
       tryToAutoFix: true,
       getDependencyPackageJson: getDependencyPackageJsonMock,
     });
@@ -157,7 +179,10 @@ describe('checkExactVersions', () => {
         },
       },
       'path',
-      'devDependencies',
+      ['devDependencies'],
+      {
+        onlyWarnsForCheck: emptyOnlyWarnsForCheck,
+      },
     );
     expect(createReportError).toHaveBeenCalled();
     expect(mockReportError).toHaveBeenCalledTimes(1);
@@ -165,6 +190,48 @@ describe('checkExactVersions', () => {
       1,
       'Unexpected range dependency in "devDependencies" for "rollupv1"',
       'expecting "^1.0.1" to be exact "1.0.1".',
+      false,
+    );
+  });
+  it('should warn when onlyWarnsFor is passed', () => {
+    checkExactVersions(
+      { name: 'test', devDependencies: { test1: '~1.0.0', test2: '~1.0.0' } },
+      'path',
+      ['devDependencies'],
+      {
+        onlyWarnsForCheck: createOnlyWarnsForArrayCheck(
+          onlyWarnsForConfigName,
+          ['test1'],
+        ),
+      },
+    );
+    expect(createReportError).toHaveBeenCalled();
+    expect(mockReportError).toHaveBeenCalledTimes(2);
+    expect(mockReportError).toHaveBeenNthCalledWith(
+      1,
+      'Unexpected range dependency in "devDependencies" for "test1"',
+      'expecting "~1.0.0" to be exact "1.0.0".',
+      true,
+    );
+    expect(mockReportError).toHaveBeenNthCalledWith(
+      2,
+      'Unexpected range dependency in "devDependencies" for "test2"',
+      'expecting "~1.0.0" to be exact "1.0.0".',
+      false,
+    );
+  });
+  it('should error when onlyWarnsFor is not fully used', () => {
+    checkExactVersions({ name: 'test' }, 'path', ['devDependencies'], {
+      onlyWarnsForCheck: createOnlyWarnsForArrayCheck(onlyWarnsForConfigName, [
+        'testa',
+      ]),
+    });
+    expect(createReportError).toHaveBeenCalled();
+    expect(mockReportError).toHaveBeenCalledTimes(1);
+    expect(mockReportError).toHaveBeenNthCalledWith(
+      1,
+      'Invalid config in "checkExactVersions.test.onlyWarnsFor"',
+      'no warning was raised for "testa"',
       false,
     );
   });

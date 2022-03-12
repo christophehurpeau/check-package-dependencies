@@ -1,5 +1,5 @@
-import type { ReportError } from '../utils/createReportError';
+import type { GetDependencyPackageJson } from 'utils/createGetDependencyPackageJson';
 import type { PackageJson, DependencyTypes } from '../utils/packageTypes';
-export declare function checkWarnedFor(reportError: ReportError, warnedFor: Set<string>, onlyWarnsFor?: string[]): void;
-export declare function checkDirectDuplicateDependencies(pkg: PackageJson, pkgPathName: string, depType: DependencyTypes, searchIn: DependencyTypes[], depPkg: PackageJson, onlyWarnsFor?: string[], warnedForInternal?: Set<string>, reportErrorNamePrefix?: string): void;
+import type { OnlyWarnsForMappingCheck } from '../utils/warnForUtils';
+export declare function checkDirectDuplicateDependencies(pkg: PackageJson, pkgPathName: string, depType: DependencyTypes, getDependencyPackageJson: GetDependencyPackageJson, onlyWarnsForCheck: OnlyWarnsForMappingCheck, reportErrorNamePrefix?: string): void;
 //# sourceMappingURL=checkDirectDuplicateDependencies.d.ts.map

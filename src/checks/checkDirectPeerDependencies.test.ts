@@ -1,7 +1,11 @@
 import { createReportError } from '../utils/createReportError';
+import { createOnlyWarnsForMappingCheck } from '../utils/warnForUtils';
 import { checkDirectPeerDependencies } from './checkDirectPeerDependencies';
 
-jest.mock('../utils/createReportError');
+jest.mock('../utils/createReportError', () => ({
+  ...jest.requireActual('../utils/createReportError'),
+  createReportError: jest.fn(),
+}));
 
 const mockReportError = jest.fn();
 (createReportError as ReturnType<typeof jest.fn>).mockReturnValue(
@@ -21,11 +25,12 @@ describe('checkDirectPeerDependencies', () => {
         devDependencies: { 'some-lib-using-rollup': '1.0.0' },
       },
       'path',
-      'devDependencies',
-      {
+      jest.fn().mockImplementationOnce(() => ({
         name: 'some-lib-using-rollup',
         peerDependencies: { rollup: '^1.0.0' },
-      },
+      })),
+      createOnlyWarnsForMappingCheck('test', []),
+      createOnlyWarnsForMappingCheck('test', []),
     );
     expect(mockReportError).toHaveBeenCalledWith(
       'Missing "rollup" peer dependency from "some-lib-using-rollup" in devDependencies',
@@ -42,11 +47,17 @@ describe('checkDirectPeerDependencies', () => {
         devDependencies: { rollup: '^1.0.0', 'some-lib-using-rollup': '1.0.0' },
       },
       'path',
-      'devDependencies',
-      {
-        name: 'some-lib-using-rollup',
-        peerDependencies: { rollup: '^1.0.0' },
-      },
+      jest
+        .fn()
+        .mockImplementationOnce(() => ({
+          name: 'rollup',
+        }))
+        .mockImplementationOnce(() => ({
+          name: 'some-lib-using-rollup',
+          peerDependencies: { rollup: '^1.0.0' },
+        })),
+      createOnlyWarnsForMappingCheck('test', []),
+      createOnlyWarnsForMappingCheck('test', []),
     );
     expect(mockReportError).not.toHaveBeenCalled();
   });
@@ -59,11 +70,17 @@ describe('checkDirectPeerDependencies', () => {
         devDependencies: { rollup: '^1.0.0', 'some-lib-using-rollup': '1.0.0' },
       },
       'path',
-      'devDependencies',
-      {
-        name: 'some-lib-using-rollup',
-        peerDependencies: { rollup: '*' },
-      },
+      jest
+        .fn()
+        .mockImplementationOnce(() => ({
+          name: 'rollup',
+        }))
+        .mockImplementationOnce(() => ({
+          name: 'some-lib-using-rollup',
+          peerDependencies: { rollup: '*' },
+        })),
+      createOnlyWarnsForMappingCheck('test', []),
+      createOnlyWarnsForMappingCheck('test', []),
     );
     expect(mockReportError).not.toHaveBeenCalled();
   });
@@ -79,11 +96,17 @@ describe('checkDirectPeerDependencies', () => {
         },
       },
       'path',
-      'devDependencies',
-      {
-        name: 'some-lib-using-rollup',
-        peerDependencies: { rollup: '*' },
-      },
+      jest
+        .fn()
+        .mockImplementationOnce(() => ({
+          name: 'rollup',
+        }))
+        .mockImplementationOnce(() => ({
+          name: 'some-lib-using-rollup',
+          peerDependencies: { rollup: '*' },
+        })),
+      createOnlyWarnsForMappingCheck('test', []),
+      createOnlyWarnsForMappingCheck('test', []),
     );
     expect(mockReportError).not.toHaveBeenCalled();
   });
@@ -99,11 +122,17 @@ describe('checkDirectPeerDependencies', () => {
         },
       },
       'path',
-      'devDependencies',
-      {
-        name: 'some-lib-using-rollup',
-        peerDependencies: { rollup: '^1.0.0-beta.15' },
-      },
+      jest
+        .fn()
+        .mockImplementationOnce(() => ({
+          name: 'rollup',
+        }))
+        .mockImplementationOnce(() => ({
+          name: 'some-lib-using-rollup',
+          peerDependencies: { rollup: '^1.0.0-beta.15' },
+        })),
+      createOnlyWarnsForMappingCheck('test', []),
+      createOnlyWarnsForMappingCheck('test', []),
     );
     expect(mockReportError).not.toHaveBeenCalled();
   });
@@ -118,11 +147,17 @@ describe('checkDirectPeerDependencies', () => {
         devDependencies: { 'some-lib-using-rollup': '1.0.0' },
       },
       'path',
-      'devDependencies',
-      {
-        name: 'some-lib-using-rollup',
-        peerDependencies: { rollup: '^1.0.0' },
-      },
+      jest
+        .fn()
+        .mockImplementationOnce(() => ({
+          name: 'rollup',
+        }))
+        .mockImplementationOnce(() => ({
+          name: 'some-lib-using-rollup',
+          peerDependencies: { rollup: '^1.0.0' },
+        })),
+      createOnlyWarnsForMappingCheck('test', []),
+      createOnlyWarnsForMappingCheck('test', []),
     );
     expect(mockReportError).not.toHaveBeenCalled();
   });
@@ -135,14 +170,15 @@ describe('checkDirectPeerDependencies', () => {
         devDependencies: { 'some-lib-using-rollup': '1.0.0' },
       },
       'path',
-      'devDependencies',
-      {
+      jest.fn().mockImplementationOnce(() => ({
         name: 'some-lib-using-rollup',
         peerDependencies: { rollup: '^1.0.0' },
         peerDependenciesMeta: {
           rollup: { optional: true },
         },
-      },
+      })),
+      createOnlyWarnsForMappingCheck('test', []),
+      createOnlyWarnsForMappingCheck('test', []),
     );
     expect(mockReportError).not.toHaveBeenCalled();
   });

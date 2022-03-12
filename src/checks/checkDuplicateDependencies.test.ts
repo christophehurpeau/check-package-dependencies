@@ -1,20 +1,25 @@
 import { createReportError } from '../utils/createReportError';
-import { checkDirectDuplicateDependencies } from './checkDirectDuplicateDependencies';
+import { createOnlyWarnsForArrayCheck } from '../utils/warnForUtils';
+import { checkDuplicateDependencies } from './checkDuplicateDependencies';
 
-jest.mock('../utils/createReportError');
+jest.mock('../utils/createReportError', () => ({
+  ...jest.requireActual('../utils/createReportError'),
+  createReportError: jest.fn(),
+}));
 
 const mockReportError = jest.fn();
 (createReportError as ReturnType<typeof jest.fn>).mockReturnValue(
   mockReportError,
 );
 
-describe('checkDirectDuplicateDependencies', () => {
+describe('checkDuplicateDependencies', () => {
   beforeEach(() => {
     mockReportError.mockReset();
   });
 
   it('should report error when dependency does not intersect', () => {
-    checkDirectDuplicateDependencies(
+    checkDuplicateDependencies(
+      mockReportError,
       {
         name: 'test',
         devDependencies: {
@@ -22,13 +27,13 @@ describe('checkDirectDuplicateDependencies', () => {
           'some-lib-using-rollup': '1.0.0',
         },
       },
-      'path',
       'dependencies',
       ['devDependencies'],
       {
         name: 'some-lib-using-rollup',
         dependencies: { rollup: '^2.0.0' },
       },
+      createOnlyWarnsForArrayCheck('test', []),
     );
     expect(mockReportError).toHaveBeenCalledWith(
       'Invalid duplicate dependency "rollup"',
@@ -38,7 +43,8 @@ describe('checkDirectDuplicateDependencies', () => {
   });
 
   it('should not report error when dev dependency value is a beta', () => {
-    checkDirectDuplicateDependencies(
+    checkDuplicateDependencies(
+      mockReportError,
       {
         name: 'test',
         devDependencies: {
@@ -46,32 +52,33 @@ describe('checkDirectDuplicateDependencies', () => {
           'some-lib-using-rollup': '1.0.0',
         },
       },
-      'path',
       'dependencies',
       ['devDependencies'],
       {
         name: 'some-lib-using-rollup',
         dependencies: { rollup: '^1.0.0-beta.0' },
       },
+      createOnlyWarnsForArrayCheck('test', []),
     );
     expect(mockReportError).not.toHaveBeenCalled();
   });
 
   it('should not report error when dependency value is also a range', () => {
-    checkDirectDuplicateDependencies(
+    checkDuplicateDependencies(
+      mockReportError,
       {
         name: 'test',
         dependencies: {
           rollup: '^1.0.1',
         },
       },
-      'path',
       'dependencies',
       ['dependencies'],
       {
         name: 'some-lib-using-rollup',
         dependencies: { rollup: '^1.0.0' },
       },
+      createOnlyWarnsForArrayCheck('test', []),
     );
     expect(mockReportError).not.toHaveBeenCalled();
   });
