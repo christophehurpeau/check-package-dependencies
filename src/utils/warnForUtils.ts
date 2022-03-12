@@ -1,6 +1,7 @@
 import { getEntries } from './object';
 
 export type OnlyWarnsFor = string[];
+// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
 export type OnlyWarnsForDependencyMapping = Record<string | '*', OnlyWarnsFor>;
 export type OnlyWarnsForOptionalDependencyMapping =
   | undefined

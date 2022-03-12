@@ -23,6 +23,7 @@ interface OnlyWarnsForInMonorepoPackageCheckPackageRecommendedOption
 }
 
 type OnlyWarnsForInMonorepoPackagesCheckPackageRecommendedOption = Record<
+  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
   '*' | string,
   OnlyWarnsForInMonorepoPackageCheckPackageRecommendedOption
 >;
