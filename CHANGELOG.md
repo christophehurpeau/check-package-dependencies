@@ -14,6 +14,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+## [3.5.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v3.4.0...v3.5.0) (2022-03-12)
+
+
+### Features
+
+* better warns for checks ([18c47ef](https://github.com/christophehurpeau/check-package-dependencies/commit/18c47ef54d8ef566bec0f10cabf5c10a77c34a51))
+
 ## [3.4.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v3.3.0...v3.4.0) (2022-03-05)
 
 
