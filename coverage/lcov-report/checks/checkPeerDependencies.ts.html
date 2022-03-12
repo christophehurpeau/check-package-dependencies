@@ -23,16 +23,16 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">86.36% </span>
+                <span class="strong">85.71% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>19/22</span>
+                <span class='fraction'>18/21</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">69.23% </span>
+                <span class="strong">75% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>9/13</span>
+                <span class='fraction'>9/12</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">90.47% </span>
+                <span class="strong">90% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>19/21</span>
+                <span class='fraction'>18/20</span>
             </div>
         
             
@@ -141,7 +141,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">7x</span>
 <span class="cline-any cline-yes">7x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -168,16 +168,16 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -194,21 +194,21 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import semver from 'semver';
-import { createReportError } from '../utils/createReportError';
+import type { ReportError } from '../utils/createReportError';
 import type { PackageJson, DependencyTypes } from '../utils/packageTypes';
-import { shouldOnlyWarnFor } from '../utils/shouldOnlyWarnFor';
+import type { OnlyWarnsForCheck } from '../utils/warnForUtils';
 &nbsp;
 export function checkPeerDependencies(
   pkg: PackageJson,
-  pkgPathName: string,
+  reportError: ReportError,
   type: DependencyTypes,
   allowedPeerIn: DependencyTypes[],
   depPkg: PackageJson,
-  onlyWarnsFor: string[] = <span class="branch-0 cbranch-no" title="branch not covered" >[],</span>
+  missingOnlyWarnsForCheck: OnlyWarnsForCheck,
+  invalidOnlyWarnsForCheck: OnlyWarnsForCheck,
 ): void {
   const { peerDependencies, peerDependenciesMeta } = depPkg;
   <span class="missing-if-branch" title="if path not taken" >I</span>if (!peerDependencies) <span class="cstat-no" title="statement not covered" >return;</span>
-  const reportError = createReportError('Peer Dependencies', pkgPathName);
 &nbsp;
   const allowedPeerInExisting = allowedPeerIn.filter(
     (allowedPeerInType) =&gt; pkg[allowedPeerInType],
@@ -229,7 +229,7 @@ export function checkPeerDependencies(
         `it should satisfies "${range}" and be in ${allowedPeerIn.join(
           ' or ',
         )}`,
-        shouldOnlyWarnFor(peerDepKey, onlyWarnsFor),
+        missingOnlyWarnsForCheck.shouldWarnsFor(peerDepKey),
       );
     } else {
       const versions = versionsIn.map(
@@ -251,7 +251,7 @@ export function checkPeerDependencies(
 <span class="cstat-no" title="statement not covered" >          reportError(</span>
             `Invalid "${peerDepKey}" peer dependency`,
             `"${version}" (in ${allowedPeerInExisting[index]}) should satisfies "${range}" from "${depPkg.name}" ${type}`,
-            shouldOnlyWarnFor(peerDepKey, onlyWarnsFor),
+            invalidOnlyWarnsForCheck.shouldWarnsFor(peerDepKey),
           );
         }
       });
@@ -265,7 +265,7 @@ export function checkPeerDependencies(
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at Sat Mar 12 2022 00:52:30 GMT+0000 (Coordinated Universal Time)
+                at Sat Mar 12 2022 15:22:57 GMT+0000 (Coordinated Universal Time)
             </div>
         <script src="../prettify.js"></script>
         <script>
