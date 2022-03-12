@@ -616,7 +616,7 @@ function createCheckPackage(pkgDirectoryPath = '.', {
           console.warn('Ignoring "exactVersionsOnlyWarnsFor" as "onlyWarnsForInPackage" is used.');
         }
 
-        exactVersionsOnlyWarnsFor = onlyWarnsForInPackage.exactVersions || {};
+        exactVersionsOnlyWarnsFor = onlyWarnsForInPackage.exactVersions || [];
       }
 
       if (onlyWarnsForInDependencies) {

@@ -338,7 +338,7 @@ export function createCheckPackage(
             'Ignoring "exactVersionsOnlyWarnsFor" as "onlyWarnsForInPackage" is used.',
           );
         }
-        exactVersionsOnlyWarnsFor = onlyWarnsForInPackage.exactVersions || {};
+        exactVersionsOnlyWarnsFor = onlyWarnsForInPackage.exactVersions || [];
       }
       if (onlyWarnsForInDependencies) {
         if (peerDependenciesOnlyWarnsFor) {
