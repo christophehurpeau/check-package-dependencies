@@ -14,6 +14,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+### [3.5.1](https://github.com/christophehurpeau/check-package-dependencies/compare/v3.5.0...v3.5.1) (2022-03-12)
+
+
+### Bug Fixes
+
+* default exactVersionsOnlyWarnsFor ([f3a5a34](https://github.com/christophehurpeau/check-package-dependencies/commit/f3a5a344bdd8e9a7edb8e3e7db7a87832665f0ca))
+
 ## [3.5.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v3.4.0...v3.5.0) (2022-03-12)
 
 
