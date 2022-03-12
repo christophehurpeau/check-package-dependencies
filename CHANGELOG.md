@@ -14,6 +14,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+### [3.5.2](https://github.com/christophehurpeau/check-package-dependencies/compare/v3.5.1...v3.5.2) (2022-03-12)
+
+
+### Bug Fixes
+
+* fixes for monorepo ([28b13e3](https://github.com/christophehurpeau/check-package-dependencies/commit/28b13e3e5374bd43e54d9e3d67fd1ae9eaeca2b0))
+
 ### [3.5.1](https://github.com/christophehurpeau/check-package-dependencies/compare/v3.5.0...v3.5.1) (2022-03-12)
 
 
