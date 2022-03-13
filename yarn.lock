@@ -1192,9 +1192,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pob/root@npm:6.12.1":
-  version: 6.12.1
-  resolution: "@pob/root@npm:6.12.1"
+"@pob/root@npm:6.13.0":
+  version: 6.13.0
+  resolution: "@pob/root@npm:6.13.0"
   dependencies:
     "@commitlint/cli": 16.2.1
     "@pob/pretty-eslint-config": 3.0.2
@@ -1202,7 +1202,7 @@ __metadata:
     husky: ^7.0.0
     json5: ^2.2.0
     lint-staged: 12.3.5
-    pob-dependencies: 6.19.0
+    pob-dependencies: 6.20.0
     prettier: 2.5.1
     repository-check-dirty: ^4.0.0
     semver: ^7.1.2
@@ -1215,7 +1215,7 @@ __metadata:
     pretty-pkg: bin/pretty-pkg.mjs
     repository-check-dirty: bin/repository-check-dirty.js
     yarnhook: bin/yarnhook.js
-  checksum: ef62b258dcf92f7b3a36625f786a948b3760e4adb0952eba228ff8ffb4dbcdb92e7eaac282c365974e0bb18213b8e7ff5aac526eb406dbb650dcbc1d7b8b3dd0
+  checksum: c286bf22fd70169fd54cbe27f54202eaa2ceb3f656daf5fc2eded66b5d8215f80454019c31f7530237e46866be154343eeccc490456cdc7921fd5ca7a471f2d3
   languageName: node
   linkType: hard
 
@@ -2485,7 +2485,7 @@ __metadata:
     "@pob/commitlint-config": 4.1.0
     "@pob/eslint-config": 49.0.0
     "@pob/eslint-config-typescript": 49.0.0
-    "@pob/root": 6.12.1
+    "@pob/root": 6.13.0
     "@types/glob": 7.2.0
     "@types/jest": 27.4.1
     "@types/semver": 7.3.9
@@ -5972,10 +5972,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pob-dependencies@npm:6.19.0":
-  version: 6.19.0
-  resolution: "pob-dependencies@npm:6.19.0"
-  checksum: 8ec0c76f38fc45095393fb173bdcf7c91876051e0d16ee5115a6e85c3cc33f8cf8ec5e63b9276cf158c3ca990e4cc7e44a6d4bafd3f94cef001682daecd44733
+"pob-dependencies@npm:6.20.0":
+  version: 6.20.0
+  resolution: "pob-dependencies@npm:6.20.0"
+  checksum: 3b874b4baa0e99a6b9389d8db3ed72039c3a3dbe91741e8653c18ab7ed8ae494d3e58f713e6c932e3904c1ddb5f90a614b8fe59cff5501699060953d6a58bec9
   languageName: node
   linkType: hard
 
