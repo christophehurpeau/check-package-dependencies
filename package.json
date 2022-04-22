@@ -101,7 +101,7 @@
     "@types/glob": "7.2.0",
     "@types/jest": "27.4.1",
     "@types/semver": "7.3.9",
-    "eslint": "8.13.0",
+    "eslint": "8.14.0",
     "jest": "27.5.1",
     "pob-babel": "32.2.0",
     "typedoc": "0.22.15",
