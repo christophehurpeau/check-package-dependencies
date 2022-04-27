@@ -33,6 +33,7 @@ npx check-package-dependencies
 ### Uses Cases
 
 - Check devDependencies are exact versions
+- Check resolutions versions matches versions in devDependencies or dependencies
 - Check direct peer dependencies are respected, and list exceptions
 - Check some dependencies in your package.json respect another dependency dependencies
 - Lock versions depending on certain conditions
@@ -72,6 +73,8 @@ createCheckPackage(/* '.' */)
   .checkDirectDuplicateDependencies({
     onlyWarnsFor: { '*': 'type-fest' },
   })
+  // Check resolutions versions matches versions in devDependencies or dependencies
+  .checkResolutionsVersionsMatch()
   // Check that all your resolutions are also present in an "resolutionsExplained" field, forcing you to explain why the resolution was necessary
   .checkResolutionsHasExplanation()
   // Same as calling .checkExactVersions(), checkDirectPeerDependencies(), checkDirectDuplicateDependencies()
@@ -105,6 +108,17 @@ createCheckPackage(/* '.' */)
   });
 ```
 
+```js
+'use script';
+
+const { createCheckPackage } = require('check-package-dependencies');
+
+createCheckPackage(/* '.' */)
+  // Call .checkExactVersions(), checkDirectPeerDependencies(), checkDirectDuplicateDependencies()
+  // checkResolutionsVersionsMatch() and checkResolutionsHasExplanation()
+  .checkRecommended({});
+```
+
 If you use workspaces:
 
 ```js
@@ -116,7 +130,7 @@ const {
 
 createCheckPackageWithWorkspaces()
   // Call .checkExactVersions(), checkDirectPeerDependencies(), checkDirectDuplicateDependencies()
-  // and checkResolutionsHasExplanation() for root package and workspaces packages, but also
+  // checkResolutionsVersionsMatch() and checkResolutionsHasExplanation() for root package and workspaces packages, but also
   // checks your workspaces packages doesn't have different versions than the ones in devDependencies of root packages.
   .checkRecommended({
     isLibrary: (pkgName) => !pkgName.endsWith('-example'),

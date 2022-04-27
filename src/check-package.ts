@@ -10,6 +10,7 @@ import { checkIdenticalVersionsThanDependency } from './checks/checkIdenticalVer
 import { checkNoDependencies } from './checks/checkNoDependencies';
 import type { CheckResolutionMessage } from './checks/checkResolutionsHasExplanation';
 import { checkResolutionsHasExplanation } from './checks/checkResolutionsHasExplanation';
+import { checkResolutionsVersionsMatch } from './checks/checkResolutionsVersionsMatch';
 import { checkSatisfiesVersionsFromDependency } from './checks/checkSatisfiesVersionsFromDependency';
 import type { GetDependencyPackageJson } from './utils/createGetDependencyPackageJson';
 import {
@@ -100,6 +101,7 @@ export interface CheckPackageApi {
   getDependencyPackageJson: GetDependencyPackageJson;
 
   checkExactVersions: (options?: CheckExactVersionsOptions) => CheckPackageApi;
+  checkResolutionsVersionsMatch: () => CheckPackageApi;
   checkExactVersionsForLibrary: (
     options?: CheckExactVersionsOptions,
   ) => CheckPackageApi;
@@ -224,6 +226,15 @@ export function createCheckPackage(
       writePackageIfChanged();
       return this;
     },
+
+    checkResolutionsVersionsMatch() {
+      checkResolutionsVersionsMatch(pkg, pkgPathName, {
+        tryToAutoFix,
+      });
+      writePackageIfChanged();
+      return this;
+    },
+
     /** @deprecated use checkExactVersions({ allowRangeVersionsInDependencies: true })  */
     checkExactVersionsForLibrary({ onlyWarnsFor } = {}) {
       const onlyWarnsForCheck = createOnlyWarnsForArrayCheck(
@@ -393,6 +404,9 @@ export function createCheckPackage(
         internalExactVersionsIgnore,
       });
 
+      this.checkResolutionsVersionsMatch();
+      this.checkResolutionsHasExplanation(checkResolutionMessage);
+
       this.checkDirectPeerDependencies({
         isLibrary,
         missingOnlyWarnsFor: internalMissingPeerDependenciesOnlyWarnsFor,
@@ -412,7 +426,6 @@ export function createCheckPackage(
           : 'onlyWarnsForInDependencies.duplicateDirectDependency',
       });
 
-      this.checkResolutionsHasExplanation(checkResolutionMessage);
       return this;
     },
 
