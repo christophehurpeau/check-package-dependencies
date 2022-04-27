@@ -338,6 +338,29 @@ function checkResolutionsHasExplanation(pkg, pkgPathName, checkMessage, getDepen
   });
 }
 
+function checkResolutionsVersionsMatch(pkg, pkgPathName, {
+  tryToAutoFix
+} = {}) {
+  const pkgResolutions = pkg.resolutions || {};
+  const reportError = createReportError('Resolutions match other dependencies', pkgPathName);
+  Object.entries(pkgResolutions).forEach(([depName, resolutionDepVersion]) => {
+    ['dependencies', 'devDependencies'].forEach(depType => {
+      const range = pkg?.[depType]?.[depName];
+      if (!range) return;
+
+      if (!semver__default.satisfies(resolutionDepVersion, range, {
+        includePrerelease: true
+      })) {
+        if (tryToAutoFix) {
+          pkg[depType][depName] = resolutionDepVersion;
+        } else {
+          reportError(`Invalid "${depName}" in ${depType}`, `expecting "${range}" be "${resolutionDepVersion}" from resolutions.`);
+        }
+      }
+    });
+  });
+}
+
 function checkSatisfiesVersionsFromDependency(pkg, pkgPathName, type, depKeys, depPkg, dependencies = {}, onlyWarnsForCheck) {
   const pkgDependencies = pkg[type] || {};
   const reportError = createReportError(`Satisfies Versions from ${depPkg.name}`, pkgPathName);
@@ -545,6 +568,14 @@ function createCheckPackage(pkgDirectoryPath = '.', {
       return this;
     },
 
+    checkResolutionsVersionsMatch() {
+      checkResolutionsVersionsMatch(pkg, pkgPathName, {
+        tryToAutoFix
+      });
+      writePackageIfChanged();
+      return this;
+    },
+
     /** @deprecated use checkExactVersions({ allowRangeVersionsInDependencies: true })  */
     checkExactVersionsForLibrary({
       onlyWarnsFor
@@ -659,6 +690,8 @@ function createCheckPackage(pkgDirectoryPath = '.', {
         onlyWarnsFor: exactVersionsOnlyWarnsFor,
         internalExactVersionsIgnore
       });
+      this.checkResolutionsVersionsMatch();
+      this.checkResolutionsHasExplanation(checkResolutionMessage);
       this.checkDirectPeerDependencies({
         isLibrary,
         missingOnlyWarnsFor: internalMissingPeerDependenciesOnlyWarnsFor,
@@ -670,7 +703,6 @@ function createCheckPackage(pkgDirectoryPath = '.', {
         onlyWarnsFor: internalDirectDuplicateDependenciesOnlyWarnsFor,
         internalConfigName: directDuplicateDependenciesOnlyWarnsFor ? 'directDuplicateDependenciesOnlyWarnsFor' : 'onlyWarnsForInDependencies.duplicateDirectDependency'
       });
-      this.checkResolutionsHasExplanation(checkResolutionMessage);
       return this;
     },
 

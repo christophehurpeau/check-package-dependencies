@@ -60,6 +60,7 @@ export interface CheckPackageApi {
     /** @internal */
     getDependencyPackageJson: GetDependencyPackageJson;
     checkExactVersions: (options?: CheckExactVersionsOptions) => CheckPackageApi;
+    checkResolutionsVersionsMatch: () => CheckPackageApi;
     checkExactVersionsForLibrary: (options?: CheckExactVersionsOptions) => CheckPackageApi;
     checkExactDevVersions: (options?: CheckExactVersionsOptions) => CheckPackageApi;
     checkNoDependencies: (type?: DependencyTypes, moveToSuggestion?: DependencyTypes) => CheckPackageApi;

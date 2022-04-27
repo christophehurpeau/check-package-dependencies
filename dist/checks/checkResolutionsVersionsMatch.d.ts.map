@@ -1,0 +1,1 @@
+{"version":3,"file":"checkResolutionsVersionsMatch.d.ts","sourceRoot":"","sources":["../../src/checks/checkResolutionsVersionsMatch.ts"],"names":[],"mappings":"AAEA,OAAO,KAAK,EAAE,WAAW,EAAE,MAAM,uBAAuB,CAAC;AAEzD,MAAM,WAAW,oCAAoC;IACnD,YAAY,CAAC,EAAE,OAAO,CAAC;CACxB;AAED,wBAAgB,6BAA6B,CAC3C,GAAG,EAAE,WAAW,EAChB,WAAW,EAAE,MAAM,EACnB,EAAE,YAAY,EAAE,GAAE,oCAAyC,GAC1D,IAAI,CA6BN"}
