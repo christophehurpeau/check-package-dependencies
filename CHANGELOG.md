@@ -14,6 +14,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+## [3.6.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v3.5.2...v3.6.0) (2022-04-27)
+
+
+### Features
+
+* add checkResolutionsVersionsMatch ([af67b83](https://github.com/christophehurpeau/check-package-dependencies/commit/af67b83bb492a4b75fc2c81f564e24789b78ac18))
+
 ### [3.5.2](https://github.com/christophehurpeau/check-package-dependencies/compare/v3.5.1...v3.5.2) (2022-03-12)
 
 
