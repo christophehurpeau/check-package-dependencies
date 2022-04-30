@@ -36,7 +36,8 @@
     "generate:test-coverage": "rm -Rf docs/coverage/ ; NODE_ENV=production BABEL_ENV=test jest --coverage --coverageReporters=pob-lcov-reporter --coverageDirectory=docs/coverage/",
     "lint": "yarn run lint:prettier && tsc && yarn run lint:eslint",
     "lint:eslint": "eslint --report-unused-disable-directives --resolve-plugins-relative-to . --quiet *.{js,cjs,mjs} src bin scripts",
-    "lint:prettier": "prettier --check .",
+    "lint:prettier": "pob-root-prettier --check .",
+    "lint:prettier:fix": "pob-root-prettier --write .",
     "postinstallDev": "pob-root-postinstall",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -93,17 +94,17 @@
     "type-fest": "^2.0.0"
   },
   "devDependencies": {
-    "@babel/core": "7.17.9",
+    "@babel/core": "7.17.10",
     "@pob/commitlint-config": "4.2.0",
-    "@pob/eslint-config": "49.0.0",
-    "@pob/eslint-config-typescript": "49.0.0",
+    "@pob/eslint-config": "49.1.0",
+    "@pob/eslint-config-typescript": "49.3.0",
     "@pob/root": "6.18.0",
     "@types/glob": "7.2.0",
     "@types/jest": "27.4.1",
     "@types/semver": "7.3.9",
     "eslint": "8.14.0",
-    "jest": "27.5.1",
-    "pob-babel": "32.2.0",
+    "jest": "28.0.3",
+    "pob-babel": "33.2.0",
     "typedoc": "0.22.15",
     "typescript": "4.6.4"
   }
