@@ -389,7 +389,7 @@ function checkSatisfiesVersionsFromDependency(pkg, pkgPathName, type, depKeys, d
 }
 
 function readPkgJson(packagePath) {
-  return JSON.parse(fs.readFileSync(packagePath, 'utf-8'));
+  return JSON.parse(fs.readFileSync(packagePath, 'utf8'));
 }
 function writePkgJson(packagePath, pkg) {
   fs.writeFileSync(packagePath, JSON.stringify(pkg, null, 2));
