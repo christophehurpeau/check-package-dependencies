@@ -4,7 +4,7 @@ import type { PackageJson } from './packageTypes';
 export type GetDependencyPackageJson = (pkgDepName: string) => PackageJson;
 
 export function readPkgJson(packagePath: string): PackageJson {
-  return JSON.parse(readFileSync(packagePath, 'utf-8')) as PackageJson;
+  return JSON.parse(readFileSync(packagePath, 'utf8')) as PackageJson;
 }
 
 export function writePkgJson(packagePath: string, pkg: PackageJson): void {

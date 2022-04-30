@@ -17,19 +17,9 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
+          registry-url: 'https://registry.npmjs.org'
 
-      - name: Cache dependencies
-        uses: actions/cache@v3
-        with:
-          path: |
-            .yarn/unplugged
-            .yarn/install-state.gz
-          key: v2-dependencies--${{ matrix.node-version }}-${{ runner.OS }}-${{ hashFiles('yarn.lock') }}
-          restore-keys: |
-            v2-dependencies--${{ matrix.node-version }}-${{ runner.OS }}-
-            v2-dependencies--${{ matrix.node-version }}-
-
-      - name: Check Dependencies
+      - name: Install Dependencies
         run: yarn install --immutable --immutable-cache
 
       - name: Checks
@@ -66,3 +56,17 @@ jobs:
       - name: Check nothing was forgotten before commit
         if: startsWith(matrix.node-version, '16.')
         run: yarn run repository-check-dirty
+
+      - uses: GoogleCloudPlatform/release-please-action@v3
+        if: ${{ startsWith(matrix.node-version, '16.') && github.ref == 'refs/heads/main' }}
+        id: release
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          release-type: node
+          package-name: release-please-action
+
+      # publish:
+      - run: npm publish
+        if: ${{ startsWith(matrix.node-version, '16.') && github.ref == 'refs/heads/main' && steps.release.outputs.release_created }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

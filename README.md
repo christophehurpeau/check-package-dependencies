@@ -8,6 +8,11 @@
 
 <p align="center">
   <a href="https://npmjs.org/package/check-package-dependencies"><img src="https://img.shields.io/npm/v/check-package-dependencies.svg?style=flat-square"></a>
+  <a href="https://npmjs.org/package/check-package-dependencies"><img src="https://img.shields.io/npm/dw/check-package-dependencies.svg?style=flat-square"></a>
+  <a href="https://npmjs.org/package/check-package-dependencies"><img src="https://img.shields.io/node/v/check-package-dependencies.svg?style=flat-square"></a>
+  <a href="https://npmjs.org/package/check-package-dependencies"><img src="https://img.shields.io/npm/types/check-package-dependencies.svg?style=flat-square"></a>
+  <a href="https://codecov.io/gh/christophehurpeau/check-package-dependencies"><img src="https://img.shields.io/codecov/c/github/christophehurpeau/check-package-dependencies/master.svg?style=flat-square"></a>
+  <a href="https://christophehurpeau.github.io/check-package-dependencies/"><img src="https://img.shields.io/website.svg?down_color=lightgrey&down_message=offline&up_color=blue&up_message=online&url=https%3A%2F%2Fchristophehurpeau.github.io%2Fcheck-package-dependencies%2F?style=flat-square"></a>
 </p>
 
 ### Install
