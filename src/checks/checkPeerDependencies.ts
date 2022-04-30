@@ -19,26 +19,26 @@ export function checkPeerDependencies(
     (allowedPeerInType) => pkg[allowedPeerInType],
   );
 
-  for (const [peerDepKey, range] of Object.entries(peerDependencies)) {
+  for (const [peerDepName, range] of Object.entries(peerDependencies)) {
     const versionsIn = allowedPeerInExisting.filter(
       (allowedPeerInExistingType) =>
-        pkg[allowedPeerInExistingType]![peerDepKey],
+        pkg[allowedPeerInExistingType]?.[peerDepName],
     );
     if (versionsIn.length === 0) {
-      const peerDependenciesMetaPeerDep = peerDependenciesMeta?.[peerDepKey];
+      const peerDependenciesMetaPeerDep = peerDependenciesMeta?.[peerDepName];
       if (peerDependenciesMetaPeerDep?.optional) {
         return;
       }
       reportError(
-        `Missing "${peerDepKey}" peer dependency from "${depPkg.name}" in ${type}`,
+        `Missing "${peerDepName}" peer dependency from "${depPkg.name}" in ${type}`,
         `it should satisfies "${range}" and be in ${allowedPeerIn.join(
           ' or ',
         )}`,
-        missingOnlyWarnsForCheck.shouldWarnsFor(peerDepKey),
+        missingOnlyWarnsForCheck.shouldWarnsFor(peerDepName),
       );
     } else {
       const versions = versionsIn.map(
-        (versionsInType) => pkg[versionsInType]![peerDepKey],
+        (versionsInType) => pkg[versionsInType]![peerDepName],
       );
 
       versions.forEach((version, index) => {
@@ -54,9 +54,9 @@ export function checkPeerDependencies(
           })
         ) {
           reportError(
-            `Invalid "${peerDepKey}" peer dependency`,
+            `Invalid "${peerDepName}" peer dependency`,
             `"${version}" (in ${allowedPeerInExisting[index]}) should satisfies "${range}" from "${depPkg.name}" ${type}`,
-            invalidOnlyWarnsForCheck.shouldWarnsFor(peerDepKey),
+            invalidOnlyWarnsForCheck.shouldWarnsFor(peerDepName),
           );
         }
       });
