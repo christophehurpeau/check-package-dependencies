@@ -89,7 +89,7 @@
   },
   "dependencies": {
     "chalk": "^4.1.0",
-    "glob": "^7.1.6",
+    "glob": "^8.0.0",
     "semver": "^7.3.4",
     "type-fest": "^2.0.0"
   },
