@@ -2481,7 +2481,7 @@ __metadata:
     pob-babel: 33.3.0
     semver: ^7.3.4
     type-fest: ^2.0.0
-    typedoc: 0.22.18
+    typedoc: 0.23.1
     typescript: 4.7.4
   bin:
     check-package-dependencies: ./bin/check-package-dependencies.js
@@ -3732,7 +3732,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"glob@npm:^8.0.0, glob@npm:^8.0.1, glob@npm:^8.0.3":
+"glob@npm:^8.0.0, glob@npm:^8.0.1":
   version: 8.0.3
   resolution: "glob@npm:8.0.3"
   dependencies:
@@ -6809,20 +6809,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typedoc@npm:0.22.18":
-  version: 0.22.18
-  resolution: "typedoc@npm:0.22.18"
+"typedoc@npm:0.23.1":
+  version: 0.23.1
+  resolution: "typedoc@npm:0.23.1"
   dependencies:
-    glob: ^8.0.3
     lunr: ^2.3.9
     marked: ^4.0.16
     minimatch: ^5.1.0
     shiki: ^0.10.1
   peerDependencies:
-    typescript: 4.0.x || 4.1.x || 4.2.x || 4.3.x || 4.4.x || 4.5.x || 4.6.x || 4.7.x
+    typescript: 4.6.x || 4.7.x
   bin:
     typedoc: bin/typedoc
-  checksum: b813d8129682f6ed5a4e96bacaf019e4da1d2744ca89fef850d6bb4c034616567ce67e6a7f5cfc5f00aac573f0b45d44b1427aafa262ab88dce6b460cb9e744c
+  checksum: 8622847ffff85b4ca2fa4d95e7507aafe50b155fe37d7f3f9b2721f7a80effecbca4dda682f9f81bdf1ac230cefd6e6127715398146fc00205042f25da19373a
   languageName: node
   linkType: hard
 
