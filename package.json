@@ -94,7 +94,7 @@
     "type-fest": "^2.0.0"
   },
   "devDependencies": {
-    "@babel/core": "7.18.5",
+    "@babel/core": "7.18.6",
     "@pob/commitlint-config": "4.3.0",
     "@pob/eslint-config": "49.1.0",
     "@pob/eslint-config-typescript": "49.3.0",
