@@ -900,6 +900,7 @@ function createCheckPackageWithWorkspaces(pkgDirectoryPath = '.', createCheckPac
         checkResolutionMessage
       });
       const monorepoDirectDuplicateDependenciesOnlyWarnsForCheck = createOnlyWarnsForMappingCheck('monorepoDirectDuplicateDependenciesOnlyWarnsFor', monorepoDirectDuplicateDependenciesOnlyWarnsFor);
+      const previousCheckedWorkspaces = new Map();
       checksWorkspaces.forEach((checkSubPackage, id) => {
         const isPackageALibrary = isLibrary(id);
         checkSubPackage.checkRecommended({
@@ -914,8 +915,16 @@ function createCheckPackageWithWorkspaces(pkgDirectoryPath = '.', createCheckPac
           internalExactVersionsIgnore: [...checksWorkspaces.keys()],
           checkResolutionMessage
         });
-        const reportMonorepoDDDError = createReportError('Monorepo Direct Duplicate Dependencies', checkSubPackage.pkgPathName);
-        checkDuplicateDependencies(reportMonorepoDDDError, checkSubPackage.pkg, 'devDependencies', ['dependencies', 'devDependencies'], pkg, monorepoDirectDuplicateDependenciesOnlyWarnsForCheck.createFor(checkSubPackage.pkg.name));
+        const reportMonorepoDDDError = createReportError('Monorepo Direct Duplicate Dependencies', checkSubPackage.pkgPathName); // Root
+
+        checkDuplicateDependencies(reportMonorepoDDDError, checkSubPackage.pkg, 'devDependencies', ['dependencies', 'devDependencies'], pkg, monorepoDirectDuplicateDependenciesOnlyWarnsForCheck.createFor(checkSubPackage.pkg.name)); // previous packages
+
+        previousCheckedWorkspaces.forEach(previousCheckSubPackage => {
+          checkDuplicateDependencies(reportMonorepoDDDError, checkSubPackage.pkg, 'devDependencies', ['dependencies', 'devDependencies'], previousCheckSubPackage.pkg, monorepoDirectDuplicateDependenciesOnlyWarnsForCheck.createFor(checkSubPackage.pkg.name));
+          checkDuplicateDependencies(reportMonorepoDDDError, checkSubPackage.pkg, 'dependencies', ['dependencies', 'devDependencies'], previousCheckSubPackage.pkg, monorepoDirectDuplicateDependenciesOnlyWarnsForCheck.createFor(checkSubPackage.pkg.name));
+          checkDuplicateDependencies(reportMonorepoDDDError, checkSubPackage.pkg, 'peerDependencies', ['peerDependencies'], previousCheckSubPackage.pkg, monorepoDirectDuplicateDependenciesOnlyWarnsForCheck.createFor(checkSubPackage.pkg.name));
+        });
+        previousCheckedWorkspaces.set(id, checkSubPackage);
       });
       reportNotWarnedForMapping(createReportError('Monorepo Direct Duplicate Dependencies', checkPackage.pkgPathName), monorepoDirectDuplicateDependenciesOnlyWarnsForCheck);
       return this;
