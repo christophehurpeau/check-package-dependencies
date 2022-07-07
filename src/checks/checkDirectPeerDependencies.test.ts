@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { createReportError } from '../utils/createReportError';
 import { createOnlyWarnsForMappingCheck } from '../utils/warnForUtils';
 import { checkDirectPeerDependencies } from './checkDirectPeerDependencies';
@@ -181,5 +182,65 @@ describe('checkDirectPeerDependencies', () => {
       createOnlyWarnsForMappingCheck('test', []),
     );
     expect(mockReportError).not.toHaveBeenCalled();
+  });
+
+  it('should not report error when @types is in dev dependency of an app', () => {
+    checkDirectPeerDependencies(
+      false,
+      {
+        name: 'test',
+        dependencies: {
+          'some-lib-using-types': '1.0.0',
+        },
+        devDependencies: {
+          '@types/a': '1.0.0',
+        },
+      },
+      'path',
+      jest
+        .fn()
+        .mockImplementationOnce(() => ({
+          name: '@types/a',
+        }))
+        .mockImplementationOnce(() => ({
+          name: 'some-lib-using-types',
+          peerDependencies: { '@types/a': '^1.0.0' },
+        })),
+      createOnlyWarnsForMappingCheck('test', []),
+      createOnlyWarnsForMappingCheck('test', []),
+    );
+    expect(mockReportError).not.toHaveBeenCalled();
+  });
+
+  it('should not report error when @types is missing in dependencies/peerDependency of a library', () => {
+    checkDirectPeerDependencies(
+      true,
+      {
+        name: 'test',
+        dependencies: {
+          'some-lib-using-types': '1.0.0',
+        },
+        devDependencies: {
+          '@types/a': '1.0.0',
+        },
+      },
+      'path',
+      jest
+        .fn()
+        .mockImplementationOnce(() => ({
+          name: '@types/a',
+        }))
+        .mockImplementationOnce(() => ({
+          name: 'some-lib-using-types',
+          peerDependencies: { '@types/a': '^1.0.0' },
+        })),
+      createOnlyWarnsForMappingCheck('test', []),
+      createOnlyWarnsForMappingCheck('test', []),
+    );
+    expect(mockReportError).toHaveBeenCalledWith(
+      'Missing "@types/a" peer dependency from "some-lib-using-types" in dependencies',
+      'it should satisfies "^1.0.0" and be in dependencies or peerDependencies',
+      false,
+    );
   });
 });

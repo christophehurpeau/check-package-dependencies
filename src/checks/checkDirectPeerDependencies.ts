@@ -26,10 +26,13 @@ const getAllowedPeerInFromType = (
     case 'devDependencies':
       return ['devDependencies', 'dependencies'];
     case 'dependencies':
-    case 'optionalDependencies':
       return isLibrary
         ? ['dependencies', 'peerDependencies']
-        : ['dependencies'];
+        : ['devDependencies', 'dependencies'];
+    case 'optionalDependencies':
+      return isLibrary
+        ? ['dependencies', 'optionalDependencies', 'peerDependencies']
+        : ['devDependencies', 'dependencies'];
   }
 };
 
