@@ -1162,9 +1162,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pob/eslint-config-typescript@npm:49.3.2":
-  version: 49.3.2
-  resolution: "@pob/eslint-config-typescript@npm:49.3.2"
+"@pob/eslint-config-typescript@npm:49.3.3":
+  version: 49.3.3
+  resolution: "@pob/eslint-config-typescript@npm:49.3.3"
   dependencies:
     "@pob/eslint-config": 49.3.2
     "@pob/use-eslint-plugin": 49.3.2
@@ -1188,7 +1188,7 @@ __metadata:
       optional: true
     eslint-plugin-node:
       optional: true
-  checksum: 4400a6ce7200c1503e30c03b856759400ae558814f7e10a5e5a2bf163ccd7f5b249da964ee26d94166b9b1a6aba33f7b5d1bc3f454270f3fc30a0e19c6bde7f6
+  checksum: eec6ff6f77e8c620b60d81ddd7c490aab6447e1c7c9c239a54eb0891951cdec5ac3aa53ba0d767c02683b5cbbdc7c4ded802c4e69a3e275b92fa8a5888375054
   languageName: node
   linkType: hard
 
@@ -2469,7 +2469,7 @@ __metadata:
     "@babel/core": 7.18.6
     "@pob/commitlint-config": 4.3.0
     "@pob/eslint-config": 49.3.2
-    "@pob/eslint-config-typescript": 49.3.2
+    "@pob/eslint-config-typescript": 49.3.3
     "@pob/root": 6.20.1
     "@types/glob": 7.2.0
     "@types/jest": 27.5.0
