@@ -14,6 +14,14 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+## [3.7.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v3.6.0...v3.7.0) (2022-07-07)
+
+
+### Features
+
+* check duplicates from previously checked packages in monorepo ([eec2e71](https://github.com/christophehurpeau/check-package-dependencies/commit/eec2e7106c6f307dd485be2bf8c9c33a967897ad))
+* **deps:** update dependency glob to v8 ([#334](https://github.com/christophehurpeau/check-package-dependencies/issues/334)) ([32953d1](https://github.com/christophehurpeau/check-package-dependencies/commit/32953d1167047ece5f0199495ed88f83828fb30c))
+
 ## [3.6.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v3.5.2...v3.6.0) (2022-04-27)
 
 
