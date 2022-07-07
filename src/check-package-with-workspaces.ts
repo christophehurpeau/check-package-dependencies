@@ -156,6 +156,7 @@ export function createCheckPackageWithWorkspaces(
           monorepoDirectDuplicateDependenciesOnlyWarnsFor,
         );
 
+      const previousCheckedWorkspaces = new Map<string, CheckPackageApi>();
       checksWorkspaces.forEach((checkSubPackage, id) => {
         const isPackageALibrary = isLibrary(id);
         checkSubPackage.checkRecommended({
@@ -183,6 +184,7 @@ export function createCheckPackageWithWorkspaces(
           'Monorepo Direct Duplicate Dependencies',
           checkSubPackage.pkgPathName,
         );
+        // Root
         checkDuplicateDependencies(
           reportMonorepoDDDError,
           checkSubPackage.pkg,
@@ -193,6 +195,41 @@ export function createCheckPackageWithWorkspaces(
             checkSubPackage.pkg.name,
           ),
         );
+        // previous packages
+        previousCheckedWorkspaces.forEach((previousCheckSubPackage) => {
+          checkDuplicateDependencies(
+            reportMonorepoDDDError,
+            checkSubPackage.pkg,
+            'devDependencies',
+            ['dependencies', 'devDependencies'],
+            previousCheckSubPackage.pkg,
+            monorepoDirectDuplicateDependenciesOnlyWarnsForCheck.createFor(
+              checkSubPackage.pkg.name,
+            ),
+          );
+          checkDuplicateDependencies(
+            reportMonorepoDDDError,
+            checkSubPackage.pkg,
+            'dependencies',
+            ['dependencies', 'devDependencies'],
+            previousCheckSubPackage.pkg,
+            monorepoDirectDuplicateDependenciesOnlyWarnsForCheck.createFor(
+              checkSubPackage.pkg.name,
+            ),
+          );
+          checkDuplicateDependencies(
+            reportMonorepoDDDError,
+            checkSubPackage.pkg,
+            'peerDependencies',
+            ['peerDependencies'],
+            previousCheckSubPackage.pkg,
+            monorepoDirectDuplicateDependenciesOnlyWarnsForCheck.createFor(
+              checkSubPackage.pkg.name,
+            ),
+          );
+        });
+
+        previousCheckedWorkspaces.set(id, checkSubPackage);
       });
       reportNotWarnedForMapping(
         createReportError(
