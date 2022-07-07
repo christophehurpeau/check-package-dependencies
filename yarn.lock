@@ -192,10 +192,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/helper-plugin-utils@npm:^7.0.0, @babel/helper-plugin-utils@npm:^7.10.4, @babel/helper-plugin-utils@npm:^7.12.13, @babel/helper-plugin-utils@npm:^7.13.0, @babel/helper-plugin-utils@npm:^7.14.5, @babel/helper-plugin-utils@npm:^7.16.7, @babel/helper-plugin-utils@npm:^7.8.0":
-  version: 7.16.7
-  resolution: "@babel/helper-plugin-utils@npm:7.16.7"
-  checksum: d08dd86554a186c2538547cd537552e4029f704994a9201d41d82015c10ed7f58f9036e8d1527c3760f042409163269d308b0b3706589039c5f1884619c6d4ce
+"@babel/helper-plugin-utils@npm:^7.0.0, @babel/helper-plugin-utils@npm:^7.10.4, @babel/helper-plugin-utils@npm:^7.12.13, @babel/helper-plugin-utils@npm:^7.13.0, @babel/helper-plugin-utils@npm:^7.14.5, @babel/helper-plugin-utils@npm:^7.16.7, @babel/helper-plugin-utils@npm:^7.17.12, @babel/helper-plugin-utils@npm:^7.8.0":
+  version: 7.18.6
+  resolution: "@babel/helper-plugin-utils@npm:7.18.6"
+  checksum: 3dbfceb6c10fdf6c78a0e57f24e991ff8967b8a0bd45fe0314fb4a8ccf7c8ad4c3778c319a32286e7b1f63d507173df56b4e69fb31b71e1b447a73efa1ca723e
   languageName: node
   linkType: hard
 
@@ -466,19 +466,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/plugin-transform-runtime@npm:7.17.10":
-  version: 7.17.10
-  resolution: "@babel/plugin-transform-runtime@npm:7.17.10"
+"@babel/plugin-transform-runtime@npm:7.18.2":
+  version: 7.18.2
+  resolution: "@babel/plugin-transform-runtime@npm:7.18.2"
   dependencies:
     "@babel/helper-module-imports": ^7.16.7
-    "@babel/helper-plugin-utils": ^7.16.7
+    "@babel/helper-plugin-utils": ^7.17.12
     babel-plugin-polyfill-corejs2: ^0.3.0
     babel-plugin-polyfill-corejs3: ^0.5.0
     babel-plugin-polyfill-regenerator: ^0.3.0
     semver: ^6.3.0
   peerDependencies:
     "@babel/core": ^7.0.0-0
-  checksum: 61b63497a9e856551d299547a29de8966102f3a85cc3c09335efd1492a6bf1d540dc937b395dd94200425194b65499bf0d36264b9061d19c93810b90fcbec181
+  checksum: 2f41b3a9213ddb795de0f7598e9e6dfe20781bab4346e34585f2ceab187dac03860db6e41c4819fb3ddb51111ee910c8b45971d6e886cd715e06ba0f3ea19481
   languageName: node
   linkType: hard
 
@@ -1331,19 +1331,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rollup/plugin-node-resolve@npm:13.2.1":
-  version: 13.2.1
-  resolution: "@rollup/plugin-node-resolve@npm:13.2.1"
+"@rollup/plugin-node-resolve@npm:13.3.0":
+  version: 13.3.0
+  resolution: "@rollup/plugin-node-resolve@npm:13.3.0"
   dependencies:
     "@rollup/pluginutils": ^3.1.0
     "@types/resolve": 1.17.1
-    builtin-modules: ^3.1.0
     deepmerge: ^4.2.2
+    is-builtin-module: ^3.1.0
     is-module: ^1.0.0
     resolve: ^1.19.0
   peerDependencies:
     rollup: ^2.42.0
-  checksum: d0ba3b6f35440b5ebc203a4f62a6c0d2c565491aed9746448288b71d0cd603d1d12fdd9d1381c1be0a4b192f167412e53c34b89fd25413db4ba7d1fa910a29a2
+  checksum: ec5418e6b3c23a9e30683056b3010e9d325316dcfae93fbc673ae64dad8e56a2ce761c15c48f5e2dcfe0c822fdc4a4905ee6346e3dcf90603ba2260afef5a5e6
   languageName: node
   linkType: hard
 
@@ -2269,9 +2269,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"babel-preset-pob-env@npm:8.1.0":
-  version: 8.1.0
-  resolution: "babel-preset-pob-env@npm:8.1.0"
+"babel-preset-pob-env@npm:8.2.0":
+  version: 8.2.0
+  resolution: "babel-preset-pob-env@npm:8.2.0"
   dependencies:
     "@babel/plugin-proposal-nullish-coalescing-operator": ^7.16.7
     "@babel/plugin-proposal-optional-chaining": ^7.16.7
@@ -2282,7 +2282,7 @@ __metadata:
     babel-preset-optimizations: ^2.0.0
   peerDependencies:
     "@babel/core": ^7.11.6
-  checksum: 836a3a8aa493a71fca886d9c5eae660572bb52f9c371aa956f1e751922c09787c5a4f5e5c1deca40792c30ac2a1a203e2a7705ec267bee1723961b88234b6f4c
+  checksum: 1948dad40f789480b58ce44e95548bd9e7582af25edb08b134c9f2ca8dc0900b8caaab31e1b1262bda63f833885ba6b2cf9a0ac8e7a9ace9c70bd64841c2d039
   languageName: node
   linkType: hard
 
@@ -2352,7 +2352,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"builtin-modules@npm:^3.0.0, builtin-modules@npm:^3.1.0":
+"builtin-modules@npm:^3.0.0":
   version: 3.2.0
   resolution: "builtin-modules@npm:3.2.0"
   checksum: 0265aa1ba78e1a16f4e18668d815cb43fb364e6a6b8aa9189c6f44c7b894a551a43b323c40206959d2d4b2568c1f2805607ad6c88adc306a776ce6904cca6715
@@ -2478,7 +2478,7 @@ __metadata:
     eslint: 8.19.0
     glob: ^8.0.0
     jest: 28.1.0
-    pob-babel: 33.3.0
+    pob-babel: 33.5.0
     semver: ^7.3.4
     type-fest: ^2.0.0
     typedoc: 0.23.5
@@ -5735,32 +5735,32 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pob-babel@npm:33.3.0":
-  version: 33.3.0
-  resolution: "pob-babel@npm:33.3.0"
+"pob-babel@npm:33.5.0":
+  version: 33.5.0
+  resolution: "pob-babel@npm:33.5.0"
   dependencies:
     "@babel/core": ^7.17.10
-    "@babel/plugin-transform-runtime": 7.17.10
+    "@babel/plugin-transform-runtime": 7.18.2
     "@rollup/plugin-babel": 5.3.1
     "@rollup/plugin-json": 4.1.0
-    "@rollup/plugin-node-resolve": 13.2.1
+    "@rollup/plugin-node-resolve": 13.3.0
     "@rollup/plugin-run": 2.1.0
     babel-plugin-module-resolver: ^4.1.0
     babel-preset-modern-browsers: ^15.0.2
-    babel-preset-pob-env: 8.1.0
-    rollup: 2.71.1
+    babel-preset-pob-env: 8.2.0
+    rollup: 2.75.5
     rollup-config-external-dependencies: ^2.0.0
     semver: ^7.3.7
   peerDependencies:
     "@babel/core": ^7.16.5
-    rollup: 2.71.1
+    rollup: 2.75.5
     typescript: ^4.0.3
   peerDependenciesMeta:
     rollup:
       optional: true
   bin:
     rollup: bin/rollup.cjs
-  checksum: b24c494380137b8a18f6f657ba0e7a963f5b576930794a3e14e5a0e9d640b2b92c276c1a6cb53a1a09414faa269789d3a08bfbf84dcab94448f2ac658b25de3b
+  checksum: 87a41b2add98c865c1e22ab0a5a6db733cad0a29add69ad46267bcae319b67d03a595a036d4b65bfb66bfefab9c721842726e781dd5c589efbff3e32681788cc
   languageName: node
   linkType: hard
 
@@ -6087,9 +6087,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rollup@npm:2.71.1":
-  version: 2.71.1
-  resolution: "rollup@npm:2.71.1"
+"rollup@npm:2.75.5":
+  version: 2.75.5
+  resolution: "rollup@npm:2.75.5"
   dependencies:
     fsevents: ~2.3.2
   dependenciesMeta:
@@ -6097,7 +6097,7 @@ __metadata:
       optional: true
   bin:
     rollup: dist/bin/rollup
-  checksum: fe2b2fda7bf53c86e970f3b026b784c00e2237089b802755b3e43725db88f5d1869c1f81f8c5257e9b68b0fd1840dcbd3897d2f19768cce97a37c70e1a563dce
+  checksum: fa3e61959efbc88cda75315dc22f035489be9dda3ae7d45a3a474f19efc3661ef6f9849486c7ca51e1a3e2aedef91f4e3223e8123bbeaf155913533d071994d1
   languageName: node
   linkType: hard
 
