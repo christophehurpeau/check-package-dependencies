@@ -2482,7 +2482,7 @@ __metadata:
     pob-babel: 33.5.0
     semver: ^7.3.4
     type-fest: ^2.0.0
-    typedoc: 0.23.5
+    typedoc: 0.23.9
     typescript: 4.7.4
   bin:
     check-package-dependencies: ./bin/check-package-dependencies.js
@@ -6755,9 +6755,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typedoc@npm:0.23.5":
-  version: 0.23.5
-  resolution: "typedoc@npm:0.23.5"
+"typedoc@npm:0.23.9":
+  version: 0.23.9
+  resolution: "typedoc@npm:0.23.9"
   dependencies:
     lunr: ^2.3.9
     marked: ^4.0.16
@@ -6767,7 +6767,7 @@ __metadata:
     typescript: 4.6.x || 4.7.x
   bin:
     typedoc: bin/typedoc
-  checksum: a8c0aed855f588a2c008e5520e59e4a59d48d14cd483d0030fc3345bed3757aac8618659c59b4087c221aa2f7a7875b9f30c7a4a966e43ec969cd8905d6d8b67
+  checksum: 3b1eac3c4acfe7390f23ff35bea3cd694762b465c53605b159cf4abbb8e50b22f835d52a7f20c71b9219c79b6ab093346d671ebba67b922782f8658375a65347
   languageName: node
   linkType: hard
 
