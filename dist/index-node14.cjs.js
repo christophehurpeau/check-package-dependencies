@@ -164,8 +164,10 @@ const getAllowedPeerInFromType = (depPkgType, isLibrary) => {
       return ['devDependencies', 'dependencies'];
 
     case 'dependencies':
+      return isLibrary ? ['dependencies', 'peerDependencies'] : ['devDependencies', 'dependencies'];
+
     case 'optionalDependencies':
-      return isLibrary ? ['dependencies', 'peerDependencies'] : ['dependencies'];
+      return isLibrary ? ['dependencies', 'optionalDependencies', 'peerDependencies'] : ['devDependencies', 'dependencies'];
   }
 };
 
