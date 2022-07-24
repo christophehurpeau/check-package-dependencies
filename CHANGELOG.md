@@ -14,6 +14,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+## [3.7.1](https://github.com/christophehurpeau/check-package-dependencies/compare/v3.7.0...v3.7.1) (2022-07-24)
+
+
+### Bug Fixes
+
+* allow peer dep of a dep to be in devdep ([4e36aa8](https://github.com/christophehurpeau/check-package-dependencies/commit/4e36aa84f9edeb28408ad418b7fab9a15b9a0561)), closes [#323](https://github.com/christophehurpeau/check-package-dependencies/issues/323)
+
 ## [3.7.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v3.6.0...v3.7.0) (2022-07-07)
 
 
