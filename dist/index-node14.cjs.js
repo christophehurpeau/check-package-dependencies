@@ -900,16 +900,9 @@ function createCheckPackageWithWorkspaces(pkgDirectoryPath = '.', createCheckPac
     });
     return [checkPkg.pkg.name, checkPkg];
   }));
-  let runCalled = false;
-  process.on('beforeExit', () => {
-    if (!runCalled) {
-      console.warn('\nFor future compatibility, call .run()');
-    }
-  });
   return {
     async run() {
-      runCalled = true;
-      await Promise.all([...checksWorkspaces.values()].map(checksWorkspace => checksWorkspace.run()));
+      await Promise.all([checkPackage, ...checksWorkspaces.values()].map(checksWorkspace => checksWorkspace.run()));
     },
 
     checkRecommended({

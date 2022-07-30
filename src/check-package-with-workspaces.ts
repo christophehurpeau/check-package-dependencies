@@ -115,19 +115,10 @@ export function createCheckPackageWithWorkspaces(
     }),
   );
 
-  let runCalled = false;
-
-  process.on('beforeExit', () => {
-    if (!runCalled) {
-      console.warn('\nFor future compatibility, call .run()');
-    }
-  });
-
   return {
     async run() {
-      runCalled = true;
       await Promise.all(
-        [...checksWorkspaces.values()].map((checksWorkspace) =>
+        [checkPackage, ...checksWorkspaces.values()].map((checksWorkspace) =>
           checksWorkspace.run(),
         ),
       );
