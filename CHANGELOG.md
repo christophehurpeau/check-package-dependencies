@@ -14,6 +14,14 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+## [3.9.1](https://github.com/christophehurpeau/check-package-dependencies/compare/v3.9.0...v3.9.1) (2022-07-30)
+
+
+### Bug Fixes
+
+* add beforeExit listener only once ([ae46f9a](https://github.com/christophehurpeau/check-package-dependencies/commit/ae46f9a9abc17f9703db553138acd37a3513f6cf))
+* glob.sync option cwd to fix windows compat ([b663e18](https://github.com/christophehurpeau/check-package-dependencies/commit/b663e18274dc9b831d4765a0e940e8ca70a99ca0))
+
 ## [3.9.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v3.8.0...v3.9.0) (2022-07-30)
 
 
