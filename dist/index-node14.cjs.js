@@ -556,7 +556,18 @@ function createCheckPackage(pkgDirectoryPath = '.', {
   const getDependencyPackageJson = createGetDependencyPackageJson({
     pkgDirname
   });
+  let runCalled = false;
+  process.on('beforeExit', () => {
+    if (!runCalled) {
+      console.warn('\nFor future compatibility, call .run() and await the result.');
+    }
+  });
   return {
+    run() {
+      runCalled = true;
+      return Promise.resolve();
+    },
+
     pkg,
     pkgDirname,
     pkgPathName,
@@ -875,7 +886,18 @@ function createCheckPackageWithWorkspaces(pkgDirectoryPath = '.', createCheckPac
     const checkPkg = createCheckPackage(subPkgDirectoryPath, createCheckPackageOptions);
     return [checkPkg.pkg.name, checkPkg];
   }));
+  let runCalled = false;
+  process.on('beforeExit', () => {
+    if (!runCalled) {
+      console.warn('\nFor future compatibility, call .run()');
+    }
+  });
   return {
+    async run() {
+      runCalled = true;
+      await Promise.all([...checksWorkspaces.values()].map(checksWorkspace => checksWorkspace.run()));
+    },
+
     checkRecommended({
       isLibrary = () => false,
       allowRangeVersionsInLibraries = true,

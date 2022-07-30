@@ -55,7 +55,7 @@ Create a script, for example `scripts/check-package.js`. Add it in `"scripts"` i
 
 const { createCheckPackage } = require('check-package-dependencies');
 
-createCheckPackage(/* '.' */)
+await createCheckPackage(/* '.' */)
   // Check that your package.json contains only exact versions of package, not range.
   .checkExactVersions({
     // When isLibrary is true, it doesnt check "dependencies" as they should mostly have a range, not an exact version
@@ -110,7 +110,8 @@ createCheckPackage(/* '.' */)
         devDependencies: ['react-test-renderer'],
       },
     },
-  });
+  })
+  .run();
 ```
 
 ```js
@@ -118,10 +119,11 @@ createCheckPackage(/* '.' */)
 
 const { createCheckPackage } = require('check-package-dependencies');
 
-createCheckPackage(/* '.' */)
+await createCheckPackage(/* '.' */)
   // Call .checkExactVersions(), checkDirectPeerDependencies(), checkDirectDuplicateDependencies()
   // checkResolutionsVersionsMatch() and checkResolutionsHasExplanation()
-  .checkRecommended({});
+  .checkRecommended({})
+  .run();
 ```
 
 If you use workspaces:
@@ -133,7 +135,7 @@ const {
   createCheckPackageWithWorkspaces,
 } = require('check-package-dependencies');
 
-createCheckPackageWithWorkspaces()
+await createCheckPackageWithWorkspaces()
   // Call .checkExactVersions(), checkDirectPeerDependencies(), checkDirectDuplicateDependencies()
   // checkResolutionsVersionsMatch() and checkResolutionsHasExplanation() for root package and workspaces packages, but also
   // checks your workspaces packages doesn't have different versions than the ones in devDependencies of root packages.
@@ -147,5 +149,6 @@ createCheckPackageWithWorkspaces()
   })
   .for('packageName', (pkgCheck) => {
     /* pkgCheck has the same API presented for single package */
-  });
+  })
+  .run();
 ```

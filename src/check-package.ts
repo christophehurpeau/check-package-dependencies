@@ -91,6 +91,8 @@ export interface CheckExactVersionsOptions {
 }
 
 export interface CheckPackageApi {
+  run: () => Promise<void>;
+
   /** @internal */
   pkg: PackageJson;
   /** @internal */
@@ -197,7 +199,22 @@ export function createCheckPackage(
     pkgDirname,
   });
 
+  let runCalled = false;
+
+  process.on('beforeExit', () => {
+    if (!runCalled) {
+      console.warn(
+        '\nFor future compatibility, call .run() and await the result.',
+      );
+    }
+  });
+
   return {
+    run() {
+      runCalled = true;
+      return Promise.resolve();
+    },
+
     pkg,
     pkgDirname,
     pkgPathName,
