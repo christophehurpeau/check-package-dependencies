@@ -95,7 +95,7 @@ export function createCheckPackageWithWorkspaces(
 
   if (pkgWorkspaces) {
     pkgWorkspaces.forEach((pattern) => {
-      const match = glob.sync(`${pkgDirname}/${pattern}`);
+      const match = glob.sync(pattern, { cwd: pkgDirname });
       match.forEach((pathMatch) => {
         const stat = fs.statSync(pathMatch);
         if (!stat.isDirectory()) return;
