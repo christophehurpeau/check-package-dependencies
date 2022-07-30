@@ -14,6 +14,18 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+## [3.9.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v3.8.0...v3.9.0) (2022-07-30)
+
+
+### Features
+
+* allow `--fix` option ([27a2f85](https://github.com/christophehurpeau/check-package-dependencies/commit/27a2f85882ed95ff1796a5d44abc0fa2c02f1787))
+
+
+### Bug Fixes
+
+* fix autofix exact dependencies ([cb8108e](https://github.com/christophehurpeau/check-package-dependencies/commit/cb8108e395b683fcbe80f74981dbdc0b8bfb9293))
+
 ## [3.8.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v3.7.1...v3.8.0) (2022-07-30)
 
 
