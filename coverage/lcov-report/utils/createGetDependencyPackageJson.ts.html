@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for checks/checkExactVersions.ts</title>
+    <title>Code coverage report for utils/createGetDependencyPackageJson.ts</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../prettify.css" />
     <link rel="stylesheet" href="../base.css" />
@@ -19,34 +19,34 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../index.html">All files</a> / <a href="index.html">checks</a> checkExactVersions.ts</h1>
+        <h1><a href="../index.html">All files</a> / <a href="index.html">utils</a> createGetDependencyPackageJson.ts</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">93.33% </span>
+                <span class="strong">60.86% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>28/30</span>
+                <span class='fraction'>14/23</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">91.66% </span>
+                <span class="strong">46.15% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>22/24</span>
+                <span class='fraction'>6/13</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">40% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>3/3</span>
+                <span class='fraction'>2/5</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">96.42% </span>
+                <span class="strong">66.66% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>27/28</span>
+                <span class='fraction'>14/21</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line high'></div>
+    <div class='status-line medium'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -143,201 +143,165 @@
 <a name='L78'></a><a href='#L78'>78</a>
 <a name='L79'></a><a href='#L79'>79</a>
 <a name='L80'></a><a href='#L80'>80</a>
-<a name='L81'></a><a href='#L81'>81</a>
-<a name='L82'></a><a href='#L82'>82</a>
-<a name='L83'></a><a href='#L83'>83</a>
-<a name='L84'></a><a href='#L84'>84</a>
-<a name='L85'></a><a href='#L85'>85</a>
-<a name='L86'></a><a href='#L86'>86</a>
-<a name='L87'></a><a href='#L87'>87</a>
-<a name='L88'></a><a href='#L88'>88</a>
-<a name='L89'></a><a href='#L89'>89</a>
-<a name='L90'></a><a href='#L90'>90</a>
-<a name='L91'></a><a href='#L91'>91</a>
-<a name='L92'></a><a href='#L92'>92</a>
-<a name='L93'></a><a href='#L93'>93</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L81'></a><a href='#L81'>81</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">12x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">11x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">11x</span>
-<span class="cline-any cline-yes">11x</span>
-<span class="cline-any cline-yes">11x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">10x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">12x</span>
-<span class="cline-any cline-yes">12x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">12x</span>
-<span class="cline-any cline-yes">11x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">11x</span>
-<span class="cline-any cline-yes">11x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">8x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">11x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">/* eslint-disable complexity */
-import semver from 'semver';
-import type { GetDependencyPackageJson } from '../utils/createGetDependencyPackageJson';
-import {
-  createReportError,
-  reportNotWarnedFor,
-} from '../utils/createReportError';
-import type { PackageJson, DependencyTypes } from '../utils/packageTypes';
-import type { OnlyWarnsFor, OnlyWarnsForCheck } from '../utils/warnForUtils';
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { readFileSync, writeFileSync } from 'fs';
+import type { PackageJson } from './packageTypes';
 &nbsp;
-export interface CheckExactVersionsOptions {
-  getDependencyPackageJson?: GetDependencyPackageJson;
-  onlyWarnsForCheck: OnlyWarnsForCheck;
-  internalExactVersionsIgnore?: OnlyWarnsFor;
-  tryToAutoFix?: boolean;
+export type GetDependencyPackageJson = (pkgDepName: string) =&gt; PackageJson;
+&nbsp;
+export function <span class="fstat-no" title="function not covered" >readPkgJson(</span>packagePath: string): PackageJson {
+<span class="cstat-no" title="statement not covered" >  return JSON.parse(readFileSync(packagePath, 'utf8')) as PackageJson;</span>
 }
 &nbsp;
-const isVersionRange = (version: string): boolean =&gt;
-  version.startsWith('^') || version.startsWith('~');
+export function <span class="fstat-no" title="function not covered" >writePkgJson(</span>packagePath: string, pkg: PackageJson): void {
+<span class="cstat-no" title="statement not covered" >  writeFileSync(packagePath, JSON.stringify(pkg, null, 2));</span>
+}
 &nbsp;
-export function checkExactVersions(
-  pkg: PackageJson,
-  pkgPathName: string,
-  types: DependencyTypes[],
-  {
-    getDependencyPackageJson,
-    onlyWarnsForCheck,
-    internalExactVersionsIgnore,
-    tryToAutoFix = false,
-  }: CheckExactVersionsOptions,
-): void {
-  const reportError = createReportError('Exact versions', pkgPathName);
+/** @internal */
+export function <span class="fstat-no" title="function not covered" >internalLoadPackageJsonFromNodeModules(</span>
+  pkgDepName: string,
+  pkgDirname: string,
+): PackageJson {
+  // eslint-disable-next-line import/no-dynamic-require, @typescript-eslint/no-var-requires
+<span class="cstat-no" title="statement not covered" >  return require(require.resolve(`${pkgDepName}/package.json`, {</span>
+    paths: [pkgDirname],
+  })) as PackageJson;
+}
 &nbsp;
-  types.forEach((type) =&gt; {
-    const pkgDependencies = pkg[type];
-    if (!pkgDependencies) return;
+type NodeModulesPackagePathCache = Map&lt;string, PackageJson&gt;;
 &nbsp;
-    for (const [dependencyName, versionConst] of Object.entries(
-      pkgDependencies,
-    )) {
-      let version = versionConst;
-      if (version.startsWith('npm:')) {
-        const match = /^npm:.*@(.*)$/.exec(version);
-        <span class="missing-if-branch" title="if path not taken" >I</span>if (!match) <span class="cstat-no" title="statement not covered" >throw new Error(`Invalid version match: ${version}`);</span>
-        const [, realVersion] = match;
-        version = realVersion;
-      }
+interface CreateGetDependencyPackageJsonOptions {
+  pkgDirname: string;
+  nodeModulesPackagePathCache?: NodeModulesPackagePathCache;
+  /** @internal */
+  internalCustomLoadPackageJsonFromNodeModules?: typeof internalLoadPackageJsonFromNodeModules;
+  /** @internal */
+  internalReadPkgJson?: typeof readPkgJson;
+}
 &nbsp;
-      if (isVersionRange(version)) {
-        <span class="missing-if-branch" title="if path not taken" >I</span>if (internalExactVersionsIgnore?.includes(dependencyName)) {
-<span class="cstat-no" title="statement not covered" >          return;</span>
+export function createGetDependencyPackageJson({
+  pkgDirname,
+  nodeModulesPackagePathCache = new Map&lt;string, PackageJson&gt;(),
+  internalCustomLoadPackageJsonFromNodeModules = <span class="branch-0 cbranch-no" title="branch not covered" >internalLoadPackageJsonFromNodeModules,</span>
+  internalReadPkgJson = <span class="branch-0 cbranch-no" title="branch not covered" >readPkgJson,</span>
+}: CreateGetDependencyPackageJsonOptions): GetDependencyPackageJson {
+  return (pkgDepName) =&gt; {
+    const existing = nodeModulesPackagePathCache.get(pkgDepName);
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (existing) <span class="cstat-no" title="statement not covered" >return existing;</span>
+    let pkg: PackageJson;
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (pkgDepName.startsWith('.')) {
+      const packagePath = <span class="cstat-no" title="statement not covered" >`${pkgDirname}/${pkgDepName}/package.json`;</span>
+<span class="cstat-no" title="statement not covered" >      pkg = internalReadPkgJson(packagePath);</span>
+    } else {
+      try {
+        pkg = internalCustomLoadPackageJsonFromNodeModules(
+          pkgDepName,
+          pkgDirname,
+        );
+      } catch (err: unknown) {
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (!(err instanceof Error)) <span class="cstat-no" title="statement not covered" >throw err;</span>
+&nbsp;
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (
+          (err as NodeJS.ErrnoException).code !==
+          'ERR_PACKAGE_PATH_NOT_EXPORTED'
+        ) {
+<span class="cstat-no" title="statement not covered" >          throw err;</span>
         }
-        const shouldOnlyWarn = onlyWarnsForCheck.shouldWarnsFor(dependencyName);
-        if (!shouldOnlyWarn &amp;&amp; tryToAutoFix &amp;&amp; getDependencyPackageJson) {
-          let resolvedDep;
-          try {
-            resolvedDep = getDependencyPackageJson(dependencyName);
-          } catch {
-            resolvedDep = null;
-          }
-          if (!resolvedDep || !resolvedDep.version) {
-            reportError(
-              `Unexpected range dependency in "${type}" for "${dependencyName}"`,
-              `expecting "${version}" to be exact, autofix failed to resolve "${dependencyName}".`,
-              shouldOnlyWarn,
-            );
-          } else if (
-            !semver.satisfies(resolvedDep.version, version, {
-              includePrerelease: true,
-            })
-          ) {
-            reportError(
-              `Unexpected range dependency in "${type}" for "${dependencyName}"`,
-              `expecting "${version}" to be exact, autofix failed as "${dependencyName}"'s resolved version is "${resolvedDep.version}" and doesn't satisfies "${version}".`,
-              shouldOnlyWarn,
-            );
-          } else {
-            pkgDependencies[dependencyName] = resolvedDep.version;
-          }
-        } else {
-          reportError(
-            `Unexpected range dependency in "${type}" for "${dependencyName}"`,
-            `expecting "${version}" to be exact "${version.slice(1)}".`,
-            shouldOnlyWarn,
-          );
+&nbsp;
+        const match = / in (.*[/\\]package.json)($|\simported from)/.exec(
+          err.message,
+        );
+&nbsp;
+        if (match) {
+          const [, matchPackageJson] = match;
+          pkg = internalReadPkgJson(matchPackageJson);
+        } else <span class="missing-if-branch" title="else path not taken" >E</span>{
+<span class="cstat-no" title="statement not covered" >          throw err;</span>
         }
       }
     }
-  });
-&nbsp;
-  reportNotWarnedFor(reportError, onlyWarnsForCheck);
+    nodeModulesPackagePathCache.set(pkgDepName, pkg);
+    return pkg;
+  };
 }
 &nbsp;</pre></td></tr></table></pre>
 
