@@ -14,6 +14,18 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+## [3.8.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v3.7.1...v3.8.0) (2022-07-30)
+
+
+### Features
+
+* prepare run() for async use with ESM ([e904c03](https://github.com/christophehurpeau/check-package-dependencies/commit/e904c0377d67d4751be3125dbab86987f7bd9e55))
+
+
+### Bug Fixes
+
+* support windows ERR_PACKAGE_PATH_NOT_EXPORTED error ([d77c4fe](https://github.com/christophehurpeau/check-package-dependencies/commit/d77c4fe61c58ef540451c85e3e9d9d756eff0e0d))
+
 ## [3.7.1](https://github.com/christophehurpeau/check-package-dependencies/compare/v3.7.0...v3.7.1) (2022-07-24)
 
 
