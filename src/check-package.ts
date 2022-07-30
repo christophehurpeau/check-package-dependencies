@@ -31,6 +31,7 @@ import {
 } from './utils/warnForUtils';
 
 export interface CreateCheckPackageOptions {
+  /** @deprecated pass in cli --fix instead */
   tryToAutoFix?: boolean;
 }
 
@@ -183,8 +184,9 @@ export function createCheckPackage(
   const copyPkg: PackageJson = JSON.parse(JSON.stringify(pkg)) as PackageJson;
 
   if (
-    process.env.CI &&
-    process.env.CHECK_PACKAGE_DEPENDENCIES_ENABLE_CI_AUTOFIX !== 'true'
+    (process.env.CI &&
+      process.env.CHECK_PACKAGE_DEPENDENCIES_ENABLE_CI_AUTOFIX !== 'true') ||
+    process.argv.slice(2).includes('--fix')
   ) {
     tryToAutoFix = false;
   }

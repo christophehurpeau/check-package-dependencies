@@ -543,7 +543,7 @@ function createCheckPackage(pkgDirectoryPath = '.', {
   const pkg = readPkgJson(pkgPath);
   const copyPkg = JSON.parse(JSON.stringify(pkg));
 
-  if (process.env.CI && process.env.CHECK_PACKAGE_DEPENDENCIES_ENABLE_CI_AUTOFIX !== 'true') {
+  if (process.env.CI && process.env.CHECK_PACKAGE_DEPENDENCIES_ENABLE_CI_AUTOFIX !== 'true' || process.argv.slice(2).includes('--fix')) {
     tryToAutoFix = false;
   }
 

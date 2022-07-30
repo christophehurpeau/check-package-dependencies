@@ -3,6 +3,7 @@ import type { GetDependencyPackageJson } from './utils/createGetDependencyPackag
 import type { DependencyTypes, PackageJson } from './utils/packageTypes';
 import type { OnlyWarnsForOptionalDependencyMapping, OnlyWarnsFor } from './utils/warnForUtils';
 export interface CreateCheckPackageOptions {
+    /** @deprecated pass in cli --fix instead */
     tryToAutoFix?: boolean;
 }
 export interface CheckDirectPeerDependenciesOptions {
