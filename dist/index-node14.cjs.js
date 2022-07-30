@@ -582,6 +582,7 @@ function createCheckPackage(pkgDirectoryPath = '.', {
       checkExactVersions(pkg, pkgPathName, !allowRangeVersionsInDependencies ? ['dependencies', 'devDependencies', 'resolutions'] : ['devDependencies', 'resolutions'], {
         onlyWarnsForCheck,
         internalExactVersionsIgnore,
+        getDependencyPackageJson,
         tryToAutoFix
       });
       writePackageIfChanged();

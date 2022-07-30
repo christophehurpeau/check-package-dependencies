@@ -237,6 +237,7 @@ export function createCheckPackage(
         {
           onlyWarnsForCheck,
           internalExactVersionsIgnore,
+          getDependencyPackageJson,
           tryToAutoFix,
         },
       );
