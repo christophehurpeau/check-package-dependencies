@@ -6,7 +6,8 @@
     "declaration": true,
     "declarationMap": true,
     "emitDeclarationOnly": true,
-    "outDir": "dist"
+    "outDir": "dist",
+    "newLine": "lf"
   },
 
   "exclude": [
