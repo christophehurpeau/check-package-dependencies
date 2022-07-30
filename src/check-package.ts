@@ -189,11 +189,14 @@ export function createCheckPackage(
   const copyPkg: PackageJson = JSON.parse(JSON.stringify(pkg)) as PackageJson;
 
   if (
-    (process.env.CI &&
-      process.env.CHECK_PACKAGE_DEPENDENCIES_ENABLE_CI_AUTOFIX !== 'true') ||
-    process.argv.slice(2).includes('--fix')
+    process.env.CI &&
+    process.env.CHECK_PACKAGE_DEPENDENCIES_ENABLE_CI_AUTOFIX !== 'true'
   ) {
     tryToAutoFix = false;
+  }
+
+  if (process.argv.slice(2).includes('--fix')) {
+    tryToAutoFix = true;
   }
 
   const writePackageIfChanged = (): void => {

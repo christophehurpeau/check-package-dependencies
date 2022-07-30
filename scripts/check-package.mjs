@@ -1,6 +1,6 @@
 import { createCheckPackage } from '../dist/index-node14.cjs.js';
 
-await createCheckPackage(undefined, { tryToAutoFix: true })
+await createCheckPackage()
   .checkRecommended({
     isLibrary: true,
     onlyWarnsForInDependencies: {
