@@ -5,6 +5,8 @@ import type { OnlyWarnsForOptionalDependencyMapping, OnlyWarnsFor } from './util
 export interface CreateCheckPackageOptions {
     /** @deprecated pass in cli --fix instead */
     tryToAutoFix?: boolean;
+    /** @internal */
+    internalWorkspacePkgDirectoryPath?: string;
 }
 export interface CheckDirectPeerDependenciesOptions {
     isLibrary?: boolean;
@@ -101,5 +103,5 @@ export interface CheckPackageApi {
         devDependencies?: string[];
     }) => CheckPackageApi;
 }
-export declare function createCheckPackage(pkgDirectoryPath?: string, { tryToAutoFix }?: CreateCheckPackageOptions): CheckPackageApi;
+export declare function createCheckPackage(pkgDirectoryPath?: string, { tryToAutoFix, internalWorkspacePkgDirectoryPath, }?: CreateCheckPackageOptions): CheckPackageApi;
 //# sourceMappingURL=check-package.d.ts.map

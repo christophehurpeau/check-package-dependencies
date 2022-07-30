@@ -33,6 +33,8 @@ import {
 export interface CreateCheckPackageOptions {
   /** @deprecated pass in cli --fix instead */
   tryToAutoFix?: boolean;
+  /** @internal */
+  internalWorkspacePkgDirectoryPath?: string;
 }
 
 export interface CheckDirectPeerDependenciesOptions {
@@ -175,7 +177,10 @@ export interface CheckPackageApi {
 
 export function createCheckPackage(
   pkgDirectoryPath = '.',
-  { tryToAutoFix = false }: CreateCheckPackageOptions = {},
+  {
+    tryToAutoFix = false,
+    internalWorkspacePkgDirectoryPath,
+  }: CreateCheckPackageOptions = {},
 ): CheckPackageApi {
   const pkgDirname = path.resolve(pkgDirectoryPath);
   const pkgPath = `${pkgDirname}/package.json`;
@@ -203,13 +208,15 @@ export function createCheckPackage(
 
   let runCalled = false;
 
-  process.on('beforeExit', () => {
-    if (!runCalled) {
-      console.warn(
-        '\nFor future compatibility, call .run() and await the result.',
-      );
-    }
-  });
+  if (!internalWorkspacePkgDirectoryPath) {
+    process.on('beforeExit', () => {
+      if (!runCalled) {
+        console.warn(
+          '\nFor future compatibility, call .run() and await the result.',
+        );
+      }
+    });
+  }
 
   return {
     run() {

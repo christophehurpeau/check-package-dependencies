@@ -107,10 +107,10 @@ export function createCheckPackageWithWorkspaces(
 
   const checksWorkspaces = new Map<string, CheckPackageApi>(
     workspacePackagesPaths.map((subPkgDirectoryPath) => {
-      const checkPkg = createCheckPackage(
-        subPkgDirectoryPath,
-        createCheckPackageOptions,
-      );
+      const checkPkg = createCheckPackage(subPkgDirectoryPath, {
+        ...createCheckPackageOptions,
+        internalWorkspacePkgDirectoryPath: pkgDirectoryPath,
+      });
       return [checkPkg.pkg.name, checkPkg];
     }),
   );

@@ -535,7 +535,8 @@ const createOnlyWarnsForMappingCheck = (configName, onlyWarnsFor) => {
 
 /* eslint-disable complexity */
 function createCheckPackage(pkgDirectoryPath = '.', {
-  tryToAutoFix = false
+  tryToAutoFix = false,
+  internalWorkspacePkgDirectoryPath
 } = {}) {
   const pkgDirname = path__default.resolve(pkgDirectoryPath);
   const pkgPath = `${pkgDirname}/package.json`;
@@ -557,11 +558,15 @@ function createCheckPackage(pkgDirectoryPath = '.', {
     pkgDirname
   });
   let runCalled = false;
-  process.on('beforeExit', () => {
-    if (!runCalled) {
-      console.warn('\nFor future compatibility, call .run() and await the result.');
-    }
-  });
+
+  if (!internalWorkspacePkgDirectoryPath) {
+    process.on('beforeExit', () => {
+      if (!runCalled) {
+        console.warn('\nFor future compatibility, call .run() and await the result.');
+      }
+    });
+  }
+
   return {
     run() {
       runCalled = true;
@@ -886,7 +891,9 @@ function createCheckPackageWithWorkspaces(pkgDirectoryPath = '.', createCheckPac
   }
 
   const checksWorkspaces = new Map(workspacePackagesPaths.map(subPkgDirectoryPath => {
-    const checkPkg = createCheckPackage(subPkgDirectoryPath, createCheckPackageOptions);
+    const checkPkg = createCheckPackage(subPkgDirectoryPath, { ...createCheckPackageOptions,
+      internalWorkspacePkgDirectoryPath: pkgDirectoryPath
+    });
     return [checkPkg.pkg.name, checkPkg];
   }));
   let runCalled = false;
