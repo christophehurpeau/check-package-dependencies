@@ -14,6 +14,14 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+## [3.9.2](https://github.com/christophehurpeau/check-package-dependencies/compare/v3.9.1...v3.9.2) (2022-07-30)
+
+
+### Bug Fixes
+
+* fix enable --fix cli option ([2fff3cd](https://github.com/christophehurpeau/check-package-dependencies/commit/2fff3cde8de2e7125f984a3dc0a5c43dbb4aaa01))
+* fix run message warning always displaying for workspaces ([2e7e01d](https://github.com/christophehurpeau/check-package-dependencies/commit/2e7e01d00bc599bea1722ff89b8e59d45a60677a))
+
 ## [3.9.1](https://github.com/christophehurpeau/check-package-dependencies/compare/v3.9.0...v3.9.1) (2022-07-30)
 
 
