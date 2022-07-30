@@ -23,6 +23,7 @@ export interface CheckPackageWithWorkspacesRecommendedOptions {
     checkResolutionMessage?: CheckResolutionMessage;
 }
 export interface CheckPackageWithWorkspacesApi {
+    run: () => Promise<void>;
     checkRecommended: (options?: CheckPackageWithWorkspacesRecommendedOptions) => CheckPackageWithWorkspacesApi;
     forRoot: (callback: (checkPackage: CheckPackageApi) => void) => CheckPackageWithWorkspacesApi;
     forEach: (callback: (checkPackage: CheckPackageApi) => void) => CheckPackageWithWorkspacesApi;

@@ -51,6 +51,7 @@ export interface CheckExactVersionsOptions {
     internalExactVersionsIgnore?: OnlyWarnsFor;
 }
 export interface CheckPackageApi {
+    run: () => Promise<void>;
     /** @internal */
     pkg: PackageJson;
     /** @internal */
