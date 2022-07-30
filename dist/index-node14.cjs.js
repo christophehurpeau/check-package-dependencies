@@ -396,9 +396,19 @@ function readPkgJson(packagePath) {
 function writePkgJson(packagePath, pkg) {
   fs.writeFileSync(packagePath, JSON.stringify(pkg, null, 2));
 }
+/** @internal */
+
+function internalLoadPackageJsonFromNodeModules(pkgDepName, pkgDirname) {
+  // eslint-disable-next-line import/no-dynamic-require, @typescript-eslint/no-var-requires
+  return require(require.resolve(`${pkgDepName}/package.json`, {
+    paths: [pkgDirname]
+  }));
+}
 function createGetDependencyPackageJson({
   pkgDirname,
-  nodeModulesPackagePathCache = new Map()
+  nodeModulesPackagePathCache = new Map(),
+  internalCustomLoadPackageJsonFromNodeModules = internalLoadPackageJsonFromNodeModules,
+  internalReadPkgJson = readPkgJson
 }) {
   return pkgDepName => {
     const existing = nodeModulesPackagePathCache.get(pkgDepName);
@@ -406,13 +416,10 @@ function createGetDependencyPackageJson({
     let pkg;
 
     if (pkgDepName.startsWith('.')) {
-      pkg = readPkgJson(`${pkgDirname}/${pkgDepName}/package.json`);
+      pkg = internalReadPkgJson(`${pkgDirname}/${pkgDepName}/package.json`);
     } else {
       try {
-        // eslint-disable-next-line import/no-dynamic-require, @typescript-eslint/no-unsafe-assignment
-        pkg = require(require.resolve(`${pkgDepName}/package.json`, {
-          paths: [pkgDirname]
-        }));
+        pkg = internalCustomLoadPackageJsonFromNodeModules(pkgDepName, pkgDirname);
       } catch (err) {
         if (!(err instanceof Error)) throw err;
 
@@ -420,11 +427,11 @@ function createGetDependencyPackageJson({
           throw err;
         }
 
-        const match = / in (.*\/package.json)($|\simported from)/.exec(err.message);
+        const match = / in (.*[/\\]package.json)($|\simported from)/.exec(err.message);
 
         if (match) {
           const [, matchPackageJson] = match;
-          pkg = readPkgJson(matchPackageJson);
+          pkg = internalReadPkgJson(matchPackageJson);
         } else {
           throw err;
         }

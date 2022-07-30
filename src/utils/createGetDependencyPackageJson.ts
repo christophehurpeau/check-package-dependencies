@@ -11,16 +11,33 @@ export function writePkgJson(packagePath: string, pkg: PackageJson): void {
   writeFileSync(packagePath, JSON.stringify(pkg, null, 2));
 }
 
+/** @internal */
+export function internalLoadPackageJsonFromNodeModules(
+  pkgDepName: string,
+  pkgDirname: string,
+): PackageJson {
+  // eslint-disable-next-line import/no-dynamic-require, @typescript-eslint/no-var-requires
+  return require(require.resolve(`${pkgDepName}/package.json`, {
+    paths: [pkgDirname],
+  })) as PackageJson;
+}
+
 type NodeModulesPackagePathCache = Map<string, PackageJson>;
 
 interface CreateGetDependencyPackageJsonOptions {
   pkgDirname: string;
   nodeModulesPackagePathCache?: NodeModulesPackagePathCache;
+  /** @internal */
+  internalCustomLoadPackageJsonFromNodeModules?: typeof internalLoadPackageJsonFromNodeModules;
+  /** @internal */
+  internalReadPkgJson?: typeof readPkgJson;
 }
 
 export function createGetDependencyPackageJson({
   pkgDirname,
   nodeModulesPackagePathCache = new Map<string, PackageJson>(),
+  internalCustomLoadPackageJsonFromNodeModules = internalLoadPackageJsonFromNodeModules,
+  internalReadPkgJson = readPkgJson,
 }: CreateGetDependencyPackageJsonOptions): GetDependencyPackageJson {
   return (pkgDepName) => {
     const existing = nodeModulesPackagePathCache.get(pkgDepName);
@@ -28,13 +45,13 @@ export function createGetDependencyPackageJson({
     let pkg: PackageJson;
     if (pkgDepName.startsWith('.')) {
       const packagePath = `${pkgDirname}/${pkgDepName}/package.json`;
-      pkg = readPkgJson(packagePath);
+      pkg = internalReadPkgJson(packagePath);
     } else {
       try {
-        // eslint-disable-next-line import/no-dynamic-require, @typescript-eslint/no-unsafe-assignment
-        pkg = require(require.resolve(`${pkgDepName}/package.json`, {
-          paths: [pkgDirname],
-        }));
+        pkg = internalCustomLoadPackageJsonFromNodeModules(
+          pkgDepName,
+          pkgDirname,
+        );
       } catch (err: unknown) {
         if (!(err instanceof Error)) throw err;
 
@@ -45,13 +62,13 @@ export function createGetDependencyPackageJson({
           throw err;
         }
 
-        const match = / in (.*\/package.json)($|\simported from)/.exec(
+        const match = / in (.*[/\\]package.json)($|\simported from)/.exec(
           err.message,
         );
 
         if (match) {
           const [, matchPackageJson] = match;
-          pkg = readPkgJson(matchPackageJson);
+          pkg = internalReadPkgJson(matchPackageJson);
         } else {
           throw err;
         }
