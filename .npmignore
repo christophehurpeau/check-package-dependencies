@@ -1,3 +1,4 @@
+/.husky
 /.github
 /build
 /docs
@@ -5,12 +6,16 @@
 /samples
 /test
 /*.config.js
+/*.config.cjs
+/*.config.mjs
 /tsconfig.json
 /tsconfig.build.json
+/tsconfig.eslint.json
 /dist/tsbuildinfo
 /tsconfig.doc.json
 babel.config.json
 __snapshots__
+/coverage
 .yo-rc.json
 /renovate.json
 /yarn.lock
