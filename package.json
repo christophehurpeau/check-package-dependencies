@@ -100,7 +100,7 @@
     "@pob/eslint-config-typescript": "49.3.3",
     "@pob/root": "6.21.1",
     "@types/glob": "7.2.0",
-    "@types/jest": "28.1.6",
+    "@types/jest": "28.1.7",
     "@types/semver": "7.3.12",
     "eslint": "8.22.0",
     "jest": "28.1.3",
