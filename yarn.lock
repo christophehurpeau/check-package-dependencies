@@ -244,7 +244,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/helper-validator-identifier@npm:^7.15.7, @babel/helper-validator-identifier@npm:^7.18.6":
+"@babel/helper-validator-identifier@npm:^7.18.6":
   version: 7.18.6
   resolution: "@babel/helper-validator-identifier@npm:7.18.6"
   checksum: e295254d616bbe26e48c196a198476ab4d42a73b90478c9842536cf910ead887f5af6b5c4df544d3052a25ccb3614866fa808dc1e3a5a4291acd444e243c0648
@@ -1183,12 +1183,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pob/eslint-config-typescript@npm:49.3.3":
-  version: 49.3.3
-  resolution: "@pob/eslint-config-typescript@npm:49.3.3"
+"@pob/eslint-config-typescript@npm:49.4.0":
+  version: 49.4.0
+  resolution: "@pob/eslint-config-typescript@npm:49.4.0"
   dependencies:
-    "@pob/eslint-config": 49.3.2
-    "@pob/use-eslint-plugin": 49.3.2
+    "@pob/eslint-config": 49.4.0
+    "@pob/use-eslint-plugin": 49.4.0
     "@typescript-eslint/eslint-plugin": ^5.18.0
     "@typescript-eslint/parser": ^5.18.0
     eslint-config-airbnb-base: ^15.0.0
@@ -1197,7 +1197,7 @@ __metadata:
   peerDependencies:
     "@typescript-eslint/eslint-plugin": ^5.18.0
     "@typescript-eslint/parser": ^5.18.0
-    eslint: ^8.11.0
+    eslint: ^8.18.0
     eslint-plugin-import: ^2.25.3
     eslint-plugin-node: ^11.1.0
   peerDependenciesMeta:
@@ -1209,25 +1209,25 @@ __metadata:
       optional: true
     eslint-plugin-node:
       optional: true
-  checksum: eec6ff6f77e8c620b60d81ddd7c490aab6447e1c7c9c239a54eb0891951cdec5ac3aa53ba0d767c02683b5cbbdc7c4ded802c4e69a3e275b92fa8a5888375054
+  checksum: 6e8569def3e02a0ce8bbfd58051a4ead5e22f24e7a0d83fcf5fd45f08843404e38b221578ac2c8d40a4a2e3100e834929c9e645d3516f3c79c0c92487fa2cf7e
   languageName: node
   linkType: hard
 
-"@pob/eslint-config@npm:49.3.2":
-  version: 49.3.2
-  resolution: "@pob/eslint-config@npm:49.3.2"
+"@pob/eslint-config@npm:49.4.0":
+  version: 49.4.0
+  resolution: "@pob/eslint-config@npm:49.4.0"
   dependencies:
-    "@pob/use-eslint-plugin": 49.3.2
+    "@pob/use-eslint-plugin": 49.4.0
     eslint-config-airbnb-base: ^15.0.0
     eslint-config-prettier: ^8.3.0
     eslint-plugin-import: ^2.25.3
     eslint-plugin-node: ^11.1.0
-    eslint-plugin-unicorn: ^41.0.0
+    eslint-plugin-unicorn: ^43.0.0
   peerDependencies:
-    eslint: ^8.11.0
+    eslint: ^8.18.0
     eslint-plugin-import: ^2.25.3
     eslint-plugin-node: ^11.1.0
-    eslint-plugin-unicorn: ^41.0.0
+    eslint-plugin-unicorn: ^43.0.0
   peerDependenciesMeta:
     eslint-plugin-import:
       optional: true
@@ -1235,7 +1235,7 @@ __metadata:
       optional: true
     eslint-plugin-unicorn:
       optional: true
-  checksum: 051e5a4fead029dc2f5a1207af179e2d5d4ef4cd94008e3fd2581d989d97cfb87e30b7c3cb542eed8b02894561ad2e4c83ac91ca681726d340cf070762759c12
+  checksum: 1e1cf6d02365b21ec59983f4978336cf258b19cfc64a79abd9ec06d6b35668954bf506a36b9f6d5894e56175e98968d6a9f2999f0069ca7275c84cb21b3aa1af
   languageName: node
   linkType: hard
 
@@ -1317,10 +1317,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pob/use-eslint-plugin@npm:49.3.2":
-  version: 49.3.2
-  resolution: "@pob/use-eslint-plugin@npm:49.3.2"
-  checksum: c4e4189ed7abbf3c3d9b8e601f58ce0775ff452adbd62211d45d5f03efe015213d55fe39a236537a9c9ca44b7e2918503c16efc40815738e71bde12d0f8ae999
+"@pob/use-eslint-plugin@npm:49.4.0":
+  version: 49.4.0
+  resolution: "@pob/use-eslint-plugin@npm:49.4.0"
+  checksum: b1123f734f5c0ed3474515c5bad8d7bb040429beb667cd9188ea3030d05fce50b8d66ff928aea0b3f4eadc31469ee7e87f15007a239b926ec7e1d495eb162f08
   languageName: node
   linkType: hard
 
@@ -2488,8 +2488,8 @@ __metadata:
   dependencies:
     "@babel/core": 7.19.0
     "@pob/commitlint-config": 4.3.0
-    "@pob/eslint-config": 49.3.2
-    "@pob/eslint-config-typescript": 49.3.3
+    "@pob/eslint-config": 49.4.0
+    "@pob/eslint-config-typescript": 49.4.0
     "@pob/root": 6.21.1
     "@types/glob": 7.2.0
     "@types/jest": 28.1.8
@@ -2515,10 +2515,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ci-info@npm:^3.2.0, ci-info@npm:^3.3.0":
-  version: 3.3.0
-  resolution: "ci-info@npm:3.3.0"
-  checksum: c3d86fe374938ecda5093b1ba39acb535d8309185ba3f23587747c6a057e63f45419b406d880304dbc0e1d72392c9a33e42fe9a1e299209bc0ded5efaa232b66
+"ci-info@npm:^3.2.0, ci-info@npm:^3.3.2":
+  version: 3.3.2
+  resolution: "ci-info@npm:3.3.2"
+  checksum: fd81f1edd2d3b0f6cb077b2e84365136d87b9db8c055928c1ad69da8a76c2c2f19cba8ea51b90238302157ca927f91f92b653e933f2398dde4867500f08d6e62
   languageName: node
   linkType: hard
 
@@ -3185,12 +3185,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-unicorn@npm:^41.0.0":
-  version: 41.0.1
-  resolution: "eslint-plugin-unicorn@npm:41.0.1"
+"eslint-plugin-unicorn@npm:^43.0.0":
+  version: 43.0.2
+  resolution: "eslint-plugin-unicorn@npm:43.0.2"
   dependencies:
-    "@babel/helper-validator-identifier": ^7.15.7
-    ci-info: ^3.3.0
+    "@babel/helper-validator-identifier": ^7.18.6
+    ci-info: ^3.3.2
     clean-regexp: ^1.0.0
     eslint-utils: ^3.0.0
     esquery: ^1.4.0
@@ -3201,11 +3201,11 @@ __metadata:
     read-pkg-up: ^7.0.1
     regexp-tree: ^0.1.24
     safe-regex: ^2.1.1
-    semver: ^7.3.5
+    semver: ^7.3.7
     strip-indent: ^3.0.0
   peerDependencies:
-    eslint: ">=8.8.0"
-  checksum: 90c9dd93b57ec2cdd650168364b4e2220e2c72c1ffc8ea43cd1be2dabadc7821ec5077656f44fa4622e284caa39ca497058e1dbe609f530d392bdb2da3d73b70
+    eslint: ">=8.18.0"
+  checksum: 1b63eb013cbc0b3c9ef131a1e049b4b53d8e208393675d5f97d3fa83c050ebcb695a7fd210f4de1460f42f89c2ecca261280488834591d5c21e146d297a9ee2e
   languageName: node
   linkType: hard
 
