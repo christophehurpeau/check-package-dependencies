@@ -363,6 +363,26 @@ function checkResolutionsVersionsMatch(pkg, pkgPathName, {
   });
 }
 
+function checkSatisfiesVersions(pkg, pkgPathName, type, dependenciesRanges, onlyWarnsForCheck) {
+  const pkgDependencies = pkg[type] || {};
+  const reportError = createReportError('Satisfies Versions', pkgPathName);
+  Object.entries(dependenciesRanges).forEach(([depKey, range]) => {
+    const version = pkgDependencies[depKey];
+
+    if (!version) {
+      reportError(`Missing "${depKey}" in ${type}`, `should satisfies "${range}".`, onlyWarnsForCheck?.shouldWarnsFor(depKey));
+    } else {
+      const minVersionOfVersion = semver__default.minVersion(version);
+
+      if (!minVersionOfVersion || !semver__default.satisfies(minVersionOfVersion, range, {
+        includePrerelease: true
+      })) {
+        reportError(`Invalid "${depKey}" in ${type}`, `"${version}" (in "${depKey}") should satisfies "${range}".`, onlyWarnsForCheck?.shouldWarnsFor(depKey));
+      }
+    }
+  });
+}
+
 function checkSatisfiesVersionsFromDependency(pkg, pkgPathName, type, depKeys, depPkg, dependencies = {}, onlyWarnsForCheck) {
   const pkgDependencies = pkg[type] || {};
   const reportError = createReportError(`Satisfies Versions from ${depPkg.name}`, pkgPathName);
@@ -777,6 +797,13 @@ function createCheckPackage(pkgDirectoryPath = '.', {
         checkIdenticalVersionsThanDependency(pkg, pkgPathName, 'devDependencies', devDependencies, depPkg, depPkg.devDependencies);
       }
 
+      return this;
+    },
+
+    checkSatisfiesVersions(dependencies) {
+      Object.entries(dependencies).forEach(([dependencyType, dependenciesRanges]) => {
+        checkSatisfiesVersions(pkg, pkgPathName, dependencyType, dependenciesRanges);
+      });
       return this;
     },
 

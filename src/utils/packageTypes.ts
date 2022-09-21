@@ -10,6 +10,8 @@ export type DependencyTypes =
   | 'peerDependencies'
   | 'resolutions';
 
+export type DependencyName = string;
+
 export type PackageJson = Except<PackageJsonFromTypeFest, 'name'> & {
   name: string;
   resolutionsExplained?: Record<string, string>;

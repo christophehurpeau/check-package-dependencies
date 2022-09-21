@@ -11,6 +11,7 @@ import { checkNoDependencies } from './checks/checkNoDependencies';
 import type { CheckResolutionMessage } from './checks/checkResolutionsHasExplanation';
 import { checkResolutionsHasExplanation } from './checks/checkResolutionsHasExplanation';
 import { checkResolutionsVersionsMatch } from './checks/checkResolutionsVersionsMatch';
+import { checkSatisfiesVersions } from './checks/checkSatisfiesVersions';
 import { checkSatisfiesVersionsFromDependency } from './checks/checkSatisfiesVersionsFromDependency';
 import type { GetDependencyPackageJson } from './utils/createGetDependencyPackageJson';
 import {
@@ -19,7 +20,11 @@ import {
   writePkgJson,
 } from './utils/createGetDependencyPackageJson';
 import { getEntries } from './utils/object';
-import type { DependencyTypes, PackageJson } from './utils/packageTypes';
+import type {
+  DependencyName,
+  DependencyTypes,
+  PackageJson,
+} from './utils/packageTypes';
 import type {
   OnlyWarnsForOptionalDependencyMapping,
   OnlyWarnsFor,
@@ -179,6 +184,25 @@ export interface CheckPackageApi {
       devDependencies?: string[];
     },
   ) => CheckPackageApi;
+
+  /**
+   * Check that your package.json dependencies specifically satisfies the range passed in config
+   *
+   * @example
+   * ```
+   * .checkSatisfiesVersions({
+   *   devDependencies: {
+   *     eslint: '^8.0.0'
+   *   },
+   * })
+   * ```
+   */
+  checkSatisfiesVersions: (
+    dependencies: Partial<
+      Record<DependencyTypes, Record<DependencyName, string>>
+    >,
+  ) => CheckPackageApi;
+
   /**
    * Check that your package.json dependencies specifically satisfies the range set in another dependencies
    * @example
@@ -598,6 +622,20 @@ export function createCheckPackage(
           depPkg.devDependencies,
         );
       }
+      return this;
+    },
+
+    checkSatisfiesVersions(dependencies) {
+      Object.entries(dependencies).forEach(
+        ([dependencyType, dependenciesRanges]) => {
+          checkSatisfiesVersions(
+            pkg,
+            pkgPathName,
+            dependencyType as DependencyTypes,
+            dependenciesRanges,
+          );
+        },
+      );
       return this;
     },
 
