@@ -106,27 +106,62 @@ export interface CheckPackageApi {
   getDependencyPackageJson: GetDependencyPackageJson;
 
   checkExactVersions: (options?: CheckExactVersionsOptions) => CheckPackageApi;
+
   checkResolutionsVersionsMatch: () => CheckPackageApi;
+
   checkExactVersionsForLibrary: (
     options?: CheckExactVersionsOptions,
   ) => CheckPackageApi;
+
   checkExactDevVersions: (
     options?: CheckExactVersionsOptions,
   ) => CheckPackageApi;
+
   checkNoDependencies: (
     type?: DependencyTypes,
     moveToSuggestion?: DependencyTypes,
   ) => CheckPackageApi;
+
+  /**
+   * @example
+   * ```
+   * .checkDirectPeerDependencies({
+   *   invalidOnlyWarnsFor: ['semver'],
+   * })
+   * ```
+   */
   checkDirectPeerDependencies: (
     options?: CheckDirectPeerDependenciesOptions,
   ) => CheckPackageApi;
+
+  /**
+   * @example
+   * ```
+   * .checkDirectDuplicateDependencies({
+   *   invalidOnlyWarnsFor: { '*': 'type-fest' },
+   * })
+   * ```
+   */
   checkDirectDuplicateDependencies: (
     options?: CheckDirectDuplicateDependenciesOptions,
   ) => CheckPackageApi;
+
   checkResolutionsHasExplanation: (
     checkMessage?: CheckResolutionMessage,
   ) => CheckPackageApi;
+
   checkRecommended: (options?: CheckRecommendedOptions) => CheckPackageApi;
+
+  /**
+   * @example
+   * Check that your package.json contains the same version of @babel/core than react-scripts, both in resolutions and devDependencies
+   * ```
+   * .checkIdenticalVersionsThanDependency('react-scripts', {
+   *   resolutions: ['@babel/core'],
+   *   devDependencies: ['@babel/core'],
+   * })
+   * ```
+   */
   checkIdenticalVersionsThanDependency: (
     depName: string,
     dependencies: {
@@ -135,6 +170,7 @@ export interface CheckPackageApi {
       devDependencies?: string[];
     },
   ) => CheckPackageApi;
+
   checkIdenticalVersionsThanDevDependencyOfDependency: (
     depName: string,
     dependencies: {
@@ -143,6 +179,18 @@ export interface CheckPackageApi {
       devDependencies?: string[];
     },
   ) => CheckPackageApi;
+  /**
+   * Check that your package.json dependencies specifically satisfies the range set in another dependencies
+   * @example
+   * ```
+   * .checkSatisfiesVersionsFromDependency('@pob/eslint-config-typescript', {
+   *   devDependencies: [
+   *     '@typescript-eslint/eslint-plugin',
+   *     '@typescript-eslint/parser',
+   *   ],
+   * })
+   * ```
+   */
   checkSatisfiesVersionsFromDependency: (
     depName: string,
     dependencies: {
@@ -151,6 +199,7 @@ export interface CheckPackageApi {
       devDependencies?: string[];
     },
   ) => CheckPackageApi;
+
   checkSatisfiesVersionsInDevDependenciesOfDependency: (
     depName: string,
     dependencies: {
@@ -159,11 +208,28 @@ export interface CheckPackageApi {
       devDependencies?: string[];
     },
   ) => CheckPackageApi;
+
+  /**
+   * Check that your package.json dependencies have the exact same version that another dependency also present in your package.json
+   * @example
+   * The react-dom version should match react, so this check will ensure it does
+   * ```
+   * .checkIdenticalVersions({
+   *   dependencies: {
+   *     react: {
+   *       dependencies: ['react-dom'],
+   *       devDependencies: ['react-test-renderer'],
+   *     },
+   *   },
+   * })
+   * ```
+   */
   checkIdenticalVersions: (dependencies: {
     resolutions?: Record<string, string[]>;
     dependencies?: Record<string, string[]>;
     devDependencies?: Record<string, string[]>;
   }) => CheckPackageApi;
+
   checkSatisfiesVersionsBetweenDependencies: (
     depName1: string,
     depName2: string,
