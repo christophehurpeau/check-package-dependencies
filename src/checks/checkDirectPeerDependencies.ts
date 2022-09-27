@@ -47,8 +47,9 @@ export function checkDirectPeerDependencies(
   const reportError = createReportError('Peer Dependencies', pkgPathName);
 
   regularDependencyTypes.forEach((depType) => {
-    if (!pkg[depType]) return;
-    getKeys(pkg[depType]).forEach((depName) => {
+    const dependencies = pkg[depType];
+    if (!dependencies) return;
+    getKeys(dependencies).forEach((depName) => {
       const depPkg = getDependencyPackageJson(depName);
 
       if (depPkg.peerDependencies) {

@@ -11,13 +11,13 @@ describe('logMessage', () => {
     logMessage('test');
     expect(errorFn).toMatchInlineSnapshot(`
       [MockFunction] {
-        "calls": Array [
-          Array [
+        "calls": [
+          [
             "[31m❌ test[39m",
           ],
         ],
-        "results": Array [
-          Object {
+        "results": [
+          {
             "type": "return",
             "value": undefined,
           },
@@ -30,13 +30,13 @@ describe('logMessage', () => {
     logMessage('test', 'info');
     expect(errorFn).toMatchInlineSnapshot(`
       [MockFunction] {
-        "calls": Array [
-          Array [
+        "calls": [
+          [
             "[31m❌ test[39m: info",
           ],
         ],
-        "results": Array [
-          Object {
+        "results": [
+          {
             "type": "return",
             "value": undefined,
           },
@@ -50,13 +50,13 @@ describe('logMessage', () => {
     logMessage('test', undefined, true);
     expect(errorFn).toMatchInlineSnapshot(`
       [MockFunction] {
-        "calls": Array [
-          Array [
+        "calls": [
+          [
             "[33m⚠ test[39m",
           ],
         ],
-        "results": Array [
-          Object {
+        "results": [
+          {
             "type": "return",
             "value": undefined,
           },
@@ -70,13 +70,13 @@ describe('logMessage', () => {
     logMessage('test', 'info', true);
     expect(errorFn).toMatchInlineSnapshot(`
       [MockFunction] {
-        "calls": Array [
-          Array [
+        "calls": [
+          [
             "[33m⚠ test[39m: info",
           ],
         ],
-        "results": Array [
-          Object {
+        "results": [
+          {
             "type": "return",
             "value": undefined,
           },

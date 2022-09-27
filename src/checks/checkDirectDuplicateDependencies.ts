@@ -32,8 +32,9 @@ export function checkDirectDuplicateDependencies(
     { type: 'dependencies', searchIn: ['devDependencies', 'dependencies'] },
   ];
   checks.forEach(({ type, searchIn }) => {
-    if (!pkg[type]) return;
-    getKeys(pkg[type]).forEach((depName) => {
+    const dependencies = pkg[type];
+    if (!dependencies) return;
+    getKeys(dependencies).forEach((depName) => {
       const depPkg = getDependencyPackageJson(depName);
       checkDuplicateDependencies(
         reportError,
