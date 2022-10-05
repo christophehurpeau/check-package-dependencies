@@ -109,8 +109,9 @@ function checkDirectDuplicateDependencies(pkg, pkgPathName, depType, getDependen
     type,
     searchIn
   }) => {
-    if (!pkg[type]) return;
-    getKeys(pkg[type]).forEach(depName => {
+    const dependencies = pkg[type];
+    if (!dependencies) return;
+    getKeys(dependencies).forEach(depName => {
       const depPkg = getDependencyPackageJson(depName);
       checkDuplicateDependencies(reportError, pkg, depType, searchIn, depPkg, onlyWarnsForCheck.createFor(depName));
     });
@@ -174,8 +175,9 @@ const getAllowedPeerInFromType = (depPkgType, isLibrary) => {
 function checkDirectPeerDependencies(isLibrary, pkg, pkgPathName, getDependencyPackageJson, missingOnlyWarnsForCheck, invalidOnlyWarnsForCheck) {
   const reportError = createReportError('Peer Dependencies', pkgPathName);
   regularDependencyTypes.forEach(depType => {
-    if (!pkg[depType]) return;
-    getKeys(pkg[depType]).forEach(depName => {
+    const dependencies = pkg[depType];
+    if (!dependencies) return;
+    getKeys(dependencies).forEach(depName => {
       const depPkg = getDependencyPackageJson(depName);
 
       if (depPkg.peerDependencies) {
