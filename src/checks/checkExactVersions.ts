@@ -13,12 +13,13 @@ export interface CheckExactVersionsOptions {
   onlyWarnsForCheck: OnlyWarnsForCheck;
   internalExactVersionsIgnore?: OnlyWarnsFor;
   tryToAutoFix?: boolean;
+  customCreateReportError?: typeof createReportError;
 }
 
 const isVersionRange = (version: string): boolean =>
   version.startsWith('^') || version.startsWith('~');
 
-export function checkExactVersions(
+export async function checkExactVersions(
   pkg: PackageJson,
   pkgPathName: string,
   types: DependencyTypes[],
@@ -27,13 +28,14 @@ export function checkExactVersions(
     onlyWarnsForCheck,
     internalExactVersionsIgnore,
     tryToAutoFix = false,
+    customCreateReportError = createReportError,
   }: CheckExactVersionsOptions,
-): void {
-  const reportError = createReportError('Exact versions', pkgPathName);
+): Promise<void> {
+  const reportError = customCreateReportError('Exact versions', pkgPathName);
 
-  types.forEach((type) => {
+  for (const type of types) {
     const pkgDependencies = pkg[type];
-    if (!pkgDependencies) return;
+    if (!pkgDependencies) continue;
 
     for (const [dependencyName, versionConst] of Object.entries(
       pkgDependencies,
@@ -48,13 +50,13 @@ export function checkExactVersions(
 
       if (isVersionRange(version)) {
         if (internalExactVersionsIgnore?.includes(dependencyName)) {
-          return;
+          continue;
         }
         const shouldOnlyWarn = onlyWarnsForCheck.shouldWarnsFor(dependencyName);
         if (!shouldOnlyWarn && tryToAutoFix && getDependencyPackageJson) {
           let resolvedDep;
           try {
-            resolvedDep = getDependencyPackageJson(dependencyName);
+            resolvedDep = await getDependencyPackageJson(dependencyName);
           } catch {
             resolvedDep = null;
           }
@@ -86,7 +88,7 @@ export function checkExactVersions(
         }
       }
     }
-  });
+  }
 
   reportNotWarnedFor(reportError, onlyWarnsForCheck);
 }

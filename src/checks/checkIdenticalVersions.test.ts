@@ -1,17 +1,11 @@
-import { createReportError } from '../utils/createReportError';
 import { checkIdenticalVersions } from './checkIdenticalVersions';
 
-jest.mock('../utils/createReportError', () => ({
-  ...jest.requireActual('../utils/createReportError'),
-  createReportError: jest.fn(),
-}));
-
-const mockReportError = jest.fn();
-(createReportError as ReturnType<typeof jest.fn>).mockReturnValue(
-  mockReportError,
-);
+const jest = import.meta.jest;
 
 describe('checkIdenticalVersions', () => {
+  const mockReportError = jest.fn();
+  const createReportError = jest.fn().mockReturnValue(mockReportError);
+
   beforeEach(() => {
     mockReportError.mockReset();
   });
@@ -28,6 +22,8 @@ describe('checkIdenticalVersions', () => {
         {
           react: ['react-dom'],
         },
+        undefined,
+        createReportError,
       );
       expect(createReportError).toHaveBeenCalledWith(
         'Identical Versions',
@@ -47,6 +43,8 @@ describe('checkIdenticalVersions', () => {
         {
           react: ['react-dom'],
         },
+        undefined,
+        createReportError,
       );
       expect(createReportError).toHaveBeenCalledWith(
         'Identical Versions',
@@ -77,6 +75,8 @@ describe('checkIdenticalVersions', () => {
             devDependencies: ['react-test-renderer'],
           },
         },
+        undefined,
+        createReportError,
       );
       expect(createReportError).toHaveBeenCalledWith(
         'Identical Versions',
@@ -100,6 +100,8 @@ describe('checkIdenticalVersions', () => {
             devDependencies: ['react-test-renderer'],
           },
         },
+        undefined,
+        createReportError,
       );
       expect(createReportError).toHaveBeenCalledWith(
         'Identical Versions',

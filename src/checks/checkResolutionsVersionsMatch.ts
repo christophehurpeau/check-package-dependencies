@@ -4,15 +4,19 @@ import type { PackageJson } from '../utils/packageTypes';
 
 export interface CheckResolutionsVersionsMatchOptions {
   tryToAutoFix?: boolean;
+  customCreateReportError?: typeof createReportError;
 }
 
 export function checkResolutionsVersionsMatch(
   pkg: PackageJson,
   pkgPathName: string,
-  { tryToAutoFix }: CheckResolutionsVersionsMatchOptions = {},
+  {
+    tryToAutoFix,
+    customCreateReportError = createReportError,
+  }: CheckResolutionsVersionsMatchOptions = {},
 ): void {
   const pkgResolutions = pkg.resolutions || {};
-  const reportError = createReportError(
+  const reportError = customCreateReportError(
     'Resolutions match other dependencies',
     pkgPathName,
   );

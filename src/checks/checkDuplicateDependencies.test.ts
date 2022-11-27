@@ -1,18 +1,11 @@
-import { createReportError } from '../utils/createReportError';
 import { createOnlyWarnsForArrayCheck } from '../utils/warnForUtils';
 import { checkDuplicateDependencies } from './checkDuplicateDependencies';
 
-jest.mock('../utils/createReportError', () => ({
-  ...jest.requireActual('../utils/createReportError'),
-  createReportError: jest.fn(),
-}));
-
-const mockReportError = jest.fn();
-(createReportError as ReturnType<typeof jest.fn>).mockReturnValue(
-  mockReportError,
-);
+const jest = import.meta.jest;
 
 describe('checkDuplicateDependencies', () => {
+  const mockReportError = jest.fn();
+
   beforeEach(() => {
     mockReportError.mockReset();
   });

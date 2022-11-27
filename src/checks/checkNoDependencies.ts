@@ -6,11 +6,12 @@ export function checkNoDependencies(
   pkgPath: string,
   type: DependencyTypes = 'dependencies',
   moveToSuggestion: DependencyTypes = 'devDependencies',
+  customCreateReportError = createReportError,
 ): void {
   const pkgDependencies = pkg[type];
   if (!pkgDependencies) return;
 
-  const reportError = createReportError('No dependencies', pkgPath);
+  const reportError = customCreateReportError('No dependencies', pkgPath);
   reportError(
     `Unexpected ${type}`,
     `you should move them in ${moveToSuggestion}`,

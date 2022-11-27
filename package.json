@@ -9,18 +9,19 @@
   "license": "ISC",
   "repository": "https://github.com/christophehurpeau/check-package-dependencies.git",
   "homepage": "https://github.com/christophehurpeau/check-package-dependencies",
-  "type": "commonjs",
+  "type": "module",
   "engines": {
     "node": "^14.13.1 || >=16.0.0"
   },
   "packageManager": "yarn@3.3.0",
-  "main": "./dist/index-node14.cjs.js",
+  "main": "./dist/index-node14.mjs",
   "types": "./dist/index.d.ts",
   "exports": {
     "./package.json": "./package.json",
     ".": {
       "node": {
-        "default": "./dist/index-node14.cjs.js"
+        "import": "./dist/index-node14.mjs",
+        "require": "./dist/index-node14.cjs.js"
       }
     }
   },
@@ -29,7 +30,7 @@
   "scripts": {
     "build": "yarn clean:build && rollup --config rollup.config.mjs && yarn run build:definitions",
     "build:definitions": "tsc -p tsconfig.build.json",
-    "checks": "node scripts/check-package.mjs",
+    "checks": "node scripts/check-package.js",
     "clean": "yarn clean:build",
     "clean:build": "pob-babel-clean-out dist",
     "generate:api": "typedoc --tsconfig tsconfig.doc.json",
@@ -39,8 +40,8 @@
     "lint:prettier": "pob-root-prettier --check .",
     "lint:prettier:fix": "pob-root-prettier --write .",
     "postinstallDev": "pob-root-postinstall",
-    "test": "jest",
-    "test:watch": "jest --watch",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch",
     "watch": "yarn clean:build && rollup --config rollup.config.mjs --watch"
   },
   "prettier": {
@@ -71,6 +72,9 @@
     "testEnvironment": "node",
     "setupFiles": [
       "<rootDir>/src/test-setup.ts"
+    ],
+    "extensionsToTreatAsEsm": [
+      ".ts"
     ]
   },
   "pob": {
@@ -79,7 +83,7 @@
         "target": "node",
         "version": "14",
         "formats": [
-          "cjs"
+          "es"
         ]
       }
     ],
@@ -90,6 +94,7 @@
   "dependencies": {
     "chalk": "^4.1.0",
     "glob": "^8.0.0",
+    "import-meta-resolve": "^2.1.0",
     "semver": "^7.3.4",
     "type-fest": "^3.0.0"
   },

@@ -1,25 +1,18 @@
 /* eslint-disable max-lines */
-import { createReportError } from '../utils/createReportError';
 import { createOnlyWarnsForMappingCheck } from '../utils/warnForUtils';
 import { checkDirectPeerDependencies } from './checkDirectPeerDependencies';
 
-jest.mock('../utils/createReportError', () => ({
-  ...jest.requireActual('../utils/createReportError'),
-  createReportError: jest.fn(),
-}));
-
-const mockReportError = jest.fn();
-(createReportError as ReturnType<typeof jest.fn>).mockReturnValue(
-  mockReportError,
-);
+const jest = import.meta.jest;
 
 describe('checkDirectPeerDependencies', () => {
+  const mockReportError = jest.fn();
+  const createReportError = jest.fn().mockReturnValue(mockReportError);
   beforeEach(() => {
     mockReportError.mockReset();
   });
 
-  it('should report error when peer dependency is missing', () => {
-    checkDirectPeerDependencies(
+  it('should report error when peer dependency is missing', async () => {
+    await checkDirectPeerDependencies(
       false,
       {
         name: 'test',
@@ -32,6 +25,7 @@ describe('checkDirectPeerDependencies', () => {
       })),
       createOnlyWarnsForMappingCheck('test', []),
       createOnlyWarnsForMappingCheck('test', []),
+      createReportError,
     );
     expect(mockReportError).toHaveBeenCalledWith(
       'Missing "rollup" peer dependency from "some-lib-using-rollup" in devDependencies',
@@ -40,8 +34,8 @@ describe('checkDirectPeerDependencies', () => {
     );
   });
 
-  it('should not report error when peer dependency is in devDependencies', () => {
-    checkDirectPeerDependencies(
+  it('should not report error when peer dependency is in devDependencies', async () => {
+    await checkDirectPeerDependencies(
       false,
       {
         name: 'test',
@@ -59,12 +53,13 @@ describe('checkDirectPeerDependencies', () => {
         })),
       createOnlyWarnsForMappingCheck('test', []),
       createOnlyWarnsForMappingCheck('test', []),
+      createReportError,
     );
     expect(mockReportError).not.toHaveBeenCalled();
   });
 
-  it('should not report error when peer dependency value is *', () => {
-    checkDirectPeerDependencies(
+  it('should not report error when peer dependency value is *', async () => {
+    await checkDirectPeerDependencies(
       false,
       {
         name: 'test',
@@ -82,12 +77,13 @@ describe('checkDirectPeerDependencies', () => {
         })),
       createOnlyWarnsForMappingCheck('test', []),
       createOnlyWarnsForMappingCheck('test', []),
+      createReportError,
     );
     expect(mockReportError).not.toHaveBeenCalled();
   });
 
-  it('should not report error when dev dependency value is a beta', () => {
-    checkDirectPeerDependencies(
+  it('should not report error when dev dependency value is a beta', async () => {
+    await checkDirectPeerDependencies(
       false,
       {
         name: 'test',
@@ -108,12 +104,13 @@ describe('checkDirectPeerDependencies', () => {
         })),
       createOnlyWarnsForMappingCheck('test', []),
       createOnlyWarnsForMappingCheck('test', []),
+      createReportError,
     );
     expect(mockReportError).not.toHaveBeenCalled();
   });
 
-  it('should not report error when dev dependency and peerDependency value are a beta', () => {
-    checkDirectPeerDependencies(
+  it('should not report error when dev dependency and peerDependency value are a beta', async () => {
+    await checkDirectPeerDependencies(
       false,
       {
         name: 'test',
@@ -134,12 +131,13 @@ describe('checkDirectPeerDependencies', () => {
         })),
       createOnlyWarnsForMappingCheck('test', []),
       createOnlyWarnsForMappingCheck('test', []),
+      createReportError,
     );
     expect(mockReportError).not.toHaveBeenCalled();
   });
 
-  it('should allow lib to have peer in both dependencies and peerDependencies', () => {
-    checkDirectPeerDependencies(
+  it('should allow lib to have peer in both dependencies and peerDependencies', async () => {
+    await checkDirectPeerDependencies(
       true,
       {
         name: 'test',
@@ -159,12 +157,13 @@ describe('checkDirectPeerDependencies', () => {
         })),
       createOnlyWarnsForMappingCheck('test', []),
       createOnlyWarnsForMappingCheck('test', []),
+      createReportError,
     );
     expect(mockReportError).not.toHaveBeenCalled();
   });
 
-  it('should allow missing peer dependency when optional', () => {
-    checkDirectPeerDependencies(
+  it('should allow missing peer dependency when optional', async () => {
+    await checkDirectPeerDependencies(
       false,
       {
         name: 'test',
@@ -180,12 +179,13 @@ describe('checkDirectPeerDependencies', () => {
       })),
       createOnlyWarnsForMappingCheck('test', []),
       createOnlyWarnsForMappingCheck('test', []),
+      createReportError,
     );
     expect(mockReportError).not.toHaveBeenCalled();
   });
 
-  it('should not report error when @types is in dev dependency of an app', () => {
-    checkDirectPeerDependencies(
+  it('should not report error when @types is in dev dependency of an app', async () => {
+    await checkDirectPeerDependencies(
       false,
       {
         name: 'test',
@@ -208,12 +208,13 @@ describe('checkDirectPeerDependencies', () => {
         })),
       createOnlyWarnsForMappingCheck('test', []),
       createOnlyWarnsForMappingCheck('test', []),
+      createReportError,
     );
     expect(mockReportError).not.toHaveBeenCalled();
   });
 
-  it('should not report error when @types is missing in dependencies/peerDependency of a library', () => {
-    checkDirectPeerDependencies(
+  it('should not report error when @types is missing in dependencies/peerDependency of a library', async () => {
+    await checkDirectPeerDependencies(
       true,
       {
         name: 'test',
@@ -236,6 +237,7 @@ describe('checkDirectPeerDependencies', () => {
         })),
       createOnlyWarnsForMappingCheck('test', []),
       createOnlyWarnsForMappingCheck('test', []),
+      createReportError,
     );
     expect(mockReportError).toHaveBeenCalledWith(
       'Missing "@types/a" peer dependency from "some-lib-using-types" in dependencies',

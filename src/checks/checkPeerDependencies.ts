@@ -27,7 +27,7 @@ export function checkPeerDependencies(
     if (versionsIn.length === 0) {
       const peerDependenciesMetaPeerDep = peerDependenciesMeta?.[peerDepName];
       if (peerDependenciesMetaPeerDep?.optional) {
-        return;
+        continue;
       }
       reportError(
         `Missing "${peerDepName}" peer dependency from "${depPkg.name}" in ${type}`,

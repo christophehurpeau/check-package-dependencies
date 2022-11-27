@@ -9,9 +9,13 @@ export function checkIdenticalVersions(
   type: DependencyTypes,
   deps: Record<string, string[] | Partial<Record<DependencyTypes, string[]>>>,
   onlyWarnsForCheck?: OnlyWarnsForCheck,
+  customCreateReportError = createReportError,
 ): void {
   const pkgDependencies = pkg[type] || {};
-  const reportError = createReportError('Identical Versions', pkgPathName);
+  const reportError = customCreateReportError(
+    'Identical Versions',
+    pkgPathName,
+  );
 
   getKeys(deps).forEach((depKey) => {
     const version = pkgDependencies[depKey];

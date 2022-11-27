@@ -1,6 +1,8 @@
 import { logMessage, reportNotWarnedForMapping } from './createReportError';
 import { createOnlyWarnsForMappingCheck } from './warnForUtils';
 
+const jest = import.meta.jest;
+
 describe('logMessage', () => {
   beforeEach(() => {
     jest.restoreAllMocks();

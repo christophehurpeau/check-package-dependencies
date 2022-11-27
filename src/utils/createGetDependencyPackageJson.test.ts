@@ -1,20 +1,24 @@
 import type { PackageJson } from 'type-fest';
 import { createGetDependencyPackageJson } from './createGetDependencyPackageJson';
 
-jest.mock('./createGetDependencyPackageJson', () => ({
-  ...jest.requireActual('./createGetDependencyPackageJson'),
-  readPkgJson: jest.fn(),
-  writePkgJson: jest.fn(),
-  internalLoadPackageJsonFromNodeModules: jest.fn(),
-}));
+const jest = import.meta.jest;
+
+((jest as any).unstable_mockModule as typeof jest.mock)(
+  './pkgJsonUtils',
+  () => ({
+    readPkgJson: jest.fn(),
+    writePkgJson: jest.fn(),
+    internalLoadPackageJsonFromNodeModules: jest.fn(),
+  }),
+);
 
 describe('createGetDependencyPackageJson', () => {
-  test('on windows with error', () => {
+  test('on windows with error', async () => {
     const internalLoadPackageJsonFromNodeModulesMock = jest
       .fn()
-      .mockImplementation(() => {
+      .mockImplementationOnce(() => {
         const err: NodeJS.ErrnoException = new Error(
-          'Package subpath \'./package.json\' is not defined by "exports" in C:\\test\\check-package-dependencies\\node_modules\\test1\\package.json',
+          'Package subpath \'./package.json\' is not defined by "exports" in C:\\test\\check-package-dependencies\\node_modules\\test1\\package.json imported from C:\\test\\check-package-dependencies\\package.json',
         );
         err.code = 'ERR_PACKAGE_PATH_NOT_EXPORTED';
 
@@ -32,7 +36,7 @@ describe('createGetDependencyPackageJson', () => {
       internalReadPkgJson: readPkgJsonMock as any,
     });
 
-    const res = getDependencyPackageJson('test1');
+    const res = await getDependencyPackageJson('test1');
 
     expect(res).toBe(mockPkg);
     expect(internalLoadPackageJsonFromNodeModulesMock).toBeCalledWith(

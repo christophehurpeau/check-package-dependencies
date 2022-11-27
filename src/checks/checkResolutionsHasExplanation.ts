@@ -15,10 +15,11 @@ export function checkResolutionsHasExplanation(
   pkgPathName: string,
   checkMessage: CheckResolutionMessage,
   getDependencyPackageJson: GetDependencyPackageJson,
+  customCreateReportError = createReportError,
 ): void {
   const pkgResolutions = pkg.resolutions || {};
   const pkgResolutionsExplained = pkg.resolutionsExplained || {};
-  const reportError = createReportError(
+  const reportError = customCreateReportError(
     'Resolutions has explanation',
     pkgPathName,
   );

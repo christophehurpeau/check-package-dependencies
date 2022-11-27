@@ -51,9 +51,7 @@ If something is missing for your need, please open an issue !
 Create a script, for example `scripts/check-package.js`. Add it in `"scripts"` in your package.json. Run in CI and/or in your husky hooks.
 
 ```js
-'use script';
-
-const { createCheckPackage } = require('check-package-dependencies');
+import { createCheckPackage } from 'check-package-dependencies';
 
 await createCheckPackage(/* '.' */)
   // Check that your package.json contains only exact versions of package, not range.

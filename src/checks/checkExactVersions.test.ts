@@ -1,17 +1,9 @@
 /* eslint-disable max-lines */
-import { createReportError } from '../utils/createReportError';
 import { createOnlyWarnsForArrayCheck } from '../utils/warnForUtils';
 import { checkExactVersions } from './checkExactVersions';
 
-jest.mock('../utils/createReportError', () => ({
-  ...jest.requireActual('../utils/createReportError'),
-  createReportError: jest.fn(),
-}));
+const jest = import.meta.jest;
 
-const mockReportError = jest.fn();
-(createReportError as ReturnType<typeof jest.fn>).mockReturnValue(
-  mockReportError,
-);
 const onlyWarnsForConfigName = 'checkExactVersions.test.onlyWarnsFor';
 const emptyOnlyWarnsForCheck = createOnlyWarnsForArrayCheck(
   onlyWarnsForConfigName,
@@ -19,25 +11,34 @@ const emptyOnlyWarnsForCheck = createOnlyWarnsForArrayCheck(
 );
 
 describe('checkExactVersions', () => {
+  const mockReportError = jest.fn();
+  const createReportError = jest.fn().mockReturnValue(mockReportError);
+
   beforeEach(() => {
     mockReportError.mockReset();
   });
-  it('should return no error when all versions are exact', () => {
-    checkExactVersions(
+  it('should return no error when all versions are exact', async () => {
+    await checkExactVersions(
       { name: 'test', devDependencies: { test: '1.0.0' } },
       'path',
       ['devDependencies'],
-      { onlyWarnsForCheck: emptyOnlyWarnsForCheck },
+      {
+        onlyWarnsForCheck: emptyOnlyWarnsForCheck,
+        customCreateReportError: createReportError,
+      },
     );
     expect(createReportError).toHaveBeenCalledWith('Exact versions', 'path');
     expect(mockReportError).not.toHaveBeenCalled();
   });
-  it('should return an error when one version has a caret range', () => {
-    checkExactVersions(
+  it('should return an error when one version has a caret range', async () => {
+    await checkExactVersions(
       { name: 'test', devDependencies: { test: '^1.0.0' } },
       'path',
       ['devDependencies'],
-      { onlyWarnsForCheck: emptyOnlyWarnsForCheck },
+      {
+        onlyWarnsForCheck: emptyOnlyWarnsForCheck,
+        customCreateReportError: createReportError,
+      },
     );
     expect(createReportError).toHaveBeenCalled();
     expect(mockReportError).toHaveBeenCalledTimes(1);
@@ -47,8 +48,8 @@ describe('checkExactVersions', () => {
       false,
     );
   });
-  it('should return an warning when one version has a caret range and is in onlyWarnsFor', () => {
-    checkExactVersions(
+  it('should return an warning when one version has a caret range and is in onlyWarnsFor', async () => {
+    await checkExactVersions(
       { name: 'test', devDependencies: { test: '^1.0.0' } },
       'path',
       ['devDependencies'],
@@ -57,6 +58,7 @@ describe('checkExactVersions', () => {
           onlyWarnsForConfigName,
           ['test'],
         ),
+        customCreateReportError: createReportError,
       },
     );
     expect(createReportError).toHaveBeenCalled();
@@ -68,12 +70,15 @@ describe('checkExactVersions', () => {
     );
   });
 
-  it('should return an error when one version has a tilde range', () => {
-    checkExactVersions(
+  it('should return an error when one version has a tilde range', async () => {
+    await checkExactVersions(
       { name: 'test', devDependencies: { test: '~1.0.0' } },
       'path',
       ['devDependencies'],
-      { onlyWarnsForCheck: emptyOnlyWarnsForCheck },
+      {
+        onlyWarnsForCheck: emptyOnlyWarnsForCheck,
+        customCreateReportError: createReportError,
+      },
     );
     expect(createReportError).toHaveBeenCalled();
     expect(mockReportError).toHaveBeenCalledTimes(1);
@@ -84,12 +89,15 @@ describe('checkExactVersions', () => {
     );
   });
 
-  it('should return multiple errors when multiple versions have range', () => {
-    checkExactVersions(
+  it('should return multiple errors when multiple versions have range', async () => {
+    await checkExactVersions(
       { name: 'test', devDependencies: { test1: '~1.0.0', test2: '~1.0.0' } },
       'path',
       ['devDependencies'],
-      { onlyWarnsForCheck: emptyOnlyWarnsForCheck },
+      {
+        onlyWarnsForCheck: emptyOnlyWarnsForCheck,
+        customCreateReportError: createReportError,
+      },
     );
     expect(createReportError).toHaveBeenCalled();
     expect(mockReportError).toHaveBeenCalledTimes(2);
@@ -107,15 +115,16 @@ describe('checkExactVersions', () => {
     );
   });
 
-  it('should fix and remove range', () => {
+  it('should fix and remove range', async () => {
     const getDependencyPackageJsonMock = jest
       .fn()
       .mockReturnValueOnce({ name: 'test1', version: '1.0.1' });
     const pkg = { name: 'test', devDependencies: { test1: '~1.0.0' } };
-    checkExactVersions(pkg, 'path', ['devDependencies'], {
+    await checkExactVersions(pkg, 'path', ['devDependencies'], {
       onlyWarnsForCheck: emptyOnlyWarnsForCheck,
       tryToAutoFix: true,
       getDependencyPackageJson: getDependencyPackageJsonMock,
+      customCreateReportError: createReportError,
     });
     expect(createReportError).toHaveBeenCalled();
     expect(mockReportError).toHaveBeenCalledTimes(0);
@@ -126,17 +135,18 @@ describe('checkExactVersions', () => {
     });
   });
 
-  it('should error if autofix failed as package does not exists', () => {
+  it('should error if autofix failed as package does not exists', async () => {
     const getDependencyPackageJsonMock = jest
       .fn()
       .mockImplementationOnce(() => {
         throw new Error('Module not found');
       });
     const pkg = { name: 'test', devDependencies: { test1: '~1.0.0' } };
-    checkExactVersions(pkg, 'path', ['devDependencies'], {
+    await checkExactVersions(pkg, 'path', ['devDependencies'], {
       onlyWarnsForCheck: emptyOnlyWarnsForCheck,
       tryToAutoFix: true,
       getDependencyPackageJson: getDependencyPackageJsonMock,
+      customCreateReportError: createReportError,
     });
     expect(createReportError).toHaveBeenCalled();
     expect(getDependencyPackageJsonMock).toHaveBeenCalled();
@@ -149,15 +159,16 @@ describe('checkExactVersions', () => {
     );
   });
 
-  it("should error if autofix failed because version doesn't match range", () => {
+  it("should error if autofix failed because version doesn't match range", async () => {
     const getDependencyPackageJsonMock = jest
       .fn()
       .mockReturnValueOnce({ name: 'test1', version: '2.0.0' });
     const pkg = { name: 'test', devDependencies: { test1: '~1.0.0' } };
-    checkExactVersions(pkg, 'path', ['devDependencies'], {
+    await checkExactVersions(pkg, 'path', ['devDependencies'], {
       onlyWarnsForCheck: emptyOnlyWarnsForCheck,
       tryToAutoFix: true,
       getDependencyPackageJson: getDependencyPackageJsonMock,
+      customCreateReportError: createReportError,
     });
     expect(createReportError).toHaveBeenCalled();
     expect(getDependencyPackageJsonMock).toHaveBeenCalled();
@@ -170,8 +181,8 @@ describe('checkExactVersions', () => {
     );
   });
 
-  it('should support npm: prefix', () => {
-    checkExactVersions(
+  it('should support npm: prefix', async () => {
+    await checkExactVersions(
       {
         name: 'test',
         devDependencies: {
@@ -182,6 +193,7 @@ describe('checkExactVersions', () => {
       ['devDependencies'],
       {
         onlyWarnsForCheck: emptyOnlyWarnsForCheck,
+        customCreateReportError: createReportError,
       },
     );
     expect(createReportError).toHaveBeenCalled();
@@ -193,8 +205,8 @@ describe('checkExactVersions', () => {
       false,
     );
   });
-  it('should warn when onlyWarnsFor is passed', () => {
-    checkExactVersions(
+  it('should warn when onlyWarnsFor is passed', async () => {
+    await checkExactVersions(
       { name: 'test', devDependencies: { test1: '~1.0.0', test2: '~1.0.0' } },
       'path',
       ['devDependencies'],
@@ -203,6 +215,7 @@ describe('checkExactVersions', () => {
           onlyWarnsForConfigName,
           ['test1'],
         ),
+        customCreateReportError: createReportError,
       },
     );
     expect(createReportError).toHaveBeenCalled();
@@ -220,11 +233,12 @@ describe('checkExactVersions', () => {
       false,
     );
   });
-  it('should error when onlyWarnsFor is not fully used', () => {
-    checkExactVersions({ name: 'test' }, 'path', ['devDependencies'], {
+  it('should error when onlyWarnsFor is not fully used', async () => {
+    await checkExactVersions({ name: 'test' }, 'path', ['devDependencies'], {
       onlyWarnsForCheck: createOnlyWarnsForArrayCheck(onlyWarnsForConfigName, [
         'testa',
       ]),
+      customCreateReportError: createReportError,
     });
     expect(createReportError).toHaveBeenCalled();
     expect(mockReportError).toHaveBeenCalledTimes(1);

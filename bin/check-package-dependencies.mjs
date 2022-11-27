@@ -1,11 +1,7 @@
-#!/usr/bin/env node
-
-'use strict';
-
-const {
+import {
   createCheckPackage,
   createCheckPackageWithWorkspaces,
-} = require('../dist/index-node14.cjs');
+} from '../dist/index-node14.mjs';
 
 const checkPackage = createCheckPackage();
 if (checkPackage.pkg.workspaces) {
@@ -15,3 +11,5 @@ if (checkPackage.pkg.workspaces) {
 } else {
   checkPackage.checkRecommended();
 }
+
+await checkPackage.run();

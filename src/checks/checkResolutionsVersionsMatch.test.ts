@@ -1,17 +1,11 @@
-import { createReportError } from '../utils/createReportError';
 import { checkResolutionsVersionsMatch } from './checkResolutionsVersionsMatch';
 
-jest.mock('../utils/createReportError', () => ({
-  ...jest.requireActual('../utils/createReportError'),
-  createReportError: jest.fn(),
-}));
-
-const mockReportError = jest.fn();
-(createReportError as ReturnType<typeof jest.fn>).mockReturnValue(
-  mockReportError,
-);
+const jest = import.meta.jest;
 
 describe('checkResolutionsVersionsMatch', () => {
+  const mockReportError = jest.fn();
+  const createReportError = jest.fn().mockReturnValue(mockReportError);
+
   beforeEach(() => {
     mockReportError.mockReset();
   });
@@ -19,6 +13,7 @@ describe('checkResolutionsVersionsMatch', () => {
     checkResolutionsVersionsMatch(
       { name: 'test', devDependencies: { test: '1.0.0' } },
       'path',
+      { customCreateReportError: createReportError },
     );
     expect(mockReportError).not.toHaveBeenCalled();
   });
@@ -27,6 +22,7 @@ describe('checkResolutionsVersionsMatch', () => {
     checkResolutionsVersionsMatch(
       { name: 'test', resolutions: { test: '1.0.0' } },
       'path',
+      { customCreateReportError: createReportError },
     );
     expect(mockReportError).not.toHaveBeenCalled();
   });
@@ -40,6 +36,7 @@ describe('checkResolutionsVersionsMatch', () => {
         dependencies: { test2: '1.0.0', test3: '^1.0.0' },
       },
       'path',
+      { customCreateReportError: createReportError },
     );
     expect(mockReportError).not.toHaveBeenCalled();
   });
@@ -53,6 +50,7 @@ describe('checkResolutionsVersionsMatch', () => {
         dependencies: { test2: '1.2.0' },
       },
       'path',
+      { customCreateReportError: createReportError },
     );
     expect(mockReportError).toHaveBeenCalledTimes(2);
     expect(mockReportError).toHaveBeenNthCalledWith(
@@ -74,7 +72,10 @@ describe('checkResolutionsVersionsMatch', () => {
       devDependencies: { test1: '1.1.0' },
       dependencies: { test2: '1.2.0' },
     };
-    checkResolutionsVersionsMatch(pkg, 'path', { tryToAutoFix: true });
+    checkResolutionsVersionsMatch(pkg, 'path', {
+      customCreateReportError: createReportError,
+      tryToAutoFix: true,
+    });
 
     expect(mockReportError).toHaveBeenCalledTimes(0);
     expect(pkg.devDependencies.test1).toBe('1.0.0');

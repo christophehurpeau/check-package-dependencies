@@ -11,9 +11,10 @@ export function checkSatisfiesVersionsFromDependency(
   depPkg: PackageJson,
   dependencies: PackageJson[DependencyTypes] = {},
   onlyWarnsForCheck?: OnlyWarnsForCheck,
+  customCreateReportError = createReportError,
 ): void {
   const pkgDependencies = pkg[type] || {};
-  const reportError = createReportError(
+  const reportError = customCreateReportError(
     `Satisfies Versions from ${depPkg.name}`,
     pkgPathName,
   );

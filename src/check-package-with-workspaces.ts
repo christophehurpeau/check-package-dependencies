@@ -117,11 +117,12 @@ export function createCheckPackageWithWorkspaces(
 
   return {
     async run() {
-      await Promise.all(
-        [checkPackage, ...checksWorkspaces.values()].map((checksWorkspace) =>
-          checksWorkspace.run(),
-        ),
-      );
+      for (const checksWorkspace of [
+        checkPackage,
+        ...checksWorkspaces.values(),
+      ]) {
+        await checksWorkspace.run();
+      }
     },
 
     checkRecommended({

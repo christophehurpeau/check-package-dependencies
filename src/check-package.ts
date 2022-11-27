@@ -14,17 +14,14 @@ import { checkResolutionsVersionsMatch } from './checks/checkResolutionsVersions
 import { checkSatisfiesVersions } from './checks/checkSatisfiesVersions';
 import { checkSatisfiesVersionsFromDependency } from './checks/checkSatisfiesVersionsFromDependency';
 import type { GetDependencyPackageJson } from './utils/createGetDependencyPackageJson';
-import {
-  createGetDependencyPackageJson,
-  readPkgJson,
-  writePkgJson,
-} from './utils/createGetDependencyPackageJson';
+import { createGetDependencyPackageJson } from './utils/createGetDependencyPackageJson';
 import { getEntries } from './utils/object';
 import type {
   DependencyName,
   DependencyTypes,
   PackageJson,
 } from './utils/packageTypes';
+import { readPkgJson, writePkgJson } from './utils/pkgJsonUtils';
 import type {
   OnlyWarnsForOptionalDependencyMapping,
   OnlyWarnsFor,
@@ -304,17 +301,40 @@ export function createCheckPackage(
   if (!internalWorkspacePkgDirectoryPath) {
     process.on('beforeExit', () => {
       if (!runCalled) {
-        console.warn(
-          '\nFor future compatibility, call .run() and await the result.',
-        );
+        throw new Error('Call .run() and await the result.');
       }
     });
   }
 
+  class Job {
+    name: string;
+
+    fn: () => Promise<void>;
+
+    constructor(name: string, fn: () => Promise<void>) {
+      this.name = name;
+      this.fn = fn;
+    }
+
+    async run(): Promise<void> {
+      try {
+        await this.fn();
+      } catch (err) {
+        throw new Error(`${this.name} failed: ${(err as Error).message}`);
+      }
+    }
+  }
+
+  const jobs: Job[] = [];
+
   return {
-    run() {
+    async run() {
       runCalled = true;
-      return Promise.resolve();
+      // TODO parallel
+      for (const job of jobs) {
+        await job.run();
+      }
+      writePackageIfChanged();
     },
 
     pkg,
@@ -326,24 +346,27 @@ export function createCheckPackage(
       internalExactVersionsIgnore,
       allowRangeVersionsInDependencies = true,
     } = {}) {
-      const onlyWarnsForCheck = createOnlyWarnsForArrayCheck(
-        'checkExactVersions.onlyWarnsFor',
-        onlyWarnsFor,
+      jobs.push(
+        new Job(this.checkExactVersions.name, async () => {
+          const onlyWarnsForCheck = createOnlyWarnsForArrayCheck(
+            'checkExactVersions.onlyWarnsFor',
+            onlyWarnsFor,
+          );
+          await checkExactVersions(
+            pkg,
+            pkgPathName,
+            !allowRangeVersionsInDependencies
+              ? ['dependencies', 'devDependencies', 'resolutions']
+              : ['devDependencies', 'resolutions'],
+            {
+              onlyWarnsForCheck,
+              internalExactVersionsIgnore,
+              getDependencyPackageJson,
+              tryToAutoFix,
+            },
+          );
+        }),
       );
-      checkExactVersions(
-        pkg,
-        pkgPathName,
-        !allowRangeVersionsInDependencies
-          ? ['dependencies', 'devDependencies', 'resolutions']
-          : ['devDependencies', 'resolutions'],
-        {
-          onlyWarnsForCheck,
-          internalExactVersionsIgnore,
-          getDependencyPackageJson,
-          tryToAutoFix,
-        },
-      );
-      writePackageIfChanged();
       return this;
     },
 
@@ -351,36 +374,46 @@ export function createCheckPackage(
       checkResolutionsVersionsMatch(pkg, pkgPathName, {
         tryToAutoFix,
       });
-      writePackageIfChanged();
       return this;
     },
 
     /** @deprecated use checkExactVersions({ allowRangeVersionsInDependencies: true })  */
     checkExactVersionsForLibrary({ onlyWarnsFor } = {}) {
-      const onlyWarnsForCheck = createOnlyWarnsForArrayCheck(
-        'checkExactVersionsForLibrary.onlyWarnsFor',
-        onlyWarnsFor,
+      jobs.push(
+        new Job(this.checkExactDevVersions.name, async () => {
+          const onlyWarnsForCheck = createOnlyWarnsForArrayCheck(
+            'checkExactVersionsForLibrary.onlyWarnsFor',
+            onlyWarnsFor,
+          );
+          await checkExactVersions(
+            pkg,
+            pkgPathName,
+            ['devDependencies', 'resolutions'],
+            {
+              onlyWarnsForCheck,
+              tryToAutoFix,
+              getDependencyPackageJson,
+            },
+          );
+        }),
       );
-      checkExactVersions(pkg, pkgPathName, ['devDependencies', 'resolutions'], {
-        onlyWarnsForCheck,
-        tryToAutoFix,
-        getDependencyPackageJson,
-      });
-      writePackageIfChanged();
       return this;
     },
 
     checkExactDevVersions({ onlyWarnsFor } = {}) {
-      const onlyWarnsForCheck = createOnlyWarnsForArrayCheck(
-        'checkExactDevVersions.onlyWarnsFor',
-        onlyWarnsFor,
+      jobs.push(
+        new Job(this.checkExactDevVersions.name, async () => {
+          const onlyWarnsForCheck = createOnlyWarnsForArrayCheck(
+            'checkExactDevVersions.onlyWarnsFor',
+            onlyWarnsFor,
+          );
+          await checkExactVersions(pkg, pkgPathName, ['devDependencies'], {
+            onlyWarnsForCheck,
+            tryToAutoFix,
+            getDependencyPackageJson,
+          });
+        }),
       );
-      checkExactVersions(pkg, pkgPathName, ['devDependencies'], {
-        onlyWarnsForCheck,
-        tryToAutoFix,
-        getDependencyPackageJson,
-      });
-      writePackageIfChanged();
       return this;
     },
 
@@ -404,24 +437,28 @@ export function createCheckPackage(
         ? 'onlyWarnsFor'
         : 'invalidOnlyWarnsFor',
     } = {}) {
-      const missingOnlyWarnsForCheck = createOnlyWarnsForMappingCheck(
-        internalMissingConfigName,
-        missingOnlyWarnsFor,
-      );
-      const invalidOnlyWarnsForCheck =
-        internalInvalidConfigName === internalMissingConfigName
-          ? missingOnlyWarnsForCheck
-          : createOnlyWarnsForMappingCheck(
-              internalInvalidConfigName,
-              invalidOnlyWarnsFor,
-            );
-      checkDirectPeerDependencies(
-        isLibrary,
-        pkg,
-        pkgPathName,
-        getDependencyPackageJson,
-        missingOnlyWarnsForCheck,
-        invalidOnlyWarnsForCheck,
+      jobs.push(
+        new Job(this.checkDirectPeerDependencies.name, async () => {
+          const missingOnlyWarnsForCheck = createOnlyWarnsForMappingCheck(
+            internalMissingConfigName,
+            missingOnlyWarnsFor,
+          );
+          const invalidOnlyWarnsForCheck =
+            internalInvalidConfigName === internalMissingConfigName
+              ? missingOnlyWarnsForCheck
+              : createOnlyWarnsForMappingCheck(
+                  internalInvalidConfigName,
+                  invalidOnlyWarnsFor,
+                );
+          await checkDirectPeerDependencies(
+            isLibrary,
+            pkg,
+            pkgPathName,
+            getDependencyPackageJson,
+            missingOnlyWarnsForCheck,
+            invalidOnlyWarnsForCheck,
+          );
+        }),
       );
       return this;
     },
@@ -430,12 +467,16 @@ export function createCheckPackage(
       onlyWarnsFor,
       internalConfigName = 'onlyWarnsFor',
     } = {}) {
-      checkDirectDuplicateDependencies(
-        pkg,
-        pkgPathName,
-        'dependencies',
-        getDependencyPackageJson,
-        createOnlyWarnsForMappingCheck(internalConfigName, onlyWarnsFor),
+      jobs.push(
+        new Job(this.checkDirectDuplicateDependencies.name, async () => {
+          await checkDirectDuplicateDependencies(
+            pkg,
+            pkgPathName,
+            'dependencies',
+            getDependencyPackageJson,
+            createOnlyWarnsForMappingCheck(internalConfigName, onlyWarnsFor),
+          );
+        }),
       );
       return this;
     },
@@ -553,37 +594,41 @@ export function createCheckPackage(
       depName,
       { resolutions, dependencies, devDependencies },
     ) {
-      const depPkg = getDependencyPackageJson(depName);
-      if (resolutions) {
-        checkIdenticalVersionsThanDependency(
-          pkg,
-          pkgPathName,
-          'resolutions',
-          resolutions,
-          depPkg,
-          depPkg.dependencies,
-        );
-      }
-      if (dependencies) {
-        checkIdenticalVersionsThanDependency(
-          pkg,
-          pkgPathName,
-          'dependencies',
-          dependencies,
-          depPkg,
-          depPkg.dependencies,
-        );
-      }
-      if (devDependencies) {
-        checkIdenticalVersionsThanDependency(
-          pkg,
-          pkgPathName,
-          'devDependencies',
-          devDependencies,
-          depPkg,
-          depPkg.dependencies,
-        );
-      }
+      jobs.push(
+        new Job(this.checkIdenticalVersionsThanDependency.name, async () => {
+          const depPkg = await getDependencyPackageJson(depName);
+          if (resolutions) {
+            checkIdenticalVersionsThanDependency(
+              pkg,
+              pkgPathName,
+              'resolutions',
+              resolutions,
+              depPkg,
+              depPkg.dependencies,
+            );
+          }
+          if (dependencies) {
+            checkIdenticalVersionsThanDependency(
+              pkg,
+              pkgPathName,
+              'dependencies',
+              dependencies,
+              depPkg,
+              depPkg.dependencies,
+            );
+          }
+          if (devDependencies) {
+            checkIdenticalVersionsThanDependency(
+              pkg,
+              pkgPathName,
+              'devDependencies',
+              devDependencies,
+              depPkg,
+              depPkg.dependencies,
+            );
+          }
+        }),
+      );
       return this;
     },
 
@@ -591,37 +636,41 @@ export function createCheckPackage(
       depName,
       { resolutions, dependencies, devDependencies },
     ) {
-      const depPkg = getDependencyPackageJson(depName);
-      if (resolutions) {
-        checkIdenticalVersionsThanDependency(
-          pkg,
-          pkgPathName,
-          'resolutions',
-          resolutions,
-          depPkg,
-          depPkg.devDependencies,
-        );
-      }
-      if (dependencies) {
-        checkIdenticalVersionsThanDependency(
-          pkg,
-          pkgPathName,
-          'dependencies',
-          dependencies,
-          depPkg,
-          depPkg.devDependencies,
-        );
-      }
-      if (devDependencies) {
-        checkIdenticalVersionsThanDependency(
-          pkg,
-          pkgPathName,
-          'devDependencies',
-          devDependencies,
-          depPkg,
-          depPkg.devDependencies,
-        );
-      }
+      jobs.push(
+        new Job(this.checkSatisfiesVersionsFromDependency.name, async () => {
+          const depPkg = await getDependencyPackageJson(depName);
+          if (resolutions) {
+            checkIdenticalVersionsThanDependency(
+              pkg,
+              pkgPathName,
+              'resolutions',
+              resolutions,
+              depPkg,
+              depPkg.devDependencies,
+            );
+          }
+          if (dependencies) {
+            checkIdenticalVersionsThanDependency(
+              pkg,
+              pkgPathName,
+              'dependencies',
+              dependencies,
+              depPkg,
+              depPkg.devDependencies,
+            );
+          }
+          if (devDependencies) {
+            checkIdenticalVersionsThanDependency(
+              pkg,
+              pkgPathName,
+              'devDependencies',
+              devDependencies,
+              depPkg,
+              depPkg.devDependencies,
+            );
+          }
+        }),
+      );
       return this;
     },
 
@@ -643,37 +692,41 @@ export function createCheckPackage(
       depName,
       { resolutions, dependencies, devDependencies },
     ) {
-      const depPkg = getDependencyPackageJson(depName);
-      if (resolutions) {
-        checkSatisfiesVersionsFromDependency(
-          pkg,
-          pkgPathName,
-          'resolutions',
-          resolutions,
-          depPkg,
-          depPkg.dependencies,
-        );
-      }
-      if (dependencies) {
-        checkSatisfiesVersionsFromDependency(
-          pkg,
-          pkgPathName,
-          'dependencies',
-          dependencies,
-          depPkg,
-          depPkg.dependencies,
-        );
-      }
-      if (devDependencies) {
-        checkSatisfiesVersionsFromDependency(
-          pkg,
-          pkgPathName,
-          'devDependencies',
-          devDependencies,
-          depPkg,
-          depPkg.dependencies,
-        );
-      }
+      jobs.push(
+        new Job(this.checkSatisfiesVersionsFromDependency.name, async () => {
+          const depPkg = await getDependencyPackageJson(depName);
+          if (resolutions) {
+            checkSatisfiesVersionsFromDependency(
+              pkg,
+              pkgPathName,
+              'resolutions',
+              resolutions,
+              depPkg,
+              depPkg.dependencies,
+            );
+          }
+          if (dependencies) {
+            checkSatisfiesVersionsFromDependency(
+              pkg,
+              pkgPathName,
+              'dependencies',
+              dependencies,
+              depPkg,
+              depPkg.dependencies,
+            );
+          }
+          if (devDependencies) {
+            checkSatisfiesVersionsFromDependency(
+              pkg,
+              pkgPathName,
+              'devDependencies',
+              devDependencies,
+              depPkg,
+              depPkg.dependencies,
+            );
+          }
+        }),
+      );
       return this;
     },
 
@@ -681,37 +734,44 @@ export function createCheckPackage(
       depName,
       { resolutions, dependencies, devDependencies },
     ) {
-      const depPkg = getDependencyPackageJson(depName);
-      if (resolutions) {
-        checkSatisfiesVersionsFromDependency(
-          pkg,
-          pkgPathName,
-          'resolutions',
-          resolutions,
-          depPkg,
-          depPkg.devDependencies,
-        );
-      }
-      if (dependencies) {
-        checkSatisfiesVersionsFromDependency(
-          pkg,
-          pkgPathName,
-          'dependencies',
-          dependencies,
-          depPkg,
-          depPkg.devDependencies,
-        );
-      }
-      if (devDependencies) {
-        checkSatisfiesVersionsFromDependency(
-          pkg,
-          pkgPathName,
-          'devDependencies',
-          devDependencies,
-          depPkg,
-          depPkg.devDependencies,
-        );
-      }
+      jobs.push(
+        new Job(
+          this.checkSatisfiesVersionsInDevDependenciesOfDependency.name,
+          async () => {
+            const depPkg = await getDependencyPackageJson(depName);
+            if (resolutions) {
+              checkSatisfiesVersionsFromDependency(
+                pkg,
+                pkgPathName,
+                'resolutions',
+                resolutions,
+                depPkg,
+                depPkg.devDependencies,
+              );
+            }
+            if (dependencies) {
+              checkSatisfiesVersionsFromDependency(
+                pkg,
+                pkgPathName,
+                'dependencies',
+                dependencies,
+                depPkg,
+                depPkg.devDependencies,
+              );
+            }
+            if (devDependencies) {
+              checkSatisfiesVersionsFromDependency(
+                pkg,
+                pkgPathName,
+                'devDependencies',
+                devDependencies,
+                depPkg,
+                depPkg.devDependencies,
+              );
+            }
+          },
+        ),
+      );
       return this;
     },
 
@@ -738,28 +798,38 @@ export function createCheckPackage(
       depName2,
       { dependencies, devDependencies },
     ) {
-      const depPkg1 = getDependencyPackageJson(depName1);
-      const depPkg2 = getDependencyPackageJson(depName2);
-      if (dependencies) {
-        checkSatisfiesVersionsFromDependency(
-          depPkg2,
-          pkgPathName,
-          'dependencies',
-          dependencies,
-          depPkg1,
-          depPkg1.dependencies,
-        );
-      }
-      if (devDependencies) {
-        checkSatisfiesVersionsFromDependency(
-          depPkg2,
-          pkgPathName,
-          'devDependencies',
-          devDependencies,
-          depPkg1,
-          depPkg1.dependencies,
-        );
-      }
+      jobs.push(
+        new Job(
+          this.checkSatisfiesVersionsBetweenDependencies.name,
+          async () => {
+            const [depPkg1, depPkg2] = await Promise.all([
+              getDependencyPackageJson(depName1),
+              getDependencyPackageJson(depName2),
+            ]);
+
+            if (dependencies) {
+              checkSatisfiesVersionsFromDependency(
+                depPkg2,
+                pkgPathName,
+                'dependencies',
+                dependencies,
+                depPkg1,
+                depPkg1.dependencies,
+              );
+            }
+            if (devDependencies) {
+              checkSatisfiesVersionsFromDependency(
+                depPkg2,
+                pkgPathName,
+                'devDependencies',
+                devDependencies,
+                depPkg1,
+                depPkg1.dependencies,
+              );
+            }
+          },
+        ),
+      );
       return this;
     },
   };

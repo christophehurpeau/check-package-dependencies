@@ -1,26 +1,12 @@
-import { readFileSync, writeFileSync } from 'fs';
 import type { PackageJson } from './packageTypes';
+import {
+  internalLoadPackageJsonFromNodeModules,
+  readPkgJson,
+} from './pkgJsonUtils';
 
-export type GetDependencyPackageJson = (pkgDepName: string) => PackageJson;
-
-export function readPkgJson(packagePath: string): PackageJson {
-  return JSON.parse(readFileSync(packagePath, 'utf8')) as PackageJson;
-}
-
-export function writePkgJson(packagePath: string, pkg: PackageJson): void {
-  writeFileSync(packagePath, JSON.stringify(pkg, null, 2));
-}
-
-/** @internal */
-export function internalLoadPackageJsonFromNodeModules(
+export type GetDependencyPackageJson = (
   pkgDepName: string,
-  pkgDirname: string,
-): PackageJson {
-  // eslint-disable-next-line import/no-dynamic-require, @typescript-eslint/no-var-requires
-  return require(require.resolve(`${pkgDepName}/package.json`, {
-    paths: [pkgDirname],
-  })) as PackageJson;
-}
+) => Promise<PackageJson>;
 
 type NodeModulesPackagePathCache = Map<string, PackageJson>;
 
@@ -39,7 +25,7 @@ export function createGetDependencyPackageJson({
   internalCustomLoadPackageJsonFromNodeModules = internalLoadPackageJsonFromNodeModules,
   internalReadPkgJson = readPkgJson,
 }: CreateGetDependencyPackageJsonOptions): GetDependencyPackageJson {
-  return (pkgDepName) => {
+  return async (pkgDepName) => {
     const existing = nodeModulesPackagePathCache.get(pkgDepName);
     if (existing) return existing;
     let pkg: PackageJson;
@@ -48,7 +34,7 @@ export function createGetDependencyPackageJson({
       pkg = internalReadPkgJson(packagePath);
     } else {
       try {
-        pkg = internalCustomLoadPackageJsonFromNodeModules(
+        pkg = await internalCustomLoadPackageJsonFromNodeModules(
           pkgDepName,
           pkgDirname,
         );
@@ -62,7 +48,7 @@ export function createGetDependencyPackageJson({
           throw err;
         }
 
-        const match = / in (.*[/\\]package.json)($|\simported from)/.exec(
+        const match = / in (.*[/\\]package\.json)\s+imported from/.exec(
           err.message,
         );
 
