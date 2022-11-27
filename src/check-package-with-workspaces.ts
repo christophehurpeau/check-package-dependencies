@@ -16,10 +16,7 @@ import {
   createReportError,
   reportNotWarnedForMapping,
 } from './utils/createReportError';
-import type {
-  OnlyWarnsFor,
-  OnlyWarnsForOptionalDependencyMapping,
-} from './utils/warnForUtils';
+import type { OnlyWarnsForOptionalDependencyMapping } from './utils/warnForUtils';
 import { createOnlyWarnsForMappingCheck } from './utils/warnForUtils';
 
 interface OnlyWarnsForInMonorepoPackageCheckPackageRecommendedOption
@@ -39,15 +36,9 @@ type OnlyWarnsForInMonorepoPackagesDependenciesCheckPackageRecommendedOption =
 export interface CheckPackageWithWorkspacesRecommendedOptions {
   isLibrary?: (pkgName: string) => boolean;
   allowRangeVersionsInLibraries?: boolean;
-  /** @deprecated use onlyWarnsFor */
-  peerDependenciesOnlyWarnsFor?: OnlyWarnsFor;
-  /** @deprecated use onlyWarnsFor */
-  directDuplicateDependenciesOnlyWarnsFor?: OnlyWarnsFor;
   monorepoDirectDuplicateDependenciesOnlyWarnsFor?: OnlyWarnsForOptionalDependencyMapping;
   onlyWarnsForInRootPackage?: OnlyWarnsForInPackageCheckPackageRecommendedOption;
   onlyWarnsForInMonorepoPackages?: OnlyWarnsForInMonorepoPackagesCheckPackageRecommendedOption;
-  /** @deprecated use onlyWarnsForInRootDependencies */
-  onlyWarnsForInDependencies?: OnlyWarnsForInDependenciesCheckPackageRecommendedOption;
   onlyWarnsForInRootDependencies?: OnlyWarnsForInDependenciesCheckPackageRecommendedOption;
   onlyWarnsForInMonorepoPackagesDependencies?: OnlyWarnsForInMonorepoPackagesDependenciesCheckPackageRecommendedOption;
   checkResolutionMessage?: CheckResolutionMessage;
@@ -130,34 +121,16 @@ export function createCheckPackageWithWorkspaces(
       allowRangeVersionsInLibraries = true,
       onlyWarnsForInRootPackage,
       onlyWarnsForInMonorepoPackages,
-      onlyWarnsForInDependencies,
-      onlyWarnsForInRootDependencies = onlyWarnsForInDependencies,
-      onlyWarnsForInMonorepoPackagesDependencies = onlyWarnsForInDependencies
-        ? { '*': onlyWarnsForInDependencies }
-        : {},
-      peerDependenciesOnlyWarnsFor,
-      directDuplicateDependenciesOnlyWarnsFor,
+      onlyWarnsForInRootDependencies,
+      onlyWarnsForInMonorepoPackagesDependencies = {},
       monorepoDirectDuplicateDependenciesOnlyWarnsFor,
       checkResolutionMessage,
     } = {}) {
-      if (peerDependenciesOnlyWarnsFor) {
-        console.warn(
-          'Option "peerDependenciesOnlyWarnsFor" in checkRecommended() is deprecated. Use "onlyWarnsForInDependencies" instead.',
-        );
-      }
-      if (directDuplicateDependenciesOnlyWarnsFor) {
-        console.warn(
-          'Option "directDuplicateDependenciesOnlyWarnsFor" in checkRecommended() is deprecated. Use "onlyWarnsForInDependencies" instead.',
-        );
-      }
-
       checkPackage.checkNoDependencies();
       checkPackage.checkRecommended({
         isLibrary: false,
         onlyWarnsForInPackage: onlyWarnsForInRootPackage,
         onlyWarnsForInDependencies: onlyWarnsForInRootDependencies,
-        peerDependenciesOnlyWarnsFor,
-        directDuplicateDependenciesOnlyWarnsFor,
         checkResolutionMessage,
       });
 
@@ -185,8 +158,6 @@ export function createCheckPackageWithWorkspaces(
             onlyWarnsForInMonorepoPackagesDependencies[
               checkSubPackage.pkg.name
             ],
-          peerDependenciesOnlyWarnsFor,
-          directDuplicateDependenciesOnlyWarnsFor,
           internalExactVersionsIgnore: [...checksWorkspaces.keys()],
           checkResolutionMessage,
         });

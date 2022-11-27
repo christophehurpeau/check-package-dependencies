@@ -548,9 +548,8 @@ const createOnlyWarnsForMappingCheck = (configName, onlyWarnsFor) => {
   };
 };
 
-/* eslint-disable complexity */
+/* eslint-disable max-lines */
 function createCheckPackage(pkgDirectoryPath = '.', {
-  tryToAutoFix = false,
   internalWorkspacePkgDirectoryPath
 } = {}) {
   const pkgDirname = path.resolve(pkgDirectoryPath);
@@ -558,10 +557,7 @@ function createCheckPackage(pkgDirectoryPath = '.', {
   const pkgPathName = `${pkgDirectoryPath}/package.json`;
   const pkg = readPkgJson(pkgPath);
   const copyPkg = JSON.parse(JSON.stringify(pkg));
-
-  if (process.env.CI && process.env.CHECK_PACKAGE_DEPENDENCIES_ENABLE_CI_AUTOFIX !== 'true') {
-    tryToAutoFix = false;
-  }
+  let tryToAutoFix = false;
 
   if (process.argv.slice(2).includes('--fix')) {
     tryToAutoFix = true;
@@ -643,21 +639,6 @@ function createCheckPackage(pkgDirectoryPath = '.', {
       return this;
     },
 
-    /** @deprecated use checkExactVersions({ allowRangeVersionsInDependencies: true })  */
-    checkExactVersionsForLibrary({
-      onlyWarnsFor
-    } = {}) {
-      jobs.push(new Job(this.checkExactDevVersions.name, async () => {
-        const onlyWarnsForCheck = createOnlyWarnsForArrayCheck('checkExactVersionsForLibrary.onlyWarnsFor', onlyWarnsFor);
-        await checkExactVersions(pkg, pkgPathName, ['devDependencies', 'resolutions'], {
-          onlyWarnsForCheck,
-          tryToAutoFix,
-          getDependencyPackageJson
-        });
-      }));
-      return this;
-    },
-
     checkExactDevVersions({
       onlyWarnsFor
     } = {}) {
@@ -679,11 +660,10 @@ function createCheckPackage(pkgDirectoryPath = '.', {
 
     checkDirectPeerDependencies({
       isLibrary = false,
-      onlyWarnsFor: deprecatedOnlyWarnsFor,
-      missingOnlyWarnsFor = deprecatedOnlyWarnsFor,
-      invalidOnlyWarnsFor = deprecatedOnlyWarnsFor,
-      internalMissingConfigName = deprecatedOnlyWarnsFor ? 'onlyWarnsFor' : 'missingOnlyWarnsFor',
-      internalInvalidConfigName = deprecatedOnlyWarnsFor ? 'onlyWarnsFor' : 'invalidOnlyWarnsFor'
+      missingOnlyWarnsFor,
+      invalidOnlyWarnsFor,
+      internalMissingConfigName = 'missingOnlyWarnsFor',
+      internalInvalidConfigName = 'invalidOnlyWarnsFor'
     } = {}) {
       jobs.push(new Job(this.checkDirectPeerDependencies.name, async () => {
         const missingOnlyWarnsForCheck = createOnlyWarnsForMappingCheck(internalMissingConfigName, missingOnlyWarnsFor);
@@ -713,33 +693,15 @@ function createCheckPackage(pkgDirectoryPath = '.', {
       onlyWarnsForInPackage,
       onlyWarnsForInDependencies,
       allowRangeVersionsInDependencies = isLibrary,
-      peerDependenciesOnlyWarnsFor,
-      directDuplicateDependenciesOnlyWarnsFor,
-      exactVersionsOnlyWarnsFor,
       internalExactVersionsIgnore,
       checkResolutionMessage
     } = {}) {
-      let internalMissingPeerDependenciesOnlyWarnsFor = peerDependenciesOnlyWarnsFor;
-      let internalInvalidPeerDependenciesOnlyWarnsFor = peerDependenciesOnlyWarnsFor;
-      let internalDirectDuplicateDependenciesOnlyWarnsFor = directDuplicateDependenciesOnlyWarnsFor;
-
-      if (onlyWarnsForInPackage) {
-        if (exactVersionsOnlyWarnsFor) {
-          console.warn('Ignoring "exactVersionsOnlyWarnsFor" as "onlyWarnsForInPackage" is used.');
-        }
-
-        exactVersionsOnlyWarnsFor = onlyWarnsForInPackage.exactVersions || [];
-      }
+      let internalMissingPeerDependenciesOnlyWarnsFor = {};
+      let internalInvalidPeerDependenciesOnlyWarnsFor = {};
+      let internalDirectDuplicateDependenciesOnlyWarnsFor = {};
+      const exactVersionsOnlyWarnsFor = onlyWarnsForInPackage?.exactVersions || [];
 
       if (onlyWarnsForInDependencies) {
-        if (peerDependenciesOnlyWarnsFor) {
-          console.warn('Ignoring "peerDependenciesOnlyWarnsFor" as "onlyWarnsFor" is used.');
-        }
-
-        if (directDuplicateDependenciesOnlyWarnsFor) {
-          console.warn('Ignoring "directDuplicateDependenciesOnlyWarnsFor" as "onlyWarnsFor" is used.');
-        }
-
         internalDirectDuplicateDependenciesOnlyWarnsFor = {};
         internalMissingPeerDependenciesOnlyWarnsFor = {};
         internalInvalidPeerDependenciesOnlyWarnsFor = {};
@@ -769,12 +731,12 @@ function createCheckPackage(pkgDirectoryPath = '.', {
         isLibrary,
         missingOnlyWarnsFor: internalMissingPeerDependenciesOnlyWarnsFor,
         invalidOnlyWarnsFor: internalInvalidPeerDependenciesOnlyWarnsFor,
-        internalMissingConfigName: peerDependenciesOnlyWarnsFor ? 'peerDependenciesOnlyWarnsFor' : 'onlyWarnsForInDependencies.missingPeerDependency',
-        internalInvalidConfigName: peerDependenciesOnlyWarnsFor ? 'peerDependenciesOnlyWarnsFor' : 'onlyWarnsForInDependencies.invalidPeerDependencyVersion'
+        internalMissingConfigName: 'onlyWarnsForInDependencies.missingPeerDependency',
+        internalInvalidConfigName: 'onlyWarnsForInDependencies.invalidPeerDependencyVersion'
       });
       this.checkDirectDuplicateDependencies({
         onlyWarnsFor: internalDirectDuplicateDependenciesOnlyWarnsFor,
-        internalConfigName: directDuplicateDependenciesOnlyWarnsFor ? 'directDuplicateDependenciesOnlyWarnsFor' : 'onlyWarnsForInDependencies.duplicateDirectDependency'
+        internalConfigName: 'onlyWarnsForInDependencies.duplicateDirectDependency'
       });
       return this;
     },
@@ -966,31 +928,16 @@ function createCheckPackageWithWorkspaces(pkgDirectoryPath = '.', createCheckPac
       allowRangeVersionsInLibraries = true,
       onlyWarnsForInRootPackage,
       onlyWarnsForInMonorepoPackages,
-      onlyWarnsForInDependencies,
-      onlyWarnsForInRootDependencies = onlyWarnsForInDependencies,
-      onlyWarnsForInMonorepoPackagesDependencies = onlyWarnsForInDependencies ? {
-        '*': onlyWarnsForInDependencies
-      } : {},
-      peerDependenciesOnlyWarnsFor,
-      directDuplicateDependenciesOnlyWarnsFor,
+      onlyWarnsForInRootDependencies,
+      onlyWarnsForInMonorepoPackagesDependencies = {},
       monorepoDirectDuplicateDependenciesOnlyWarnsFor,
       checkResolutionMessage
     } = {}) {
-      if (peerDependenciesOnlyWarnsFor) {
-        console.warn('Option "peerDependenciesOnlyWarnsFor" in checkRecommended() is deprecated. Use "onlyWarnsForInDependencies" instead.');
-      }
-
-      if (directDuplicateDependenciesOnlyWarnsFor) {
-        console.warn('Option "directDuplicateDependenciesOnlyWarnsFor" in checkRecommended() is deprecated. Use "onlyWarnsForInDependencies" instead.');
-      }
-
       checkPackage.checkNoDependencies();
       checkPackage.checkRecommended({
         isLibrary: false,
         onlyWarnsForInPackage: onlyWarnsForInRootPackage,
         onlyWarnsForInDependencies: onlyWarnsForInRootDependencies,
-        peerDependenciesOnlyWarnsFor,
-        directDuplicateDependenciesOnlyWarnsFor,
         checkResolutionMessage
       });
       const monorepoDirectDuplicateDependenciesOnlyWarnsForCheck = createOnlyWarnsForMappingCheck('monorepoDirectDuplicateDependenciesOnlyWarnsFor', monorepoDirectDuplicateDependenciesOnlyWarnsFor);
@@ -1004,8 +951,6 @@ function createCheckPackageWithWorkspaces(pkgDirectoryPath = '.', createCheckPac
             ...onlyWarnsForInMonorepoPackages[checkSubPackage.pkg.name]
           } : undefined,
           onlyWarnsForInDependencies: onlyWarnsForInMonorepoPackagesDependencies[checkSubPackage.pkg.name],
-          peerDependenciesOnlyWarnsFor,
-          directDuplicateDependenciesOnlyWarnsFor,
           internalExactVersionsIgnore: [...checksWorkspaces.keys()],
           checkResolutionMessage
         });

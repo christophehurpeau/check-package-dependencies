@@ -1,6 +1,6 @@
 import type { CreateCheckPackageOptions, CheckPackageApi, OnlyWarnsForInDependenciesCheckPackageRecommendedOption, OnlyWarnsForInDependencyCheckPackageRecommendedOption, OnlyWarnsForInPackageCheckPackageRecommendedOption } from './check-package';
 import type { CheckResolutionMessage } from './checks/checkResolutionsHasExplanation';
-import type { OnlyWarnsFor, OnlyWarnsForOptionalDependencyMapping } from './utils/warnForUtils';
+import type { OnlyWarnsForOptionalDependencyMapping } from './utils/warnForUtils';
 interface OnlyWarnsForInMonorepoPackageCheckPackageRecommendedOption extends OnlyWarnsForInPackageCheckPackageRecommendedOption {
     duplicateDirectDependency: OnlyWarnsForInDependencyCheckPackageRecommendedOption['duplicateDirectDependency'];
 }
@@ -9,15 +9,9 @@ type OnlyWarnsForInMonorepoPackagesDependenciesCheckPackageRecommendedOption = R
 export interface CheckPackageWithWorkspacesRecommendedOptions {
     isLibrary?: (pkgName: string) => boolean;
     allowRangeVersionsInLibraries?: boolean;
-    /** @deprecated use onlyWarnsFor */
-    peerDependenciesOnlyWarnsFor?: OnlyWarnsFor;
-    /** @deprecated use onlyWarnsFor */
-    directDuplicateDependenciesOnlyWarnsFor?: OnlyWarnsFor;
     monorepoDirectDuplicateDependenciesOnlyWarnsFor?: OnlyWarnsForOptionalDependencyMapping;
     onlyWarnsForInRootPackage?: OnlyWarnsForInPackageCheckPackageRecommendedOption;
     onlyWarnsForInMonorepoPackages?: OnlyWarnsForInMonorepoPackagesCheckPackageRecommendedOption;
-    /** @deprecated use onlyWarnsForInRootDependencies */
-    onlyWarnsForInDependencies?: OnlyWarnsForInDependenciesCheckPackageRecommendedOption;
     onlyWarnsForInRootDependencies?: OnlyWarnsForInDependenciesCheckPackageRecommendedOption;
     onlyWarnsForInMonorepoPackagesDependencies?: OnlyWarnsForInMonorepoPackagesDependenciesCheckPackageRecommendedOption;
     checkResolutionMessage?: CheckResolutionMessage;

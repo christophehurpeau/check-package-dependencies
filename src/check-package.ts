@@ -1,4 +1,3 @@
-/* eslint-disable complexity */
 /* eslint-disable max-lines */
 import path from 'path';
 import util from 'util';
@@ -33,16 +32,12 @@ import {
 } from './utils/warnForUtils';
 
 export interface CreateCheckPackageOptions {
-  /** @deprecated pass in cli --fix instead */
-  tryToAutoFix?: boolean;
   /** @internal */
   internalWorkspacePkgDirectoryPath?: string;
 }
 
 export interface CheckDirectPeerDependenciesOptions {
   isLibrary?: boolean;
-  /** @deprecated use missingOnlyWarnsFor or invalidOnlyWarnsFor */
-  onlyWarnsFor?: OnlyWarnsForOptionalDependencyMapping;
   missingOnlyWarnsFor?: OnlyWarnsForOptionalDependencyMapping;
   invalidOnlyWarnsFor?: OnlyWarnsForOptionalDependencyMapping;
   internalMissingConfigName?: string;
@@ -76,12 +71,6 @@ export interface CheckRecommendedOptions {
   allowRangeVersionsInDependencies?: boolean;
   onlyWarnsForInPackage?: OnlyWarnsForInPackageCheckPackageRecommendedOption;
   onlyWarnsForInDependencies?: OnlyWarnsForInDependenciesCheckPackageRecommendedOption;
-  /** @deprecated use onlyWarnsForInDependencies option */
-  peerDependenciesOnlyWarnsFor?: OnlyWarnsFor;
-  /** @deprecated use onlyWarnsForInDependencies option */
-  directDuplicateDependenciesOnlyWarnsFor?: OnlyWarnsFor;
-  /** @deprecated use onlyWarnsForInPackage option */
-  exactVersionsOnlyWarnsFor?: OnlyWarnsFor;
   /** @internal */
   internalExactVersionsIgnore?: OnlyWarnsFor;
   /** function to check the value in the "resolutionExplained" key in package.json */
@@ -110,10 +99,6 @@ export interface CheckPackageApi {
   checkExactVersions: (options?: CheckExactVersionsOptions) => CheckPackageApi;
 
   checkResolutionsVersionsMatch: () => CheckPackageApi;
-
-  checkExactVersionsForLibrary: (
-    options?: CheckExactVersionsOptions,
-  ) => CheckPackageApi;
 
   checkExactDevVersions: (
     options?: CheckExactVersionsOptions,
@@ -264,10 +249,7 @@ export interface CheckPackageApi {
 
 export function createCheckPackage(
   pkgDirectoryPath = '.',
-  {
-    tryToAutoFix = false,
-    internalWorkspacePkgDirectoryPath,
-  }: CreateCheckPackageOptions = {},
+  { internalWorkspacePkgDirectoryPath }: CreateCheckPackageOptions = {},
 ): CheckPackageApi {
   const pkgDirname = path.resolve(pkgDirectoryPath);
   const pkgPath = `${pkgDirname}/package.json`;
@@ -275,12 +257,7 @@ export function createCheckPackage(
   const pkg = readPkgJson(pkgPath);
   const copyPkg: PackageJson = JSON.parse(JSON.stringify(pkg)) as PackageJson;
 
-  if (
-    process.env.CI &&
-    process.env.CHECK_PACKAGE_DEPENDENCIES_ENABLE_CI_AUTOFIX !== 'true'
-  ) {
-    tryToAutoFix = false;
-  }
+  let tryToAutoFix = false;
 
   if (process.argv.slice(2).includes('--fix')) {
     tryToAutoFix = true;
@@ -377,29 +354,6 @@ export function createCheckPackage(
       return this;
     },
 
-    /** @deprecated use checkExactVersions({ allowRangeVersionsInDependencies: true })  */
-    checkExactVersionsForLibrary({ onlyWarnsFor } = {}) {
-      jobs.push(
-        new Job(this.checkExactDevVersions.name, async () => {
-          const onlyWarnsForCheck = createOnlyWarnsForArrayCheck(
-            'checkExactVersionsForLibrary.onlyWarnsFor',
-            onlyWarnsFor,
-          );
-          await checkExactVersions(
-            pkg,
-            pkgPathName,
-            ['devDependencies', 'resolutions'],
-            {
-              onlyWarnsForCheck,
-              tryToAutoFix,
-              getDependencyPackageJson,
-            },
-          );
-        }),
-      );
-      return this;
-    },
-
     checkExactDevVersions({ onlyWarnsFor } = {}) {
       jobs.push(
         new Job(this.checkExactDevVersions.name, async () => {
@@ -427,15 +381,10 @@ export function createCheckPackage(
 
     checkDirectPeerDependencies({
       isLibrary = false,
-      onlyWarnsFor: deprecatedOnlyWarnsFor,
-      missingOnlyWarnsFor = deprecatedOnlyWarnsFor,
-      invalidOnlyWarnsFor = deprecatedOnlyWarnsFor,
-      internalMissingConfigName = deprecatedOnlyWarnsFor
-        ? 'onlyWarnsFor'
-        : 'missingOnlyWarnsFor',
-      internalInvalidConfigName = deprecatedOnlyWarnsFor
-        ? 'onlyWarnsFor'
-        : 'invalidOnlyWarnsFor',
+      missingOnlyWarnsFor,
+      invalidOnlyWarnsFor,
+      internalMissingConfigName = 'missingOnlyWarnsFor',
+      internalInvalidConfigName = 'invalidOnlyWarnsFor',
     } = {}) {
       jobs.push(
         new Job(this.checkDirectPeerDependencies.name, async () => {
@@ -498,39 +447,20 @@ export function createCheckPackage(
       onlyWarnsForInPackage,
       onlyWarnsForInDependencies,
       allowRangeVersionsInDependencies = isLibrary,
-      peerDependenciesOnlyWarnsFor,
-      directDuplicateDependenciesOnlyWarnsFor,
-      exactVersionsOnlyWarnsFor,
       internalExactVersionsIgnore,
       checkResolutionMessage,
     } = {}) {
       let internalMissingPeerDependenciesOnlyWarnsFor: OnlyWarnsForOptionalDependencyMapping =
-        peerDependenciesOnlyWarnsFor;
+        {};
       let internalInvalidPeerDependenciesOnlyWarnsFor: OnlyWarnsForOptionalDependencyMapping =
-        peerDependenciesOnlyWarnsFor;
+        {};
       let internalDirectDuplicateDependenciesOnlyWarnsFor: OnlyWarnsForOptionalDependencyMapping =
-        directDuplicateDependenciesOnlyWarnsFor;
+        {};
 
-      if (onlyWarnsForInPackage) {
-        if (exactVersionsOnlyWarnsFor) {
-          console.warn(
-            'Ignoring "exactVersionsOnlyWarnsFor" as "onlyWarnsForInPackage" is used.',
-          );
-        }
-        exactVersionsOnlyWarnsFor = onlyWarnsForInPackage.exactVersions || [];
-      }
+      const exactVersionsOnlyWarnsFor =
+        onlyWarnsForInPackage?.exactVersions || [];
+
       if (onlyWarnsForInDependencies) {
-        if (peerDependenciesOnlyWarnsFor) {
-          console.warn(
-            'Ignoring "peerDependenciesOnlyWarnsFor" as "onlyWarnsFor" is used.',
-          );
-        }
-        if (directDuplicateDependenciesOnlyWarnsFor) {
-          console.warn(
-            'Ignoring "directDuplicateDependenciesOnlyWarnsFor" as "onlyWarnsFor" is used.',
-          );
-        }
-
         internalDirectDuplicateDependenciesOnlyWarnsFor = {};
         internalMissingPeerDependenciesOnlyWarnsFor = {};
         internalInvalidPeerDependenciesOnlyWarnsFor = {};
@@ -572,19 +502,16 @@ export function createCheckPackage(
         isLibrary,
         missingOnlyWarnsFor: internalMissingPeerDependenciesOnlyWarnsFor,
         invalidOnlyWarnsFor: internalInvalidPeerDependenciesOnlyWarnsFor,
-        internalMissingConfigName: peerDependenciesOnlyWarnsFor
-          ? 'peerDependenciesOnlyWarnsFor'
-          : 'onlyWarnsForInDependencies.missingPeerDependency',
-        internalInvalidConfigName: peerDependenciesOnlyWarnsFor
-          ? 'peerDependenciesOnlyWarnsFor'
-          : 'onlyWarnsForInDependencies.invalidPeerDependencyVersion',
+        internalMissingConfigName:
+          'onlyWarnsForInDependencies.missingPeerDependency',
+        internalInvalidConfigName:
+          'onlyWarnsForInDependencies.invalidPeerDependencyVersion',
       });
 
       this.checkDirectDuplicateDependencies({
         onlyWarnsFor: internalDirectDuplicateDependenciesOnlyWarnsFor,
-        internalConfigName: directDuplicateDependenciesOnlyWarnsFor
-          ? 'directDuplicateDependenciesOnlyWarnsFor'
-          : 'onlyWarnsForInDependencies.duplicateDirectDependency',
+        internalConfigName:
+          'onlyWarnsForInDependencies.duplicateDirectDependency',
       });
 
       return this;

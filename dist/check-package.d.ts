@@ -3,15 +3,11 @@ import type { GetDependencyPackageJson } from './utils/createGetDependencyPackag
 import type { DependencyName, DependencyTypes, PackageJson } from './utils/packageTypes';
 import type { OnlyWarnsForOptionalDependencyMapping, OnlyWarnsFor } from './utils/warnForUtils';
 export interface CreateCheckPackageOptions {
-    /** @deprecated pass in cli --fix instead */
-    tryToAutoFix?: boolean;
     /** @internal */
     internalWorkspacePkgDirectoryPath?: string;
 }
 export interface CheckDirectPeerDependenciesOptions {
     isLibrary?: boolean;
-    /** @deprecated use missingOnlyWarnsFor or invalidOnlyWarnsFor */
-    onlyWarnsFor?: OnlyWarnsForOptionalDependencyMapping;
     missingOnlyWarnsFor?: OnlyWarnsForOptionalDependencyMapping;
     invalidOnlyWarnsFor?: OnlyWarnsForOptionalDependencyMapping;
     internalMissingConfigName?: string;
@@ -36,12 +32,6 @@ export interface CheckRecommendedOptions {
     allowRangeVersionsInDependencies?: boolean;
     onlyWarnsForInPackage?: OnlyWarnsForInPackageCheckPackageRecommendedOption;
     onlyWarnsForInDependencies?: OnlyWarnsForInDependenciesCheckPackageRecommendedOption;
-    /** @deprecated use onlyWarnsForInDependencies option */
-    peerDependenciesOnlyWarnsFor?: OnlyWarnsFor;
-    /** @deprecated use onlyWarnsForInDependencies option */
-    directDuplicateDependenciesOnlyWarnsFor?: OnlyWarnsFor;
-    /** @deprecated use onlyWarnsForInPackage option */
-    exactVersionsOnlyWarnsFor?: OnlyWarnsFor;
     /** @internal */
     internalExactVersionsIgnore?: OnlyWarnsFor;
     /** function to check the value in the "resolutionExplained" key in package.json */
@@ -65,7 +55,6 @@ export interface CheckPackageApi {
     getDependencyPackageJson: GetDependencyPackageJson;
     checkExactVersions: (options?: CheckExactVersionsOptions) => CheckPackageApi;
     checkResolutionsVersionsMatch: () => CheckPackageApi;
-    checkExactVersionsForLibrary: (options?: CheckExactVersionsOptions) => CheckPackageApi;
     checkExactDevVersions: (options?: CheckExactVersionsOptions) => CheckPackageApi;
     checkNoDependencies: (type?: DependencyTypes, moveToSuggestion?: DependencyTypes) => CheckPackageApi;
     /**
@@ -169,5 +158,5 @@ export interface CheckPackageApi {
         devDependencies?: string[];
     }) => CheckPackageApi;
 }
-export declare function createCheckPackage(pkgDirectoryPath?: string, { tryToAutoFix, internalWorkspacePkgDirectoryPath, }?: CreateCheckPackageOptions): CheckPackageApi;
+export declare function createCheckPackage(pkgDirectoryPath?: string, { internalWorkspacePkgDirectoryPath }?: CreateCheckPackageOptions): CheckPackageApi;
 //# sourceMappingURL=check-package.d.ts.map
