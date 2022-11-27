@@ -1,10 +1,10 @@
 import type { PackageJson } from './packageTypes';
-export declare type GetDependencyPackageJson = (pkgDepName: string) => PackageJson;
+export type GetDependencyPackageJson = (pkgDepName: string) => PackageJson;
 export declare function readPkgJson(packagePath: string): PackageJson;
 export declare function writePkgJson(packagePath: string, pkg: PackageJson): void;
 /** @internal */
 export declare function internalLoadPackageJsonFromNodeModules(pkgDepName: string, pkgDirname: string): PackageJson;
-declare type NodeModulesPackagePathCache = Map<string, PackageJson>;
+type NodeModulesPackagePathCache = Map<string, PackageJson>;
 interface CreateGetDependencyPackageJsonOptions {
     pkgDirname: string;
     nodeModulesPackagePathCache?: NodeModulesPackagePathCache;
