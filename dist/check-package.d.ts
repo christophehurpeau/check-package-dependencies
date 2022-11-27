@@ -29,7 +29,7 @@ export interface OnlyWarnsForInDependencyCheckPackageRecommendedOption {
     missingPeerDependency: OnlyWarnsFor;
     invalidPeerDependencyVersion: OnlyWarnsFor;
 }
-export declare type OnlyWarnsForInDependenciesCheckPackageRecommendedOption = Record<'*' | string, OnlyWarnsForInDependencyCheckPackageRecommendedOption>;
+export type OnlyWarnsForInDependenciesCheckPackageRecommendedOption = Record<'*' | string, OnlyWarnsForInDependencyCheckPackageRecommendedOption>;
 export interface CheckRecommendedOptions {
     isLibrary?: boolean;
     /** default is true for libraries, false otherwise */
