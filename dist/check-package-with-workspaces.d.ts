@@ -4,8 +4,8 @@ import type { OnlyWarnsFor, OnlyWarnsForOptionalDependencyMapping } from './util
 interface OnlyWarnsForInMonorepoPackageCheckPackageRecommendedOption extends OnlyWarnsForInPackageCheckPackageRecommendedOption {
     duplicateDirectDependency: OnlyWarnsForInDependencyCheckPackageRecommendedOption['duplicateDirectDependency'];
 }
-declare type OnlyWarnsForInMonorepoPackagesCheckPackageRecommendedOption = Record<'*' | string, OnlyWarnsForInMonorepoPackageCheckPackageRecommendedOption>;
-declare type OnlyWarnsForInMonorepoPackagesDependenciesCheckPackageRecommendedOption = Record<string, OnlyWarnsForInDependenciesCheckPackageRecommendedOption>;
+type OnlyWarnsForInMonorepoPackagesCheckPackageRecommendedOption = Record<'*' | string, OnlyWarnsForInMonorepoPackageCheckPackageRecommendedOption>;
+type OnlyWarnsForInMonorepoPackagesDependenciesCheckPackageRecommendedOption = Record<string, OnlyWarnsForInDependenciesCheckPackageRecommendedOption>;
 export interface CheckPackageWithWorkspacesRecommendedOptions {
     isLibrary?: (pkgName: string) => boolean;
     allowRangeVersionsInLibraries?: boolean;
