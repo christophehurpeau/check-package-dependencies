@@ -14,6 +14,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+## [3.11.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v3.10.0...v3.11.0) (2022-11-27)
+
+
+### Features
+
+* **deps:** update dependency type-fest to v3 ([#419](https://github.com/christophehurpeau/check-package-dependencies/issues/419)) ([1195137](https://github.com/christophehurpeau/check-package-dependencies/commit/1195137aad2ad042079ee5049802b93a1799db0d))
+
 ## [3.10.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v3.9.2...v3.10.0) (2022-09-21)
 
 
