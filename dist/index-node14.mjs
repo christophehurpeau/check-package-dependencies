@@ -359,9 +359,11 @@ function checkResolutionsVersionsMatch(pkg, pkgPathName, {
   });
 }
 
-function checkSatisfiesVersions(pkg, pkgPathName, type, dependenciesRanges, onlyWarnsForCheck) {
+function checkSatisfiesVersions(pkg, pkgPathName, type, dependenciesRanges, onlyWarnsForCheck, {
+  customCreateReportError = createReportError
+} = {}) {
   const pkgDependencies = pkg[type] || {};
-  const reportError = createReportError('Satisfies Versions', pkgPathName);
+  const reportError = customCreateReportError('Satisfies Versions', pkgPathName);
   Object.entries(dependenciesRanges).forEach(([depKey, range]) => {
     const version = pkgDependencies[depKey];
 
