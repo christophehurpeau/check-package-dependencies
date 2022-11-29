@@ -3,15 +3,25 @@ import { createReportError } from '../utils/createReportError';
 import type { DependencyTypes, PackageJson } from '../utils/packageTypes';
 import type { OnlyWarnsForCheck } from '../utils/warnForUtils';
 
+export interface CheckSatisfiesVersionsOptions {
+  customCreateReportError?: typeof createReportError;
+}
+
 export function checkSatisfiesVersions(
   pkg: PackageJson,
   pkgPathName: string,
   type: DependencyTypes,
   dependenciesRanges: Record<string, string>,
   onlyWarnsForCheck?: OnlyWarnsForCheck,
+  {
+    customCreateReportError = createReportError,
+  }: CheckSatisfiesVersionsOptions = {},
 ): void {
   const pkgDependencies = pkg[type] || {};
-  const reportError = createReportError('Satisfies Versions', pkgPathName);
+  const reportError = customCreateReportError(
+    'Satisfies Versions',
+    pkgPathName,
+  );
 
   Object.entries(dependenciesRanges).forEach(([depKey, range]) => {
     const version = pkgDependencies[depKey];

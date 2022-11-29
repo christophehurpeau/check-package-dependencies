@@ -1,26 +1,23 @@
-import { createReportError } from '../utils/createReportError';
 import { checkSatisfiesVersions } from './checkSatisfiesVersions';
 
-jest.mock('../utils/createReportError', () => ({
-  ...jest.requireActual('../utils/createReportError'),
-  createReportError: jest.fn(),
-}));
-
-const mockReportError = jest.fn();
-(createReportError as ReturnType<typeof jest.fn>).mockReturnValue(
-  mockReportError,
-);
+const jest = import.meta.jest;
 
 describe('checkSatisfiesVersions', () => {
+  const mockReportError = jest.fn();
+  const createReportError = jest.fn().mockReturnValue(mockReportError);
+
   beforeEach(() => {
     mockReportError.mockReset();
   });
+
   it('should return no error when range is satisfied', () => {
     checkSatisfiesVersions(
       { name: 'test', devDependencies: { test: '1.0.0' } },
       'path',
       'devDependencies',
       { test: '^1.0.0' },
+      undefined,
+      { customCreateReportError: createReportError },
     );
     expect(mockReportError).not.toHaveBeenCalled();
   });
@@ -31,6 +28,8 @@ describe('checkSatisfiesVersions', () => {
       'path',
       'devDependencies',
       { test: '^2.0.0' },
+      undefined,
+      { customCreateReportError: createReportError },
     );
     expect(mockReportError).toHaveBeenCalledTimes(1);
     expect(mockReportError).toHaveBeenNthCalledWith(
@@ -46,6 +45,8 @@ describe('checkSatisfiesVersions', () => {
       'path',
       'devDependencies',
       { test: '^1.0.0' },
+      undefined,
+      { customCreateReportError: createReportError },
     );
     expect(mockReportError).toHaveBeenCalledTimes(1);
     expect(mockReportError).toHaveBeenNthCalledWith(
