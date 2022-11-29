@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for checks/checkNoDependencies.ts</title>
+    <title>Code coverage report for utils/pkgJsonUtils.ts</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../prettify.css" />
     <link rel="stylesheet" href="../base.css" />
@@ -19,34 +19,34 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../index.html">All files</a> / <a href="index.html">checks</a> checkNoDependencies.ts</h1>
+        <h1><a href="../index.html">All files</a> / <a href="index.html">utils</a> pkgJsonUtils.ts</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>5/5</span>
+                <span class='fraction'>0/4</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">80% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>4/5</span>
+                <span class='fraction'>0/2</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>1/1</span>
+                <span class='fraction'>0/3</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>4/4</span>
+                <span class='fraction'>0/4</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line high'></div>
+    <div class='status-line low'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -82,7 +82,25 @@
 <a name='L17'></a><a href='#L17'>17</a>
 <a name='L18'></a><a href='#L18'>18</a>
 <a name='L19'></a><a href='#L19'>19</a>
-<a name='L20'></a><a href='#L20'>20</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L20'></a><a href='#L20'>20</a>
+<a name='L21'></a><a href='#L21'>21</a>
+<a name='L22'></a><a href='#L22'>22</a>
+<a name='L23'></a><a href='#L23'>23</a>
+<a name='L24'></a><a href='#L24'>24</a>
+<a name='L25'></a><a href='#L25'>25</a>
+<a name='L26'></a><a href='#L26'>26</a>
+<a name='L27'></a><a href='#L27'>27</a>
+<a name='L28'></a><a href='#L28'>28</a>
+<a name='L29'></a><a href='#L29'>29</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -90,34 +108,43 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { createReportError } from '../utils/createReportError';
-import type { PackageJson, DependencyTypes } from '../utils/packageTypes';
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { readFileSync, writeFileSync } from 'fs';
+import { resolve as importResolve } from 'import-meta-resolve';
+import type { PackageJson } from './packageTypes';
 &nbsp;
-export function checkNoDependencies(
-  pkg: PackageJson,
-  pkgPath: string,
-  type: DependencyTypes = 'dependencies',
-  moveToSuggestion: DependencyTypes = 'devDependencies',
-  customCreateReportError = <span class="branch-0 cbranch-no" title="branch not covered" >createReportError,</span>
-): void {
-  const pkgDependencies = pkg[type];
-  if (!pkgDependencies) return;
+export function <span class="fstat-no" title="function not covered" >readPkgJson(</span>packagePath: string): PackageJson {
+<span class="cstat-no" title="statement not covered" >  return JSON.parse(readFileSync(packagePath, 'utf8')) as PackageJson;</span>
+}
 &nbsp;
-  const reportError = customCreateReportError('No dependencies', pkgPath);
-  reportError(
-    `Unexpected ${type}`,
-    `you should move them in ${moveToSuggestion}`,
+export function <span class="fstat-no" title="function not covered" >writePkgJson(</span>packagePath: string, pkg: PackageJson): void {
+<span class="cstat-no" title="statement not covered" >  writeFileSync(packagePath, JSON.stringify(pkg, null, 2));</span>
+}
+&nbsp;
+/** @internal */
+export async function <span class="fstat-no" title="function not covered" >internalLoadPackageJsonFromNodeModules(</span>
+  pkgDepName: string,
+  pkgDirname: string,
+): Promise&lt;PackageJson&gt; {
+  const packageUrl = <span class="cstat-no" title="statement not covered" >await importResolve(</span>
+    `${pkgDepName}/package.json`,
+    `file://${pkgDirname}/package.json`,
+  );
+<span class="cstat-no" title="statement not covered" >  return readPkgJson(</span>
+    packageUrl.replace(
+      process.platform === 'win32' ? /^file:\/{3}/ : /^file:\/\//,
+      '',
+    ),
   );
 }
 &nbsp;</pre></td></tr></table></pre>
