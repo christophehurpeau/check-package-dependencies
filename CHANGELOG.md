@@ -14,6 +14,19 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+## [4.0.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v3.11.0...v4.0.0) (2022-11-29)
+
+
+### ⚠ BREAKING CHANGES
+
+* removed deprecated methods
+* requires ESM, drop CJS support
+
+### Features
+
+* remove deprecated methods ([57e411a](https://github.com/christophehurpeau/check-package-dependencies/commit/57e411aae97bf6bce10e63b69212f4adcfc8f51e))
+* rewrite for ESM ([464baa4](https://github.com/christophehurpeau/check-package-dependencies/commit/464baa4158f93f778b36b5fa3d83bdfeae11df5e))
+
 ## [3.11.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v3.10.0...v3.11.0) (2022-11-27)
 
 
