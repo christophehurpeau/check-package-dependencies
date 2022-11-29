@@ -69,6 +69,7 @@
       "json"
     ],
     "automock": false,
+    "clearMocks": true,
     "testEnvironment": "node",
     "setupFiles": [
       "<rootDir>/src/test-setup.ts"
