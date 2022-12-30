@@ -14,6 +14,14 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+## [6.1.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v6.0.0...v6.1.0) (2022-12-30)
+
+
+### Features
+
+* add checkMinRangeDependenciesSatisfiesDevDependencies ([934247f](https://github.com/christophehurpeau/check-package-dependencies/commit/934247f6eb8a00ea84262104c4f9514c431875b9))
+* autofix checkMinRangeSatisfies ([63b20f7](https://github.com/christophehurpeau/check-package-dependencies/commit/63b20f72ff0294b380b9643f427267bf8377f52c))
+
 ## [6.0.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v5.0.0...v6.0.0) (2022-12-30)
 
 
