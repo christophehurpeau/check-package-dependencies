@@ -14,6 +14,17 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+## [6.0.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v5.0.0...v6.0.0) (2022-12-30)
+
+
+### ⚠ BREAKING CHANGES
+
+* isLibrary is now an option on createCheckPackage instead of checkRecommended
+
+### Features
+
+* allow duplicate devdep and dep when pkg is library and dep is range ([3697f8d](https://github.com/christophehurpeau/check-package-dependencies/commit/3697f8da6fff5a98af768c36864ac5ad32be1c43))
+
 ## [5.0.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v4.0.0...v5.0.0) (2022-12-30)
 
 
