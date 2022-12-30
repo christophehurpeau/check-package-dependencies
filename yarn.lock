@@ -572,23 +572,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@commitlint/cli@npm:17.2.0":
-  version: 17.2.0
-  resolution: "@commitlint/cli@npm:17.2.0"
+"@commitlint/cli@npm:17.3.0":
+  version: 17.3.0
+  resolution: "@commitlint/cli@npm:17.3.0"
   dependencies:
     "@commitlint/format": ^17.0.0
-    "@commitlint/lint": ^17.2.0
-    "@commitlint/load": ^17.2.0
+    "@commitlint/lint": ^17.3.0
+    "@commitlint/load": ^17.3.0
     "@commitlint/read": ^17.2.0
     "@commitlint/types": ^17.0.0
     execa: ^5.0.0
-    lodash: ^4.17.19
+    lodash.isfunction: ^3.0.9
     resolve-from: 5.0.0
     resolve-global: 1.0.0
     yargs: ^17.0.0
   bin:
     commitlint: cli.js
-  checksum: e850a2bfac3df902b72150050811e89a7aa5202918aa47bea5b8f6e5cff2277e9b15786a087b146bd510d450efad7ce3216338c4d580d9342ef43616abc2744c
+  checksum: 9f544ea528198bbb8ee00c54dc68a4933c680bd6e995817b7acabe3352835ee77b7c86f522a0bb749684422d469365fdc86c134012c9b1c0af42a2e1ed3b342c
   languageName: node
   linkType: hard
 
@@ -652,7 +652,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@commitlint/lint@npm:^17.2.0":
+"@commitlint/lint@npm:^17.3.0":
   version: 17.3.0
   resolution: "@commitlint/lint@npm:17.3.0"
   dependencies:
@@ -664,7 +664,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@commitlint/load@npm:^17.2.0":
+"@commitlint/load@npm:^17.3.0":
   version: 17.3.0
   resolution: "@commitlint/load@npm:17.3.0"
   dependencies:
@@ -1275,18 +1275,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pob/root@npm:7.2.0":
-  version: 7.2.0
-  resolution: "@pob/root@npm:7.2.0"
+"@pob/root@npm:7.3.0":
+  version: 7.3.0
+  resolution: "@pob/root@npm:7.3.0"
   dependencies:
-    "@commitlint/cli": 17.2.0
+    "@commitlint/cli": 17.3.0
     "@pob/pretty-eslint-config": 4.1.0
     "@pob/pretty-pkg": 5.1.0
     husky: ~8.0.1
-    json5: ^2.2.1
-    lint-staged: 13.0.3
-    pob-dependencies: 7.2.0
-    prettier: 2.7.1
+    json5: ^2.2.2
+    lint-staged: 13.1.0
+    pob-dependencies: 7.3.0
+    prettier: 2.8.1
     repository-check-dirty: 5.1.0
     semver: ^7.3.7
     which-pm-runs: 1.1.0
@@ -1299,7 +1299,7 @@ __metadata:
     pretty-eslint-config: bin/pretty-eslint-config.js
     pretty-pkg: bin/pretty-pkg.js
     repository-check-dirty: bin/repository-check-dirty.js
-  checksum: 6092db49a3e4bfeabe3965b4ef42ed9105675e401efd0cbe393c51080a44021b3d4bd42ac1c8db59ded9d2dbbf79d7029943a4fed51c10dfbf4d9d0b075eb5db
+  checksum: 66c942b553e22b453ba7d4c035fd973df797e54dd68ed0550834711c2374ded9bb27404270a2914a7ff00906eca4fceae79cf08449dd4a989e381089f2258943
   languageName: node
   linkType: hard
 
@@ -2526,7 +2526,7 @@ __metadata:
     "@pob/commitlint-config": 5.1.0
     "@pob/eslint-config": 50.0.0
     "@pob/eslint-config-typescript": 50.0.0
-    "@pob/root": 7.2.0
+    "@pob/root": 7.3.0
     "@types/glob": 8.0.0
     "@types/jest": 29.2.4
     "@types/semver": 7.3.13
@@ -2677,17 +2677,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"colorette@npm:^2.0.16, colorette@npm:^2.0.17":
+"colorette@npm:^2.0.19":
   version: 2.0.19
   resolution: "colorette@npm:2.0.19"
   checksum: 888cf5493f781e5fcf54ce4d49e9d7d698f96ea2b2ef67906834bb319a392c667f9ec69f4a10e268d2946d13a9503d2d19b3abaaaf174e3451bfe91fb9d82427
   languageName: node
   linkType: hard
 
-"commander@npm:^9.3.0":
-  version: 9.3.0
-  resolution: "commander@npm:9.3.0"
-  checksum: d421ce66fee25792a1470c69aa8d1b86434bf873a96483aa92c8267f81a6f20c6f7c426f5e82f88ac50a8ec4855d3f2787aebcdef8aa559e1080a2337a95a217
+"commander@npm:^9.4.1":
+  version: 9.4.1
+  resolution: "commander@npm:9.4.1"
+  checksum: bfb18e325a5bdf772763c2213d5c7d9e77144d944124e988bcd8e5e65fb6d45d5d4e86b09155d0f2556c9a59c31e428720e57968bcd050b2306e910a0bf3cf13
   languageName: node
   linkType: hard
 
@@ -4924,12 +4924,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"json5@npm:^2.2.1":
-  version: 2.2.1
-  resolution: "json5@npm:2.2.1"
+"json5@npm:^2.2.1, json5@npm:^2.2.2":
+  version: 2.2.2
+  resolution: "json5@npm:2.2.2"
   bin:
     json5: lib/cli.js
-  checksum: 74b8a23b102a6f2bf2d224797ae553a75488b5adbaee9c9b6e5ab8b510a2fc6e38f876d4c77dea672d4014a44b2399e15f2051ac2b37b87f74c0c7602003543b
+  checksum: 9a878d66b72157b073cf0017f3e5d93ec209fa5943abcb38d37a54b208917c166bd473c26a24695e67a016ce65759aeb89946592991f8f9174fb96c8e2492683
   languageName: node
   linkType: hard
 
@@ -4991,10 +4991,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lilconfig@npm:2.0.5":
-  version: 2.0.5
-  resolution: "lilconfig@npm:2.0.5"
-  checksum: f7bb9e42656f06930ad04e583026f087508ae408d3526b8b54895e934eb2a966b7aafae569656f2c79a29fe6d779b3ec44ba577e80814734c8655d6f71cdf2d1
+"lilconfig@npm:2.0.6":
+  version: 2.0.6
+  resolution: "lilconfig@npm:2.0.6"
+  checksum: 40a3cd72f103b1be5975f2ac1850810b61d4053e20ab09be8d3aeddfe042187e1ba70b4651a7e70f95efa1642e7dc8b2ae395b317b7d7753b241b43cef7c0f7d
   languageName: node
   linkType: hard
 
@@ -5005,39 +5005,39 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lint-staged@npm:13.0.3":
-  version: 13.0.3
-  resolution: "lint-staged@npm:13.0.3"
+"lint-staged@npm:13.1.0":
+  version: 13.1.0
+  resolution: "lint-staged@npm:13.1.0"
   dependencies:
     cli-truncate: ^3.1.0
-    colorette: ^2.0.17
-    commander: ^9.3.0
+    colorette: ^2.0.19
+    commander: ^9.4.1
     debug: ^4.3.4
     execa: ^6.1.0
-    lilconfig: 2.0.5
-    listr2: ^4.0.5
+    lilconfig: 2.0.6
+    listr2: ^5.0.5
     micromatch: ^4.0.5
     normalize-path: ^3.0.0
     object-inspect: ^1.12.2
     pidtree: ^0.6.0
     string-argv: ^0.3.1
-    yaml: ^2.1.1
+    yaml: ^2.1.3
   bin:
     lint-staged: bin/lint-staged.js
-  checksum: 53d585007df06e162febab6b0836b55016d902586a267823c8a1158529d8c742dc7297e523f7023dff02250bef3eb0d6934f4ec4f9961adfc2ebbed5f54162d0
+  checksum: adf20c4ca9285c4a93b06598b970d71b04cfe58a1a4c9006f753b83e02c1c622d1866c32a4f1e7e29a98091c501eac3345f7678af247b4f97d5be88b3d8727c1
   languageName: node
   linkType: hard
 
-"listr2@npm:^4.0.5":
-  version: 4.0.5
-  resolution: "listr2@npm:4.0.5"
+"listr2@npm:^5.0.5":
+  version: 5.0.6
+  resolution: "listr2@npm:5.0.6"
   dependencies:
     cli-truncate: ^2.1.0
-    colorette: ^2.0.16
+    colorette: ^2.0.19
     log-update: ^4.0.0
     p-map: ^4.0.0
     rfdc: ^1.3.0
-    rxjs: ^7.5.5
+    rxjs: ^7.5.7
     through: ^2.3.8
     wrap-ansi: ^7.0.0
   peerDependencies:
@@ -5045,7 +5045,7 @@ __metadata:
   peerDependenciesMeta:
     enquirer:
       optional: true
-  checksum: 7af31851abe25969ef0581c6db808117e36af15b131401795182427769d9824f451ba9e8aff6ccd25b6a4f6c8796f816292caf08e5f1f9b1775e8e9c313dc6c5
+  checksum: 18975d690988aa2cce18fea9bacfc12c2607948ff9f7b7fd5b3e2b64d059b6e1961f8d06b4e1400d4c6bc18af84c7c145c2d22a1d392464fdb197c53b062e3d5
   languageName: node
   linkType: hard
 
@@ -5088,6 +5088,13 @@ __metadata:
   version: 4.0.8
   resolution: "lodash.debounce@npm:4.0.8"
   checksum: a3f527d22c548f43ae31c861ada88b2637eb48ac6aa3eb56e82d44917971b8aa96fbb37aa60efea674dc4ee8c42074f90f7b1f772e9db375435f6c83a19b3bc6
+  languageName: node
+  linkType: hard
+
+"lodash.isfunction@npm:^3.0.9":
+  version: 3.0.9
+  resolution: "lodash.isfunction@npm:3.0.9"
+  checksum: 99e54c34b1e8a9ba75c034deb39cedbd2aca7af685815e67a2a8ec4f73ec9748cda6ebee5a07d7de4b938e90d421fd280e9c385cc190f903ac217ac8aff30314
   languageName: node
   linkType: hard
 
@@ -5147,7 +5154,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash@npm:^4.17.11, lodash@npm:^4.17.15, lodash@npm:^4.17.19, lodash@npm:^4.17.21":
+"lodash@npm:^4.17.11, lodash@npm:^4.17.15, lodash@npm:^4.17.21":
   version: 4.17.21
   resolution: "lodash@npm:4.17.21"
   checksum: eb835a2e51d381e561e508ce932ea50a8e5a68f4ebdd771ea240d3048244a8d13658acbd502cd4829768c56f2e16bdd4340b9ea141297d472517b83868e677f7
@@ -5901,10 +5908,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pob-dependencies@npm:7.2.0":
-  version: 7.2.0
-  resolution: "pob-dependencies@npm:7.2.0"
-  checksum: e836587ca31b2ac66aac6e39320dbd2e38e197c4b3459da5a83921cf65e60f9240a91c164b591764b49e678cfcf30039c2cd5f729eee23fb6c71b5fb59986d50
+"pob-dependencies@npm:7.3.0":
+  version: 7.3.0
+  resolution: "pob-dependencies@npm:7.3.0"
+  checksum: bb3851d07ec68437e07c0e62ac2b9fe6020c35d0362f717c696418bd804849d54d87efc609821561a1f5023656aeec812e3b70c68688c76e627fa68d95f92774
   languageName: node
   linkType: hard
 
@@ -5915,12 +5922,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:2.7.1, prettier@npm:^2.6.2":
-  version: 2.7.1
-  resolution: "prettier@npm:2.7.1"
+"prettier@npm:2.8.1, prettier@npm:^2.6.2":
+  version: 2.8.1
+  resolution: "prettier@npm:2.8.1"
   bin:
     prettier: bin-prettier.js
-  checksum: 55a4409182260866ab31284d929b3cb961e5fdb91fe0d2e099dac92eaecec890f36e524b4c19e6ceae839c99c6d7195817579cdffc8e2c80da0cb794463a748b
+  checksum: 4f21a0f1269f76fb36f54e9a8a1ea4c11e27478958bf860661fb4b6d7ac69aac1581f8724fa98ea3585e56d42a2ea317a17ff6e3324f40cb11ff9e20b73785cc
   languageName: node
   linkType: hard
 
@@ -6228,12 +6235,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rxjs@npm:^7.5.5":
-  version: 7.5.5
-  resolution: "rxjs@npm:7.5.5"
+"rxjs@npm:^7.5.7":
+  version: 7.8.0
+  resolution: "rxjs@npm:7.8.0"
   dependencies:
     tslib: ^2.1.0
-  checksum: e034f60805210cce756dd2f49664a8108780b117cf5d0e2281506e9e6387f7b4f1532d974a8c8b09314fa7a16dd2f6cff3462072a5789672b5dcb45c4173f3c6
+  checksum: 61b4d4fd323c1043d8d6ceb91f24183b28bcf5def4f01ca111511d5c6b66755bc5578587fe714ef5d67cf4c9f2e26f4490d4e1d8cabf9bd5967687835e9866a2
   languageName: node
   linkType: hard
 
@@ -7159,10 +7166,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yaml@npm:^2.1.1":
-  version: 2.1.1
-  resolution: "yaml@npm:2.1.1"
-  checksum: f48bb209918aa57cfaf78ef6448d1a1f8187f45c746f933268b7023dc59e5456004611879126c9bb5ea55b0a2b1c2b392dfde436931ece0c703a3d754562bb96
+"yaml@npm:^2.1.3":
+  version: 2.2.1
+  resolution: "yaml@npm:2.2.1"
+  checksum: 84f68cbe462d5da4e7ded4a8bded949ffa912bc264472e5a684c3d45b22d8f73a3019963a32164023bdf3d83cfb6f5b58ff7b2b10ef5b717c630f40bd6369a23
   languageName: node
   linkType: hard
 
