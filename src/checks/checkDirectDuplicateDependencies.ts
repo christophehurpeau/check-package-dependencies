@@ -1,4 +1,4 @@
-import type { GetDependencyPackageJson } from 'utils/createGetDependencyPackageJson';
+import type { GetDependencyPackageJson } from '../utils/createGetDependencyPackageJson';
 import {
   reportNotWarnedForMapping,
   createReportError,
@@ -11,6 +11,7 @@ import { checkDuplicateDependencies } from './checkDuplicateDependencies';
 export async function checkDirectDuplicateDependencies(
   pkg: PackageJson,
   pkgPathName: string,
+  isPackageALibrary: boolean,
   depType: DependencyTypes,
   getDependencyPackageJson: GetDependencyPackageJson,
   onlyWarnsForCheck: OnlyWarnsForMappingCheck,
@@ -43,6 +44,7 @@ export async function checkDirectDuplicateDependencies(
         checkDuplicateDependencies(
           reportError,
           pkg,
+          isPackageALibrary,
           depType,
           searchIn,
           depPkg,

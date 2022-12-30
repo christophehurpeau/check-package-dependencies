@@ -43,14 +43,24 @@ function reportNotWarnedForMapping(reportError, onlyWarnsForMappingCheck) {
   });
 }
 
-function checkDuplicateDependencies(reportError, pkg, depType, searchIn, depPkg, onlyWarnsForCheck) {
+function checkDuplicateDependencies(reportError, pkg, isPkgLibrary, depType, searchIn, depPkg, onlyWarnsForCheck) {
   const dependencies = depPkg[depType];
   if (!dependencies) return;
   const searchInExisting = searchIn.filter(type => pkg[type]);
   for (const [depKey, range] of Object.entries(dependencies)) {
     const versionsIn = searchInExisting.filter(type => pkg[type][depKey]);
-    if (versionsIn.length > 1) {
-      reportError(`${depKey} is present in both devDependencies and dependencies, please place it only in dependencies`);
+    let allowDuplicated = false;
+    if (versionsIn.length === 2 && isPkgLibrary && versionsIn.includes('dependencies') && versionsIn.includes('devDependencies')) {
+      const depVersion = pkg.dependencies[depKey];
+      const devDepVersion = pkg.devDependencies[depKey];
+      if (depVersion && depVersion === devDepVersion) {
+        reportError(`Invalid "${depKey}" has same version in dependencies and devDependencies`, 'please place it only in dependencies or use range in dependencies');
+        continue;
+      }
+      allowDuplicated = true;
+    }
+    if (versionsIn.length > 2 || versionsIn.length === 2 && !allowDuplicated) {
+      reportError(`Invalid "${depKey}" present in ${versionsIn.join(' and ')}`, 'please place it only in dependencies');
     } else {
       const versions = versionsIn.map(type => pkg[type][depKey]);
       versions.forEach((version, index) => {
@@ -78,7 +88,7 @@ function checkDuplicateDependencies(reportError, pkg, depType, searchIn, depPkg,
   }
 }
 
-async function checkDirectDuplicateDependencies(pkg, pkgPathName, depType, getDependencyPackageJson, onlyWarnsForCheck, reportErrorNamePrefix = '', customCreateReportError = createReportError) {
+async function checkDirectDuplicateDependencies(pkg, pkgPathName, isPackageALibrary, depType, getDependencyPackageJson, onlyWarnsForCheck, reportErrorNamePrefix = '', customCreateReportError = createReportError) {
   const reportError = customCreateReportError(`${reportErrorNamePrefix}Direct Duplicate Dependencies`, pkgPathName);
   await Promise.all([{
     type: 'devDependencies',
@@ -94,7 +104,7 @@ async function checkDirectDuplicateDependencies(pkg, pkgPathName, depType, getDe
     if (!dependencies) return;
     for (const depName of getKeys(dependencies)) {
       const depPkg = await getDependencyPackageJson(depName);
-      checkDuplicateDependencies(reportError, pkg, depType, searchIn, depPkg, onlyWarnsForCheck.createFor(depName));
+      checkDuplicateDependencies(reportError, pkg, isPackageALibrary, depType, searchIn, depPkg, onlyWarnsForCheck.createFor(depName));
     }
   }));
   reportNotWarnedForMapping(reportError, onlyWarnsForCheck);
@@ -504,14 +514,17 @@ const createOnlyWarnsForMappingCheck = (configName, onlyWarnsFor) => {
 };
 
 /* eslint-disable max-lines */
-function createCheckPackage(pkgDirectoryPath = '.', {
-  internalWorkspacePkgDirectoryPath
+function createCheckPackage({
+  packageDirectoryPath = '.',
+  internalWorkspacePkgDirectoryPath,
+  isLibrary = false
 } = {}) {
-  const pkgDirname = path.resolve(pkgDirectoryPath);
+  const pkgDirname = path.resolve(packageDirectoryPath);
   const pkgPath = `${pkgDirname}/package.json`;
-  const pkgPathName = `${pkgDirectoryPath}/package.json`;
+  const pkgPathName = `${packageDirectoryPath}/package.json`;
   const pkg = readPkgJson(pkgPath);
   const copyPkg = JSON.parse(JSON.stringify(pkg));
+  const isPkgLibrary = typeof isLibrary === 'function' ? isLibrary(pkg) : isLibrary;
   let tryToAutoFix = false;
   if (process.argv.slice(2).includes('--fix')) {
     tryToAutoFix = true;
@@ -558,6 +571,7 @@ function createCheckPackage(pkgDirectoryPath = '.', {
     pkg,
     pkgDirname,
     pkgPathName,
+    isPkgLibrary,
     getDependencyPackageJson,
     checkExactVersions({
       onlyWarnsFor,
@@ -599,7 +613,6 @@ function createCheckPackage(pkgDirectoryPath = '.', {
       return this;
     },
     checkDirectPeerDependencies({
-      isLibrary = false,
       missingOnlyWarnsFor,
       invalidOnlyWarnsFor,
       internalMissingConfigName = 'missingOnlyWarnsFor',
@@ -608,7 +621,7 @@ function createCheckPackage(pkgDirectoryPath = '.', {
       jobs.push(new Job(this.checkDirectPeerDependencies.name, async () => {
         const missingOnlyWarnsForCheck = createOnlyWarnsForMappingCheck(internalMissingConfigName, missingOnlyWarnsFor);
         const invalidOnlyWarnsForCheck = internalInvalidConfigName === internalMissingConfigName ? missingOnlyWarnsForCheck : createOnlyWarnsForMappingCheck(internalInvalidConfigName, invalidOnlyWarnsFor);
-        await checkDirectPeerDependencies(isLibrary, pkg, pkgPathName, getDependencyPackageJson, missingOnlyWarnsForCheck, invalidOnlyWarnsForCheck);
+        await checkDirectPeerDependencies(isPkgLibrary, pkg, pkgPathName, getDependencyPackageJson, missingOnlyWarnsForCheck, invalidOnlyWarnsForCheck);
       }));
       return this;
     },
@@ -617,7 +630,7 @@ function createCheckPackage(pkgDirectoryPath = '.', {
       internalConfigName = 'onlyWarnsFor'
     } = {}) {
       jobs.push(new Job(this.checkDirectDuplicateDependencies.name, async () => {
-        await checkDirectDuplicateDependencies(pkg, pkgPathName, 'dependencies', getDependencyPackageJson, createOnlyWarnsForMappingCheck(internalConfigName, onlyWarnsFor));
+        await checkDirectDuplicateDependencies(pkg, pkgPathName, isPkgLibrary, 'dependencies', getDependencyPackageJson, createOnlyWarnsForMappingCheck(internalConfigName, onlyWarnsFor));
       }));
       return this;
     },
@@ -626,10 +639,9 @@ function createCheckPackage(pkgDirectoryPath = '.', {
       return this;
     },
     checkRecommended({
-      isLibrary = false,
       onlyWarnsForInPackage,
       onlyWarnsForInDependencies,
-      allowRangeVersionsInDependencies = isLibrary,
+      allowRangeVersionsInDependencies = isPkgLibrary,
       internalExactVersionsIgnore,
       checkResolutionMessage
     } = {}) {
@@ -661,7 +673,6 @@ function createCheckPackage(pkgDirectoryPath = '.', {
       this.checkResolutionsVersionsMatch();
       this.checkResolutionsHasExplanation(checkResolutionMessage);
       this.checkDirectPeerDependencies({
-        isLibrary,
         missingOnlyWarnsFor: internalMissingPeerDependenciesOnlyWarnsFor,
         invalidOnlyWarnsFor: internalInvalidPeerDependenciesOnlyWarnsFor,
         internalMissingConfigName: 'onlyWarnsForInDependencies.missingPeerDependency',
@@ -797,8 +808,11 @@ function createCheckPackage(pkgDirectoryPath = '.', {
 }
 
 /* eslint-disable max-lines */
-function createCheckPackageWithWorkspaces(pkgDirectoryPath = '.', createCheckPackageOptions = {}) {
-  const checkPackage = createCheckPackage(pkgDirectoryPath, createCheckPackageOptions);
+function createCheckPackageWithWorkspaces(createCheckPackageOptions = {}) {
+  const checkPackage = createCheckPackage({
+    ...createCheckPackageOptions,
+    isLibrary: false
+  });
   const {
     pkg,
     pkgDirname
@@ -822,9 +836,10 @@ function createCheckPackageWithWorkspaces(pkgDirectoryPath = '.', createCheckPac
     });
   }
   const checksWorkspaces = new Map(workspacePackagesPaths.map(subPkgDirectoryPath => {
-    const checkPkg = createCheckPackage(subPkgDirectoryPath, {
+    const checkPkg = createCheckPackage({
       ...createCheckPackageOptions,
-      internalWorkspacePkgDirectoryPath: pkgDirectoryPath
+      packageDirectoryPath: subPkgDirectoryPath,
+      internalWorkspacePkgDirectoryPath: createCheckPackageOptions.packageDirectoryPath
     });
     return [checkPkg.pkg.name, checkPkg];
   }));
@@ -835,7 +850,6 @@ function createCheckPackageWithWorkspaces(pkgDirectoryPath = '.', createCheckPac
       }
     },
     checkRecommended({
-      isLibrary = () => false,
       allowRangeVersionsInLibraries = true,
       onlyWarnsForInRootPackage,
       onlyWarnsForInMonorepoPackages,
@@ -846,7 +860,6 @@ function createCheckPackageWithWorkspaces(pkgDirectoryPath = '.', createCheckPac
     } = {}) {
       checkPackage.checkNoDependencies();
       checkPackage.checkRecommended({
-        isLibrary: false,
         onlyWarnsForInPackage: onlyWarnsForInRootPackage,
         onlyWarnsForInDependencies: onlyWarnsForInRootDependencies,
         checkResolutionMessage
@@ -854,10 +867,8 @@ function createCheckPackageWithWorkspaces(pkgDirectoryPath = '.', createCheckPac
       const monorepoDirectDuplicateDependenciesOnlyWarnsForCheck = createOnlyWarnsForMappingCheck('monorepoDirectDuplicateDependenciesOnlyWarnsFor', monorepoDirectDuplicateDependenciesOnlyWarnsFor);
       const previousCheckedWorkspaces = new Map();
       checksWorkspaces.forEach((checkSubPackage, id) => {
-        const isPackageALibrary = isLibrary(id);
         checkSubPackage.checkRecommended({
-          isLibrary: isPackageALibrary,
-          allowRangeVersionsInDependencies: isPackageALibrary ? allowRangeVersionsInLibraries : false,
+          allowRangeVersionsInDependencies: checkSubPackage.isPkgLibrary ? allowRangeVersionsInLibraries : false,
           onlyWarnsForInPackage: onlyWarnsForInMonorepoPackages ? {
             ...onlyWarnsForInMonorepoPackages['*'],
             ...onlyWarnsForInMonorepoPackages[checkSubPackage.pkg.name]
@@ -868,12 +879,12 @@ function createCheckPackageWithWorkspaces(pkgDirectoryPath = '.', createCheckPac
         });
         const reportMonorepoDDDError = createReportError('Monorepo Direct Duplicate Dependencies', checkSubPackage.pkgPathName);
         // Root
-        checkDuplicateDependencies(reportMonorepoDDDError, checkSubPackage.pkg, 'devDependencies', ['dependencies', 'devDependencies'], pkg, monorepoDirectDuplicateDependenciesOnlyWarnsForCheck.createFor(checkSubPackage.pkg.name));
+        checkDuplicateDependencies(reportMonorepoDDDError, checkSubPackage.pkg, checkSubPackage.isPkgLibrary, 'devDependencies', ['dependencies', 'devDependencies'], pkg, monorepoDirectDuplicateDependenciesOnlyWarnsForCheck.createFor(checkSubPackage.pkg.name));
         // previous packages
         previousCheckedWorkspaces.forEach(previousCheckSubPackage => {
-          checkDuplicateDependencies(reportMonorepoDDDError, checkSubPackage.pkg, 'devDependencies', ['dependencies', 'devDependencies'], previousCheckSubPackage.pkg, monorepoDirectDuplicateDependenciesOnlyWarnsForCheck.createFor(checkSubPackage.pkg.name));
-          checkDuplicateDependencies(reportMonorepoDDDError, checkSubPackage.pkg, 'dependencies', ['dependencies', 'devDependencies'], previousCheckSubPackage.pkg, monorepoDirectDuplicateDependenciesOnlyWarnsForCheck.createFor(checkSubPackage.pkg.name));
-          checkDuplicateDependencies(reportMonorepoDDDError, checkSubPackage.pkg, 'peerDependencies', ['peerDependencies'], previousCheckSubPackage.pkg, monorepoDirectDuplicateDependenciesOnlyWarnsForCheck.createFor(checkSubPackage.pkg.name));
+          checkDuplicateDependencies(reportMonorepoDDDError, checkSubPackage.pkg, checkSubPackage.isPkgLibrary, 'devDependencies', ['dependencies', 'devDependencies'], previousCheckSubPackage.pkg, monorepoDirectDuplicateDependenciesOnlyWarnsForCheck.createFor(checkSubPackage.pkg.name));
+          checkDuplicateDependencies(reportMonorepoDDDError, checkSubPackage.pkg, checkSubPackage.isPkgLibrary, 'dependencies', ['dependencies', 'devDependencies'], previousCheckSubPackage.pkg, monorepoDirectDuplicateDependenciesOnlyWarnsForCheck.createFor(checkSubPackage.pkg.name));
+          checkDuplicateDependencies(reportMonorepoDDDError, checkSubPackage.pkg, checkSubPackage.isPkgLibrary, 'peerDependencies', ['peerDependencies'], previousCheckSubPackage.pkg, monorepoDirectDuplicateDependenciesOnlyWarnsForCheck.createFor(checkSubPackage.pkg.name));
         });
         previousCheckedWorkspaces.set(id, checkSubPackage);
       });

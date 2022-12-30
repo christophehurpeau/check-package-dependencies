@@ -1,4 +1,4 @@
-import type { GetDependencyPackageJson } from 'utils/createGetDependencyPackageJson';
+import type { GetDependencyPackageJson } from '../utils/createGetDependencyPackageJson';
 import { createReportError } from '../utils/createReportError';
 import type { PackageJson } from '../utils/packageTypes';
 import type { OnlyWarnsForMappingCheck } from '../utils/warnForUtils';

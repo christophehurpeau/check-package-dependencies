@@ -3,11 +3,12 @@ import type { GetDependencyPackageJson } from './utils/createGetDependencyPackag
 import type { DependenciesRanges, DependencyName, DependencyTypes, PackageJson } from './utils/packageTypes';
 import type { OnlyWarnsForOptionalDependencyMapping, OnlyWarnsFor } from './utils/warnForUtils';
 export interface CreateCheckPackageOptions {
+    packageDirectoryPath?: string;
+    isLibrary?: boolean | ((pkg: PackageJson) => boolean);
     /** @internal */
     internalWorkspacePkgDirectoryPath?: string;
 }
 export interface CheckDirectPeerDependenciesOptions {
-    isLibrary?: boolean;
     missingOnlyWarnsFor?: OnlyWarnsForOptionalDependencyMapping;
     invalidOnlyWarnsFor?: OnlyWarnsForOptionalDependencyMapping;
     internalMissingConfigName?: string;
@@ -27,7 +28,6 @@ export interface OnlyWarnsForInDependencyCheckPackageRecommendedOption {
 }
 export type OnlyWarnsForInDependenciesCheckPackageRecommendedOption = Record<'*' | string, OnlyWarnsForInDependencyCheckPackageRecommendedOption>;
 export interface CheckRecommendedOptions {
-    isLibrary?: boolean;
     /** default is true for libraries, false otherwise */
     allowRangeVersionsInDependencies?: boolean;
     onlyWarnsForInPackage?: OnlyWarnsForInPackageCheckPackageRecommendedOption;
@@ -51,6 +51,8 @@ export interface CheckPackageApi {
     pkgDirname: string;
     /** @internal */
     pkgPathName: string;
+    /** @internal */
+    isPkgLibrary: boolean;
     /** @internal */
     getDependencyPackageJson: GetDependencyPackageJson;
     checkExactVersions: (options?: CheckExactVersionsOptions) => CheckPackageApi;
@@ -173,5 +175,5 @@ export interface CheckPackageApi {
      */
     checkSatisfiesVersionsInDependency: (depName: string, dependenciesRanges: DependenciesRanges) => CheckPackageApi;
 }
-export declare function createCheckPackage(pkgDirectoryPath?: string, { internalWorkspacePkgDirectoryPath }?: CreateCheckPackageOptions): CheckPackageApi;
+export declare function createCheckPackage({ packageDirectoryPath, internalWorkspacePkgDirectoryPath, isLibrary, }?: CreateCheckPackageOptions): CheckPackageApi;
 //# sourceMappingURL=check-package.d.ts.map

@@ -6,6 +6,7 @@ import type { OnlyWarnsForCheck } from '../utils/warnForUtils';
 export function checkDuplicateDependencies(
   reportError: ReportError,
   pkg: PackageJson,
+  isPkgLibrary: boolean,
   depType: DependencyTypes,
   searchIn: DependencyTypes[],
   depPkg: PackageJson,
@@ -19,9 +20,33 @@ export function checkDuplicateDependencies(
   for (const [depKey, range] of Object.entries(dependencies)) {
     const versionsIn = searchInExisting.filter((type) => pkg[type]![depKey]);
 
-    if (versionsIn.length > 1) {
+    let allowDuplicated = false;
+    if (
+      versionsIn.length === 2 &&
+      isPkgLibrary &&
+      versionsIn.includes('dependencies') &&
+      versionsIn.includes('devDependencies')
+    ) {
+      const depVersion = pkg.dependencies![depKey];
+      const devDepVersion = pkg.devDependencies![depKey];
+
+      if (depVersion && depVersion === devDepVersion) {
+        reportError(
+          `Invalid "${depKey}" has same version in dependencies and devDependencies`,
+          'please place it only in dependencies or use range in dependencies',
+        );
+        continue;
+      }
+      allowDuplicated = true;
+    }
+
+    if (
+      versionsIn.length > 2 ||
+      (versionsIn.length === 2 && !allowDuplicated)
+    ) {
       reportError(
-        `${depKey} is present in both devDependencies and dependencies, please place it only in dependencies`,
+        `Invalid "${depKey}" present in ${versionsIn.join(' and ')}`,
+        'please place it only in dependencies',
       );
     } else {
       const versions = versionsIn.map((type) => pkg[type]![depKey]);

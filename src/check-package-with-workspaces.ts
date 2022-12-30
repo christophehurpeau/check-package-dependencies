@@ -2,6 +2,7 @@
 import fs from 'fs';
 import path from 'path';
 import glob from 'glob';
+import type { Except } from 'type-fest';
 import type {
   CreateCheckPackageOptions,
   CheckPackageApi,
@@ -16,6 +17,7 @@ import {
   createReportError,
   reportNotWarnedForMapping,
 } from './utils/createReportError';
+import type { PackageJson } from './utils/packageTypes';
 import type { OnlyWarnsForOptionalDependencyMapping } from './utils/warnForUtils';
 import { createOnlyWarnsForMappingCheck } from './utils/warnForUtils';
 
@@ -34,7 +36,6 @@ type OnlyWarnsForInMonorepoPackagesDependenciesCheckPackageRecommendedOption =
   Record<string, OnlyWarnsForInDependenciesCheckPackageRecommendedOption>;
 
 export interface CheckPackageWithWorkspacesRecommendedOptions {
-  isLibrary?: (pkgName: string) => boolean;
   allowRangeVersionsInLibraries?: boolean;
   monorepoDirectDuplicateDependenciesOnlyWarnsFor?: OnlyWarnsForOptionalDependencyMapping;
   onlyWarnsForInRootPackage?: OnlyWarnsForInPackageCheckPackageRecommendedOption;
@@ -63,14 +64,18 @@ export interface CheckPackageWithWorkspacesApi {
   ) => CheckPackageWithWorkspacesApi;
 }
 
+interface CreateCheckPackageWithWorkspacesOptions
+  extends Except<CreateCheckPackageOptions, 'isLibrary'> {
+  isLibrary?: (pkg: PackageJson) => boolean;
+}
+
 export function createCheckPackageWithWorkspaces(
-  pkgDirectoryPath = '.',
-  createCheckPackageOptions: CreateCheckPackageOptions = {},
+  createCheckPackageOptions: CreateCheckPackageWithWorkspacesOptions = {},
 ): CheckPackageWithWorkspacesApi {
-  const checkPackage = createCheckPackage(
-    pkgDirectoryPath,
-    createCheckPackageOptions,
-  );
+  const checkPackage = createCheckPackage({
+    ...createCheckPackageOptions,
+    isLibrary: false,
+  });
   const { pkg, pkgDirname } = checkPackage;
 
   const pkgWorkspaces: string[] | undefined =
@@ -98,9 +103,11 @@ export function createCheckPackageWithWorkspaces(
 
   const checksWorkspaces = new Map<string, CheckPackageApi>(
     workspacePackagesPaths.map((subPkgDirectoryPath) => {
-      const checkPkg = createCheckPackage(subPkgDirectoryPath, {
+      const checkPkg = createCheckPackage({
         ...createCheckPackageOptions,
-        internalWorkspacePkgDirectoryPath: pkgDirectoryPath,
+        packageDirectoryPath: subPkgDirectoryPath,
+        internalWorkspacePkgDirectoryPath:
+          createCheckPackageOptions.packageDirectoryPath,
       });
       return [checkPkg.pkg.name, checkPkg];
     }),
@@ -117,7 +124,6 @@ export function createCheckPackageWithWorkspaces(
     },
 
     checkRecommended({
-      isLibrary = () => false,
       allowRangeVersionsInLibraries = true,
       onlyWarnsForInRootPackage,
       onlyWarnsForInMonorepoPackages,
@@ -128,7 +134,6 @@ export function createCheckPackageWithWorkspaces(
     } = {}) {
       checkPackage.checkNoDependencies();
       checkPackage.checkRecommended({
-        isLibrary: false,
         onlyWarnsForInPackage: onlyWarnsForInRootPackage,
         onlyWarnsForInDependencies: onlyWarnsForInRootDependencies,
         checkResolutionMessage,
@@ -142,10 +147,8 @@ export function createCheckPackageWithWorkspaces(
 
       const previousCheckedWorkspaces = new Map<string, CheckPackageApi>();
       checksWorkspaces.forEach((checkSubPackage, id) => {
-        const isPackageALibrary = isLibrary(id);
         checkSubPackage.checkRecommended({
-          isLibrary: isPackageALibrary,
-          allowRangeVersionsInDependencies: isPackageALibrary
+          allowRangeVersionsInDependencies: checkSubPackage.isPkgLibrary
             ? allowRangeVersionsInLibraries
             : false,
           onlyWarnsForInPackage: onlyWarnsForInMonorepoPackages
@@ -170,6 +173,7 @@ export function createCheckPackageWithWorkspaces(
         checkDuplicateDependencies(
           reportMonorepoDDDError,
           checkSubPackage.pkg,
+          checkSubPackage.isPkgLibrary,
           'devDependencies',
           ['dependencies', 'devDependencies'],
           pkg,
@@ -182,6 +186,7 @@ export function createCheckPackageWithWorkspaces(
           checkDuplicateDependencies(
             reportMonorepoDDDError,
             checkSubPackage.pkg,
+            checkSubPackage.isPkgLibrary,
             'devDependencies',
             ['dependencies', 'devDependencies'],
             previousCheckSubPackage.pkg,
@@ -192,6 +197,7 @@ export function createCheckPackageWithWorkspaces(
           checkDuplicateDependencies(
             reportMonorepoDDDError,
             checkSubPackage.pkg,
+            checkSubPackage.isPkgLibrary,
             'dependencies',
             ['dependencies', 'devDependencies'],
             previousCheckSubPackage.pkg,
@@ -202,6 +208,7 @@ export function createCheckPackageWithWorkspaces(
           checkDuplicateDependencies(
             reportMonorepoDDDError,
             checkSubPackage.pkg,
+            checkSubPackage.isPkgLibrary,
             'peerDependencies',
             ['peerDependencies'],
             previousCheckSubPackage.pkg,

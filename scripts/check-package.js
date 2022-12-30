@@ -1,8 +1,9 @@
 import { createCheckPackage } from '../dist/index-node16.mjs';
 
-await createCheckPackage()
+await createCheckPackage({
+  isLibrary: true,
+})
   .checkRecommended({
-    isLibrary: true,
     onlyWarnsForInDependencies: {
       '@babel/core': { duplicateDirectDependency: ['semver'] },
       eslint: { duplicateDirectDependency: ['chalk'] },

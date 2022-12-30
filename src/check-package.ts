@@ -34,12 +34,13 @@ import {
 } from './utils/warnForUtils';
 
 export interface CreateCheckPackageOptions {
+  packageDirectoryPath?: string;
+  isLibrary?: boolean | ((pkg: PackageJson) => boolean);
   /** @internal */
   internalWorkspacePkgDirectoryPath?: string;
 }
 
 export interface CheckDirectPeerDependenciesOptions {
-  isLibrary?: boolean;
   missingOnlyWarnsFor?: OnlyWarnsForOptionalDependencyMapping;
   invalidOnlyWarnsFor?: OnlyWarnsForOptionalDependencyMapping;
   internalMissingConfigName?: string;
@@ -68,7 +69,6 @@ export type OnlyWarnsForInDependenciesCheckPackageRecommendedOption = Record<
 >;
 
 export interface CheckRecommendedOptions {
-  isLibrary?: boolean;
   /** default is true for libraries, false otherwise */
   allowRangeVersionsInDependencies?: boolean;
   onlyWarnsForInPackage?: OnlyWarnsForInPackageCheckPackageRecommendedOption;
@@ -95,6 +95,8 @@ export interface CheckPackageApi {
   pkgDirname: string;
   /** @internal */
   pkgPathName: string;
+  /** @internal */
+  isPkgLibrary: boolean;
   /** @internal */
   getDependencyPackageJson: GetDependencyPackageJson;
 
@@ -268,15 +270,18 @@ export interface CheckPackageApi {
   ) => CheckPackageApi;
 }
 
-export function createCheckPackage(
-  pkgDirectoryPath = '.',
-  { internalWorkspacePkgDirectoryPath }: CreateCheckPackageOptions = {},
-): CheckPackageApi {
-  const pkgDirname = path.resolve(pkgDirectoryPath);
+export function createCheckPackage({
+  packageDirectoryPath = '.',
+  internalWorkspacePkgDirectoryPath,
+  isLibrary = false,
+}: CreateCheckPackageOptions = {}): CheckPackageApi {
+  const pkgDirname = path.resolve(packageDirectoryPath);
   const pkgPath = `${pkgDirname}/package.json`;
-  const pkgPathName = `${pkgDirectoryPath}/package.json`;
+  const pkgPathName = `${packageDirectoryPath}/package.json`;
   const pkg = readPkgJson(pkgPath);
   const copyPkg: PackageJson = JSON.parse(JSON.stringify(pkg)) as PackageJson;
+  const isPkgLibrary =
+    typeof isLibrary === 'function' ? isLibrary(pkg) : isLibrary;
 
   let tryToAutoFix = false;
 
@@ -338,6 +343,7 @@ export function createCheckPackage(
     pkg,
     pkgDirname,
     pkgPathName,
+    isPkgLibrary,
     getDependencyPackageJson,
     checkExactVersions({
       onlyWarnsFor,
@@ -401,7 +407,6 @@ export function createCheckPackage(
     },
 
     checkDirectPeerDependencies({
-      isLibrary = false,
       missingOnlyWarnsFor,
       invalidOnlyWarnsFor,
       internalMissingConfigName = 'missingOnlyWarnsFor',
@@ -421,7 +426,7 @@ export function createCheckPackage(
                   invalidOnlyWarnsFor,
                 );
           await checkDirectPeerDependencies(
-            isLibrary,
+            isPkgLibrary,
             pkg,
             pkgPathName,
             getDependencyPackageJson,
@@ -442,6 +447,7 @@ export function createCheckPackage(
           await checkDirectDuplicateDependencies(
             pkg,
             pkgPathName,
+            isPkgLibrary,
             'dependencies',
             getDependencyPackageJson,
             createOnlyWarnsForMappingCheck(internalConfigName, onlyWarnsFor),
@@ -464,10 +470,9 @@ export function createCheckPackage(
     },
 
     checkRecommended({
-      isLibrary = false,
       onlyWarnsForInPackage,
       onlyWarnsForInDependencies,
-      allowRangeVersionsInDependencies = isLibrary,
+      allowRangeVersionsInDependencies = isPkgLibrary,
       internalExactVersionsIgnore,
       checkResolutionMessage,
     } = {}) {
@@ -520,7 +525,6 @@ export function createCheckPackage(
       this.checkResolutionsHasExplanation(checkResolutionMessage);
 
       this.checkDirectPeerDependencies({
-        isLibrary,
         missingOnlyWarnsFor: internalMissingPeerDependenciesOnlyWarnsFor,
         invalidOnlyWarnsFor: internalInvalidPeerDependenciesOnlyWarnsFor,
         internalMissingConfigName:

@@ -11,6 +11,9 @@
     "@pob/eslint-config-typescript/node"
   ],
   "ignorePatterns": ["*.d.ts"],
+  "rules": {
+    "complexity": ["error", 20]
+  },
   "overrides": [
     {
       "files": ["**/*.test.ts", "__tests__/**/*.ts"],
