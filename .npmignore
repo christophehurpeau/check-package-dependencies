@@ -9,9 +9,7 @@
 /*.config.cjs
 /*.config.mjs
 /tsconfig.json
-/tsconfig.build.json
-/tsconfig.eslint.json
-/dist/tsbuildinfo
+/dist/definitions/tsbuildinfo
 /tsconfig.doc.json
 babel.config.json
 __snapshots__

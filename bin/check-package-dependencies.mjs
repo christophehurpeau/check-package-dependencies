@@ -1,7 +1,7 @@
 import {
   createCheckPackage,
   createCheckPackageWithWorkspaces,
-} from '../dist/index-node14.mjs';
+} from '../dist/index-node16.mjs';
 
 const checkPackage = createCheckPackage();
 if (checkPackage.pkg.workspaces) {

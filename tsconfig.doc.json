@@ -7,7 +7,7 @@
     "readme": "README.md",
     "out": "docs",
     "excludePrivate": true,
-    "gitRevision": "master"
+    "gitRevision": "main"
   },
 
   "exclude": ["src/**/*.test.ts", "src/**/__tests__/**"]

@@ -2,8 +2,12 @@
   "include": ["src/**/*.ts"],
   "compilerOptions": {
     "rootDir": "src",
-    /* No emit in default config file. See build config file for config to build declaration files */
-    "noEmit": true,
+    "newLine": "lf",
+    "outDir": "dist/definitions",
+    "noEmitOnError": true,
+    "declaration": true,
+    "declarationMap": true,
+    "emitDeclarationOnly": true,
 
     /* No need to check .d.ts files */
     "skipLibCheck": true,

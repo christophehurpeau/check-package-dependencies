@@ -1,4 +1,4 @@
-import { createCheckPackage } from '../dist/index-node14.mjs';
+import { createCheckPackage } from '../dist/index-node16.mjs';
 
 await createCheckPackage()
   .checkRecommended({
