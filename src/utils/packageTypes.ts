@@ -18,3 +18,7 @@ export type PackageJson = Except<PackageJsonFromTypeFest, 'name'> & {
   name: string;
   resolutionsExplained?: Record<string, string>;
 } & Partial<Record<DependencyTypes, Dependency>>;
+
+export type DependenciesRanges = Partial<
+  Record<DependencyTypes, Record<DependencyName, string | null>>
+>;

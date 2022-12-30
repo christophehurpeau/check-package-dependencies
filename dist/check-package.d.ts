@@ -1,6 +1,6 @@
 import type { CheckResolutionMessage } from './checks/checkResolutionsHasExplanation';
 import type { GetDependencyPackageJson } from './utils/createGetDependencyPackageJson';
-import type { DependencyName, DependencyTypes, PackageJson } from './utils/packageTypes';
+import type { DependenciesRanges, DependencyName, DependencyTypes, PackageJson } from './utils/packageTypes';
 import type { OnlyWarnsForOptionalDependencyMapping, OnlyWarnsFor } from './utils/warnForUtils';
 export interface CreateCheckPackageOptions {
     /** @internal */
@@ -157,6 +157,21 @@ export interface CheckPackageApi {
         dependencies?: string[];
         devDependencies?: string[];
     }) => CheckPackageApi;
+    /**
+     * Check versions in a dependency
+     * Also useable to check if a dependency is not present
+     *
+     * @example
+     * Checking if `@lerna/version` has no dependency `@nrwl/devkit`
+     * ```
+     * .checkSatisfiesVersionsInDependency('@lerna/version', {
+     *   dependencies: {
+     *     '@nrwl/devkit': null,
+     *   },
+     * })
+     * ```
+     */
+    checkSatisfiesVersionsInDependency: (depName: string, dependenciesRanges: DependenciesRanges) => CheckPackageApi;
 }
 export declare function createCheckPackage(pkgDirectoryPath?: string, { internalWorkspacePkgDirectoryPath }?: CreateCheckPackageOptions): CheckPackageApi;
 //# sourceMappingURL=check-package.d.ts.map

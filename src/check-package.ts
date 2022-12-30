@@ -12,10 +12,12 @@ import { checkResolutionsHasExplanation } from './checks/checkResolutionsHasExpl
 import { checkResolutionsVersionsMatch } from './checks/checkResolutionsVersionsMatch';
 import { checkSatisfiesVersions } from './checks/checkSatisfiesVersions';
 import { checkSatisfiesVersionsFromDependency } from './checks/checkSatisfiesVersionsFromDependency';
+import { checkSatisfiesVersionsInDependency } from './checks/checkSatisfiesVersionsInDependency';
 import type { GetDependencyPackageJson } from './utils/createGetDependencyPackageJson';
 import { createGetDependencyPackageJson } from './utils/createGetDependencyPackageJson';
 import { getEntries } from './utils/object';
 import type {
+  DependenciesRanges,
   DependencyName,
   DependencyTypes,
   PackageJson,
@@ -244,6 +246,25 @@ export interface CheckPackageApi {
       dependencies?: string[];
       devDependencies?: string[];
     },
+  ) => CheckPackageApi;
+
+  /**
+   * Check versions in a dependency
+   * Also useable to check if a dependency is not present
+   *
+   * @example
+   * Checking if `@lerna/version` has no dependency `@nrwl/devkit`
+   * ```
+   * .checkSatisfiesVersionsInDependency('@lerna/version', {
+   *   dependencies: {
+   *     '@nrwl/devkit': null,
+   *   },
+   * })
+   * ```
+   */
+  checkSatisfiesVersionsInDependency: (
+    depName: string,
+    dependenciesRanges: DependenciesRanges,
   ) => CheckPackageApi;
 }
 
@@ -756,6 +777,20 @@ export function createCheckPackage(
             }
           },
         ),
+      );
+      return this;
+    },
+
+    checkSatisfiesVersionsInDependency(depName, dependenciesRanges) {
+      jobs.push(
+        new Job(this.checkSatisfiesVersionsInDependency.name, async () => {
+          const depPkg = await getDependencyPackageJson(depName);
+          checkSatisfiesVersionsInDependency(
+            pkgPathName,
+            depPkg,
+            dependenciesRanges,
+          );
+        }),
       );
       return this;
     },
