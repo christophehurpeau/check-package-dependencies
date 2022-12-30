@@ -14,6 +14,23 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+## [5.0.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v4.0.0...v5.0.0) (2022-12-30)
+
+
+### ⚠ BREAKING CHANGES
+
+* requires node 16
+
+### Features
+
+* add checkSatisfiesVersionsInDependency ([59cb1d2](https://github.com/christophehurpeau/check-package-dependencies/commit/59cb1d2f71e5cb93469c9d0727817695e6ce9be7))
+* **deps:** update dependency chalk to v5 ([#219](https://github.com/christophehurpeau/check-package-dependencies/issues/219)) ([b1ac9b1](https://github.com/christophehurpeau/check-package-dependencies/commit/b1ac9b10b7e403e1c1d5a184925e723fb31b36eb))
+
+
+### Miscellaneous Chores
+
+* drop node 14 ([3d4c7f1](https://github.com/christophehurpeau/check-package-dependencies/commit/3d4c7f191cf6de8a05792e54dd7fad0deb462de5))
+
 ## [4.0.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v3.11.0...v4.0.0) (2022-11-29)
 
 
