@@ -814,6 +814,7 @@ export function createCheckPackage({
             pkg,
             'dependencies',
             'devDependencies',
+            { tryToAutoFix },
           );
         }),
       );

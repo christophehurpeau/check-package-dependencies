@@ -1,3 +1,4 @@
+import type { PackageJson } from '../utils/packageTypes';
 import { checkMinRangeSatisfies } from './checkMinRangeSatisfies';
 
 const jest = import.meta.jest;
@@ -73,6 +74,9 @@ describe(checkMinRangeSatisfies.name, () => {
         },
         'Invalid "test1" in dependencies',
         '"1.1.0" should satisfies "1.0.0" from "devDependencies".',
+        {
+          dependencies: { test1: '1.0.0' },
+        },
       ],
       [
         'exact dev dependency is higher than caret range dependency',
@@ -82,6 +86,9 @@ describe(checkMinRangeSatisfies.name, () => {
         },
         'Invalid "test1" in dependencies',
         '"^1.0.0" should satisfies "1.1.0" from "devDependencies".',
+        {
+          dependencies: { test1: '^1.1.0' },
+        },
       ],
       [
         'exact dev dependency is lower than caret range dependency',
@@ -91,6 +98,9 @@ describe(checkMinRangeSatisfies.name, () => {
         },
         'Invalid "test1" in dependencies',
         '"^1.1.0" should satisfies "1.0.0" from "devDependencies".',
+        {
+          dependencies: { test1: '^1.0.0' },
+        },
       ],
       [
         'exact dev dependency is higher than tilde range dependency',
@@ -100,6 +110,9 @@ describe(checkMinRangeSatisfies.name, () => {
         },
         'Invalid "test1" in dependencies',
         '"~1.0.0" should satisfies "1.1.0" from "devDependencies".',
+        {
+          dependencies: { test1: '~1.1.0' },
+        },
       ],
       [
         'exact dev dependency is lower than tilde range dependency',
@@ -109,6 +122,9 @@ describe(checkMinRangeSatisfies.name, () => {
         },
         'Invalid "test1" in dependencies',
         '"~1.1.0" should satisfies "1.0.0" from "devDependencies".',
+        {
+          dependencies: { test1: '~1.0.0' },
+        },
       ],
       [
         'exact dev dependency is higher than >= range dependency',
@@ -118,6 +134,9 @@ describe(checkMinRangeSatisfies.name, () => {
         },
         'Invalid "test1" in dependencies',
         '">=1.0.0" should satisfies "1.1.0" from "devDependencies".',
+        {
+          dependencies: { test1: '>=1.1.0' },
+        },
       ],
       [
         'exact dev dependency is lower than >= range dependency',
@@ -127,16 +146,37 @@ describe(checkMinRangeSatisfies.name, () => {
         },
         'Invalid "test1" in dependencies',
         '">=1.1.0" should satisfies "1.0.0" from "devDependencies".',
+        {
+          dependencies: { test1: '>=1.0.0' },
+        },
       ],
-    ])('should error when %s', (_, pkgContent, errorTitle, errorInfo) => {
-      checkMinRangeSatisfies(
-        'path',
-        { name: 'test', ...pkgContent },
-        'dependencies',
-        'devDependencies',
-        { customCreateReportError: createReportError },
-      );
-      expect(mockReportError).toHaveBeenCalledWith(errorTitle, errorInfo);
-    });
+    ])(
+      'should error when %s',
+      (_, pkgContent, errorTitle, errorInfo, expectedFix) => {
+        checkMinRangeSatisfies(
+          'path',
+          { name: 'test', ...pkgContent },
+          'dependencies',
+          'devDependencies',
+          { customCreateReportError: createReportError },
+        );
+        expect(mockReportError).toHaveBeenCalledWith(errorTitle, errorInfo);
+
+        if (expectedFix) {
+          const pkg = JSON.parse(
+            JSON.stringify({ name: 'test', ...pkgContent }),
+          ) as PackageJson;
+          checkMinRangeSatisfies(
+            'path',
+            pkg,
+            'dependencies',
+            'devDependencies',
+            { tryToAutoFix: true },
+          );
+
+          expect(pkg).toStrictEqual({ ...pkg, ...expectedFix });
+        }
+      },
+    );
   });
 });

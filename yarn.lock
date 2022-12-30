@@ -1656,6 +1656,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/semver-utils@npm:1.1.1":
+  version: 1.1.1
+  resolution: "@types/semver-utils@npm:1.1.1"
+  checksum: fd53e2ef9712e20c69caacc608b42050e815573d9755afe344299b8131a14978e35a3b56a13a9bdb58d9a0025e940672d27ddd8d77c67004535af0e991baeb12
+  languageName: node
+  linkType: hard
+
 "@types/semver@npm:7.3.13":
   version: 7.3.13
   resolution: "@types/semver@npm:7.3.13"
@@ -2530,6 +2537,7 @@ __metadata:
     "@types/glob": 8.0.0
     "@types/jest": 29.2.4
     "@types/semver": 7.3.13
+    "@types/semver-utils": 1.1.1
     chalk: ^5.2.0
     eslint: 8.30.0
     glob: ^8.0.0
@@ -2537,6 +2545,7 @@ __metadata:
     jest: 29.3.1
     pob-babel: 35.4.0
     semver: 7.3.8
+    semver-utils: ^1.1.4
     type-fest: ^3.0.0
     typedoc: 0.23.23
     typescript: 4.9.4
@@ -6271,6 +6280,13 @@ __metadata:
   version: 2.1.2
   resolution: "safer-buffer@npm:2.1.2"
   checksum: cab8f25ae6f1434abee8d80023d7e72b598cf1327164ddab31003c51215526801e40b66c5e65d658a0af1e9d6478cadcb4c745f4bd6751f97d8644786c0978b0
+  languageName: node
+  linkType: hard
+
+"semver-utils@npm:^1.1.4":
+  version: 1.1.4
+  resolution: "semver-utils@npm:1.1.4"
+  checksum: 93fd955a30f5bdf532163d94981aa03dfbaddf29dad6388415b264c95d7046a6b47d947c6e3e37c0d7867ed3f024aa6e50fc308c9487378354e9d300c9dd68b6
   languageName: node
   linkType: hard
 

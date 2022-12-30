@@ -2,6 +2,7 @@ import path from 'path';
 import util from 'util';
 import chalk from 'chalk';
 import semver from 'semver';
+import semverUtils from 'semver-utils';
 import fs, { readFileSync, writeFileSync } from 'fs';
 import { resolve } from 'import-meta-resolve';
 import glob from 'glob';
@@ -273,6 +274,7 @@ function checkIdenticalVersionsThanDependency(pkg, pkgPathName, type, depKeys, d
 }
 
 function checkMinRangeSatisfies(pkgPathName, pkg, type1 = 'dependencies', type2 = 'devDependencies', {
+  tryToAutoFix = false,
   customCreateReportError = createReportError
 } = {}) {
   const dependencies1 = pkg[type1];
@@ -288,7 +290,12 @@ function checkMinRangeSatisfies(pkgPathName, pkg, type1 = 'dependencies', type2 
     if (!semver.satisfies(minDepRange1, depRange2, {
       includePrerelease: true
     })) {
-      reportError(`Invalid "${depName}" in ${type1}`, `"${depRange1}" should satisfies "${depRange2}" from "${type2}".`);
+      if (tryToAutoFix) {
+        const depRange1Parsed = semverUtils.parseRange(depRange1);
+        dependencies1[depName] = (depRange1Parsed[0]?.operator || '') + (semver.minVersion(depRange2)?.version || depRange2);
+      } else {
+        reportError(`Invalid "${depName}" in ${type1}`, `"${depRange1}" should satisfies "${depRange2}" from "${type2}".`);
+      }
     }
   }
 }
@@ -829,7 +836,9 @@ function createCheckPackage({
     },
     checkMinRangeDependenciesSatisfiesDevDependencies() {
       jobs.push(new Job(this.checkSatisfiesVersionsInDependency.name, async () => {
-        checkMinRangeSatisfies(pkgPathName, pkg, 'dependencies', 'devDependencies');
+        checkMinRangeSatisfies(pkgPathName, pkg, 'dependencies', 'devDependencies', {
+          tryToAutoFix
+        });
       }));
       return this;
     }

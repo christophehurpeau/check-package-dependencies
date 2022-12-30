@@ -1,4 +1,5 @@
 import semver from 'semver';
+import semverUtils from 'semver-utils';
 import type { PackageJson } from 'type-fest';
 import { createReportError } from '../utils/createReportError';
 import { getEntries } from '../utils/object';
@@ -6,6 +7,7 @@ import type { DependencyTypes } from '../utils/packageTypes';
 
 export interface CheckMinRangeSatisfiesOptions {
   customCreateReportError?: typeof createReportError;
+  tryToAutoFix?: boolean;
 }
 
 export function checkMinRangeSatisfies(
@@ -14,6 +16,7 @@ export function checkMinRangeSatisfies(
   type1: DependencyTypes = 'dependencies',
   type2: DependencyTypes = 'devDependencies',
   {
+    tryToAutoFix = false,
     customCreateReportError = createReportError,
   }: CheckMinRangeSatisfiesOptions = {},
 ): void {
@@ -40,10 +43,17 @@ export function checkMinRangeSatisfies(
         includePrerelease: true,
       })
     ) {
-      reportError(
-        `Invalid "${depName}" in ${type1}`,
-        `"${depRange1}" should satisfies "${depRange2}" from "${type2}".`,
-      );
+      if (tryToAutoFix) {
+        const depRange1Parsed = semverUtils.parseRange(depRange1);
+        dependencies1[depName] =
+          (depRange1Parsed[0]?.operator || '') +
+          (semver.minVersion(depRange2)?.version || depRange2);
+      } else {
+        reportError(
+          `Invalid "${depName}" in ${type1}`,
+          `"${depRange1}" should satisfies "${depRange2}" from "${type2}".`,
+        );
+      }
     }
   }
 }
