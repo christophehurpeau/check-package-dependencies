@@ -6,6 +6,7 @@ import { checkDirectPeerDependencies } from './checks/checkDirectPeerDependencie
 import { checkExactVersions } from './checks/checkExactVersions';
 import { checkIdenticalVersions } from './checks/checkIdenticalVersions';
 import { checkIdenticalVersionsThanDependency } from './checks/checkIdenticalVersionsThanDependency';
+import { checkMinRangeSatisfies } from './checks/checkMinRangeSatisfies';
 import { checkNoDependencies } from './checks/checkNoDependencies';
 import type { CheckResolutionMessage } from './checks/checkResolutionsHasExplanation';
 import { checkResolutionsHasExplanation } from './checks/checkResolutionsHasExplanation';
@@ -268,6 +269,8 @@ export interface CheckPackageApi {
     depName: string,
     dependenciesRanges: DependenciesRanges,
   ) => CheckPackageApi;
+
+  checkMinRangeDependenciesSatisfiesDevDependencies: () => CheckPackageApi;
 }
 
 export function createCheckPackage({
@@ -539,6 +542,10 @@ export function createCheckPackage({
           'onlyWarnsForInDependencies.duplicateDirectDependency',
       });
 
+      if (isPkgLibrary) {
+        this.checkMinRangeDependenciesSatisfiesDevDependencies();
+      }
+
       return this;
     },
 
@@ -793,6 +800,20 @@ export function createCheckPackage({
             pkgPathName,
             depPkg,
             dependenciesRanges,
+          );
+        }),
+      );
+      return this;
+    },
+
+    checkMinRangeDependenciesSatisfiesDevDependencies() {
+      jobs.push(
+        new Job(this.checkSatisfiesVersionsInDependency.name, async () => {
+          checkMinRangeSatisfies(
+            pkgPathName,
+            pkg,
+            'dependencies',
+            'devDependencies',
           );
         }),
       );

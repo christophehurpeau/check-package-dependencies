@@ -272,6 +272,27 @@ function checkIdenticalVersionsThanDependency(pkg, pkgPathName, type, depKeys, d
   });
 }
 
+function checkMinRangeSatisfies(pkgPathName, pkg, type1 = 'dependencies', type2 = 'devDependencies', {
+  customCreateReportError = createReportError
+} = {}) {
+  const dependencies1 = pkg[type1];
+  const dependencies2 = pkg[type2];
+  if (!dependencies1 || !dependencies2) {
+    return;
+  }
+  const reportError = customCreateReportError(`"${type1}" minimum range satisfies "${type2}"`, pkgPathName);
+  for (const [depName, depRange1] of getEntries(dependencies1)) {
+    const depRange2 = dependencies2[depName];
+    if (!depRange2 || !depRange1) continue;
+    const minDepRange1 = semver.minVersion(depRange1)?.version || depRange1;
+    if (!semver.satisfies(minDepRange1, depRange2, {
+      includePrerelease: true
+    })) {
+      reportError(`Invalid "${depName}" in ${type1}`, `"${depRange1}" should satisfies "${depRange2}" from "${type2}".`);
+    }
+  }
+}
+
 function checkNoDependencies(pkg, pkgPath, type = 'dependencies', moveToSuggestion = 'devDependencies', customCreateReportError = createReportError) {
   const pkgDependencies = pkg[type];
   if (!pkgDependencies) return;
@@ -681,6 +702,9 @@ function createCheckPackage({
         onlyWarnsFor: internalDirectDuplicateDependenciesOnlyWarnsFor,
         internalConfigName: 'onlyWarnsForInDependencies.duplicateDirectDependency'
       });
+      if (isPkgLibrary) {
+        this.checkMinRangeDependenciesSatisfiesDevDependencies();
+      }
       return this;
     },
     checkIdenticalVersionsThanDependency(depName, {
@@ -800,6 +824,12 @@ function createCheckPackage({
       jobs.push(new Job(this.checkSatisfiesVersionsInDependency.name, async () => {
         const depPkg = await getDependencyPackageJson(depName);
         checkSatisfiesVersionsInDependency(pkgPathName, depPkg, dependenciesRanges);
+      }));
+      return this;
+    },
+    checkMinRangeDependenciesSatisfiesDevDependencies() {
+      jobs.push(new Job(this.checkSatisfiesVersionsInDependency.name, async () => {
+        checkMinRangeSatisfies(pkgPathName, pkg, 'dependencies', 'devDependencies');
       }));
       return this;
     }
