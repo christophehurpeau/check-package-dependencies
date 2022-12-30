@@ -171,7 +171,6 @@ async function checkDirectPeerDependencies(isLibrary, pkg, pkgPathName, getDepen
   }
 }
 
-/* eslint-disable complexity */
 const isVersionRange = version => version.startsWith('^') || version.startsWith('~');
 async function checkExactVersions(pkg, pkgPathName, types, {
   getDependencyPackageJson,

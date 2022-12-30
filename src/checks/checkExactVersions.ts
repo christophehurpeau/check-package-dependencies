@@ -1,4 +1,3 @@
-/* eslint-disable complexity */
 import semver from 'semver';
 import type { GetDependencyPackageJson } from '../utils/createGetDependencyPackageJson';
 import {
