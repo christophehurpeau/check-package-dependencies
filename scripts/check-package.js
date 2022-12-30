@@ -5,6 +5,7 @@ await createCheckPackage()
     isLibrary: true,
     onlyWarnsForInDependencies: {
       '@babel/core': { duplicateDirectDependency: ['semver'] },
+      eslint: { duplicateDirectDependency: ['chalk'] },
     },
   })
   .run();
