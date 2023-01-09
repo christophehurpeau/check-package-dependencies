@@ -14,6 +14,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+## [6.2.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v6.1.0...v6.2.0) (2023-01-09)
+
+
+### Features
+
+* **checkExactVersion:** add check for comparators range ([c886651](https://github.com/christophehurpeau/check-package-dependencies/commit/c886651e7632b022e783ad33a7d308ba1a952587))
+
 ## [6.1.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v6.0.0...v6.1.0) (2022-12-30)
 
 
