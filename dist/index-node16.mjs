@@ -172,7 +172,7 @@ async function checkDirectPeerDependencies(isLibrary, pkg, pkgPathName, getDepen
   }
 }
 
-const isVersionRange = version => version.startsWith('^') || version.startsWith('~');
+const isVersionRange = version => version.startsWith('^') || version.startsWith('~') || version.startsWith('>') || version.startsWith('<');
 async function checkExactVersions(pkg, pkgPathName, types, {
   getDependencyPackageJson,
   onlyWarnsForCheck,
@@ -214,7 +214,7 @@ async function checkExactVersions(pkg, pkgPathName, types, {
             pkgDependencies[dependencyName] = resolvedDep.version;
           }
         } else {
-          reportError(`Unexpected range dependency in "${type}" for "${dependencyName}"`, `expecting "${version}" to be exact "${version.slice(1)}".`, shouldOnlyWarn);
+          reportError(`Unexpected range dependency in "${type}" for "${dependencyName}"`, `expecting "${version}" to be exact "${version.slice(version[1] === '=' ? 2 : 1)}".`, shouldOnlyWarn);
         }
       }
     }

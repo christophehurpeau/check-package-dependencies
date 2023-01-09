@@ -16,7 +16,10 @@ export interface CheckExactVersionsOptions {
 }
 
 const isVersionRange = (version: string): boolean =>
-  version.startsWith('^') || version.startsWith('~');
+  version.startsWith('^') ||
+  version.startsWith('~') ||
+  version.startsWith('>') ||
+  version.startsWith('<');
 
 export async function checkExactVersions(
   pkg: PackageJson,
@@ -81,7 +84,9 @@ export async function checkExactVersions(
         } else {
           reportError(
             `Unexpected range dependency in "${type}" for "${dependencyName}"`,
-            `expecting "${version}" to be exact "${version.slice(1)}".`,
+            `expecting "${version}" to be exact "${version.slice(
+              version[1] === '=' ? 2 : 1,
+            )}".`,
             shouldOnlyWarn,
           );
         }
