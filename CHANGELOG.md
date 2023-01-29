@@ -14,6 +14,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+## [6.2.1](https://github.com/christophehurpeau/check-package-dependencies/compare/v6.2.0...v6.2.1) (2023-01-29)
+
+
+### Bug Fixes
+
+* ignore directory with no package.json with warning ([76cdddf](https://github.com/christophehurpeau/check-package-dependencies/commit/76cdddf0c6b43e181a4e9b2fd71a1a75478e5ad9))
+
 ## [6.2.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v6.1.0...v6.2.0) (2023-01-09)
 
 
