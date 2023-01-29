@@ -866,8 +866,10 @@ function createCheckPackageWithWorkspaces(createCheckPackageOptions = {}) {
         cwd: pkgDirname
       });
       match.forEach(pathMatch => {
-        const stat = fs.statSync(pathMatch);
-        if (!stat.isDirectory()) return;
+        if (!fs.existsSync(path.join(pathMatch, 'package.json'))) {
+          console.log(`Ignored potential directory, no package.json found: ${pathMatch}`);
+          return;
+        }
         const subPkgDirectoryPath = path.relative(process.cwd(), pathMatch);
         workspacePackagesPaths.push(subPkgDirectoryPath);
       });
