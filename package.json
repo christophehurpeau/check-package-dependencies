@@ -100,7 +100,7 @@
     "@pob/commitlint-config": "5.1.0",
     "@pob/eslint-config": "50.0.0",
     "@pob/eslint-config-typescript": "50.0.0",
-    "@pob/root": "7.3.0",
+    "@pob/root": "7.4.0",
     "@types/glob": "8.0.1",
     "@types/jest": "29.4.0",
     "@types/semver": "7.3.13",
