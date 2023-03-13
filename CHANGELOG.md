@@ -14,6 +14,14 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+## [6.3.1](https://github.com/christophehurpeau/check-package-dependencies/compare/v6.3.0...v6.3.1) (2023-03-13)
+
+
+### Bug Fixes
+
+* make sure all dependencies matches peerdependency range before skipping it ([6b0db57](https://github.com/christophehurpeau/check-package-dependencies/commit/6b0db575a696e09f5a72c529626ae37fdbc6a136))
+* only allow dependencies satisfiying peerdependencies when isLibrary is false ([0093237](https://github.com/christophehurpeau/check-package-dependencies/commit/00932373f3b3b78c977140680b76f81db38b9fcb))
+
 ## [6.3.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v6.2.1...v6.3.0) (2023-03-13)
 
 
