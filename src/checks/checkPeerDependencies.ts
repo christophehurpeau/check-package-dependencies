@@ -31,21 +31,29 @@ export function checkPeerDependencies(
         continue;
       }
 
+      let additionalDetails = '';
       // satisfied by another direct dependency
-      if (
-        providedDependencies.some(
-          ([depName, depRange]) =>
-            depName === peerDepName && semver.intersects(range, depRange),
-        )
-      ) {
-        continue;
+      const providedDependenciesForDepName = providedDependencies.filter(
+        ([depName]) => depName === peerDepName,
+      );
+      if (providedDependenciesForDepName.length > 0) {
+        if (
+          providedDependenciesForDepName.every(([, depRange]) =>
+            semver.intersects(range, depRange),
+          )
+        ) {
+          continue;
+        }
+
+        additionalDetails +=
+          ' (required as some dependencies have non-satisfying range too)';
       }
 
       reportError(
         `Missing "${peerDepName}" peer dependency from "${depPkg.name}" in ${type}`,
         `it should satisfies "${range}" and be in ${allowedPeerIn.join(
           ' or ',
-        )}`,
+        )}${additionalDetails}`,
         missingOnlyWarnsForCheck.shouldWarnsFor(peerDepName),
       );
     } else {
