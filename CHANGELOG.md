@@ -14,6 +14,19 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+## [6.3.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v6.2.1...v6.3.0) (2023-03-13)
+
+
+### Features
+
+* allow direct peer dependencies to be satisfied by another direct peer dependency ([2aba256](https://github.com/christophehurpeau/check-package-dependencies/commit/2aba256c989fa57786fe69ebefba73d2956c50ac))
+
+
+### Bug Fixes
+
+* add missing shebang ([d978b3d](https://github.com/christophehurpeau/check-package-dependencies/commit/d978b3d4f9be64448d2cfebbfb76fd04b6d2ffea))
+* fix bin ([80900d3](https://github.com/christophehurpeau/check-package-dependencies/commit/80900d35773310a7fd6626494f86e5b43741850a)), closes [#472](https://github.com/christophehurpeau/check-package-dependencies/issues/472)
+
 ## [6.2.1](https://github.com/christophehurpeau/check-package-dependencies/compare/v6.2.0...v6.2.1) (2023-01-29)
 
 
