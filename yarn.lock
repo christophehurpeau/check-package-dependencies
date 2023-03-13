@@ -2544,7 +2544,7 @@ __metadata:
     typedoc: 0.23.25
     typescript: 4.9.5
   bin:
-    check-package-dependencies: ./bin/check-package-dependencies.js
+    check-package-dependencies: ./bin/check-package-dependencies.mjs
   languageName: unknown
   linkType: soft
 

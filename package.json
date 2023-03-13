@@ -25,7 +25,7 @@
     }
   },
   "sideEffects": false,
-  "bin": "./bin/check-package-dependencies.js",
+  "bin": "./bin/check-package-dependencies.mjs",
   "scripts": {
     "build": "yarn clean:build && rollup --config rollup.config.mjs && yarn run build:definitions",
     "build:definitions": "tsc -p tsconfig.json",
