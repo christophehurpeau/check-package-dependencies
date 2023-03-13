@@ -47,27 +47,44 @@ export async function checkDirectPeerDependencies(
 ): Promise<void> {
   const reportError = customCreateReportError('Peer Dependencies', pkgPathName);
 
+  const allDepPkgs: {
+    name: string;
+    type: RegularDependencyTypes;
+    pkg: PackageJson;
+  }[] = [];
+  const allDirectDependenciesDependencies: [string, string][] = [];
+
   await Promise.all(
     regularDependencyTypes.map(async (depType) => {
       const dependencies = pkg[depType];
       if (!dependencies) return;
       for (const depName of getKeys(dependencies)) {
         const depPkg = await getDependencyPackageJson(depName);
+        allDepPkgs.push({ name: depName, type: depType, pkg: depPkg });
 
-        if (depPkg.peerDependencies) {
-          checkPeerDependencies(
-            pkg,
-            reportError,
-            depType,
-            getAllowedPeerInFromType(depType, isLibrary),
-            depPkg,
-            missingOnlyWarnsForCheck.createFor(depName),
-            invalidOnlyWarnsForCheck.createFor(depName),
+        if (depPkg.dependencies) {
+          allDirectDependenciesDependencies.push(
+            ...Object.entries(depPkg.dependencies),
           );
         }
       }
     }),
   );
+
+  for (const { name: depName, type: depType, pkg: depPkg } of allDepPkgs) {
+    if (depPkg.peerDependencies) {
+      checkPeerDependencies(
+        pkg,
+        reportError,
+        depType,
+        getAllowedPeerInFromType(depType, isLibrary),
+        allDirectDependenciesDependencies,
+        depPkg,
+        missingOnlyWarnsForCheck.createFor(depName),
+        invalidOnlyWarnsForCheck.createFor(depName),
+      );
+    }
+  }
 
   reportNotWarnedForMapping(reportError, missingOnlyWarnsForCheck);
   if (missingOnlyWarnsForCheck !== invalidOnlyWarnsForCheck) {

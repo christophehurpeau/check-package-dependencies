@@ -8,6 +8,7 @@ export function checkPeerDependencies(
   reportError: ReportError,
   type: DependencyTypes,
   allowedPeerIn: DependencyTypes[],
+  providedDependencies: [string, string][],
   depPkg: PackageJson,
   missingOnlyWarnsForCheck: OnlyWarnsForCheck,
   invalidOnlyWarnsForCheck: OnlyWarnsForCheck,
@@ -29,6 +30,17 @@ export function checkPeerDependencies(
       if (peerDependenciesMetaPeerDep?.optional) {
         continue;
       }
+
+      // satisfied by another direct dependency
+      if (
+        providedDependencies.some(
+          ([depName, depRange]) =>
+            depName === peerDepName && semver.intersects(range, depRange),
+        )
+      ) {
+        continue;
+      }
+
       reportError(
         `Missing "${peerDepName}" peer dependency from "${depPkg.name}" in ${type}`,
         `it should satisfies "${range}" and be in ${allowedPeerIn.join(
