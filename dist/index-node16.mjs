@@ -111,7 +111,7 @@ async function checkDirectDuplicateDependencies(pkg, pkgPathName, isPackageALibr
   reportNotWarnedForMapping(reportError, onlyWarnsForCheck);
 }
 
-function checkPeerDependencies(pkg, reportError, type, allowedPeerIn, depPkg, missingOnlyWarnsForCheck, invalidOnlyWarnsForCheck) {
+function checkPeerDependencies(pkg, reportError, type, allowedPeerIn, providedDependencies, depPkg, missingOnlyWarnsForCheck, invalidOnlyWarnsForCheck) {
   const {
     peerDependencies,
     peerDependenciesMeta
@@ -123,6 +123,11 @@ function checkPeerDependencies(pkg, reportError, type, allowedPeerIn, depPkg, mi
     if (versionsIn.length === 0) {
       const peerDependenciesMetaPeerDep = peerDependenciesMeta?.[peerDepName];
       if (peerDependenciesMetaPeerDep?.optional) {
+        continue;
+      }
+
+      // satisfied by another direct dependency
+      if (providedDependencies.some(([depName, depRange]) => depName === peerDepName && semver.intersects(range, depRange))) {
         continue;
       }
       reportError(`Missing "${peerDepName}" peer dependency from "${depPkg.name}" in ${type}`, `it should satisfies "${range}" and be in ${allowedPeerIn.join(' or ')}`, missingOnlyWarnsForCheck.shouldWarnsFor(peerDepName));
@@ -156,16 +161,32 @@ const getAllowedPeerInFromType = (depPkgType, isLibrary) => {
 };
 async function checkDirectPeerDependencies(isLibrary, pkg, pkgPathName, getDependencyPackageJson, missingOnlyWarnsForCheck, invalidOnlyWarnsForCheck, customCreateReportError = createReportError) {
   const reportError = customCreateReportError('Peer Dependencies', pkgPathName);
+  const allDepPkgs = [];
+  const allDirectDependenciesDependencies = [];
   await Promise.all(regularDependencyTypes.map(async depType => {
     const dependencies = pkg[depType];
     if (!dependencies) return;
     for (const depName of getKeys(dependencies)) {
       const depPkg = await getDependencyPackageJson(depName);
-      if (depPkg.peerDependencies) {
-        checkPeerDependencies(pkg, reportError, depType, getAllowedPeerInFromType(depType, isLibrary), depPkg, missingOnlyWarnsForCheck.createFor(depName), invalidOnlyWarnsForCheck.createFor(depName));
+      allDepPkgs.push({
+        name: depName,
+        type: depType,
+        pkg: depPkg
+      });
+      if (depPkg.dependencies) {
+        allDirectDependenciesDependencies.push(...Object.entries(depPkg.dependencies));
       }
     }
   }));
+  for (const {
+    name: depName,
+    type: depType,
+    pkg: depPkg
+  } of allDepPkgs) {
+    if (depPkg.peerDependencies) {
+      checkPeerDependencies(pkg, reportError, depType, getAllowedPeerInFromType(depType, isLibrary), allDirectDependenciesDependencies, depPkg, missingOnlyWarnsForCheck.createFor(depName), invalidOnlyWarnsForCheck.createFor(depName));
+    }
+  }
   reportNotWarnedForMapping(reportError, missingOnlyWarnsForCheck);
   if (missingOnlyWarnsForCheck !== invalidOnlyWarnsForCheck) {
     reportNotWarnedForMapping(reportError, invalidOnlyWarnsForCheck);
