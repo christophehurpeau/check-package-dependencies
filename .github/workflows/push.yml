@@ -1,4 +1,4 @@
-name: Node CI
+name: Push CI
 
 on: [push]
 
@@ -63,7 +63,6 @@ jobs:
         with:
           token: ${{ secrets.GH_TOKEN }}
           release-type: node
-          package-name: release-please-action
 
       # publish:
       - run: npm publish
