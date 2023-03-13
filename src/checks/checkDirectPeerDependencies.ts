@@ -62,7 +62,7 @@ export async function checkDirectPeerDependencies(
         const depPkg = await getDependencyPackageJson(depName);
         allDepPkgs.push({ name: depName, type: depType, pkg: depPkg });
 
-        if (depPkg.dependencies) {
+        if (depPkg.dependencies && !isLibrary) {
           allDirectDependenciesDependencies.push(
             ...Object.entries(depPkg.dependencies),
           );
