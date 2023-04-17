@@ -14,6 +14,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+## [6.3.2](https://github.com/christophehurpeau/check-package-dependencies/compare/v6.3.1...v6.3.2) (2023-04-17)
+
+
+### Bug Fixes
+
+* ignore direct peer dependency check if the dependency is in peer dependencies ([9eb7635](https://github.com/christophehurpeau/check-package-dependencies/commit/9eb763530047148334970ed5367eadd3ad495022))
+
 ## [6.3.1](https://github.com/christophehurpeau/check-package-dependencies/compare/v6.3.0...v6.3.1) (2023-03-13)
 
 
