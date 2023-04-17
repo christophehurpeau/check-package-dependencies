@@ -342,4 +342,28 @@ describe('checkDirectPeerDependencies', () => {
       false,
     );
   });
+
+  it('should not report error when peer dependency is marked as peer dependency', async () => {
+    await checkDirectPeerDependencies(
+      false,
+      {
+        name: 'test',
+        devDependencies: {
+          'some-lib-using-rollup': '1.0.0',
+        },
+        peerDependencies: {
+          'some-lib-using-rollup': '^1.0.0',
+        },
+      },
+      'path',
+      jest.fn().mockImplementationOnce(() => ({
+        name: 'some-lib-using-rollup',
+        peerDependencies: { rollup: '^1.0.0' },
+      })),
+      createOnlyWarnsForMappingCheck('test', []),
+      createOnlyWarnsForMappingCheck('test', []),
+      createReportError,
+    );
+    expect(mockReportError).not.toHaveBeenCalled();
+  });
 });

@@ -1,3 +1,4 @@
+import semver from 'semver';
 import type { GetDependencyPackageJson } from '../utils/createGetDependencyPackageJson';
 import {
   createReportError,
@@ -59,6 +60,17 @@ export async function checkDirectPeerDependencies(
       const dependencies = pkg[depType];
       if (!dependencies) return;
       for (const depName of getKeys(dependencies)) {
+        if (pkg.peerDependencies?.[depName]) {
+          if (
+            semver.intersects(
+              dependencies[depName],
+              pkg.peerDependencies?.[depName],
+            )
+          ) {
+            continue;
+          }
+        }
+
         const depPkg = await getDependencyPackageJson(depName);
         allDepPkgs.push({ name: depName, type: depType, pkg: depPkg });
 
