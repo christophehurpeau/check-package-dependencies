@@ -98,8 +98,8 @@
   "devDependencies": {
     "@babel/core": "7.21.3",
     "@pob/commitlint-config": "5.1.1",
-    "@pob/eslint-config": "50.0.0",
-    "@pob/eslint-config-typescript": "50.0.0",
+    "@pob/eslint-config": "50.0.4",
+    "@pob/eslint-config-typescript": "50.0.4",
     "@pob/root": "7.6.0",
     "@types/jest": "29.5.1",
     "@types/semver": "7.5.0",
