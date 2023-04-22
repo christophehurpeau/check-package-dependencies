@@ -7,7 +7,7 @@ export function checkIdenticalVersions(
   pkg: PackageJson,
   pkgPathName: string,
   type: DependencyTypes,
-  deps: Record<string, string[] | Partial<Record<DependencyTypes, string[]>>>,
+  deps: Record<string, Partial<Record<DependencyTypes, string[]>> | string[]>,
   onlyWarnsForCheck?: OnlyWarnsForCheck,
   customCreateReportError = createReportError,
 ): void {

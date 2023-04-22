@@ -248,7 +248,7 @@ async function checkExactVersions(pkg, pkgPathName, types, {
           } catch {
             resolvedDep = null;
           }
-          if (!resolvedDep || !resolvedDep.version) {
+          if (!resolvedDep?.version) {
             reportError(`Unexpected range dependency in "${type}" for "${dependencyName}"`, `expecting "${version}" to be exact, autofix failed to resolve "${dependencyName}".`, shouldOnlyWarn);
           } else if (!semver.satisfies(resolvedDep.version, version, {
             includePrerelease: true
