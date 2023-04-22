@@ -101,7 +101,6 @@
     "@pob/eslint-config": "50.0.0",
     "@pob/eslint-config-typescript": "50.0.0",
     "@pob/root": "7.6.0",
-    "@types/glob": "8.1.0",
     "@types/jest": "29.5.1",
     "@types/semver": "7.3.13",
     "@types/semver-utils": "1.1.1",

@@ -1,7 +1,7 @@
 /* eslint-disable max-lines */
 import fs from 'fs';
 import path from 'path';
-import glob from 'glob';
+import { globSync } from 'glob';
 import type { Except } from 'type-fest';
 import type {
   CreateCheckPackageOptions,
@@ -91,7 +91,7 @@ export function createCheckPackageWithWorkspaces(
 
   if (pkgWorkspaces) {
     pkgWorkspaces.forEach((pattern) => {
-      const match = glob.sync(pattern, { cwd: pkgDirname });
+      const match = globSync(pattern, { cwd: pkgDirname });
       match.forEach((pathMatch) => {
         if (!fs.existsSync(path.join(pathMatch, 'package.json'))) {
           console.log(
