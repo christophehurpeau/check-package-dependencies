@@ -5,7 +5,7 @@ import semver from 'semver';
 import semverUtils from 'semver-utils';
 import fs, { readFileSync, writeFileSync } from 'fs';
 import { resolve } from 'import-meta-resolve';
-import glob from 'glob';
+import { globSync } from 'glob';
 
 const getKeys = o => Object.keys(o);
 const getEntries = o => Object.entries(o);
@@ -892,7 +892,7 @@ function createCheckPackageWithWorkspaces(createCheckPackageOptions = {}) {
   const workspacePackagesPaths = [];
   if (pkgWorkspaces) {
     pkgWorkspaces.forEach(pattern => {
-      const match = glob.sync(pattern, {
+      const match = globSync(pattern, {
         cwd: pkgDirname
       });
       match.forEach(pathMatch => {
