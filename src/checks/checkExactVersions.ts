@@ -62,7 +62,7 @@ export async function checkExactVersions(
           } catch {
             resolvedDep = null;
           }
-          if (!resolvedDep || !resolvedDep.version) {
+          if (!resolvedDep?.version) {
             reportError(
               `Unexpected range dependency in "${type}" for "${dependencyName}"`,
               `expecting "${version}" to be exact, autofix failed to resolve "${dependencyName}".`,

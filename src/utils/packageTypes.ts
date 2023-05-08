@@ -14,10 +14,11 @@ export type DependencyName = string;
 
 type Dependency = Record<string, string>;
 
-export type PackageJson = Except<PackageJsonFromTypeFest, 'name'> & {
-  name: string;
-  resolutionsExplained?: Record<string, string>;
-} & Partial<Record<DependencyTypes, Dependency>>;
+export type PackageJson = Except<PackageJsonFromTypeFest, 'name'> &
+  Partial<Record<DependencyTypes, Dependency>> & {
+    name: string;
+    resolutionsExplained?: Record<string, string>;
+  };
 
 export type DependenciesRanges = Partial<
   Record<DependencyTypes, Record<DependencyName, string | null>>
