@@ -514,6 +514,8 @@ function createGetDependencyPackageJson({
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
+
 const createOnlyWarnsForArrayCheck = (configName, onlyWarnsFor = []) => {
   const notWarnedFor = new Set(onlyWarnsFor);
   return {
