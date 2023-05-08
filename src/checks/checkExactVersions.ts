@@ -58,7 +58,7 @@ export async function checkExactVersions(
         if (!shouldOnlyWarn && tryToAutoFix && getDependencyPackageJson) {
           let resolvedDep;
           try {
-            resolvedDep = await getDependencyPackageJson(dependencyName);
+            resolvedDep = getDependencyPackageJson(dependencyName);
           } catch {
             resolvedDep = null;
           }
