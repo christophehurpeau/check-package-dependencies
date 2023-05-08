@@ -11,11 +11,11 @@ export function writePkgJson(packagePath: string, pkg: PackageJson): void {
 }
 
 /** @internal */
-export async function internalLoadPackageJsonFromNodeModules(
+export function internalLoadPackageJsonFromNodeModules(
   pkgDepName: string,
   pkgDirname: string,
-): Promise<PackageJson> {
-  const packageUrl = await importResolve(
+): PackageJson {
+  const packageUrl = importResolve(
     `${pkgDepName}/package.json`,
     `file://${pkgDirname}/package.json`,
   );
