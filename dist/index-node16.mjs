@@ -909,7 +909,7 @@ function createCheckPackageWithWorkspaces(createCheckPackageOptions = {}) {
     const checkPkg = createCheckPackage({
       ...createCheckPackageOptions,
       packageDirectoryPath: subPkgDirectoryPath,
-      internalWorkspacePkgDirectoryPath: createCheckPackageOptions.packageDirectoryPath
+      internalWorkspacePkgDirectoryPath: createCheckPackageOptions.packageDirectoryPath || '.'
     });
     return [checkPkg.pkg.name, checkPkg];
   }));

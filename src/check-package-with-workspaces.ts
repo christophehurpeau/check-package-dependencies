@@ -111,7 +111,7 @@ export function createCheckPackageWithWorkspaces(
         ...createCheckPackageOptions,
         packageDirectoryPath: subPkgDirectoryPath,
         internalWorkspacePkgDirectoryPath:
-          createCheckPackageOptions.packageDirectoryPath,
+          createCheckPackageOptions.packageDirectoryPath || '.',
       });
       return [checkPkg.pkg.name, checkPkg];
     }),
