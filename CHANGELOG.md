@@ -14,6 +14,20 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+## [6.4.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v6.3.2...v6.4.0) (2023-05-08)
+
+
+### Features
+
+* add conclusion ([d29d77c](https://github.com/christophehurpeau/check-package-dependencies/commit/d29d77cf30689acbff3525a5de773b180aaccbe2))
+* **deps:** update dependency glob to v10 ([#491](https://github.com/christophehurpeau/check-package-dependencies/issues/491)) ([455068c](https://github.com/christophehurpeau/check-package-dependencies/commit/455068c985408700844d60d2fdd43677a621c728))
+* **deps:** update dependency import-meta-resolve to v3 ([#498](https://github.com/christophehurpeau/check-package-dependencies/issues/498)) ([626782a](https://github.com/christophehurpeau/check-package-dependencies/commit/626782a926e55444e3782584f8c37fb87df8606f))
+
+
+### Bug Fixes
+
+* fix multiple beforeExit ([d0595d2](https://github.com/christophehurpeau/check-package-dependencies/commit/d0595d2ff8008f65e4f9a81253a15681f40a9bac))
+
 ## [6.3.2](https://github.com/christophehurpeau/check-package-dependencies/compare/v6.3.1...v6.3.2) (2023-04-17)
 
 
