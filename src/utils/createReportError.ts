@@ -16,11 +16,34 @@ export type ReportError = (
 let titleDisplayed: string | null = null;
 let pkgPathDisplayed: string | null = null;
 
+let totalWarnings = 0;
+let totalErrors = 0;
+
+export function displayConclusion(): void {
+  if (!totalWarnings && !totalErrors) {
+    console.log(`\n${chalk.green('✅ No errors or warnings found')}.`);
+  } else if (!totalErrors) {
+    console.log(`\nFound ${chalk.yellow(`${totalWarnings} warnings`)}.`);
+  } else if (!totalWarnings) {
+    console.log(`\nFound ${chalk.red(`${totalErrors} errors`)}.`);
+  } else {
+    console.log(
+      chalk.red(
+        `\nFound ${chalk.red(`${totalErrors} errors`)} and ${chalk.yellow(
+          `${totalWarnings} warnings`,
+        )}.`,
+      ),
+    );
+  }
+}
+
 export function logMessage(
   msgTitle: string,
   msgInfo?: string,
   onlyWarns?: boolean,
 ): void {
+  if (onlyWarns) totalWarnings++;
+  else totalErrors++;
   console.error(
     `${
       onlyWarns ? chalk.yellow(`⚠ ${msgTitle}`) : chalk.red(`❌ ${msgTitle}`)

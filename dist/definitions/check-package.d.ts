@@ -43,8 +43,12 @@ export interface CheckExactVersionsOptions {
     /** @internal */
     internalExactVersionsIgnore?: OnlyWarnsFor;
 }
+export interface CheckPackageApiRunOptions {
+    /** @internal */
+    skipDisplayConclusion?: boolean;
+}
 export interface CheckPackageApi {
-    run: () => Promise<void>;
+    run: (options?: CheckPackageApiRunOptions) => Promise<void>;
     /** @internal */
     pkg: PackageJson;
     /** @internal */

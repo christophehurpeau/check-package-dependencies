@@ -13,7 +13,21 @@ const getEntries = o => Object.entries(o);
 /* eslint-disable no-console */
 let titleDisplayed = null;
 let pkgPathDisplayed = null;
+let totalWarnings = 0;
+let totalErrors = 0;
+function displayConclusion() {
+  if (!totalWarnings && !totalErrors) {
+    console.log(`\n${chalk.green('✅ No errors or warnings found')}.`);
+  } else if (!totalErrors) {
+    console.log(`\nFound ${chalk.yellow(`${totalWarnings} warnings`)}.`);
+  } else if (!totalWarnings) {
+    console.log(`\nFound ${chalk.red(`${totalErrors} errors`)}.`);
+  } else {
+    console.log(chalk.red(`\nFound ${chalk.red(`${totalErrors} errors`)} and ${chalk.yellow(`${totalWarnings} warnings`)}.`));
+  }
+}
 function logMessage(msgTitle, msgInfo, onlyWarns) {
+  if (onlyWarns) totalWarnings++;else totalErrors++;
   console.error(`${onlyWarns ? chalk.yellow(`⚠ ${msgTitle}`) : chalk.red(`❌ ${msgTitle}`)}${msgInfo ? `: ${msgInfo}` : ''}`);
 }
 function createReportError(title, pkgPathName) {
@@ -617,13 +631,18 @@ function createCheckPackage({
   }
   const jobs = [];
   return {
-    async run() {
+    async run({
+      skipDisplayConclusion = false
+    } = {}) {
       runCalled = true;
       // TODO parallel
       for (const job of jobs) {
         await job.run();
       }
       writePackageIfChanged();
+      if (!skipDisplayConclusion) {
+        displayConclusion();
+      }
     },
     pkg,
     pkgDirname,
@@ -916,8 +935,11 @@ function createCheckPackageWithWorkspaces(createCheckPackageOptions = {}) {
   return {
     async run() {
       for (const checksWorkspace of [checkPackage, ...checksWorkspaces.values()]) {
-        await checksWorkspace.run();
+        await checksWorkspace.run({
+          skipDisplayConclusion: true
+        });
       }
+      displayConclusion();
     },
     checkRecommended({
       allowRangeVersionsInLibraries = true,

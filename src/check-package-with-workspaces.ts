@@ -15,6 +15,7 @@ import { checkDuplicateDependencies } from './checks/checkDuplicateDependencies'
 import type { CheckResolutionMessage } from './checks/checkResolutionsHasExplanation';
 import {
   createReportError,
+  displayConclusion,
   reportNotWarnedForMapping,
 } from './utils/createReportError';
 import type { PackageJson } from './utils/packageTypes';
@@ -123,8 +124,10 @@ export function createCheckPackageWithWorkspaces(
         checkPackage,
         ...checksWorkspaces.values(),
       ]) {
-        await checksWorkspace.run();
+        await checksWorkspace.run({ skipDisplayConclusion: true });
       }
+
+      displayConclusion();
     },
 
     checkRecommended({
