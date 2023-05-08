@@ -475,8 +475,8 @@ function writePkgJson(packagePath, pkg) {
 }
 
 /** @internal */
-async function internalLoadPackageJsonFromNodeModules(pkgDepName, pkgDirname) {
-  const packageUrl = await resolve(`${pkgDepName}/package.json`, `file://${pkgDirname}/package.json`);
+function internalLoadPackageJsonFromNodeModules(pkgDepName, pkgDirname) {
+  const packageUrl = resolve(`${pkgDepName}/package.json`, `file://${pkgDirname}/package.json`);
   return readPkgJson(packageUrl.replace(process.platform === 'win32' ? /^file:\/{3}/ : /^file:\/\//, ''));
 }
 
@@ -486,7 +486,7 @@ function createGetDependencyPackageJson({
   internalCustomLoadPackageJsonFromNodeModules = internalLoadPackageJsonFromNodeModules,
   internalReadPkgJson = readPkgJson
 }) {
-  return async pkgDepName => {
+  return pkgDepName => {
     const existing = nodeModulesPackagePathCache.get(pkgDepName);
     if (existing) return existing;
     let pkg;
@@ -494,7 +494,7 @@ function createGetDependencyPackageJson({
       pkg = internalReadPkgJson(`${pkgDirname}/${pkgDepName}/package.json`);
     } else {
       try {
-        pkg = await internalCustomLoadPackageJsonFromNodeModules(pkgDepName, pkgDirname);
+        pkg = internalCustomLoadPackageJsonFromNodeModules(pkgDepName, pkgDirname);
       } catch (err) {
         if (!(err instanceof Error)) throw err;
         if (err.code !== 'ERR_PACKAGE_PATH_NOT_EXPORTED') {
