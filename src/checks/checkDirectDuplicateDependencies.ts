@@ -34,25 +34,23 @@ export async function checkDirectDuplicateDependencies(
     { type: 'dependencies', searchIn: ['devDependencies', 'dependencies'] },
   ];
 
-  await Promise.all(
-    checks.map(async ({ type, searchIn }) => {
-      const dependencies = pkg[type];
+  checks.forEach(({ type, searchIn }) => {
+    const dependencies = pkg[type];
 
-      if (!dependencies) return;
-      for (const depName of getKeys(dependencies)) {
-        const depPkg = await getDependencyPackageJson(depName);
-        checkDuplicateDependencies(
-          reportError,
-          pkg,
-          isPackageALibrary,
-          depType,
-          searchIn,
-          depPkg,
-          onlyWarnsForCheck.createFor(depName),
-        );
-      }
-    }),
-  );
+    if (!dependencies) return;
+    for (const depName of getKeys(dependencies)) {
+      const depPkg = getDependencyPackageJson(depName);
+      checkDuplicateDependencies(
+        reportError,
+        pkg,
+        isPackageALibrary,
+        depType,
+        searchIn,
+        depPkg,
+        onlyWarnsForCheck.createFor(depName),
+      );
+    }
+  });
 
   reportNotWarnedForMapping(reportError, onlyWarnsForCheck);
 }

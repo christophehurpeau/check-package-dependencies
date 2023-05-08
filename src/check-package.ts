@@ -566,7 +566,7 @@ export function createCheckPackage({
     ) {
       jobs.push(
         new Job(this.checkIdenticalVersionsThanDependency.name, async () => {
-          const depPkg = await getDependencyPackageJson(depName);
+          const depPkg = getDependencyPackageJson(depName);
           if (resolutions) {
             checkIdenticalVersionsThanDependency(
               pkg,
@@ -608,7 +608,7 @@ export function createCheckPackage({
     ) {
       jobs.push(
         new Job(this.checkSatisfiesVersionsFromDependency.name, async () => {
-          const depPkg = await getDependencyPackageJson(depName);
+          const depPkg = getDependencyPackageJson(depName);
           if (resolutions) {
             checkIdenticalVersionsThanDependency(
               pkg,
@@ -664,7 +664,7 @@ export function createCheckPackage({
     ) {
       jobs.push(
         new Job(this.checkSatisfiesVersionsFromDependency.name, async () => {
-          const depPkg = await getDependencyPackageJson(depName);
+          const depPkg = getDependencyPackageJson(depName);
           if (resolutions) {
             checkSatisfiesVersionsFromDependency(
               pkg,
@@ -708,7 +708,7 @@ export function createCheckPackage({
         new Job(
           this.checkSatisfiesVersionsInDevDependenciesOfDependency.name,
           async () => {
-            const depPkg = await getDependencyPackageJson(depName);
+            const depPkg = getDependencyPackageJson(depName);
             if (resolutions) {
               checkSatisfiesVersionsFromDependency(
                 pkg,
@@ -806,7 +806,7 @@ export function createCheckPackage({
     checkSatisfiesVersionsInDependency(depName, dependenciesRanges) {
       jobs.push(
         new Job(this.checkSatisfiesVersionsInDependency.name, async () => {
-          const depPkg = await getDependencyPackageJson(depName);
+          const depPkg = getDependencyPackageJson(depName);
           checkSatisfiesVersionsInDependency(
             pkgPathName,
             depPkg,
