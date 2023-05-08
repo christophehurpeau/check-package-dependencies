@@ -105,23 +105,23 @@ function checkDuplicateDependencies(reportError, pkg, isPkgLibrary, depType, sea
 
 async function checkDirectDuplicateDependencies(pkg, pkgPathName, isPackageALibrary, depType, getDependencyPackageJson, onlyWarnsForCheck, reportErrorNamePrefix = '', customCreateReportError = createReportError) {
   const reportError = customCreateReportError(`${reportErrorNamePrefix}Direct Duplicate Dependencies`, pkgPathName);
-  await Promise.all([{
+  [{
     type: 'devDependencies',
     searchIn: ['devDependencies', 'dependencies']
   }, {
     type: 'dependencies',
     searchIn: ['devDependencies', 'dependencies']
-  }].map(async ({
+  }].forEach(({
     type,
     searchIn
   }) => {
     const dependencies = pkg[type];
     if (!dependencies) return;
     for (const depName of getKeys(dependencies)) {
-      const depPkg = await getDependencyPackageJson(depName);
+      const depPkg = getDependencyPackageJson(depName);
       checkDuplicateDependencies(reportError, pkg, isPackageALibrary, depType, searchIn, depPkg, onlyWarnsForCheck.createFor(depName));
     }
-  }));
+  });
   reportNotWarnedForMapping(reportError, onlyWarnsForCheck);
 }
 
@@ -190,7 +190,7 @@ async function checkDirectPeerDependencies(isLibrary, pkg, pkgPathName, getDepen
           continue;
         }
       }
-      const depPkg = await getDependencyPackageJson(depName);
+      const depPkg = getDependencyPackageJson(depName);
       allDepPkgs.push({
         name: depName,
         type: depType,
@@ -244,11 +244,11 @@ async function checkExactVersions(pkg, pkgPathName, types, {
         if (!shouldOnlyWarn && tryToAutoFix && getDependencyPackageJson) {
           let resolvedDep;
           try {
-            resolvedDep = await getDependencyPackageJson(dependencyName);
+            resolvedDep = getDependencyPackageJson(dependencyName);
           } catch {
             resolvedDep = null;
           }
-          if (!resolvedDep || !resolvedDep.version) {
+          if (!resolvedDep?.version) {
             reportError(`Unexpected range dependency in "${type}" for "${dependencyName}"`, `expecting "${version}" to be exact, autofix failed to resolve "${dependencyName}".`, shouldOnlyWarn);
           } else if (!semver.satisfies(resolvedDep.version, version, {
             includePrerelease: true
@@ -475,8 +475,8 @@ function writePkgJson(packagePath, pkg) {
 }
 
 /** @internal */
-async function internalLoadPackageJsonFromNodeModules(pkgDepName, pkgDirname) {
-  const packageUrl = await resolve(`${pkgDepName}/package.json`, `file://${pkgDirname}/package.json`);
+function internalLoadPackageJsonFromNodeModules(pkgDepName, pkgDirname) {
+  const packageUrl = resolve(`${pkgDepName}/package.json`, `file://${pkgDirname}/package.json`);
   return readPkgJson(packageUrl.replace(process.platform === 'win32' ? /^file:\/{3}/ : /^file:\/\//, ''));
 }
 
@@ -486,7 +486,7 @@ function createGetDependencyPackageJson({
   internalCustomLoadPackageJsonFromNodeModules = internalLoadPackageJsonFromNodeModules,
   internalReadPkgJson = readPkgJson
 }) {
-  return async pkgDepName => {
+  return pkgDepName => {
     const existing = nodeModulesPackagePathCache.get(pkgDepName);
     if (existing) return existing;
     let pkg;
@@ -494,7 +494,7 @@ function createGetDependencyPackageJson({
       pkg = internalReadPkgJson(`${pkgDirname}/${pkgDepName}/package.json`);
     } else {
       try {
-        pkg = await internalCustomLoadPackageJsonFromNodeModules(pkgDepName, pkgDirname);
+        pkg = internalCustomLoadPackageJsonFromNodeModules(pkgDepName, pkgDirname);
       } catch (err) {
         if (!(err instanceof Error)) throw err;
         if (err.code !== 'ERR_PACKAGE_PATH_NOT_EXPORTED') {
@@ -771,7 +771,7 @@ function createCheckPackage({
       devDependencies
     }) {
       jobs.push(new Job(this.checkIdenticalVersionsThanDependency.name, async () => {
-        const depPkg = await getDependencyPackageJson(depName);
+        const depPkg = getDependencyPackageJson(depName);
         if (resolutions) {
           checkIdenticalVersionsThanDependency(pkg, pkgPathName, 'resolutions', resolutions, depPkg, depPkg.dependencies);
         }
@@ -790,7 +790,7 @@ function createCheckPackage({
       devDependencies
     }) {
       jobs.push(new Job(this.checkSatisfiesVersionsFromDependency.name, async () => {
-        const depPkg = await getDependencyPackageJson(depName);
+        const depPkg = getDependencyPackageJson(depName);
         if (resolutions) {
           checkIdenticalVersionsThanDependency(pkg, pkgPathName, 'resolutions', resolutions, depPkg, depPkg.devDependencies);
         }
@@ -815,7 +815,7 @@ function createCheckPackage({
       devDependencies
     }) {
       jobs.push(new Job(this.checkSatisfiesVersionsFromDependency.name, async () => {
-        const depPkg = await getDependencyPackageJson(depName);
+        const depPkg = getDependencyPackageJson(depName);
         if (resolutions) {
           checkSatisfiesVersionsFromDependency(pkg, pkgPathName, 'resolutions', resolutions, depPkg, depPkg.dependencies);
         }
@@ -834,7 +834,7 @@ function createCheckPackage({
       devDependencies
     }) {
       jobs.push(new Job(this.checkSatisfiesVersionsInDevDependenciesOfDependency.name, async () => {
-        const depPkg = await getDependencyPackageJson(depName);
+        const depPkg = getDependencyPackageJson(depName);
         if (resolutions) {
           checkSatisfiesVersionsFromDependency(pkg, pkgPathName, 'resolutions', resolutions, depPkg, depPkg.devDependencies);
         }
@@ -880,7 +880,7 @@ function createCheckPackage({
     },
     checkSatisfiesVersionsInDependency(depName, dependenciesRanges) {
       jobs.push(new Job(this.checkSatisfiesVersionsInDependency.name, async () => {
-        const depPkg = await getDependencyPackageJson(depName);
+        const depPkg = getDependencyPackageJson(depName);
         checkSatisfiesVersionsInDependency(pkgPathName, depPkg, dependenciesRanges);
       }));
       return this;

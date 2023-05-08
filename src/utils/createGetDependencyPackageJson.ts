@@ -4,9 +4,7 @@ import {
   readPkgJson,
 } from './pkgJsonUtils';
 
-export type GetDependencyPackageJson = (
-  pkgDepName: string,
-) => Promise<PackageJson>;
+export type GetDependencyPackageJson = (pkgDepName: string) => PackageJson;
 
 type NodeModulesPackagePathCache = Map<string, PackageJson>;
 
@@ -25,7 +23,7 @@ export function createGetDependencyPackageJson({
   internalCustomLoadPackageJsonFromNodeModules = internalLoadPackageJsonFromNodeModules,
   internalReadPkgJson = readPkgJson,
 }: CreateGetDependencyPackageJsonOptions): GetDependencyPackageJson {
-  return async (pkgDepName) => {
+  return (pkgDepName) => {
     const existing = nodeModulesPackagePathCache.get(pkgDepName);
     if (existing) return existing;
     let pkg: PackageJson;
@@ -34,7 +32,7 @@ export function createGetDependencyPackageJson({
       pkg = internalReadPkgJson(packagePath);
     } else {
       try {
-        pkg = await internalCustomLoadPackageJsonFromNodeModules(
+        pkg = internalCustomLoadPackageJsonFromNodeModules(
           pkgDepName,
           pkgDirname,
         );

@@ -3,10 +3,10 @@ export type RegularDependencyTypes = 'dependencies' | 'devDependencies' | 'optio
 export type DependencyTypes = RegularDependencyTypes | 'peerDependencies' | 'resolutions';
 export type DependencyName = string;
 type Dependency = Record<string, string>;
-export type PackageJson = Except<PackageJsonFromTypeFest, 'name'> & {
+export type PackageJson = Except<PackageJsonFromTypeFest, 'name'> & Partial<Record<DependencyTypes, Dependency>> & {
     name: string;
     resolutionsExplained?: Record<string, string>;
-} & Partial<Record<DependencyTypes, Dependency>>;
+};
 export type DependenciesRanges = Partial<Record<DependencyTypes, Record<DependencyName, string | null>>>;
 export {};
 //# sourceMappingURL=packageTypes.d.ts.map

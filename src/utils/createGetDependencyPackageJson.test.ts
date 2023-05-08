@@ -36,7 +36,7 @@ describe('createGetDependencyPackageJson', () => {
       internalReadPkgJson: readPkgJsonMock as any,
     });
 
-    const res = await getDependencyPackageJson('test1');
+    const res = getDependencyPackageJson('test1');
 
     expect(res).toBe(mockPkg);
     expect(internalLoadPackageJsonFromNodeModulesMock).toBeCalledWith(

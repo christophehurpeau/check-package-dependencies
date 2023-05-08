@@ -58,11 +58,11 @@ export async function checkExactVersions(
         if (!shouldOnlyWarn && tryToAutoFix && getDependencyPackageJson) {
           let resolvedDep;
           try {
-            resolvedDep = await getDependencyPackageJson(dependencyName);
+            resolvedDep = getDependencyPackageJson(dependencyName);
           } catch {
             resolvedDep = null;
           }
-          if (!resolvedDep || !resolvedDep.version) {
+          if (!resolvedDep?.version) {
             reportError(
               `Unexpected range dependency in "${type}" for "${dependencyName}"`,
               `expecting "${version}" to be exact, autofix failed to resolve "${dependencyName}".`,
