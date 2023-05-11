@@ -14,6 +14,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+## [6.4.1](https://github.com/christophehurpeau/check-package-dependencies/compare/v6.4.0...v6.4.1) (2023-05-11)
+
+
+### Bug Fixes
+
+* fix colors when both errors and warnings are found ([5779fe2](https://github.com/christophehurpeau/check-package-dependencies/commit/5779fe247ae97f06a1817adc559f5531c001ae01))
+
 ## [6.4.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v6.3.2...v6.4.0) (2023-05-08)
 
 
