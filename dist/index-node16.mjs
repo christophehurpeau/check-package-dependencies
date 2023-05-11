@@ -23,7 +23,7 @@ function displayConclusion() {
   } else if (!totalWarnings) {
     console.log(`\nFound ${chalk.red(`${totalErrors} errors`)}.`);
   } else {
-    console.log(chalk.red(`\nFound ${chalk.red(`${totalErrors} errors`)} and ${chalk.yellow(`${totalWarnings} warnings`)}.`));
+    console.log(`\nFound ${chalk.red(`${totalErrors} errors`)} and ${chalk.yellow(`${totalWarnings} warnings`)}.`);
   }
 }
 function logMessage(msgTitle, msgInfo, onlyWarns) {
