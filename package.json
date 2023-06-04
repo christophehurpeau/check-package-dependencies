@@ -109,6 +109,6 @@
     "pob-babel": "35.8.0",
     "semver": "7.5.1",
     "typedoc": "0.24.8",
-    "typescript": "5.0.4"
+    "typescript": "5.1.3"
   }
 }
