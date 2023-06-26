@@ -277,6 +277,7 @@ export interface CheckPackageApi {
   ) => CheckPackageApi;
 
   checkMinRangeDependenciesSatisfiesDevDependencies: () => CheckPackageApi;
+  checkMinRangePeerDependenciesSatisfiesDependencies: () => CheckPackageApi;
 }
 
 export function createCheckPackage({
@@ -555,6 +556,7 @@ export function createCheckPackage({
 
       if (isPkgLibrary) {
         this.checkMinRangeDependenciesSatisfiesDevDependencies();
+        this.checkMinRangePeerDependenciesSatisfiesDependencies();
       }
 
       return this;
@@ -825,6 +827,21 @@ export function createCheckPackage({
             pkg,
             'dependencies',
             'devDependencies',
+            { tryToAutoFix },
+          );
+        }),
+      );
+      return this;
+    },
+
+    checkMinRangePeerDependenciesSatisfiesDependencies() {
+      jobs.push(
+        new Job(this.checkSatisfiesVersionsInDependency.name, async () => {
+          checkMinRangeSatisfies(
+            pkgPathName,
+            pkg,
+            'peerDependencies',
+            'dependencies',
             { tryToAutoFix },
           );
         }),

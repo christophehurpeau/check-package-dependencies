@@ -762,6 +762,7 @@ function createCheckPackage({
       });
       if (isPkgLibrary) {
         this.checkMinRangeDependenciesSatisfiesDevDependencies();
+        this.checkMinRangePeerDependenciesSatisfiesDependencies();
       }
       return this;
     },
@@ -888,6 +889,14 @@ function createCheckPackage({
     checkMinRangeDependenciesSatisfiesDevDependencies() {
       jobs.push(new Job(this.checkSatisfiesVersionsInDependency.name, async () => {
         checkMinRangeSatisfies(pkgPathName, pkg, 'dependencies', 'devDependencies', {
+          tryToAutoFix
+        });
+      }));
+      return this;
+    },
+    checkMinRangePeerDependenciesSatisfiesDependencies() {
+      jobs.push(new Job(this.checkSatisfiesVersionsInDependency.name, async () => {
+        checkMinRangeSatisfies(pkgPathName, pkg, 'peerDependencies', 'dependencies', {
           tryToAutoFix
         });
       }));

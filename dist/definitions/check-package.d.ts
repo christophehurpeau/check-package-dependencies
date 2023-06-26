@@ -179,6 +179,7 @@ export interface CheckPackageApi {
      */
     checkSatisfiesVersionsInDependency: (depName: string, dependenciesRanges: DependenciesRanges) => CheckPackageApi;
     checkMinRangeDependenciesSatisfiesDevDependencies: () => CheckPackageApi;
+    checkMinRangePeerDependenciesSatisfiesDependencies: () => CheckPackageApi;
 }
 export declare function createCheckPackage({ packageDirectoryPath, internalWorkspacePkgDirectoryPath, isLibrary, }?: CreateCheckPackageOptions): CheckPackageApi;
 //# sourceMappingURL=check-package.d.ts.map
