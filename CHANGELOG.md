@@ -14,6 +14,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+## [6.6.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v6.5.0...v6.6.0) (2023-07-05)
+
+
+### Features
+
+* allow * use in onlyWarnsForInMonorepoPackagesDependencies ([350e62a](https://github.com/christophehurpeau/check-package-dependencies/commit/350e62a91c349c6c35f2f56a628bf60a270870d8))
+
 ## [6.5.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v6.4.1...v6.5.0) (2023-07-05)
 
 
