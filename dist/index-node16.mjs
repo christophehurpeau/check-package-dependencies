@@ -155,6 +155,9 @@ function checkPeerDependencies(pkg, reportError, type, allowedPeerIn, providedDe
         if (version.startsWith('npm:')) {
           return;
         }
+        if (version === '*') {
+          return;
+        }
         const minVersionOfVersion = semver.minVersion(version);
         if (!minVersionOfVersion || !semver.satisfies(minVersionOfVersion, range, {
           includePrerelease: true
@@ -328,6 +331,7 @@ function checkMinRangeSatisfies(pkgPathName, pkg, type1 = 'dependencies', type2 
   }
   const reportError = customCreateReportError(`"${type1}" minimum range satisfies "${type2}"`, pkgPathName);
   for (const [depName, depRange1] of getEntries(dependencies1)) {
+    if (depRange1 === '*') continue;
     const depRange2 = dependencies2[depName];
     if (!depRange2 || !depRange1) continue;
     const minDepRange1 = semver.minVersion(depRange1)?.version || depRange1;

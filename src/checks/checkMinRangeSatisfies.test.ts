@@ -52,6 +52,13 @@ describe(checkMinRangeSatisfies.name, () => {
           devDependencies: { test1: '^1.1.0' },
         },
       ],
+      [
+        '* dependency',
+        {
+          dependencies: { test1: '*' },
+          devDependencies: { test1: '^1.1.0' },
+        },
+      ],
     ])('should have no error when %s', (_, pkgContent) => {
       checkMinRangeSatisfies(
         'path',

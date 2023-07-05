@@ -33,6 +33,8 @@ export function checkMinRangeSatisfies(
   );
 
   for (const [depName, depRange1] of getEntries(dependencies1)) {
+    if (depRange1 === '*') continue;
+
     const depRange2 = dependencies2[depName];
     if (!depRange2 || !depRange1) continue;
 

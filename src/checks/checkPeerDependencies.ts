@@ -66,6 +66,10 @@ export function checkPeerDependencies(
           return;
         }
 
+        if (version === '*') {
+          return;
+        }
+
         const minVersionOfVersion = semver.minVersion(version);
         if (
           !minVersionOfVersion ||
