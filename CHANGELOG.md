@@ -14,6 +14,19 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+## [6.5.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v6.4.1...v6.5.0) (2023-07-05)
+
+
+### Features
+
+* add checkMinRangePeerDependenciesSatisfiesDependencies and enable in recommended for librairies ([c04eb24](https://github.com/christophehurpeau/check-package-dependencies/commit/c04eb24bfe3c4108ce641fd13a5e19293cc2bb53))
+* **deps:** update dependency semver to v7.5.1 ([#504](https://github.com/christophehurpeau/check-package-dependencies/issues/504)) ([d8079a5](https://github.com/christophehurpeau/check-package-dependencies/commit/d8079a5afef6aa35696ba6ae766638efdbea6338))
+
+
+### Bug Fixes
+
+* better support for * ([1ac69e6](https://github.com/christophehurpeau/check-package-dependencies/commit/1ac69e6b42839147a9fe9a5a2af56fa33ef5a7e7))
+
 ## [6.4.1](https://github.com/christophehurpeau/check-package-dependencies/compare/v6.4.0...v6.4.1) (2023-05-11)
 
 
