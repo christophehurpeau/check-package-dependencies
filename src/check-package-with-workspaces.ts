@@ -164,10 +164,12 @@ export function createCheckPackageWithWorkspaces(
                 ...onlyWarnsForInMonorepoPackages[checkSubPackage.pkg.name],
               }
             : undefined,
-          onlyWarnsForInDependencies:
-            onlyWarnsForInMonorepoPackagesDependencies[
+          onlyWarnsForInDependencies: {
+            ...onlyWarnsForInMonorepoPackagesDependencies['*'],
+            ...onlyWarnsForInMonorepoPackagesDependencies[
               checkSubPackage.pkg.name
             ],
+          },
           internalExactVersionsIgnore: [...checksWorkspaces.keys()],
           checkResolutionMessage,
         });

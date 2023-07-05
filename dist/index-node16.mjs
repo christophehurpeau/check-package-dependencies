@@ -980,7 +980,10 @@ function createCheckPackageWithWorkspaces(createCheckPackageOptions = {}) {
             ...onlyWarnsForInMonorepoPackages['*'],
             ...onlyWarnsForInMonorepoPackages[checkSubPackage.pkg.name]
           } : undefined,
-          onlyWarnsForInDependencies: onlyWarnsForInMonorepoPackagesDependencies[checkSubPackage.pkg.name],
+          onlyWarnsForInDependencies: {
+            ...onlyWarnsForInMonorepoPackagesDependencies['*'],
+            ...onlyWarnsForInMonorepoPackagesDependencies[checkSubPackage.pkg.name]
+          },
           internalExactVersionsIgnore: [...checksWorkspaces.keys()],
           checkResolutionMessage
         });
