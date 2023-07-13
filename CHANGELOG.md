@@ -14,6 +14,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+## [6.7.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v6.6.0...v6.7.0) (2023-07-13)
+
+
+### Features
+
+* add tryToAutoFix support in checkSatisfiesVersionsFromDependency ([c4efa60](https://github.com/christophehurpeau/check-package-dependencies/commit/c4efa603e47d3be05460bad38e332b574902e451))
+
 ## [6.6.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v6.5.0...v6.6.0) (2023-07-05)
 
 
