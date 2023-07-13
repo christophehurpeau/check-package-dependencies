@@ -421,24 +421,84 @@ function checkSatisfiesVersions(pkg, pkgPathName, type, dependenciesRanges, only
   });
 }
 
-function checkSatisfiesVersionsFromDependency(pkg, pkgPathName, type, depKeys, depPkg, dependencies = {}, onlyWarnsForCheck, customCreateReportError = createReportError) {
+semverUtils.parse;
+const parseRange = semverUtils.parseRange;
+
+// semverUtils.stringify does not support the operator
+function stringify(semver) {
+  let str = '';
+  if (semver.operator) {
+    str += semver.operator;
+  }
+  str += semver.major || '0';
+  str += '.';
+  str += semver.minor || '0';
+  str += '.';
+  str += semver.patch || '0';
+  if (semver.release) {
+    str += `-${semver.release}`;
+  }
+  if (semver.build) {
+    str += `+${semver.build}`;
+  }
+  return str;
+}
+function getOperator(range) {
+  const parsedRange = parseRange(range);
+  if (parsedRange.length !== 1) return null;
+  return parsedRange[0].operator || '';
+}
+function changeOperator(range, operator) {
+  if (operator === null) return range;
+  const parsedRange = parseRange(range);
+  if (parsedRange.length !== 1) return null;
+  const parsed = parsedRange[0];
+  parsed.operator = operator === '' ? undefined : operator;
+  return stringify(parsed);
+}
+
+function checkSatisfiesVersionsFromDependency(pkg, pkgPathName, type, depKeys, depPkg, depType, {
+  tryToAutoFix,
+  shouldHaveExactVersions,
+  onlyWarnsForCheck,
+  customCreateReportError = createReportError
+}) {
   const pkgDependencies = pkg[type] || {};
-  const reportError = customCreateReportError(`Satisfies Versions from ${depPkg.name}`, pkgPathName);
+  const dependencies = depPkg[depType] || {};
+  const reportError = customCreateReportError(`Satisfies Versions from "${depPkg.name}"`, pkgPathName);
   depKeys.forEach(depKey => {
     const range = dependencies[depKey];
     if (!range) {
-      reportError(`Unexpected missing dependency "${depKey}" in "${depPkg.name}".`);
+      reportError(`Unexpected missing dependency "${depKey}" in "${depPkg.name}"`, `config expects "${depKey}" in "${depType}" of "${depPkg.name}".`, undefined);
       return;
     }
     const version = pkgDependencies[depKey];
+    const autoFixIfPossible = () => {
+      if (!tryToAutoFix) return false;
+      const existingOperator = version ? getOperator(version) : null;
+      const expectedOperator = existingOperator === null ? shouldHaveExactVersions(type) ? '' : null : existingOperator;
+      const versionToApply = expectedOperator === '' ? semver.minVersion(range)?.version : changeOperator(range, expectedOperator);
+      if (!versionToApply) {
+        return false;
+      }
+      pkg[type] = {
+        ...pkg[type],
+        [depKey]: versionToApply
+      };
+      return true;
+    };
     if (!version) {
-      reportError(`Missing "${depKey}" in ${type}`, `should satisfies "${range}" from "${depPkg.name}" ${depKey}.`, onlyWarnsForCheck?.shouldWarnsFor(depKey));
+      if (!autoFixIfPossible()) {
+        reportError(`Missing "${depKey}" in "${type}" of "${pkg.name}"`, `should satisfies "${range}" from "${depPkg.name}" in "${depType}".`, onlyWarnsForCheck?.shouldWarnsFor(depKey));
+      }
     } else {
       const minVersionOfVersion = semver.minVersion(version);
       if (!minVersionOfVersion || !semver.satisfies(minVersionOfVersion, range, {
         includePrerelease: true
       })) {
-        reportError(`Invalid "${depKey}" in ${type}`, `"${version}" (in "${depKey}") should satisfies "${range}" from "${depPkg.name}" ${depKey}.`, onlyWarnsForCheck?.shouldWarnsFor(depKey));
+        if (!autoFixIfPossible()) {
+          reportError(`Invalid "${depKey}" in "${type}" of "${pkg.name}"`, `"${version}" should satisfies "${range}" from "${depPkg.name}"'s "${depType}".`, onlyWarnsForCheck?.shouldWarnsFor(depKey));
+        }
       }
     }
   });
@@ -602,6 +662,7 @@ function createCheckPackage({
   const pkg = readPkgJson(pkgPath);
   const copyPkg = JSON.parse(JSON.stringify(pkg));
   const isPkgLibrary = typeof isLibrary === 'function' ? isLibrary(pkg) : isLibrary;
+  const shouldHaveExactVersions = depType => !isPkgLibrary ? true : depType === 'devDependencies';
   let tryToAutoFix = false;
   if (process.argv.slice(2).includes('--fix')) {
     tryToAutoFix = true;
@@ -822,13 +883,22 @@ function createCheckPackage({
       jobs.push(new Job(this.checkSatisfiesVersionsFromDependency.name, async () => {
         const depPkg = getDependencyPackageJson(depName);
         if (resolutions) {
-          checkSatisfiesVersionsFromDependency(pkg, pkgPathName, 'resolutions', resolutions, depPkg, depPkg.dependencies);
+          checkSatisfiesVersionsFromDependency(pkg, pkgPathName, 'resolutions', resolutions, depPkg, 'dependencies', {
+            tryToAutoFix,
+            shouldHaveExactVersions
+          });
         }
         if (dependencies) {
-          checkSatisfiesVersionsFromDependency(pkg, pkgPathName, 'dependencies', dependencies, depPkg, depPkg.dependencies);
+          checkSatisfiesVersionsFromDependency(pkg, pkgPathName, 'dependencies', dependencies, depPkg, 'dependencies', {
+            tryToAutoFix,
+            shouldHaveExactVersions
+          });
         }
         if (devDependencies) {
-          checkSatisfiesVersionsFromDependency(pkg, pkgPathName, 'devDependencies', devDependencies, depPkg, depPkg.dependencies);
+          checkSatisfiesVersionsFromDependency(pkg, pkgPathName, 'devDependencies', devDependencies, depPkg, 'dependencies', {
+            tryToAutoFix,
+            shouldHaveExactVersions
+          });
         }
       }));
       return this;
@@ -841,13 +911,22 @@ function createCheckPackage({
       jobs.push(new Job(this.checkSatisfiesVersionsInDevDependenciesOfDependency.name, async () => {
         const depPkg = getDependencyPackageJson(depName);
         if (resolutions) {
-          checkSatisfiesVersionsFromDependency(pkg, pkgPathName, 'resolutions', resolutions, depPkg, depPkg.devDependencies);
+          checkSatisfiesVersionsFromDependency(pkg, pkgPathName, 'resolutions', resolutions, depPkg, 'devDependencies', {
+            tryToAutoFix,
+            shouldHaveExactVersions
+          });
         }
         if (dependencies) {
-          checkSatisfiesVersionsFromDependency(pkg, pkgPathName, 'dependencies', dependencies, depPkg, depPkg.devDependencies);
+          checkSatisfiesVersionsFromDependency(pkg, pkgPathName, 'dependencies', dependencies, depPkg, 'devDependencies', {
+            tryToAutoFix,
+            shouldHaveExactVersions
+          });
         }
         if (devDependencies) {
-          checkSatisfiesVersionsFromDependency(pkg, pkgPathName, 'devDependencies', devDependencies, depPkg, depPkg.devDependencies);
+          checkSatisfiesVersionsFromDependency(pkg, pkgPathName, 'devDependencies', devDependencies, depPkg, 'devDependencies', {
+            tryToAutoFix,
+            shouldHaveExactVersions
+          });
         }
       }));
       return this;
@@ -875,10 +954,16 @@ function createCheckPackage({
       jobs.push(new Job(this.checkSatisfiesVersionsBetweenDependencies.name, async () => {
         const [depPkg1, depPkg2] = await Promise.all([getDependencyPackageJson(depName1), getDependencyPackageJson(depName2)]);
         if (dependencies) {
-          checkSatisfiesVersionsFromDependency(depPkg2, pkgPathName, 'dependencies', dependencies, depPkg1, depPkg1.dependencies);
+          checkSatisfiesVersionsFromDependency(depPkg2, pkgPathName, 'dependencies', dependencies, depPkg1, 'dependencies', {
+            tryToAutoFix,
+            shouldHaveExactVersions
+          });
         }
         if (devDependencies) {
-          checkSatisfiesVersionsFromDependency(depPkg2, pkgPathName, 'devDependencies', devDependencies, depPkg1, depPkg1.dependencies);
+          checkSatisfiesVersionsFromDependency(depPkg2, pkgPathName, 'devDependencies', devDependencies, depPkg1, 'dependencies', {
+            tryToAutoFix,
+            shouldHaveExactVersions
+          });
         }
       }));
       return this;

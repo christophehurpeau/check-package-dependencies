@@ -280,6 +280,8 @@ export interface CheckPackageApi {
   checkMinRangePeerDependenciesSatisfiesDependencies: () => CheckPackageApi;
 }
 
+export type ShouldHaveExactVersions = (depType: DependencyTypes) => boolean;
+
 export function createCheckPackage({
   packageDirectoryPath = '.',
   internalWorkspacePkgDirectoryPath,
@@ -292,6 +294,8 @@ export function createCheckPackage({
   const copyPkg: PackageJson = JSON.parse(JSON.stringify(pkg)) as PackageJson;
   const isPkgLibrary =
     typeof isLibrary === 'function' ? isLibrary(pkg) : isLibrary;
+  const shouldHaveExactVersions: ShouldHaveExactVersions = (depType) =>
+    !isPkgLibrary ? true : depType === 'devDependencies';
 
   let tryToAutoFix = false;
 
@@ -674,7 +678,8 @@ export function createCheckPackage({
               'resolutions',
               resolutions,
               depPkg,
-              depPkg.dependencies,
+              'dependencies',
+              { tryToAutoFix, shouldHaveExactVersions },
             );
           }
           if (dependencies) {
@@ -684,7 +689,8 @@ export function createCheckPackage({
               'dependencies',
               dependencies,
               depPkg,
-              depPkg.dependencies,
+              'dependencies',
+              { tryToAutoFix, shouldHaveExactVersions },
             );
           }
           if (devDependencies) {
@@ -694,7 +700,8 @@ export function createCheckPackage({
               'devDependencies',
               devDependencies,
               depPkg,
-              depPkg.dependencies,
+              'dependencies',
+              { tryToAutoFix, shouldHaveExactVersions },
             );
           }
         }),
@@ -718,7 +725,8 @@ export function createCheckPackage({
                 'resolutions',
                 resolutions,
                 depPkg,
-                depPkg.devDependencies,
+                'devDependencies',
+                { tryToAutoFix, shouldHaveExactVersions },
               );
             }
             if (dependencies) {
@@ -728,7 +736,8 @@ export function createCheckPackage({
                 'dependencies',
                 dependencies,
                 depPkg,
-                depPkg.devDependencies,
+                'devDependencies',
+                { tryToAutoFix, shouldHaveExactVersions },
               );
             }
             if (devDependencies) {
@@ -738,7 +747,8 @@ export function createCheckPackage({
                 'devDependencies',
                 devDependencies,
                 depPkg,
-                depPkg.devDependencies,
+                'devDependencies',
+                { tryToAutoFix, shouldHaveExactVersions },
               );
             }
           },
@@ -786,7 +796,8 @@ export function createCheckPackage({
                 'dependencies',
                 dependencies,
                 depPkg1,
-                depPkg1.dependencies,
+                'dependencies',
+                { tryToAutoFix, shouldHaveExactVersions },
               );
             }
             if (devDependencies) {
@@ -796,7 +807,8 @@ export function createCheckPackage({
                 'devDependencies',
                 devDependencies,
                 depPkg1,
-                depPkg1.dependencies,
+                'dependencies',
+                { tryToAutoFix, shouldHaveExactVersions },
               );
             }
           },
