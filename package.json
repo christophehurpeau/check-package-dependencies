@@ -93,7 +93,7 @@
     "import-meta-resolve": "^3.0.0",
     "semver": "^7.5.4",
     "semver-utils": "^1.1.4",
-    "type-fest": "^3.0.0"
+    "type-fest": "^4.0.0"
   },
   "devDependencies": {
     "@babel/core": "7.22.9",
