@@ -31,8 +31,13 @@ describe('checkResolutionsVersionsMatch', () => {
     checkResolutionsVersionsMatch(
       {
         name: 'test',
-        resolutions: { test1: '1.0.0', test2: '1.0.0', test3: '1.0.1' },
-        devDependencies: { test1: '1.0.0' },
+        resolutions: {
+          test1: '1.0.0',
+          test2: '1.0.0',
+          test3: '1.0.1',
+          'test4@npm:1.1.0': 'patch:1.2.0',
+        },
+        devDependencies: { test1: '1.0.0', test4: '1.1.0' },
         dependencies: { test2: '1.0.0', test3: '^1.0.0' },
       },
       'path',
@@ -45,14 +50,19 @@ describe('checkResolutionsVersionsMatch', () => {
     checkResolutionsVersionsMatch(
       {
         name: 'test',
-        resolutions: { test1: '1.0.0', test2: '1.0.0' },
+        resolutions: {
+          test1: '1.0.0',
+          test2: '1.0.0',
+          'test3@npm:1.1.0': 'patch:1.2.0',
+          'test4@npm:1.1.0': 'patch:1.2.0',
+        },
         devDependencies: { test1: '1.1.0' },
-        dependencies: { test2: '1.2.0' },
+        dependencies: { test2: '1.2.0', test3: '1.0.0', test4: '1.2.0' },
       },
       'path',
       { customCreateReportError: createReportError },
     );
-    expect(mockReportError).toHaveBeenCalledTimes(2);
+    expect(mockReportError).toHaveBeenCalledTimes(4);
     expect(mockReportError).toHaveBeenNthCalledWith(
       1,
       'Invalid "test1" in devDependencies',
@@ -62,6 +72,16 @@ describe('checkResolutionsVersionsMatch', () => {
       2,
       'Invalid "test2" in dependencies',
       'expecting "1.2.0" be "1.0.0" from resolutions.',
+    );
+    expect(mockReportError).toHaveBeenNthCalledWith(
+      3,
+      'Invalid "test3" in dependencies',
+      'expecting "1.0.0" be "1.1.0" from resolutions.',
+    );
+    expect(mockReportError).toHaveBeenNthCalledWith(
+      4,
+      'Invalid "test4" in dependencies',
+      'expecting "1.2.0" be "1.1.0" from resolutions.',
     );
   });
 

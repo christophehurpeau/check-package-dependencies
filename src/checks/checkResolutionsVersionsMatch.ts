@@ -21,7 +21,15 @@ export function checkResolutionsVersionsMatch(
     pkgPathName,
   );
 
-  Object.entries(pkgResolutions).forEach(([depName, resolutionDepVersion]) => {
+  Object.entries(pkgResolutions).forEach(([resolutionKey, resolutionValue]) => {
+    let depName = resolutionKey;
+    let resolutionDepVersion = resolutionValue;
+    if (resolutionValue.startsWith('patch:')) {
+      const matchResolutionInKey = /^(.+)@npm:(.+)$/.exec(resolutionKey);
+      if (matchResolutionInKey) {
+        [, depName, resolutionDepVersion] = matchResolutionInKey;
+      }
+    }
     (['dependencies', 'devDependencies'] as const).forEach((depType) => {
       const range = pkg?.[depType]?.[depName];
 
