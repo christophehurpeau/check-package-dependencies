@@ -384,7 +384,15 @@ function checkResolutionsVersionsMatch(pkg, pkgPathName, {
 } = {}) {
   const pkgResolutions = pkg.resolutions || {};
   const reportError = customCreateReportError('Resolutions match other dependencies', pkgPathName);
-  Object.entries(pkgResolutions).forEach(([depName, resolutionDepVersion]) => {
+  Object.entries(pkgResolutions).forEach(([resolutionKey, resolutionValue]) => {
+    let depName = resolutionKey;
+    let resolutionDepVersion = resolutionValue;
+    if (resolutionValue.startsWith('patch:')) {
+      const matchResolutionInKey = /^(.+)@npm:(.+)$/.exec(resolutionKey);
+      if (matchResolutionInKey) {
+        [, depName, resolutionDepVersion] = matchResolutionInKey;
+      }
+    }
     ['dependencies', 'devDependencies'].forEach(depType => {
       const range = pkg?.[depType]?.[depName];
       if (!range) return;
