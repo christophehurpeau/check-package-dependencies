@@ -14,6 +14,14 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+## [6.8.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v6.7.0...v6.8.0) (2023-09-15)
+
+
+### Features
+
+* **checkResolutionsVersionsMatch:** add support for resolutions with patch ([42520ad](https://github.com/christophehurpeau/check-package-dependencies/commit/42520adc525dbd631306625bd611b8559d2f5a79))
+* **deps:** update dependency type-fest to v4 ([#535](https://github.com/christophehurpeau/check-package-dependencies/issues/535)) ([4c94049](https://github.com/christophehurpeau/check-package-dependencies/commit/4c940490202accb27edde2bae165a0a68ff97dd1))
+
 ## [6.7.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v6.6.0...v6.7.0) (2023-07-13)
 
 
