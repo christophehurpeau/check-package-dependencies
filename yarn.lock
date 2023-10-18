@@ -1641,10 +1641,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/semver-utils@npm:1.1.1":
-  version: 1.1.1
-  resolution: "@types/semver-utils@npm:1.1.1"
-  checksum: fd53e2ef9712e20c69caacc608b42050e815573d9755afe344299b8131a14978e35a3b56a13a9bdb58d9a0025e940672d27ddd8d77c67004535af0e991baeb12
+"@types/semver-utils@npm:1.1.2":
+  version: 1.1.2
+  resolution: "@types/semver-utils@npm:1.1.2"
+  checksum: 0715e23be1e35015353ae13bafe875b31dd48ac540de068fdcb32a4bba3111c39f97cd457cb19a7be44e1830a5058ac2e750bb01f1cf5a8193dca59e85fa6d9e
   languageName: node
   linkType: hard
 
@@ -2549,7 +2549,7 @@ __metadata:
     "@pob/root": 7.8.0
     "@types/jest": 29.5.6
     "@types/semver": 7.5.3
-    "@types/semver-utils": 1.1.1
+    "@types/semver-utils": 1.1.2
     chalk: ^5.2.0
     eslint: 8.51.0
     glob: ^10.0.0
