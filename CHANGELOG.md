@@ -1,7 +1,32 @@
-# Change Log
+# Changelog
 
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
+## [7.0.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v6.8.0...v7.0.0) (2023-11-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* drop node 16, requires node 18
+
+### Features
+
+* indicate when the issue is auto fixable ([f9a5609](https://github.com/christophehurpeau/check-package-dependencies/commit/f9a560917296d21de967a9af50e0b75b7330ff7b))
+
+
+### Bug Fixes
+
+* add missing newline when autofixing package.json ([5e52efc](https://github.com/christophehurpeau/check-package-dependencies/commit/5e52efc9d2a6aaf7cab1da0d38a2e1f0707344d2))
+* display expected version in checkExactVersion if we could resolve it ([14e1103](https://github.com/christophehurpeau/check-package-dependencies/commit/14e1103ae6aa14b52d31b8e64f1b931c5e06c7dd))
+* update import-meta-resolve ([77acefd](https://github.com/christophehurpeau/check-package-dependencies/commit/77acefd1a705b9cbeec385bbc07db46c646ffc45))
+* use fileURLToPath ([ad78573](https://github.com/christophehurpeau/check-package-dependencies/commit/ad785739203486171f7c707b1af8366867af3217))
+
+
+### Miscellaneous Chores
+
+* pob update and update to yarn 4 and node 18 ([d474f59](https://github.com/christophehurpeau/check-package-dependencies/commit/d474f59a37bf8c36b2a73498d8b45bce78d88013))
+
 
 # [0.2.0](https://github.com/christophehurpeau/pob/compare/check-package-dependencies@0.1.2...check-package-dependencies@0.2.0) (2021-03-13)
 
