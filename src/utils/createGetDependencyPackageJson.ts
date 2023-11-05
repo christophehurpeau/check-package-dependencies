@@ -36,25 +36,25 @@ export function createGetDependencyPackageJson({
           pkgDepName,
           pkgDirname,
         );
-      } catch (err: unknown) {
-        if (!(err instanceof Error)) throw err;
+      } catch (error: unknown) {
+        if (!(error instanceof Error)) throw error;
 
         if (
-          (err as NodeJS.ErrnoException).code !==
+          (error as NodeJS.ErrnoException).code !==
           'ERR_PACKAGE_PATH_NOT_EXPORTED'
         ) {
-          throw err;
+          throw error;
         }
 
         const match = / in (.*[/\\]package\.json)\s+imported from/.exec(
-          err.message,
+          error.message,
         );
 
         if (match) {
           const [, matchPackageJson] = match;
           pkg = internalReadPkgJson(matchPackageJson);
         } else {
-          throw err;
+          throw error;
         }
       }
     }

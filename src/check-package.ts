@@ -1,6 +1,6 @@
 /* eslint-disable max-lines */
-import path from 'path';
-import util from 'util';
+import path from 'node:path';
+import util from 'node:util';
 import { checkDirectDuplicateDependencies } from './checks/checkDirectDuplicateDependencies';
 import { checkDirectPeerDependencies } from './checks/checkDirectPeerDependencies';
 import { checkExactVersions } from './checks/checkExactVersions';
@@ -336,8 +336,8 @@ export function createCheckPackage({
     async run(): Promise<void> {
       try {
         await this.fn();
-      } catch (err) {
-        throw new Error(`${this.name} failed: ${(err as Error).message}`);
+      } catch (error) {
+        throw new Error(`${this.name} failed: ${(error as Error).message}`);
       }
     }
   }

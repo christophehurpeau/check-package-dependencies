@@ -1,9 +1,9 @@
-import path from 'path';
-import util from 'util';
+import path from 'node:path';
+import util from 'node:util';
 import chalk from 'chalk';
 import semver from 'semver';
 import semverUtils from 'semver-utils';
-import fs, { readFileSync, writeFileSync } from 'fs';
+import fs, { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'import-meta-resolve';
 import { globSync } from 'glob';
 
@@ -568,17 +568,17 @@ function createGetDependencyPackageJson({
     } else {
       try {
         pkg = internalCustomLoadPackageJsonFromNodeModules(pkgDepName, pkgDirname);
-      } catch (err) {
-        if (!(err instanceof Error)) throw err;
-        if (err.code !== 'ERR_PACKAGE_PATH_NOT_EXPORTED') {
-          throw err;
+      } catch (error) {
+        if (!(error instanceof Error)) throw error;
+        if (error.code !== 'ERR_PACKAGE_PATH_NOT_EXPORTED') {
+          throw error;
         }
-        const match = / in (.*[/\\]package\.json)\s+imported from/.exec(err.message);
+        const match = / in (.*[/\\]package\.json)\s+imported from/.exec(error.message);
         if (match) {
           const [, matchPackageJson] = match;
           pkg = internalReadPkgJson(matchPackageJson);
         } else {
-          throw err;
+          throw error;
         }
       }
     }
@@ -700,8 +700,8 @@ function createCheckPackage({
     async run() {
       try {
         await this.fn();
-      } catch (err) {
-        throw new Error(`${this.name} failed: ${err.message}`);
+      } catch (error) {
+        throw new Error(`${this.name} failed: ${error.message}`);
       }
     }
   }

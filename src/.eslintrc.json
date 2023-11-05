@@ -12,7 +12,8 @@
   ],
   "ignorePatterns": ["*.d.ts"],
   "rules": {
-    "complexity": ["error", 20]
+    "complexity": ["error", 20],
+    "@typescript-eslint/max-params": "warn"
   },
   "overrides": [
     {

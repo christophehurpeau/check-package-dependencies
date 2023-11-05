@@ -1,6 +1,6 @@
 /* eslint-disable max-lines */
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 import { globSync } from 'glob';
 import type { Except } from 'type-fest';
 import type {
