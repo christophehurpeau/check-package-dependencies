@@ -93,9 +93,7 @@ export async function checkExactVersions(
           } else {
             reportError(
               `Unexpected range dependency in "${type}" for "${dependencyName}"`,
-              `expecting "${version}" to be exact "${version.slice(
-                version[1] === '=' ? 2 : 1,
-              )}".`,
+              `expecting "${version}" to be exact "${resolvedDep.version}".`,
               shouldOnlyWarn,
               true,
             );
