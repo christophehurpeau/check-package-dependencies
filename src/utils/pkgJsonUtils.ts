@@ -1,4 +1,5 @@
 import { readFileSync, writeFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { resolve as importResolve } from 'import-meta-resolve';
 import type { PackageJson } from './packageTypes';
 
@@ -19,10 +20,5 @@ export function internalLoadPackageJsonFromNodeModules(
     `${pkgDepName}/package.json`,
     `file://${pkgDirname}/package.json`,
   );
-  return readPkgJson(
-    packageUrl.replace(
-      process.platform === 'win32' ? /^file:\/{3}/ : /^file:\/\//,
-      '',
-    ),
-  );
+  return readPkgJson(fileURLToPath(packageUrl));
 }
