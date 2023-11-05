@@ -8,7 +8,7 @@ export function readPkgJson(packagePath: string): PackageJson {
 }
 
 export function writePkgJson(packagePath: string, pkg: PackageJson): void {
-  writeFileSync(packagePath, JSON.stringify(pkg, null, 2));
+  writeFileSync(packagePath, `${JSON.stringify(pkg, null, 2)}\n`);
 }
 
 /** @internal */
