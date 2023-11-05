@@ -23,16 +23,16 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">51.51% </span>
+                <span class="strong">50% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>17/33</span>
+                <span class='fraction'>19/38</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">33.33% </span>
+                <span class="strong">32.25% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>8/24</span>
+                <span class='fraction'>10/31</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">51.61% </span>
+                <span class="strong">51.42% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>16/31</span>
+                <span class='fraction'>18/35</span>
             </div>
         
             
@@ -164,7 +164,27 @@
 <a name='L99'></a><a href='#L99'>99</a>
 <a name='L100'></a><a href='#L100'>100</a>
 <a name='L101'></a><a href='#L101'>101</a>
-<a name='L102'></a><a href='#L102'>102</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L102'></a><a href='#L102'>102</a>
+<a name='L103'></a><a href='#L103'>103</a>
+<a name='L104'></a><a href='#L104'>104</a>
+<a name='L105'></a><a href='#L105'>105</a>
+<a name='L106'></a><a href='#L106'>106</a>
+<a name='L107'></a><a href='#L107'>107</a>
+<a name='L108'></a><a href='#L108'>108</a>
+<a name='L109'></a><a href='#L109'>109</a>
+<a name='L110'></a><a href='#L110'>110</a>
+<a name='L111'></a><a href='#L111'>111</a>
+<a name='L112'></a><a href='#L112'>112</a>
+<a name='L113'></a><a href='#L113'>113</a>
+<a name='L114'></a><a href='#L114'>114</a>
+<a name='L115'></a><a href='#L115'>115</a>
+<a name='L116'></a><a href='#L116'>116</a>
+<a name='L117'></a><a href='#L117'>117</a>
+<a name='L118'></a><a href='#L118'>118</a>
+<a name='L119'></a><a href='#L119'>119</a>
+<a name='L120'></a><a href='#L120'>120</a>
+<a name='L121'></a><a href='#L121'>121</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -184,6 +204,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">10x</span>
 <span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-yes">10x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -194,6 +215,15 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -209,6 +239,9 @@
 <span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -220,6 +253,11 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -278,6 +316,7 @@ export type ReportError = (
   msgTitle: string,
   msgInfo?: string,
   onlyWarns?: boolean,
+  autoFixable?: boolean,
 ) =&gt; void;
 &nbsp;
 let titleDisplayed: string | null = null;
@@ -285,6 +324,7 @@ let pkgPathDisplayed: string | null = null;
 &nbsp;
 let totalWarnings = 0;
 let totalErrors = 0;
+let totalFixable = 0;
 &nbsp;
 export function <span class="fstat-no" title="function not covered" >displayConclusion(</span>): void {
 <span class="cstat-no" title="statement not covered" >  if (!totalWarnings &amp;&amp; !totalErrors) {</span>
@@ -300,19 +340,31 @@ export function <span class="fstat-no" title="function not covered" >displayConc
       )}.`,
     );
   }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  if (totalFixable) {</span>
+<span class="cstat-no" title="statement not covered" >    console.log(</span>
+      `Found ${chalk.green(
+        `${totalFixable} auto-fixable`,
+      )} errors or warnings, run the command with "--fix" to fix them.`,
+    );
+  }
 }
 &nbsp;
 export function logMessage(
   msgTitle: string,
   msgInfo?: string,
   onlyWarns?: boolean,
+  autoFixable?: boolean,
 ): void {
   if (onlyWarns) totalWarnings++;
   else totalErrors++;
+  <span class="missing-if-branch" title="if path not taken" >I</span>if (autoFixable) <span class="cstat-no" title="statement not covered" >totalFixable++;</span>
   console.error(
     `${
       onlyWarns ? chalk.yellow(`⚠ ${msgTitle}`) : chalk.red(`❌ ${msgTitle}`)
-    }${msgInfo ? `: ${msgInfo}` : ''}`,
+    }${msgInfo ? `: ${msgInfo}` : ''}${
+      autoFixable ? <span class="branch-0 cbranch-no" title="branch not covered" >` ${chalk.bgGreenBright(chalk.black('auto-fixable'))}` </span>: ''
+    }`,
   );
 }
 &nbsp;
@@ -320,14 +372,19 @@ export function createReportError(
   title: string,
   pkgPathName: string,
 ): ReportError {
-  return function <span class="fstat-no" title="function not covered" >reportError(</span>msgTitle, msgInfo, onlyWarns): void {
+  return function <span class="fstat-no" title="function not covered" >reportError(</span>
+    msgTitle,
+    msgInfo,
+    onlyWarns,
+    autoFixable = <span class="branch-0 cbranch-no" title="branch not covered" >false,</span>
+  ): void {
 <span class="cstat-no" title="statement not covered" >    if (titleDisplayed !== title || pkgPathName !== pkgPathDisplayed) {</span>
 <span class="cstat-no" title="statement not covered" >      if (titleDisplayed) <span class="cstat-no" title="statement not covered" >console.error();</span></span>
 <span class="cstat-no" title="statement not covered" >      console.error(chalk.cyan(`== ${title} in ${pkgPathName} ==`));</span>
 <span class="cstat-no" title="statement not covered" >      titleDisplayed = title;</span>
 <span class="cstat-no" title="statement not covered" >      pkgPathDisplayed = pkgPathName;</span>
     }
-<span class="cstat-no" title="statement not covered" >    logMessage(msgTitle, msgInfo, onlyWarns);</span>
+<span class="cstat-no" title="statement not covered" >    logMessage(msgTitle, msgInfo, onlyWarns, autoFixable);</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    if (!onlyWarns) {</span>
       // console.trace();
@@ -373,7 +430,7 @@ export function reportNotWarnedForMapping(
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at Sun Nov 05 2023 17:19:46 GMT+0000 (Coordinated Universal Time)
+                at Sun Nov 05 2023 18:07:42 GMT+0000 (Coordinated Universal Time)
             </div>
         <script src="../prettify.js"></script>
         <script>
