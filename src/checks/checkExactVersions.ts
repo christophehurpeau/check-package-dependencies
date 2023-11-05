@@ -55,7 +55,7 @@ export async function checkExactVersions(
           continue;
         }
         const shouldOnlyWarn = onlyWarnsForCheck.shouldWarnsFor(dependencyName);
-        if (!shouldOnlyWarn && tryToAutoFix && getDependencyPackageJson) {
+        if (!shouldOnlyWarn && getDependencyPackageJson) {
           let resolvedDep;
           try {
             resolvedDep = getDependencyPackageJson(dependencyName);
@@ -65,8 +65,13 @@ export async function checkExactVersions(
           if (!resolvedDep?.version) {
             reportError(
               `Unexpected range dependency in "${type}" for "${dependencyName}"`,
-              `expecting "${version}" to be exact, autofix failed to resolve "${dependencyName}".`,
+              `expecting "${version}" to be exact${
+                tryToAutoFix
+                  ? `, autofix failed to resolve "${dependencyName}".`
+                  : ''
+              }`,
               shouldOnlyWarn,
+              false,
             );
           } else if (
             !semver.satisfies(resolvedDep.version, version, {
@@ -75,11 +80,25 @@ export async function checkExactVersions(
           ) {
             reportError(
               `Unexpected range dependency in "${type}" for "${dependencyName}"`,
-              `expecting "${version}" to be exact, autofix failed as "${dependencyName}"'s resolved version is "${resolvedDep.version}" and doesn't satisfies "${version}".`,
+              `expecting "${version}" to be exact${
+                tryToAutoFix
+                  ? `, autofix failed as "${dependencyName}"'s resolved version is "${resolvedDep.version}" and doesn't satisfies "${version}".`
+                  : ''
+              }`,
               shouldOnlyWarn,
+              false,
             );
-          } else {
+          } else if (tryToAutoFix) {
             pkgDependencies[dependencyName] = resolvedDep.version;
+          } else {
+            reportError(
+              `Unexpected range dependency in "${type}" for "${dependencyName}"`,
+              `expecting "${version}" to be exact "${version.slice(
+                version[1] === '=' ? 2 : 1,
+              )}".`,
+              shouldOnlyWarn,
+              true,
+            );
           }
         } else {
           reportError(
@@ -88,6 +107,7 @@ export async function checkExactVersions(
               version[1] === '=' ? 2 : 1,
             )}".`,
             shouldOnlyWarn,
+            false,
           );
         }
       }

@@ -16,6 +16,7 @@ let titleDisplayed = null;
 let pkgPathDisplayed = null;
 let totalWarnings = 0;
 let totalErrors = 0;
+let totalFixable = 0;
 function displayConclusion() {
   if (!totalWarnings && !totalErrors) {
     console.log(`\n${chalk.green('✅ No errors or warnings found')}.`);
@@ -26,20 +27,24 @@ function displayConclusion() {
   } else {
     console.log(`\nFound ${chalk.red(`${totalErrors} errors`)} and ${chalk.yellow(`${totalWarnings} warnings`)}.`);
   }
+  if (totalFixable) {
+    console.log(`Found ${chalk.green(`${totalFixable} auto-fixable`)} errors or warnings, run the command with "--fix" to fix them.`);
+  }
 }
-function logMessage(msgTitle, msgInfo, onlyWarns) {
+function logMessage(msgTitle, msgInfo, onlyWarns, autoFixable) {
   if (onlyWarns) totalWarnings++;else totalErrors++;
-  console.error(`${onlyWarns ? chalk.yellow(`⚠ ${msgTitle}`) : chalk.red(`❌ ${msgTitle}`)}${msgInfo ? `: ${msgInfo}` : ''}`);
+  if (autoFixable) totalFixable++;
+  console.error(`${onlyWarns ? chalk.yellow(`⚠ ${msgTitle}`) : chalk.red(`❌ ${msgTitle}`)}${msgInfo ? `: ${msgInfo}` : ''}${autoFixable ? ` ${chalk.bgGreenBright(chalk.black('auto-fixable'))}` : ''}`);
 }
 function createReportError(title, pkgPathName) {
-  return function reportError(msgTitle, msgInfo, onlyWarns) {
+  return function reportError(msgTitle, msgInfo, onlyWarns, autoFixable = false) {
     if (titleDisplayed !== title || pkgPathName !== pkgPathDisplayed) {
       if (titleDisplayed) console.error();
       console.error(chalk.cyan(`== ${title} in ${pkgPathName} ==`));
       titleDisplayed = title;
       pkgPathDisplayed = pkgPathName;
     }
-    logMessage(msgTitle, msgInfo, onlyWarns);
+    logMessage(msgTitle, msgInfo, onlyWarns, autoFixable);
     if (!onlyWarns) {
       // console.trace();
       process.exitCode = 1;
@@ -245,7 +250,7 @@ async function checkExactVersions(pkg, pkgPathName, types, {
           continue;
         }
         const shouldOnlyWarn = onlyWarnsForCheck.shouldWarnsFor(dependencyName);
-        if (!shouldOnlyWarn && tryToAutoFix && getDependencyPackageJson) {
+        if (!shouldOnlyWarn && getDependencyPackageJson) {
           let resolvedDep;
           try {
             resolvedDep = getDependencyPackageJson(dependencyName);
@@ -253,16 +258,18 @@ async function checkExactVersions(pkg, pkgPathName, types, {
             resolvedDep = null;
           }
           if (!resolvedDep?.version) {
-            reportError(`Unexpected range dependency in "${type}" for "${dependencyName}"`, `expecting "${version}" to be exact, autofix failed to resolve "${dependencyName}".`, shouldOnlyWarn);
+            reportError(`Unexpected range dependency in "${type}" for "${dependencyName}"`, `expecting "${version}" to be exact${tryToAutoFix ? `, autofix failed to resolve "${dependencyName}".` : ''}`, shouldOnlyWarn, false);
           } else if (!semver.satisfies(resolvedDep.version, version, {
             includePrerelease: true
           })) {
-            reportError(`Unexpected range dependency in "${type}" for "${dependencyName}"`, `expecting "${version}" to be exact, autofix failed as "${dependencyName}"'s resolved version is "${resolvedDep.version}" and doesn't satisfies "${version}".`, shouldOnlyWarn);
-          } else {
+            reportError(`Unexpected range dependency in "${type}" for "${dependencyName}"`, `expecting "${version}" to be exact${tryToAutoFix ? `, autofix failed as "${dependencyName}"'s resolved version is "${resolvedDep.version}" and doesn't satisfies "${version}".` : ''}`, shouldOnlyWarn, false);
+          } else if (tryToAutoFix) {
             pkgDependencies[dependencyName] = resolvedDep.version;
+          } else {
+            reportError(`Unexpected range dependency in "${type}" for "${dependencyName}"`, `expecting "${version}" to be exact "${version.slice(version[1] === '=' ? 2 : 1)}".`, shouldOnlyWarn, true);
           }
         } else {
-          reportError(`Unexpected range dependency in "${type}" for "${dependencyName}"`, `expecting "${version}" to be exact "${version.slice(version[1] === '=' ? 2 : 1)}".`, shouldOnlyWarn);
+          reportError(`Unexpected range dependency in "${type}" for "${dependencyName}"`, `expecting "${version}" to be exact "${version.slice(version[1] === '=' ? 2 : 1)}".`, shouldOnlyWarn, false);
         }
       }
     }
@@ -343,7 +350,7 @@ function checkMinRangeSatisfies(pkgPathName, pkg, type1 = 'dependencies', type2 
         const depRange1Parsed = semverUtils.parseRange(depRange1);
         dependencies1[depName] = (depRange1Parsed[0]?.operator || '') + (semver.minVersion(depRange2)?.version || depRange2);
       } else {
-        reportError(`Invalid "${depName}" in ${type1}`, `"${depRange1}" should satisfies "${depRange2}" from "${type2}".`);
+        reportError(`Invalid "${depName}" in ${type1}`, `"${depRange1}" should satisfies "${depRange2}" from "${type2}".`, false, true);
       }
     }
   }
@@ -403,7 +410,7 @@ function checkResolutionsVersionsMatch(pkg, pkgPathName, {
         if (tryToAutoFix) {
           pkg[depType][depName] = resolutionDepVersion;
         } else {
-          reportError(`Invalid "${depName}" in ${depType}`, `expecting "${range}" be "${resolutionDepVersion}" from resolutions.`);
+          reportError(`Invalid "${depName}" in ${depType}`, `expecting "${range}" be "${resolutionDepVersion}" from resolutions.`, false, true);
         }
       }
     });
@@ -482,31 +489,34 @@ function checkSatisfiesVersionsFromDependency(pkg, pkgPathName, type, depKeys, d
       return;
     }
     const version = pkgDependencies[depKey];
-    const autoFixIfPossible = () => {
-      if (!tryToAutoFix) return false;
+    const getAutoFixIfExists = () => {
       const existingOperator = version ? getOperator(version) : null;
       const expectedOperator = existingOperator === null ? shouldHaveExactVersions(type) ? '' : null : existingOperator;
-      const versionToApply = expectedOperator === '' ? semver.minVersion(range)?.version : changeOperator(range, expectedOperator);
-      if (!versionToApply) {
-        return false;
-      }
+      return expectedOperator === '' ? semver.minVersion(range)?.version : changeOperator(range, expectedOperator);
+    };
+    const autoFix = versionToApply => {
       pkg[type] = {
         ...pkg[type],
         [depKey]: versionToApply
       };
-      return true;
     };
     if (!version) {
-      if (!autoFixIfPossible()) {
-        reportError(`Missing "${depKey}" in "${type}" of "${pkg.name}"`, `should satisfies "${range}" from "${depPkg.name}" in "${depType}".`, onlyWarnsForCheck?.shouldWarnsFor(depKey));
+      const fix = getAutoFixIfExists();
+      if (!fix || !tryToAutoFix) {
+        reportError(`Missing "${depKey}" in "${type}" of "${pkg.name}"`, `should satisfies "${range}" from "${depPkg.name}" in "${depType}".`, onlyWarnsForCheck?.shouldWarnsFor(depKey), !!fix);
+      } else {
+        autoFix(fix);
       }
     } else {
       const minVersionOfVersion = semver.minVersion(version);
       if (!minVersionOfVersion || !semver.satisfies(minVersionOfVersion, range, {
         includePrerelease: true
       })) {
-        if (!autoFixIfPossible()) {
-          reportError(`Invalid "${depKey}" in "${type}" of "${pkg.name}"`, `"${version}" should satisfies "${range}" from "${depPkg.name}"'s "${depType}".`, onlyWarnsForCheck?.shouldWarnsFor(depKey));
+        const fix = getAutoFixIfExists();
+        if (!fix || !tryToAutoFix) {
+          reportError(`Invalid "${depKey}" in "${type}" of "${pkg.name}"`, `"${version}" should satisfies "${range}" from "${depPkg.name}"'s "${depType}".`, onlyWarnsForCheck?.shouldWarnsFor(depKey), !!fix);
+        } else {
+          autoFix(fix);
         }
       }
     }

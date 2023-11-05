@@ -11,6 +11,7 @@ export type ReportError = (
   msgTitle: string,
   msgInfo?: string,
   onlyWarns?: boolean,
+  autoFixable?: boolean,
 ) => void;
 
 let titleDisplayed: string | null = null;
@@ -18,6 +19,7 @@ let pkgPathDisplayed: string | null = null;
 
 let totalWarnings = 0;
 let totalErrors = 0;
+let totalFixable = 0;
 
 export function displayConclusion(): void {
   if (!totalWarnings && !totalErrors) {
@@ -33,19 +35,31 @@ export function displayConclusion(): void {
       )}.`,
     );
   }
+
+  if (totalFixable) {
+    console.log(
+      `Found ${chalk.green(
+        `${totalFixable} auto-fixable`,
+      )} errors or warnings, run the command with "--fix" to fix them.`,
+    );
+  }
 }
 
 export function logMessage(
   msgTitle: string,
   msgInfo?: string,
   onlyWarns?: boolean,
+  autoFixable?: boolean,
 ): void {
   if (onlyWarns) totalWarnings++;
   else totalErrors++;
+  if (autoFixable) totalFixable++;
   console.error(
     `${
       onlyWarns ? chalk.yellow(`⚠ ${msgTitle}`) : chalk.red(`❌ ${msgTitle}`)
-    }${msgInfo ? `: ${msgInfo}` : ''}`,
+    }${msgInfo ? `: ${msgInfo}` : ''}${
+      autoFixable ? ` ${chalk.bgGreenBright(chalk.black('auto-fixable'))}` : ''
+    }`,
   );
 }
 
@@ -53,14 +67,19 @@ export function createReportError(
   title: string,
   pkgPathName: string,
 ): ReportError {
-  return function reportError(msgTitle, msgInfo, onlyWarns): void {
+  return function reportError(
+    msgTitle,
+    msgInfo,
+    onlyWarns,
+    autoFixable = false,
+  ): void {
     if (titleDisplayed !== title || pkgPathName !== pkgPathDisplayed) {
       if (titleDisplayed) console.error();
       console.error(chalk.cyan(`== ${title} in ${pkgPathName} ==`));
       titleDisplayed = title;
       pkgPathDisplayed = pkgPathName;
     }
-    logMessage(msgTitle, msgInfo, onlyWarns);
+    logMessage(msgTitle, msgInfo, onlyWarns, autoFixable);
 
     if (!onlyWarns) {
       // console.trace();

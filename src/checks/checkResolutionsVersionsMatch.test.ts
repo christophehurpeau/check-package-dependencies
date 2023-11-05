@@ -67,21 +67,29 @@ describe('checkResolutionsVersionsMatch', () => {
       1,
       'Invalid "test1" in devDependencies',
       'expecting "1.1.0" be "1.0.0" from resolutions.',
+      false,
+      true,
     );
     expect(mockReportError).toHaveBeenNthCalledWith(
       2,
       'Invalid "test2" in dependencies',
       'expecting "1.2.0" be "1.0.0" from resolutions.',
+      false,
+      true,
     );
     expect(mockReportError).toHaveBeenNthCalledWith(
       3,
       'Invalid "test3" in dependencies',
       'expecting "1.0.0" be "1.1.0" from resolutions.',
+      false,
+      true,
     );
     expect(mockReportError).toHaveBeenNthCalledWith(
       4,
       'Invalid "test4" in dependencies',
       'expecting "1.2.0" be "1.1.0" from resolutions.',
+      false,
+      true,
     );
   });
 

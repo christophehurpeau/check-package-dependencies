@@ -167,7 +167,12 @@ describe(checkMinRangeSatisfies.name, () => {
           'devDependencies',
           { customCreateReportError: createReportError },
         );
-        expect(mockReportError).toHaveBeenCalledWith(errorTitle, errorInfo);
+        expect(mockReportError).toHaveBeenCalledWith(
+          errorTitle,
+          errorInfo,
+          false,
+          true,
+        );
 
         if (expectedFix) {
           const pkg = JSON.parse(

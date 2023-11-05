@@ -46,6 +46,7 @@ describe('checkExactVersions', () => {
       'Unexpected range dependency in "devDependencies" for "test"',
       'expecting "^1.0.0" to be exact "1.0.0".',
       false,
+      false,
     );
   });
   it.each(['<', '<=', '>', '>='])(
@@ -65,6 +66,7 @@ describe('checkExactVersions', () => {
       expect(mockReportError).toHaveBeenCalledWith(
         'Unexpected range dependency in "devDependencies" for "test"',
         `expecting "${comparator}1.0.0" to be exact "1.0.0".`,
+        false,
         false,
       );
     },
@@ -88,6 +90,7 @@ describe('checkExactVersions', () => {
       'Unexpected range dependency in "devDependencies" for "test"',
       'expecting "^1.0.0" to be exact "1.0.0".',
       true,
+      false,
     );
   });
 
@@ -106,6 +109,7 @@ describe('checkExactVersions', () => {
     expect(mockReportError).toHaveBeenCalledWith(
       'Unexpected range dependency in "devDependencies" for "test"',
       'expecting "~1.0.0" to be exact "1.0.0".',
+      false,
       false,
     );
   });
@@ -127,11 +131,13 @@ describe('checkExactVersions', () => {
       'Unexpected range dependency in "devDependencies" for "test1"',
       'expecting "~1.0.0" to be exact "1.0.0".',
       false,
+      false,
     );
     expect(mockReportError).toHaveBeenNthCalledWith(
       2,
       'Unexpected range dependency in "devDependencies" for "test2"',
       'expecting "~1.0.0" to be exact "1.0.0".',
+      false,
       false,
     );
   });
@@ -177,6 +183,7 @@ describe('checkExactVersions', () => {
       'Unexpected range dependency in "devDependencies" for "test1"',
       'expecting "~1.0.0" to be exact, autofix failed to resolve "test1".',
       false,
+      false,
     );
   });
 
@@ -198,6 +205,7 @@ describe('checkExactVersions', () => {
       1,
       'Unexpected range dependency in "devDependencies" for "test1"',
       'expecting "~1.0.0" to be exact, autofix failed as "test1"\'s resolved version is "2.0.0" and doesn\'t satisfies "~1.0.0".',
+      false,
       false,
     );
   });
@@ -224,6 +232,7 @@ describe('checkExactVersions', () => {
       'Unexpected range dependency in "devDependencies" for "rollupv1"',
       'expecting "^1.0.1" to be exact "1.0.1".',
       false,
+      false,
     );
   });
   it('should warn when onlyWarnsFor is passed', async () => {
@@ -246,11 +255,13 @@ describe('checkExactVersions', () => {
       'Unexpected range dependency in "devDependencies" for "test1"',
       'expecting "~1.0.0" to be exact "1.0.0".',
       true,
+      false,
     );
     expect(mockReportError).toHaveBeenNthCalledWith(
       2,
       'Unexpected range dependency in "devDependencies" for "test2"',
       'expecting "~1.0.0" to be exact "1.0.0".',
+      false,
       false,
     );
   });

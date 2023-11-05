@@ -54,6 +54,8 @@ export function checkMinRangeSatisfies(
         reportError(
           `Invalid "${depName}" in ${type1}`,
           `"${depRange1}" should satisfies "${depRange2}" from "${type2}".`,
+          false,
+          true,
         );
       }
     }

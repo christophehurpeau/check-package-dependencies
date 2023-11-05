@@ -46,6 +46,8 @@ export function checkResolutionsVersionsMatch(
           reportError(
             `Invalid "${depName}" in ${depType}`,
             `expecting "${range}" be "${resolutionDepVersion}" from resolutions.`,
+            false,
+            true,
           );
         }
       }

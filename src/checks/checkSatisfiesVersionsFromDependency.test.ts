@@ -188,6 +188,7 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
         {},
         'Missing "test1" in "devDependencies" of "test"',
         'should satisfies "1.0.0" from "test-dep" in "devDependencies".',
+        true,
       ],
       [
         'test2',
@@ -197,6 +198,7 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
         { devDependencies: {} },
         'Missing "test2" in "devDependencies" of "test"',
         'should satisfies "1.0.0" from "test-dep" in "devDependencies".',
+        true,
       ],
       [
         'test3',
@@ -206,6 +208,7 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
         { devDependencies: { test3: '1.0.0' } },
         'Unexpected missing dependency "test3" in "test-dep"',
         'config expects "test3" in "devDependencies" of "test-dep".',
+        false,
       ],
       [
         'test4',
@@ -215,6 +218,7 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
         { devDependencies: { test4: '1.0.0' } },
         'Invalid "test4" in "devDependencies" of "test"',
         '"1.0.0" should satisfies "0.1.0" from "test-dep"\'s "devDependencies".',
+        true,
       ],
     ])(
       'should error when %s is %s in %s',
@@ -226,6 +230,7 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
         pkgContent,
         errorTitle,
         errorInfo,
+        autoFixable,
       ) => {
         const depTypeInPkg: DependencyTypes = 'devDependencies';
         const pkg: PackageJson = {
@@ -252,6 +257,7 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
           errorTitle,
           errorInfo,
           undefined,
+          autoFixable,
         );
       },
     );

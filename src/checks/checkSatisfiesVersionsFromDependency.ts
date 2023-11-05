@@ -42,14 +42,14 @@ export function checkSatisfiesVersionsFromDependency(
         `Unexpected missing dependency "${depKey}" in "${depPkg.name}"`,
         `config expects "${depKey}" in "${depType}" of "${depPkg.name}".`,
         undefined,
+        false,
       );
       return;
     }
 
     const version = pkgDependencies[depKey];
 
-    const autoFixIfPossible = (): boolean => {
-      if (!tryToAutoFix) return false;
+    const getAutoFixIfExists = (): string | null | undefined => {
       const existingOperator = version ? getOperator(version) : null;
       const expectedOperator =
         existingOperator === null
@@ -57,29 +57,30 @@ export function checkSatisfiesVersionsFromDependency(
             ? ''
             : null
           : existingOperator;
-      const versionToApply =
-        expectedOperator === ''
-          ? semver.minVersion(range)?.version
-          : changeOperator(range, expectedOperator);
 
-      if (!versionToApply) {
-        return false;
-      }
+      return expectedOperator === ''
+        ? semver.minVersion(range)?.version
+        : changeOperator(range, expectedOperator);
+    };
 
+    const autoFix = (versionToApply: string): void => {
       pkg[type] = {
         ...pkg[type],
         [depKey]: versionToApply,
       };
-      return true;
     };
 
     if (!version) {
-      if (!autoFixIfPossible()) {
+      const fix = getAutoFixIfExists();
+      if (!fix || !tryToAutoFix) {
         reportError(
           `Missing "${depKey}" in "${type}" of "${pkg.name}"`,
           `should satisfies "${range}" from "${depPkg.name}" in "${depType}".`,
           onlyWarnsForCheck?.shouldWarnsFor(depKey),
+          !!fix,
         );
+      } else {
+        autoFix(fix);
       }
     } else {
       const minVersionOfVersion = semver.minVersion(version);
@@ -89,12 +90,16 @@ export function checkSatisfiesVersionsFromDependency(
           includePrerelease: true,
         })
       ) {
-        if (!autoFixIfPossible()) {
+        const fix = getAutoFixIfExists();
+        if (!fix || !tryToAutoFix) {
           reportError(
             `Invalid "${depKey}" in "${type}" of "${pkg.name}"`,
             `"${version}" should satisfies "${range}" from "${depPkg.name}"'s "${depType}".`,
             onlyWarnsForCheck?.shouldWarnsFor(depKey),
+            !!fix,
           );
+        } else {
+          autoFix(fix);
         }
       }
     }
