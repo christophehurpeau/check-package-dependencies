@@ -4,6 +4,7 @@ import chalk from 'chalk';
 import semver from 'semver';
 import semverUtils from 'semver-utils';
 import fs, { readFileSync, writeFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { resolve } from 'import-meta-resolve';
 import { globSync } from 'glob';
 
@@ -266,7 +267,7 @@ async function checkExactVersions(pkg, pkgPathName, types, {
           } else if (tryToAutoFix) {
             pkgDependencies[dependencyName] = resolvedDep.version;
           } else {
-            reportError(`Unexpected range dependency in "${type}" for "${dependencyName}"`, `expecting "${version}" to be exact "${version.slice(version[1] === '=' ? 2 : 1)}".`, shouldOnlyWarn, true);
+            reportError(`Unexpected range dependency in "${type}" for "${dependencyName}"`, `expecting "${version}" to be exact "${resolvedDep.version}".`, shouldOnlyWarn, true);
           }
         } else {
           reportError(`Unexpected range dependency in "${type}" for "${dependencyName}"`, `expecting "${version}" to be exact "${version.slice(version[1] === '=' ? 2 : 1)}".`, shouldOnlyWarn, false);
@@ -485,7 +486,7 @@ function checkSatisfiesVersionsFromDependency(pkg, pkgPathName, type, depKeys, d
   depKeys.forEach(depKey => {
     const range = dependencies[depKey];
     if (!range) {
-      reportError(`Unexpected missing dependency "${depKey}" in "${depPkg.name}"`, `config expects "${depKey}" in "${depType}" of "${depPkg.name}".`, undefined);
+      reportError(`Unexpected missing dependency "${depKey}" in "${depPkg.name}"`, `config expects "${depKey}" in "${depType}" of "${depPkg.name}".`, undefined, false);
       return;
     }
     const version = pkgDependencies[depKey];
@@ -554,13 +555,13 @@ function readPkgJson(packagePath) {
   return JSON.parse(readFileSync(packagePath, 'utf8'));
 }
 function writePkgJson(packagePath, pkg) {
-  writeFileSync(packagePath, JSON.stringify(pkg, null, 2));
+  writeFileSync(packagePath, `${JSON.stringify(pkg, null, 2)}\n`);
 }
 
 /** @internal */
 function internalLoadPackageJsonFromNodeModules(pkgDepName, pkgDirname) {
   const packageUrl = resolve(`${pkgDepName}/package.json`, `file://${pkgDirname}/package.json`);
-  return readPkgJson(packageUrl.replace(process.platform === 'win32' ? /^file:\/{3}/ : /^file:\/\//, ''));
+  return readPkgJson(fileURLToPath(packageUrl));
 }
 
 function createGetDependencyPackageJson({
