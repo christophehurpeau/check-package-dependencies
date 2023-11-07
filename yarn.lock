@@ -1611,10 +1611,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/semver@npm:7.5.4, @types/semver@npm:^7.5.0":
-  version: 7.5.4
-  resolution: "@types/semver@npm:7.5.4"
-  checksum: dee66a71d9f089c118be74b5937d4fef42864d68d9472a3f4f5399b9e3ad74d56a8e155020c846667b9ecf9de78fdb9ea55a53fff5067af28e06779b282b6c40
+"@types/semver@npm:7.5.5, @types/semver@npm:^7.5.0":
+  version: 7.5.5
+  resolution: "@types/semver@npm:7.5.5"
+  checksum: bb1b525221d93c9e7b45914af5ed1729a5bfdfa80927d6b02bcb4550ff7015f8c713152c32cb679ffcc79e77c0dda66d1f972ff5ee8d2205336729c51198bb18
   languageName: node
   linkType: hard
 
@@ -2527,7 +2527,7 @@ __metadata:
     "@pob/eslint-config-typescript": "npm:51.1.2"
     "@pob/root": "npm:8.6.0"
     "@types/jest": "npm:29.5.8"
-    "@types/semver": "npm:7.5.4"
+    "@types/semver": "npm:7.5.5"
     "@types/semver-utils": "npm:1.1.3"
     chalk: "npm:^5.2.0"
     eslint: "npm:8.53.0"
