@@ -81,7 +81,7 @@
     "@pob/eslint-config": "51.1.2",
     "@pob/eslint-config-typescript": "51.1.2",
     "@pob/root": "8.7.0",
-    "@types/jest": "29.5.8",
+    "@types/jest": "29.5.9",
     "@types/semver": "7.5.5",
     "@types/semver-utils": "1.1.3",
     "eslint": "8.54.0",
