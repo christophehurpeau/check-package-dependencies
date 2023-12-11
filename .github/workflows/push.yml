@@ -56,6 +56,9 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
         if: startsWith(matrix.node-version, '18.')
 
+      - name: E2E testing
+        run: yarn false run test:e2e
+
       - name: Check nothing was forgotten before commit
         if: startsWith(matrix.node-version, '18.')
         run: yarn run repository-check-dirty
