@@ -1379,17 +1379,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rollup/plugin-json@npm:6.0.1":
-  version: 6.0.1
-  resolution: "@rollup/plugin-json@npm:6.0.1"
+"@rollup/plugin-json@npm:6.1.0":
+  version: 6.1.0
+  resolution: "@rollup/plugin-json@npm:6.1.0"
   dependencies:
-    "@rollup/pluginutils": "npm:^5.0.1"
+    "@rollup/pluginutils": "npm:^5.1.0"
   peerDependencies:
     rollup: ^1.20.0||^2.0.0||^3.0.0||^4.0.0
   peerDependenciesMeta:
     rollup:
       optional: true
-  checksum: 8a8aed6376c86fb7e551b8b17181e585a9141f94d9c205d99dcdf834242720ee029693c3c44c36e4c4e72c61595c0976d89da4b04e790f0a3698a3cd1eb283fc
+  checksum: 9400c431b5e0cf3088ba2eb2d038809a2b0fb2a84ed004997da85582f48cd64958ed3168893c4f2c8109e38652400ed68282d0c92bf8ec07a3b2ef2e1ceab0b7
   languageName: node
   linkType: hard
 
@@ -1426,19 +1426,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rollup/pluginutils@npm:^5.0.1":
-  version: 5.0.2
-  resolution: "@rollup/pluginutils@npm:5.0.2"
+"@rollup/pluginutils@npm:^5.0.1, @rollup/pluginutils@npm:^5.1.0":
+  version: 5.1.0
+  resolution: "@rollup/pluginutils@npm:5.1.0"
   dependencies:
     "@types/estree": "npm:^1.0.0"
     estree-walker: "npm:^2.0.2"
     picomatch: "npm:^2.3.1"
   peerDependencies:
-    rollup: ^1.20.0||^2.0.0||^3.0.0
+    rollup: ^1.20.0||^2.0.0||^3.0.0||^4.0.0
   peerDependenciesMeta:
     rollup:
       optional: true
-  checksum: b06f73c15bb59418aa6fbfead5675bab2d6922e15663525ffc2eb8429530bc5add516600adb251cfbf9b60f3d12fb821cde155cb5103415154a476bd0f163432
+  checksum: c7bed15711f942d6fdd3470fef4105b73991f99a478605e13d41888963330a6f9e32be37e6ddb13f012bc7673ff5e54f06f59fd47109436c1c513986a8a7612d
   languageName: node
   linkType: hard
 
@@ -2547,7 +2547,7 @@ __metadata:
     glob: "npm:^10.0.0"
     import-meta-resolve: "npm:^4.0.0"
     jest: "npm:29.7.0"
-    pob-babel: "npm:36.7.0"
+    pob-babel: "npm:36.8.0"
     semver: "npm:7.5.4"
     semver-utils: "npm:^1.1.4"
     type-fest: "npm:^4.0.0"
@@ -6019,15 +6019,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pob-babel@npm:36.7.0":
-  version: 36.7.0
-  resolution: "pob-babel@npm:36.7.0"
+"pob-babel@npm:36.8.0":
+  version: 36.8.0
+  resolution: "pob-babel@npm:36.8.0"
   dependencies:
     "@babel/core": "npm:^7.23.2"
     "@babel/plugin-transform-runtime": "npm:7.23.4"
     "@pob/rollup": "npm:1.0.0"
     "@rollup/plugin-babel": "npm:6.0.4"
-    "@rollup/plugin-json": "npm:6.0.1"
+    "@rollup/plugin-json": "npm:6.1.0"
     "@rollup/plugin-node-resolve": "npm:15.2.3"
     "@rollup/plugin-run": "npm:3.0.2"
     babel-preset-pob-env: "npm:10.3.0"
@@ -6044,7 +6044,7 @@ __metadata:
   bin:
     pob-babel-clean-out: ./bin/pob-babel-clean-out.js
     rollup: ./bin/rollup.cjs
-  checksum: 700bd0e4234900d3b0f75b8fad5516bf587ea72d40888fbbd2756381ace3a6109b1b737a73108ac0ed7f393d10627b30607ec12e6112e407c16d15cd5c18bc14
+  checksum: b0cf5fc73c81b6f4489ebfbaac77314c18c85c57b89c36b82fff1cfd9c2b9f7bea05dd5024af22a8ed2c7372d48592522a3f458c7295c80f6c3a325849e2ce2c
   languageName: node
   linkType: hard
 
