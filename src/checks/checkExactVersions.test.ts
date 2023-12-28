@@ -1,4 +1,3 @@
-/* eslint-disable max-lines */
 import { createOnlyWarnsForArrayCheck } from '../utils/warnForUtils';
 import { checkExactVersions } from './checkExactVersions';
 

@@ -1,4 +1,3 @@
-/* eslint-disable max-lines */
 import { createOnlyWarnsForMappingCheck } from '../utils/warnForUtils';
 import { checkDirectPeerDependencies } from './checkDirectPeerDependencies';
 

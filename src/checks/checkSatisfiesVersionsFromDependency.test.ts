@@ -1,4 +1,3 @@
-/* eslint-disable max-lines */
 import type { DependencyTypes, PackageJson } from '../utils/packageTypes';
 import { checkSatisfiesVersionsFromDependency } from './checkSatisfiesVersionsFromDependency';
 

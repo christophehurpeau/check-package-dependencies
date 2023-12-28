@@ -17,7 +17,7 @@ yarn-error.log*
 # generated documentation directory
 /docs
 
-# jest default coverage directory
+# default coverage directory
 /coverage
 
 # Typescript
