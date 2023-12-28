@@ -1215,9 +1215,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pob/eslint-config-typescript@npm:53.0.0":
-  version: 53.0.0
-  resolution: "@pob/eslint-config-typescript@npm:53.0.0"
+"@pob/eslint-config-typescript@npm:53.1.0":
+  version: 53.1.0
+  resolution: "@pob/eslint-config-typescript@npm:53.1.0"
   dependencies:
     "@pob/eslint-config": "npm:53.0.0"
     "@typescript-eslint/eslint-plugin": "npm:^6.16.0"
@@ -1240,7 +1240,7 @@ __metadata:
       optional: true
     eslint-plugin-node:
       optional: true
-  checksum: 6d24821a74788859c1f4f381de73ce93bc50ed2110f4d250d58f4836269cd00169043379590de8f7b013bb0c6dcf2f75b498546f98b9fbd34822388b067e9761
+  checksum: 5b70cec588cde7dd958ff19c6e23f8dc444623502bf04a6840e98d23abf7667d11b67b473c3b78a10f2d52d003536d458f04b989ef755390f11288d1fe7ecc3e
   languageName: node
   linkType: hard
 
@@ -2538,7 +2538,7 @@ __metadata:
     "@babel/core": "npm:7.23.6"
     "@pob/commitlint-config": "npm:6.3.0"
     "@pob/eslint-config": "npm:53.0.0"
-    "@pob/eslint-config-typescript": "npm:53.0.0"
+    "@pob/eslint-config-typescript": "npm:53.1.0"
     "@pob/root": "npm:8.7.0"
     "@types/jest": "npm:29.5.11"
     "@types/semver": "npm:7.5.6"
