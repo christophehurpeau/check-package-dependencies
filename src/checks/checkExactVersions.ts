@@ -99,11 +99,17 @@ export async function checkExactVersions(
             );
           }
         } else {
+          let exactVersion = version.slice(version[1] === '=' ? 2 : 1);
+          if (exactVersion.split('.').length < 3) {
+            if (exactVersion.split('.').length === 1) {
+              exactVersion = `${exactVersion}.0.0`;
+            } else {
+              exactVersion = `${exactVersion}.0`;
+            }
+          }
           reportError(
             `Unexpected range dependency in "${type}" for "${dependencyName}"`,
-            `expecting "${version}" to be exact "${version.slice(
-              version[1] === '=' ? 2 : 1,
-            )}".`,
+            `expecting "${version}" to be exact "${exactVersion}".`,
             shouldOnlyWarn,
             false,
           );

@@ -115,7 +115,15 @@ describe('checkExactVersions', () => {
 
   it('should return multiple errors when multiple versions have range', async () => {
     await checkExactVersions(
-      { name: 'test', devDependencies: { test1: '~1.0.0', test2: '~1.0.0' } },
+      {
+        name: 'test',
+        devDependencies: {
+          test1: '~1.0.0',
+          test2: '~1.0.0',
+          test3: '^18',
+          test4: '^18.1',
+        },
+      },
       'path',
       ['devDependencies'],
       {
@@ -124,7 +132,7 @@ describe('checkExactVersions', () => {
       },
     );
     expect(createReportError).toHaveBeenCalled();
-    expect(mockReportError).toHaveBeenCalledTimes(2);
+    expect(mockReportError).toHaveBeenCalledTimes(4);
     expect(mockReportError).toHaveBeenNthCalledWith(
       1,
       'Unexpected range dependency in "devDependencies" for "test1"',
@@ -136,6 +144,20 @@ describe('checkExactVersions', () => {
       2,
       'Unexpected range dependency in "devDependencies" for "test2"',
       'expecting "~1.0.0" to be exact "1.0.0".',
+      false,
+      false,
+    );
+    expect(mockReportError).toHaveBeenNthCalledWith(
+      3,
+      'Unexpected range dependency in "devDependencies" for "test3"',
+      'expecting "^18" to be exact "18.0.0".',
+      false,
+      false,
+    );
+    expect(mockReportError).toHaveBeenNthCalledWith(
+      4,
+      'Unexpected range dependency in "devDependencies" for "test4"',
+      'expecting "^18.1" to be exact "18.1.0".',
       false,
       false,
     );
