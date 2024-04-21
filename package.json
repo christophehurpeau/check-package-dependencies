@@ -82,7 +82,7 @@
     "@pob/commitlint-config": "6.3.1",
     "@pob/eslint-config": "54.0.1",
     "@pob/eslint-config-typescript": "54.0.1",
-    "@pob/root": "9.2.0",
+    "@pob/root": "9.3.0",
     "@types/jest": "29.5.12",
     "@types/semver": "7.5.6",
     "@types/semver-utils": "1.1.3",
