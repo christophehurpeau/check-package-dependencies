@@ -1,7 +1,6 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createOnlyWarnsForArrayCheck } from '../utils/warnForUtils';
 import { checkExactVersions } from './checkExactVersions';
-
-const jest = import.meta.jest;
 
 const onlyWarnsForConfigName = 'checkExactVersions.test.onlyWarnsFor';
 const emptyOnlyWarnsForCheck = createOnlyWarnsForArrayCheck(
@@ -10,8 +9,8 @@ const emptyOnlyWarnsForCheck = createOnlyWarnsForArrayCheck(
 );
 
 describe('checkExactVersions', () => {
-  const mockReportError = jest.fn();
-  const createReportError = jest.fn().mockReturnValue(mockReportError);
+  const mockReportError = vi.fn();
+  const createReportError = vi.fn().mockReturnValue(mockReportError);
 
   beforeEach(() => {
     mockReportError.mockReset();
@@ -164,7 +163,7 @@ describe('checkExactVersions', () => {
   });
 
   it('should fix and remove range', async () => {
-    const getDependencyPackageJsonMock = jest
+    const getDependencyPackageJsonMock = vi
       .fn()
       .mockReturnValueOnce({ name: 'test1', version: '1.0.1' });
     const pkg = { name: 'test', devDependencies: { test1: '~1.0.0' } };
@@ -184,11 +183,9 @@ describe('checkExactVersions', () => {
   });
 
   it('should error if autofix failed as package does not exists', async () => {
-    const getDependencyPackageJsonMock = jest
-      .fn()
-      .mockImplementationOnce(() => {
-        throw new Error('Module not found');
-      });
+    const getDependencyPackageJsonMock = vi.fn().mockImplementationOnce(() => {
+      throw new Error('Module not found');
+    });
     const pkg = { name: 'test', devDependencies: { test1: '~1.0.0' } };
     await checkExactVersions(pkg, 'path', ['devDependencies'], {
       onlyWarnsForCheck: emptyOnlyWarnsForCheck,
@@ -209,7 +206,7 @@ describe('checkExactVersions', () => {
   });
 
   it("should error if autofix failed because version doesn't match range", async () => {
-    const getDependencyPackageJsonMock = jest
+    const getDependencyPackageJsonMock = vi
       .fn()
       .mockReturnValueOnce({ name: 'test1', version: '2.0.0' });
     const pkg = { name: 'test', devDependencies: { test1: '~1.0.0' } };

@@ -1,11 +1,10 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createOnlyWarnsForMappingCheck } from '../utils/warnForUtils';
 import { checkDirectPeerDependencies } from './checkDirectPeerDependencies';
 
-const jest = import.meta.jest;
-
 describe('checkDirectPeerDependencies', () => {
-  const mockReportError = jest.fn();
-  const createReportError = jest.fn().mockReturnValue(mockReportError);
+  const mockReportError = vi.fn();
+  const createReportError = vi.fn().mockReturnValue(mockReportError);
   beforeEach(() => {
     mockReportError.mockReset();
   });
@@ -18,7 +17,7 @@ describe('checkDirectPeerDependencies', () => {
         devDependencies: { 'some-lib-using-rollup': '1.0.0' },
       },
       'path',
-      jest.fn().mockImplementationOnce(() => ({
+      vi.fn().mockImplementationOnce(() => ({
         name: 'some-lib-using-rollup',
         peerDependencies: { rollup: '^1.0.0' },
       })),
@@ -41,7 +40,7 @@ describe('checkDirectPeerDependencies', () => {
         devDependencies: { rollup: '^1.0.0', 'some-lib-using-rollup': '1.0.0' },
       },
       'path',
-      jest
+      vi
         .fn()
         .mockImplementationOnce(() => ({
           name: 'rollup',
@@ -65,7 +64,7 @@ describe('checkDirectPeerDependencies', () => {
         devDependencies: { rollup: '^1.0.0', 'some-lib-using-rollup': '1.0.0' },
       },
       'path',
-      jest
+      vi
         .fn()
         .mockImplementationOnce(() => ({
           name: 'rollup',
@@ -92,7 +91,7 @@ describe('checkDirectPeerDependencies', () => {
         },
       },
       'path',
-      jest
+      vi
         .fn()
         .mockImplementationOnce(() => ({
           name: 'rollup',
@@ -119,7 +118,7 @@ describe('checkDirectPeerDependencies', () => {
         },
       },
       'path',
-      jest
+      vi
         .fn()
         .mockImplementationOnce(() => ({
           name: 'rollup',
@@ -145,7 +144,7 @@ describe('checkDirectPeerDependencies', () => {
         devDependencies: { 'some-lib-using-rollup': '1.0.0' },
       },
       'path',
-      jest
+      vi
         .fn()
         .mockImplementationOnce(() => ({
           name: 'rollup',
@@ -169,7 +168,7 @@ describe('checkDirectPeerDependencies', () => {
         devDependencies: { 'some-lib-using-rollup': '1.0.0' },
       },
       'path',
-      jest.fn().mockImplementationOnce(() => ({
+      vi.fn().mockImplementationOnce(() => ({
         name: 'some-lib-using-rollup',
         peerDependencies: { rollup: '^1.0.0' },
         peerDependenciesMeta: {
@@ -196,7 +195,7 @@ describe('checkDirectPeerDependencies', () => {
         },
       },
       'path',
-      jest
+      vi
         .fn()
         .mockImplementationOnce(() => ({
           name: '@types/a',
@@ -225,7 +224,7 @@ describe('checkDirectPeerDependencies', () => {
         },
       },
       'path',
-      jest
+      vi
         .fn()
         .mockImplementationOnce(() => ({
           name: '@types/a',
@@ -256,7 +255,7 @@ describe('checkDirectPeerDependencies', () => {
         },
       },
       'path',
-      jest
+      vi
         .fn()
         .mockImplementationOnce(() => ({
           name: 'some-lib-providing-rollup',
@@ -288,7 +287,7 @@ describe('checkDirectPeerDependencies', () => {
         },
       },
       'path',
-      jest
+      vi
         .fn()
         .mockImplementationOnce(() => ({
           name: 'some-lib-providing-rollup',
@@ -317,7 +316,7 @@ describe('checkDirectPeerDependencies', () => {
         },
       },
       'path',
-      jest
+      vi
         .fn()
         .mockImplementationOnce(() => ({
           name: 'some-lib-using-rollup',
@@ -355,7 +354,7 @@ describe('checkDirectPeerDependencies', () => {
         },
       },
       'path',
-      jest.fn().mockImplementationOnce(() => ({
+      vi.fn().mockImplementationOnce(() => ({
         name: 'some-lib-using-rollup',
         peerDependencies: { rollup: '^1.0.0' },
       })),

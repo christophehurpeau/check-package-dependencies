@@ -1,18 +1,17 @@
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { logMessage, reportNotWarnedForMapping } from './createReportError';
 import { createOnlyWarnsForMappingCheck } from './warnForUtils';
 
-const jest = import.meta.jest;
-
 describe('logMessage', () => {
   beforeEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   test('it should display error with no info', () => {
-    const errorFn = jest.spyOn(console, 'error').mockImplementation();
+    const errorFn = vi.spyOn(console, 'error').mockImplementation(() => {});
     logMessage('test');
     expect(errorFn).toMatchInlineSnapshot(`
-      [MockFunction] {
+      [MockFunction error] {
         "calls": [
           [
             "[31m❌ test[39m",
@@ -28,10 +27,10 @@ describe('logMessage', () => {
     `);
   });
   test('it should display error with info', () => {
-    const errorFn = jest.spyOn(console, 'error').mockImplementation();
+    const errorFn = vi.spyOn(console, 'error').mockImplementation(() => {});
     logMessage('test', 'info');
     expect(errorFn).toMatchInlineSnapshot(`
-      [MockFunction] {
+      [MockFunction error] {
         "calls": [
           [
             "[31m❌ test[39m: info",
@@ -48,10 +47,10 @@ describe('logMessage', () => {
   });
 
   test('it should display warning with no info', () => {
-    const errorFn = jest.spyOn(console, 'error').mockImplementation();
+    const errorFn = vi.spyOn(console, 'error').mockImplementation(() => {});
     logMessage('test', undefined, true);
     expect(errorFn).toMatchInlineSnapshot(`
-      [MockFunction] {
+      [MockFunction error] {
         "calls": [
           [
             "[33m⚠ test[39m",
@@ -68,10 +67,10 @@ describe('logMessage', () => {
   });
 
   test('it should display warning with info', () => {
-    const errorFn = jest.spyOn(console, 'error').mockImplementation();
+    const errorFn = vi.spyOn(console, 'error').mockImplementation(() => {});
     logMessage('test', 'info', true);
     expect(errorFn).toMatchInlineSnapshot(`
-      [MockFunction] {
+      [MockFunction error] {
         "calls": [
           [
             "[33m⚠ test[39m: info",
@@ -89,7 +88,7 @@ describe('logMessage', () => {
 });
 
 describe('reportNotWarnedForMapping', () => {
-  const reportError = jest.fn();
+  const reportError = vi.fn();
   beforeEach(() => {
     reportError.mockReset();
   });

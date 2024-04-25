@@ -1,10 +1,9 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { checkNoDependencies } from './checkNoDependencies';
 
-const jest = import.meta.jest;
-
 describe('checkNoDependencies', () => {
-  const mockReportError = jest.fn();
-  const createReportError = jest.fn().mockReturnValue(mockReportError);
+  const mockReportError = vi.fn();
+  const createReportError = vi.fn().mockReturnValue(mockReportError);
 
   beforeEach(() => {
     mockReportError.mockReset();

@@ -1,11 +1,10 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PackageJson } from '../utils/packageTypes';
 import { checkMinRangeSatisfies } from './checkMinRangeSatisfies';
 
-const jest = import.meta.jest;
-
 describe(checkMinRangeSatisfies.name, () => {
-  const mockReportError = jest.fn();
-  const createReportError = jest.fn().mockReturnValue(mockReportError);
+  const mockReportError = vi.fn();
+  const createReportError = vi.fn().mockReturnValue(mockReportError);
 
   beforeEach(() => {
     mockReportError.mockReset();

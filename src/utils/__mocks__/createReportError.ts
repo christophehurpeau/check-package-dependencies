@@ -1,2 +1,4 @@
-export const mockReportError = jest.fn();
-export const createReportError = jest.fn().mockReturnValue(mockReportError);
+import { vi } from 'vitest';
+
+export const mockReportError = vi.fn();
+export const createReportError = vi.fn().mockReturnValue(mockReportError);

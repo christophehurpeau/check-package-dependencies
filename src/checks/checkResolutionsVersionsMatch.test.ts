@@ -1,10 +1,9 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { checkResolutionsVersionsMatch } from './checkResolutionsVersionsMatch';
 
-const jest = import.meta.jest;
-
 describe('checkResolutionsVersionsMatch', () => {
-  const mockReportError = jest.fn();
-  const createReportError = jest.fn().mockReturnValue(mockReportError);
+  const mockReportError = vi.fn();
+  const createReportError = vi.fn().mockReturnValue(mockReportError);
 
   beforeEach(() => {
     mockReportError.mockReset();

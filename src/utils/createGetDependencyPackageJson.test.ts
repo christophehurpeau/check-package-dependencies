@@ -1,20 +1,16 @@
 import type { PackageJson } from 'type-fest';
+import { describe, expect, test, vi } from 'vitest';
 import { createGetDependencyPackageJson } from './createGetDependencyPackageJson';
 
-const jest = import.meta.jest;
-
-((jest as any).unstable_mockModule as typeof jest.mock)(
-  './pkgJsonUtils',
-  () => ({
-    readPkgJson: jest.fn(),
-    writePkgJson: jest.fn(),
-    internalLoadPackageJsonFromNodeModules: jest.fn(),
-  }),
-);
+vi.mock('./pkgJsonUtils', () => ({
+  readPkgJson: vi.fn(),
+  writePkgJson: vi.fn(),
+  internalLoadPackageJsonFromNodeModules: vi.fn(),
+}));
 
 describe('createGetDependencyPackageJson', () => {
   test('on windows with error', () => {
-    const internalLoadPackageJsonFromNodeModulesMock = jest
+    const internalLoadPackageJsonFromNodeModulesMock = vi
       .fn()
       .mockImplementationOnce(() => {
         const err: NodeJS.ErrnoException = new Error(
@@ -26,7 +22,7 @@ describe('createGetDependencyPackageJson', () => {
       });
 
     const mockPkg: PackageJson = {};
-    const readPkgJsonMock = jest.fn((pkgPath: string) => mockPkg);
+    const readPkgJsonMock = vi.fn((pkgPath: string) => mockPkg);
 
     const getDependencyPackageJson = createGetDependencyPackageJson({
       pkgDirname: 'test',

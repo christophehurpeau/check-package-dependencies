@@ -1,11 +1,10 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { DependencyTypes, PackageJson } from '../utils/packageTypes';
 import { checkSatisfiesVersionsFromDependency } from './checkSatisfiesVersionsFromDependency';
 
-const jest = import.meta.jest;
-
 describe(checkSatisfiesVersionsFromDependency.name, () => {
-  const mockReportError = jest.fn();
-  const createReportError = jest.fn().mockReturnValue(mockReportError);
+  const mockReportError = vi.fn();
+  const createReportError = vi.fn().mockReturnValue(mockReportError);
 
   beforeEach(() => {
     mockReportError.mockReset();

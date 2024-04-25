@@ -5,7 +5,6 @@ await createCheckPackage({
 })
   .checkRecommended({
     onlyWarnsForInDependencies: {
-      '@babel/core': { duplicateDirectDependency: ['semver'] },
       eslint: { duplicateDirectDependency: ['chalk'] },
     },
   })

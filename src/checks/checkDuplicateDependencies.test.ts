@@ -1,10 +1,9 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createOnlyWarnsForArrayCheck } from '../utils/warnForUtils';
 import { checkDuplicateDependencies } from './checkDuplicateDependencies';
 
-const jest = import.meta.jest;
-
 describe('checkDuplicateDependencies', () => {
-  const mockReportError = jest.fn();
+  const mockReportError = vi.fn();
 
   beforeEach(() => {
     mockReportError.mockReset();
