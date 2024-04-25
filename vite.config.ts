@@ -9,6 +9,7 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       include: ['src/**/*.ts?(x)'],
+      exclude: ['src/**/__mocks__/**/*.ts?(x)'],
       reportsDirectory: 'docs/coverage',
       reporter: (process.env.POB_VITEST_COVERAGE || 'json,text').split(','),
     },
