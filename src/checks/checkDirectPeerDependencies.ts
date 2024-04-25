@@ -34,6 +34,8 @@ const getAllowedPeerInFromType = (
       return isLibrary
         ? ['dependencies', 'optionalDependencies', 'peerDependencies']
         : ['devDependencies', 'dependencies'];
+
+    // no default
   }
 };
 
@@ -64,7 +66,7 @@ export async function checkDirectPeerDependencies(
           if (
             semver.intersects(
               dependencies[depName],
-              pkg.peerDependencies?.[depName],
+              pkg.peerDependencies[depName],
             )
           ) {
             continue;

@@ -185,6 +185,8 @@ const getAllowedPeerInFromType = (depPkgType, isLibrary) => {
       return isLibrary ? ['dependencies', 'peerDependencies'] : ['devDependencies', 'dependencies'];
     case 'optionalDependencies':
       return isLibrary ? ['dependencies', 'optionalDependencies', 'peerDependencies'] : ['devDependencies', 'dependencies'];
+
+    // no default
   }
 };
 async function checkDirectPeerDependencies(isLibrary, pkg, pkgPathName, getDependencyPackageJson, missingOnlyWarnsForCheck, invalidOnlyWarnsForCheck, customCreateReportError = createReportError) {
@@ -196,7 +198,7 @@ async function checkDirectPeerDependencies(isLibrary, pkg, pkgPathName, getDepen
     if (!dependencies) return;
     for (const depName of getKeys(dependencies)) {
       if (pkg.peerDependencies?.[depName]) {
-        if (semver.intersects(dependencies[depName], pkg.peerDependencies?.[depName])) {
+        if (semver.intersects(dependencies[depName], pkg.peerDependencies[depName])) {
           continue;
         }
       }
@@ -227,6 +229,8 @@ async function checkDirectPeerDependencies(isLibrary, pkg, pkgPathName, getDepen
 }
 
 const isVersionRange = version => version.startsWith('^') || version.startsWith('~') || version.startsWith('>') || version.startsWith('<');
+
+// eslint-disable-next-line @typescript-eslint/require-await
 async function checkExactVersions(pkg, pkgPathName, types, {
   getDependencyPackageJson,
   onlyWarnsForCheck,
@@ -500,7 +504,12 @@ function checkSatisfiesVersionsFromDependency(pkg, pkgPathName, type, depKeys, d
     const version = pkgDependencies[depKey];
     const getAutoFixIfExists = () => {
       const existingOperator = version ? getOperator(version) : null;
-      const expectedOperator = existingOperator === null ? shouldHaveExactVersions(type) ? '' : null : existingOperator;
+      const expectedOperator = (() => {
+        if (existingOperator !== null) {
+          return existingOperator;
+        }
+        return shouldHaveExactVersions(type) ? '' : null;
+      })();
       return expectedOperator === '' ? semver.minVersion(range)?.version : changeOperator(range, expectedOperator);
     };
     const autoFix = versionToApply => {
@@ -678,7 +687,6 @@ const createOnlyWarnsForMappingCheck = (configName, onlyWarnsFor) => {
   };
 };
 
-/* eslint-disable max-lines */
 function createCheckPackage({
   packageDirectoryPath = '.',
   internalWorkspacePkgDirectoryPath,
@@ -1022,7 +1030,6 @@ function createCheckPackage({
   };
 }
 
-/* eslint-disable max-lines */
 function createCheckPackageWithWorkspaces(createCheckPackageOptions = {}) {
   const checkPackage = createCheckPackage({
     ...createCheckPackageOptions,

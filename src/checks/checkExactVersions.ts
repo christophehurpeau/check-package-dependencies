@@ -21,6 +21,7 @@ const isVersionRange = (version: string): boolean =>
   version.startsWith('>') ||
   version.startsWith('<');
 
+// eslint-disable-next-line @typescript-eslint/require-await
 export async function checkExactVersions(
   pkg: PackageJson,
   pkgPathName: string,

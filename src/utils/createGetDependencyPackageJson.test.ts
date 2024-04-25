@@ -13,7 +13,7 @@ const jest = import.meta.jest;
 );
 
 describe('createGetDependencyPackageJson', () => {
-  test('on windows with error', async () => {
+  test('on windows with error', () => {
     const internalLoadPackageJsonFromNodeModulesMock = jest
       .fn()
       .mockImplementationOnce(() => {

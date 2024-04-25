@@ -1,4 +1,3 @@
-/* eslint-disable max-lines */
 import path from 'node:path';
 import util from 'node:util';
 import { checkDirectDuplicateDependencies } from './checks/checkDirectDuplicateDependencies';

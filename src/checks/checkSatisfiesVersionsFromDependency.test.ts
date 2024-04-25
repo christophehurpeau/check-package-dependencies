@@ -232,6 +232,7 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
         autoFixable,
       ) => {
         const depTypeInPkg: DependencyTypes = 'devDependencies';
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         const pkg: PackageJson = {
           ...(pkgContent as PackageJson),
           name: 'test',

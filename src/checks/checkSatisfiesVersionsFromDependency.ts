@@ -51,12 +51,12 @@ export function checkSatisfiesVersionsFromDependency(
 
     const getAutoFixIfExists = (): string | null | undefined => {
       const existingOperator = version ? getOperator(version) : null;
-      const expectedOperator =
-        existingOperator === null
-          ? shouldHaveExactVersions(type)
-            ? ''
-            : null
-          : existingOperator;
+      const expectedOperator = (() => {
+        if (existingOperator !== null) {
+          return existingOperator;
+        }
+        return shouldHaveExactVersions(type) ? '' : null;
+      })();
 
       return expectedOperator === ''
         ? semver.minVersion(range)?.version
