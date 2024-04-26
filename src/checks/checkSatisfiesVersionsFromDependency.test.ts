@@ -134,6 +134,13 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
         { devDependencies: { expectedDep: '^1.0.1' } },
         true,
       ],
+      [
+        'expects range version with existing version ; shouldHaveExactVersions = false ; with release',
+        '^1.0.1-beta',
+        { devDependencies: { expectedDep: '^1.0.0' } },
+        { devDependencies: { expectedDep: '^1.0.1-beta' } },
+        false,
+      ],
     ])(
       'should to fix when %s',
       (
