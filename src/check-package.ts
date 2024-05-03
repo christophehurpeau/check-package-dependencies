@@ -661,7 +661,8 @@ export function createCheckPackage({
               'resolutions',
               resolutions,
               depPkg,
-              depPkg.dependencies,
+              'dependencies',
+              { tryToAutoFix },
             );
           }
           if (dependencies) {
@@ -671,7 +672,8 @@ export function createCheckPackage({
               'dependencies',
               dependencies,
               depPkg,
-              depPkg.dependencies,
+              'dependencies',
+              { tryToAutoFix },
             );
           }
           if (devDependencies) {
@@ -681,7 +683,8 @@ export function createCheckPackage({
               'devDependencies',
               devDependencies,
               depPkg,
-              depPkg.dependencies,
+              'dependencies',
+              { tryToAutoFix },
             );
           }
         }),
@@ -705,7 +708,8 @@ export function createCheckPackage({
                 'resolutions',
                 resolutions,
                 depPkg,
-                depPkg.devDependencies,
+                'devDependencies',
+                { tryToAutoFix },
               );
             }
             if (dependencies) {
@@ -715,7 +719,8 @@ export function createCheckPackage({
                 'dependencies',
                 dependencies,
                 depPkg,
-                depPkg.devDependencies,
+                'devDependencies',
+                { tryToAutoFix },
               );
             }
             if (devDependencies) {
@@ -725,7 +730,8 @@ export function createCheckPackage({
                 'devDependencies',
                 devDependencies,
                 depPkg,
-                depPkg.devDependencies,
+                'devDependencies',
+                { tryToAutoFix },
               );
             }
           },
@@ -773,7 +779,8 @@ export function createCheckPackage({
                 'dependencies',
                 dependencies,
                 depPkg1,
-                depPkg1.dependencies,
+                'dependencies',
+                { tryToAutoFix },
               );
             }
             if (devDependencies) {
@@ -783,7 +790,8 @@ export function createCheckPackage({
                 'devDependencies',
                 devDependencies,
                 depPkg1,
-                depPkg1.dependencies,
+                'dependencies',
+                { tryToAutoFix },
               );
             }
           },

@@ -3,28 +3,43 @@ import { createReportError } from '../utils/createReportError';
 import type { DependencyTypes, PackageJson } from '../utils/packageTypes';
 import type { OnlyWarnsForCheck } from '../utils/warnForUtils';
 
+export interface CheckSatisfiesVersionsFromDependencyOptions {
+  tryToAutoFix?: boolean;
+  onlyWarnsForCheck?: OnlyWarnsForCheck;
+  customCreateReportError?: typeof createReportError;
+}
+
 export function checkSatisfiesVersionsFromDependency(
   pkg: PackageJson,
   pkgPathName: string,
   type: DependencyTypes,
   depKeys: string[],
   depPkg: PackageJson,
-  dependencies: PackageJson[DependencyTypes] = {},
-  onlyWarnsForCheck?: OnlyWarnsForCheck,
-  customCreateReportError = createReportError,
+  depType: DependencyTypes,
+  {
+    tryToAutoFix,
+    onlyWarnsForCheck,
+    customCreateReportError = createReportError,
+  }: CheckSatisfiesVersionsFromDependencyOptions = {},
 ): void {
   const pkgDependencies = pkg[type] || {};
+  const dependencies = depPkg[depType] || {};
+
   const reportError = customCreateReportError(
-    `Satisfies Versions from ${depPkg.name}`,
+    `Satisfies Versions from "${depPkg.name}"`,
     pkgPathName,
   );
 
   depKeys.forEach((depKey) => {
     const range = dependencies[depKey];
+
     if (!range) {
-      reportError(
-        `Unexpected missing dependency "${depKey}" in "${depPkg.name}".`,
-      );
+      if (tryToAutoFix) {
+      } else {
+        reportError(
+          `Unexpected missing dependency "${depKey}" in "${depPkg.name}".`,
+        );
+      }
       return;
     }
 
