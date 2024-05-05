@@ -634,24 +634,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pob/eslint-config-typescript@npm:55.3.0":
-  version: 55.3.0
-  resolution: "@pob/eslint-config-typescript@npm:55.3.0"
+"@pob/eslint-config-typescript@npm:56.0.0":
+  version: 56.0.0
+  resolution: "@pob/eslint-config-typescript@npm:56.0.0"
   dependencies:
-    "@pob/eslint-config": "npm:55.3.0"
+    "@pob/eslint-config": "npm:56.0.0"
     "@typescript-eslint/eslint-plugin": "npm:^7.8.0"
     "@typescript-eslint/parser": "npm:^7.8.0"
     eslint-plugin-import: "npm:^2.29.1"
     eslint-plugin-n: "npm:^17.4.0"
   peerDependencies:
     eslint: ^8.56.0
-  checksum: 10/688b8f90d16c6c8103546f4352883714242228a6863b8d826e8680c5fe9e6d1d9611595ff711563274bece5c5d9ff870f7f9301a80bead4dd2d905334acac2a5
+  checksum: 10/fcc6626af9d484c84b700eb7d3674274c6c329310bf2c3876d8e76a8634d3da7d1bfd984e27194381e9b4464c70e2f594e80a64b17583ff89737c7a7bcb840ab
   languageName: node
   linkType: hard
 
-"@pob/eslint-config@npm:55.3.0":
-  version: 55.3.0
-  resolution: "@pob/eslint-config@npm:55.3.0"
+"@pob/eslint-config@npm:56.0.0":
+  version: 56.0.0
+  resolution: "@pob/eslint-config@npm:56.0.0"
   dependencies:
     confusing-browser-globals: "npm:^1.0.11"
     eslint-plugin-import: "npm:^2.29.1"
@@ -659,7 +659,7 @@ __metadata:
     eslint-plugin-unicorn: "npm:^52.0.0"
   peerDependencies:
     eslint: ^8.56.0
-  checksum: 10/b4fef01f275b1e9f95a7470dba2dbb606db1a896dd8d564f08b3dfeec4110216a9c2099431d2d526e89cc212d6796166de3c62670a2cba2ce6eb05dde7a6e03b
+  checksum: 10/acaa084d22de5c8491ed13c7bf1ece0128e4305d5115dc983d359d029a7062299d1dcef6b8d8c4d51721d4968405b422a84dbc24d0169531e167c50aa211ebc2
   languageName: node
   linkType: hard
 
@@ -1707,8 +1707,8 @@ __metadata:
   resolution: "check-package-dependencies@workspace:."
   dependencies:
     "@pob/commitlint-config": "npm:6.3.3"
-    "@pob/eslint-config": "npm:55.3.0"
-    "@pob/eslint-config-typescript": "npm:55.3.0"
+    "@pob/eslint-config": "npm:56.0.0"
+    "@pob/eslint-config-typescript": "npm:56.0.0"
     "@pob/rollup-esbuild": "npm:1.0.2"
     "@pob/root": "npm:9.3.2"
     "@types/semver": "npm:7.5.8"
