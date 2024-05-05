@@ -83,7 +83,7 @@
     "@pob/commitlint-config": "6.3.3",
     "@pob/eslint-config": "55.3.0",
     "@pob/eslint-config-typescript": "55.3.0",
-    "@pob/rollup-esbuild": "1.0.1",
+    "@pob/rollup-esbuild": "1.0.2",
     "@pob/root": "9.3.2",
     "@types/semver": "7.5.8",
     "@types/semver-utils": "1.1.3",

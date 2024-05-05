@@ -688,11 +688,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pob/rollup-esbuild@npm:1.0.1":
-  version: 1.0.1
-  resolution: "@pob/rollup-esbuild@npm:1.0.1"
+"@pob/rollup-esbuild@npm:1.0.2":
+  version: 1.0.2
+  resolution: "@pob/rollup-esbuild@npm:1.0.2"
   dependencies:
-    "@pob/rollup": "npm:1.1.0"
+    "@pob/rollup": "npm:1.1.1"
     "@rollup/plugin-node-resolve": "npm:15.2.3"
     "@rollup/plugin-run": "npm:3.0.2"
     esbuild: "npm:0.20.2"
@@ -708,19 +708,19 @@ __metadata:
   bin:
     pob-esbuild-clean-out: ./bin/pob-esbuild-clean-out.js
     rollup: ./bin/rollup.cjs
-  checksum: 10/a7b10a5b85e240d12dbb11d46c0e01801cbe39f6968f753ca5fe50c867261c4ca52033045d651f1d9f8f9c89cd4b2996299fea7839d83955be04fb0f620e18c9
+  checksum: 10/1751a18c616cb2e2e67b5908e3fb23ce6d94ff9668859a360a0f3313433d579c09d7e10c51eac034e88ec383fdcbd188db4c477690b6464a77aba26b8df586cd
   languageName: node
   linkType: hard
 
-"@pob/rollup@npm:1.1.0":
-  version: 1.1.0
-  resolution: "@pob/rollup@npm:1.1.0"
+"@pob/rollup@npm:1.1.1":
+  version: 1.1.1
+  resolution: "@pob/rollup@npm:1.1.1"
   dependencies:
     rollup: "npm:3.29.4"
   bin:
     pob-rollup-clean-out: ./bin/pob-rollup-clean-out.js
     rollup: ./bin/rollup.cjs
-  checksum: 10/8ad51fd9c0b7f07c20753626398c024470026ba39471333ca7c78c48cd1819a7762befcf58dc08d402325cf00b07ff44aeefb4da8655dc85c58981a7c2f4057a
+  checksum: 10/6f4a3bcf7a61604530fcd349254b2405dd495736b8c84c3259b30e9940e18d524c30f35d14d6194ddaba6d891e8949b5194c903aa219f1a17ad3f7dbfc2b7e51
   languageName: node
   linkType: hard
 
@@ -1709,7 +1709,7 @@ __metadata:
     "@pob/commitlint-config": "npm:6.3.3"
     "@pob/eslint-config": "npm:55.3.0"
     "@pob/eslint-config-typescript": "npm:55.3.0"
-    "@pob/rollup-esbuild": "npm:1.0.1"
+    "@pob/rollup-esbuild": "npm:1.0.2"
     "@pob/root": "npm:9.3.2"
     "@types/semver": "npm:7.5.8"
     "@types/semver-utils": "npm:1.1.3"
