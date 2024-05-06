@@ -51,7 +51,7 @@ If something is missing for your need, please open an issue !
 Create a script, for example `scripts/check-package.js`. Add it in `"scripts"` in your package.json. Run in CI and/or in your husky hooks.
 
 ```js
-import { createCheckPackage } from 'check-package-dependencies';
+import { createCheckPackage } from "check-package-dependencies";
 
 await createCheckPackage(/* '.' */)
   // Check that your package.json contains only exact versions of package, not range.
@@ -74,7 +74,7 @@ await createCheckPackage(/* '.' */)
   // You will probably need to add warnings for common library where duplicate have low impact,
   // like type-fest or fast-deep-equal.
   .checkDirectDuplicateDependencies({
-    onlyWarnsFor: { '*': 'type-fest' },
+    onlyWarnsFor: { "*": "type-fest" },
   })
   // Check resolutions versions matches versions in devDependencies or dependencies
   .checkResolutionsVersionsMatch()
@@ -85,18 +85,18 @@ await createCheckPackage(/* '.' */)
   .checkRecommended({
     isLibrary: false,
     peerDependenciesOnlyWarnsFor: [],
-    directDuplicateDependenciesOnlyWarnsFor: ['type-fest'],
+    directDuplicateDependenciesOnlyWarnsFor: ["type-fest"],
   })
   // Check that your package.json contains the same version of @babel/core than react-scripts, both in resolutions and devDependencies
-  .checkIdenticalVersionsThanDependency('react-scripts', {
-    resolutions: ['@babel/core'],
-    devDependencies: ['@babel/core'],
+  .checkIdenticalVersionsThanDependency("react-scripts", {
+    resolutions: ["@babel/core"],
+    devDependencies: ["@babel/core"],
   })
   // Check that your package.json dependencies specifically satisfies the range set in another dependencies
-  .checkSatisfiesVersionsFromDependency('@pob/eslint-config-typescript', {
+  .checkSatisfiesVersionsFromDependency("@pob/eslint-config-typescript", {
     devDependencies: [
-      '@typescript-eslint/eslint-plugin',
-      '@typescript-eslint/parser',
+      "@typescript-eslint/eslint-plugin",
+      "@typescript-eslint/parser",
     ],
   })
   // Check that your package.json dependencies have the exact same version that another dependency also present in your package.json
@@ -104,8 +104,8 @@ await createCheckPackage(/* '.' */)
   .checkIdenticalVersions({
     dependencies: {
       react: {
-        dependencies: ['react-dom'],
-        devDependencies: ['react-test-renderer'],
+        dependencies: ["react-dom"],
+        devDependencies: ["react-test-renderer"],
       },
     },
   })
@@ -113,9 +113,9 @@ await createCheckPackage(/* '.' */)
 ```
 
 ```js
-'use script';
+"use script";
 
-const { createCheckPackage } = require('check-package-dependencies');
+const { createCheckPackage } = require("check-package-dependencies");
 
 await createCheckPackage(/* '.' */)
   // Call .checkExactVersions(), checkDirectPeerDependencies(), checkDirectDuplicateDependencies()
@@ -127,25 +127,25 @@ await createCheckPackage(/* '.' */)
 If you use workspaces:
 
 ```js
-'use script';
+"use script";
 
 const {
   createCheckPackageWithWorkspaces,
-} = require('check-package-dependencies');
+} = require("check-package-dependencies");
 
 await createCheckPackageWithWorkspaces()
   // Call .checkExactVersions(), checkDirectPeerDependencies(), checkDirectDuplicateDependencies()
   // checkResolutionsVersionsMatch() and checkResolutionsHasExplanation() for root package and workspaces packages, but also
   // checks your workspaces packages doesn't have different versions than the ones in devDependencies of root packages.
   .checkRecommended({
-    isLibrary: (pkgName) => !pkgName.endsWith('-example'),
+    isLibrary: (pkgName) => !pkgName.endsWith("-example"),
     peerDependenciesOnlyWarnsFor: [],
-    directDuplicateDependenciesOnlyWarnsFor: ['semver', 'github-username'],
+    directDuplicateDependenciesOnlyWarnsFor: ["semver", "github-username"],
   })
   .forRoot((rootPackageCheck) => {
     /* rootPackageCheck has the same API presented for single package */
   })
-  .for('packageName', (pkgCheck) => {
+  .for("packageName", (pkgCheck) => {
     /* pkgCheck has the same API presented for single package */
   })
   .run();
