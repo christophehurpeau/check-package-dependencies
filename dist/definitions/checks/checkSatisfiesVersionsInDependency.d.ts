@@ -1,5 +1,5 @@
-import { createReportError } from '../utils/createReportError';
-import type { DependenciesRanges, PackageJson } from '../utils/packageTypes';
+import { createReportError } from "../utils/createReportError";
+import type { DependenciesRanges, PackageJson } from "../utils/packageTypes";
 interface CheckSatisfiesVersionsInDependencyOptions {
     customCreateReportError?: typeof createReportError;
 }

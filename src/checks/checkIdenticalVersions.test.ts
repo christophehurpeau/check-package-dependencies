@@ -1,7 +1,7 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { checkIdenticalVersions } from './checkIdenticalVersions';
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { checkIdenticalVersions } from "./checkIdenticalVersions";
 
-describe('checkIdenticalVersions', () => {
+describe("checkIdenticalVersions", () => {
   const mockReportError = vi.fn();
   const createReportError = vi.fn().mockReturnValue(mockReportError);
 
@@ -9,45 +9,45 @@ describe('checkIdenticalVersions', () => {
     mockReportError.mockReset();
   });
 
-  describe('devDependencies in array', () => {
-    it('should return no error when all versions are identical', () => {
+  describe("devDependencies in array", () => {
+    it("should return no error when all versions are identical", () => {
       checkIdenticalVersions(
         {
-          name: 'test',
-          devDependencies: { react: '1.0.0', 'react-dom': '1.0.0' },
+          name: "test",
+          devDependencies: { react: "1.0.0", "react-dom": "1.0.0" },
         },
-        'path',
-        'devDependencies',
+        "path",
+        "devDependencies",
         {
-          react: ['react-dom'],
+          react: ["react-dom"],
         },
         undefined,
         createReportError,
       );
       expect(createReportError).toHaveBeenCalledWith(
-        'Identical Versions',
-        'path',
+        "Identical Versions",
+        "path",
       );
       expect(mockReportError).not.toHaveBeenCalled();
     });
 
-    it('should return error when versions are not identical', () => {
+    it("should return error when versions are not identical", () => {
       checkIdenticalVersions(
         {
-          name: 'test',
-          devDependencies: { react: '1.0.0', 'react-dom': '1.0.1' },
+          name: "test",
+          devDependencies: { react: "1.0.0", "react-dom": "1.0.1" },
         },
-        'path',
-        'devDependencies',
+        "path",
+        "devDependencies",
         {
-          react: ['react-dom'],
+          react: ["react-dom"],
         },
         undefined,
         createReportError,
       );
       expect(createReportError).toHaveBeenCalledWith(
-        'Identical Versions',
-        'path',
+        "Identical Versions",
+        "path",
       );
       expect(mockReportError).toHaveBeenCalledTimes(1);
       expect(mockReportError).toHaveBeenCalledWith(
@@ -58,53 +58,53 @@ describe('checkIdenticalVersions', () => {
     });
   });
 
-  describe('object with dependencies and devDependencies', () => {
-    it('should return no error when all versions are identical', () => {
+  describe("object with dependencies and devDependencies", () => {
+    it("should return no error when all versions are identical", () => {
       checkIdenticalVersions(
         {
-          name: 'test',
-          dependencies: { react: '1.0.0', 'react-dom': '1.0.0' },
-          devDependencies: { 'react-test-renderer': '1.0.0' },
+          name: "test",
+          dependencies: { react: "1.0.0", "react-dom": "1.0.0" },
+          devDependencies: { "react-test-renderer": "1.0.0" },
         },
-        'path',
-        'dependencies',
+        "path",
+        "dependencies",
         {
           react: {
-            dependencies: ['react-dom'],
-            devDependencies: ['react-test-renderer'],
+            dependencies: ["react-dom"],
+            devDependencies: ["react-test-renderer"],
           },
         },
         undefined,
         createReportError,
       );
       expect(createReportError).toHaveBeenCalledWith(
-        'Identical Versions',
-        'path',
+        "Identical Versions",
+        "path",
       );
       expect(mockReportError).not.toHaveBeenCalled();
     });
 
-    it('should return error when versions are not identical', () => {
+    it("should return error when versions are not identical", () => {
       checkIdenticalVersions(
         {
-          name: 'test',
-          dependencies: { react: '1.0.0', 'react-dom': '1.0.1' },
-          devDependencies: { 'react-test-renderer': '1.0.1' },
+          name: "test",
+          dependencies: { react: "1.0.0", "react-dom": "1.0.1" },
+          devDependencies: { "react-test-renderer": "1.0.1" },
         },
-        'path',
-        'dependencies',
+        "path",
+        "dependencies",
         {
           react: {
-            dependencies: ['react-dom'],
-            devDependencies: ['react-test-renderer'],
+            dependencies: ["react-dom"],
+            devDependencies: ["react-test-renderer"],
           },
         },
         undefined,
         createReportError,
       );
       expect(createReportError).toHaveBeenCalledWith(
-        'Identical Versions',
-        'path',
+        "Identical Versions",
+        "path",
       );
       expect(mockReportError).toHaveBeenCalledTimes(2);
       expect(mockReportError).toHaveBeenCalledWith(

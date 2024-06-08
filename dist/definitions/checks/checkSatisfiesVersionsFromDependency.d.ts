@@ -1,7 +1,7 @@
-import type { ShouldHaveExactVersions } from '../check-package';
-import { createReportError } from '../utils/createReportError';
-import type { DependencyTypes, PackageJson } from '../utils/packageTypes';
-import type { OnlyWarnsForCheck } from '../utils/warnForUtils';
+import type { ShouldHaveExactVersions } from "../check-package";
+import { createReportError } from "../utils/createReportError";
+import type { DependencyTypes, PackageJson } from "../utils/packageTypes";
+import type { OnlyWarnsForCheck } from "../utils/warnForUtils";
 export interface CheckSatisfiesVersionsFromDependencyOptions {
     tryToAutoFix?: boolean;
     shouldHaveExactVersions: ShouldHaveExactVersions;

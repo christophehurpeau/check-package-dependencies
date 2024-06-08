@@ -1,6 +1,6 @@
-import semver from 'semver';
-import { createReportError } from '../utils/createReportError';
-import type { PackageJson } from '../utils/packageTypes';
+import semver from "semver";
+import { createReportError } from "../utils/createReportError";
+import type { PackageJson } from "../utils/packageTypes";
 
 export interface CheckResolutionsVersionsMatchOptions {
   tryToAutoFix?: boolean;
@@ -17,20 +17,20 @@ export function checkResolutionsVersionsMatch(
 ): void {
   const pkgResolutions = pkg.resolutions || {};
   const reportError = customCreateReportError(
-    'Resolutions match other dependencies',
+    "Resolutions match other dependencies",
     pkgPathName,
   );
 
   Object.entries(pkgResolutions).forEach(([resolutionKey, resolutionValue]) => {
     let depName = resolutionKey;
     let resolutionDepVersion = resolutionValue;
-    if (resolutionValue.startsWith('patch:')) {
+    if (resolutionValue.startsWith("patch:")) {
       const matchResolutionInKey = /^(.+)@npm:(.+)$/.exec(resolutionKey);
       if (matchResolutionInKey) {
         [, depName, resolutionDepVersion] = matchResolutionInKey;
       }
     }
-    (['dependencies', 'devDependencies'] as const).forEach((depType) => {
+    (["dependencies", "devDependencies"] as const).forEach((depType) => {
       const range = pkg?.[depType]?.[depName];
 
       if (!range) return;

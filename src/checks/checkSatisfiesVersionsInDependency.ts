@@ -1,7 +1,7 @@
-import semver from 'semver';
-import { createReportError } from '../utils/createReportError';
-import { getEntries } from '../utils/object';
-import type { DependenciesRanges, PackageJson } from '../utils/packageTypes';
+import semver from "semver";
+import { createReportError } from "../utils/createReportError";
+import { getEntries } from "../utils/object";
+import type { DependenciesRanges, PackageJson } from "../utils/packageTypes";
 
 interface CheckSatisfiesVersionsInDependencyOptions {
   customCreateReportError?: typeof createReportError;
@@ -33,7 +33,7 @@ export function checkSatisfiesVersionsInDependency(
         if (dependencies?.[dependencyName]) {
           reportError(
             `Invalid "${dependencyName}" in ${dependenciesType} of "${depPkg.name}"`,
-            'it should not be present',
+            "it should not be present",
           );
         }
       } else if (!dependencies) {

@@ -1,12 +1,12 @@
-import type { Except } from 'type-fest';
-import type { CreateCheckPackageOptions, CheckPackageApi, OnlyWarnsForInDependenciesCheckPackageRecommendedOption, OnlyWarnsForInDependencyCheckPackageRecommendedOption, OnlyWarnsForInPackageCheckPackageRecommendedOption } from './check-package';
-import type { CheckResolutionMessage } from './checks/checkResolutionsHasExplanation';
-import type { PackageJson } from './utils/packageTypes';
-import type { OnlyWarnsForOptionalDependencyMapping } from './utils/warnForUtils';
+import type { Except } from "type-fest";
+import type { CreateCheckPackageOptions, CheckPackageApi, OnlyWarnsForInDependenciesCheckPackageRecommendedOption, OnlyWarnsForInDependencyCheckPackageRecommendedOption, OnlyWarnsForInPackageCheckPackageRecommendedOption } from "./check-package";
+import type { CheckResolutionMessage } from "./checks/checkResolutionsHasExplanation";
+import type { PackageJson } from "./utils/packageTypes";
+import type { OnlyWarnsForOptionalDependencyMapping } from "./utils/warnForUtils";
 interface OnlyWarnsForInMonorepoPackageCheckPackageRecommendedOption extends OnlyWarnsForInPackageCheckPackageRecommendedOption {
-    duplicateDirectDependency: OnlyWarnsForInDependencyCheckPackageRecommendedOption['duplicateDirectDependency'];
+    duplicateDirectDependency: OnlyWarnsForInDependencyCheckPackageRecommendedOption["duplicateDirectDependency"];
 }
-type OnlyWarnsForInMonorepoPackagesCheckPackageRecommendedOption = Record<'*' | string, OnlyWarnsForInMonorepoPackageCheckPackageRecommendedOption>;
+type OnlyWarnsForInMonorepoPackagesCheckPackageRecommendedOption = Record<"*" | string, OnlyWarnsForInMonorepoPackageCheckPackageRecommendedOption>;
 type OnlyWarnsForInMonorepoPackagesDependenciesCheckPackageRecommendedOption = Record<string, OnlyWarnsForInDependenciesCheckPackageRecommendedOption>;
 export interface CheckPackageWithWorkspacesRecommendedOptions {
     allowRangeVersionsInLibraries?: boolean;
@@ -24,7 +24,7 @@ export interface CheckPackageWithWorkspacesApi {
     forEach: (callback: (checkPackage: CheckPackageApi) => void) => CheckPackageWithWorkspacesApi;
     for: (id: string, callback: (checkPackage: CheckPackageApi) => void) => CheckPackageWithWorkspacesApi;
 }
-interface CreateCheckPackageWithWorkspacesOptions extends Except<CreateCheckPackageOptions, 'isLibrary'> {
+interface CreateCheckPackageWithWorkspacesOptions extends Except<CreateCheckPackageOptions, "isLibrary"> {
     isLibrary?: (pkg: PackageJson) => boolean;
 }
 export declare function createCheckPackageWithWorkspaces(createCheckPackageOptions?: CreateCheckPackageWithWorkspacesOptions): CheckPackageWithWorkspacesApi;

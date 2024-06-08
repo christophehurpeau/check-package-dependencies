@@ -1,4 +1,4 @@
-import semverUtils from 'semver-utils';
+import semverUtils from "semver-utils";
 export declare const parse: typeof semverUtils.parse;
 export declare const parseRange: typeof semverUtils.parseRange;
 export declare function getOperator(range: string): string | null;

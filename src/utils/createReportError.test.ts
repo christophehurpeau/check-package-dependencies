@@ -1,15 +1,15 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest';
-import { logMessage, reportNotWarnedForMapping } from './createReportError';
-import { createOnlyWarnsForMappingCheck } from './warnForUtils';
+import { beforeEach, describe, expect, test, vi } from "vitest";
+import { logMessage, reportNotWarnedForMapping } from "./createReportError";
+import { createOnlyWarnsForMappingCheck } from "./warnForUtils";
 
-describe('logMessage', () => {
+describe("logMessage", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
   });
 
-  test('it should display error with no info', () => {
-    const errorFn = vi.spyOn(console, 'error').mockImplementation(() => {});
-    logMessage('test');
+  test("it should display error with no info", () => {
+    const errorFn = vi.spyOn(console, "error").mockImplementation(() => {});
+    logMessage("test");
     expect(errorFn).toMatchInlineSnapshot(`
       [MockFunction error] {
         "calls": [
@@ -26,9 +26,9 @@ describe('logMessage', () => {
       }
     `);
   });
-  test('it should display error with info', () => {
-    const errorFn = vi.spyOn(console, 'error').mockImplementation(() => {});
-    logMessage('test', 'info');
+  test("it should display error with info", () => {
+    const errorFn = vi.spyOn(console, "error").mockImplementation(() => {});
+    logMessage("test", "info");
     expect(errorFn).toMatchInlineSnapshot(`
       [MockFunction error] {
         "calls": [
@@ -46,9 +46,9 @@ describe('logMessage', () => {
     `);
   });
 
-  test('it should display warning with no info', () => {
-    const errorFn = vi.spyOn(console, 'error').mockImplementation(() => {});
-    logMessage('test', undefined, true);
+  test("it should display warning with no info", () => {
+    const errorFn = vi.spyOn(console, "error").mockImplementation(() => {});
+    logMessage("test", undefined, true);
     expect(errorFn).toMatchInlineSnapshot(`
       [MockFunction error] {
         "calls": [
@@ -66,9 +66,9 @@ describe('logMessage', () => {
     `);
   });
 
-  test('it should display warning with info', () => {
-    const errorFn = vi.spyOn(console, 'error').mockImplementation(() => {});
-    logMessage('test', 'info', true);
+  test("it should display warning with info", () => {
+    const errorFn = vi.spyOn(console, "error").mockImplementation(() => {});
+    logMessage("test", "info", true);
     expect(errorFn).toMatchInlineSnapshot(`
       [MockFunction error] {
         "calls": [
@@ -87,21 +87,21 @@ describe('logMessage', () => {
   });
 });
 
-describe('reportNotWarnedForMapping', () => {
+describe("reportNotWarnedForMapping", () => {
   const reportError = vi.fn();
   beforeEach(() => {
     reportError.mockReset();
   });
 
-  test('it not report when warn is empty', () => {
-    const onlyWarnsForMappingCheck = createOnlyWarnsForMappingCheck('test', []);
+  test("it not report when warn is empty", () => {
+    const onlyWarnsForMappingCheck = createOnlyWarnsForMappingCheck("test", []);
     reportNotWarnedForMapping(reportError, onlyWarnsForMappingCheck);
     expect(reportError).not.toHaveBeenCalled();
   });
 
-  test('it report when warn not empty as array', () => {
-    const onlyWarnsForMappingCheck = createOnlyWarnsForMappingCheck('test', [
-      'dep1',
+  test("it report when warn not empty as array", () => {
+    const onlyWarnsForMappingCheck = createOnlyWarnsForMappingCheck("test", [
+      "dep1",
     ]);
     reportNotWarnedForMapping(reportError, onlyWarnsForMappingCheck);
     expect(reportError).toHaveBeenCalledTimes(1);
@@ -111,9 +111,9 @@ describe('reportNotWarnedForMapping', () => {
     );
   });
 
-  test('it report when warn not empty as record with star', () => {
-    const onlyWarnsForMappingCheck = createOnlyWarnsForMappingCheck('test', {
-      '*': ['dep1'],
+  test("it report when warn not empty as record with star", () => {
+    const onlyWarnsForMappingCheck = createOnlyWarnsForMappingCheck("test", {
+      "*": ["dep1"],
     });
     reportNotWarnedForMapping(reportError, onlyWarnsForMappingCheck);
     expect(reportError).toHaveBeenCalledTimes(1);
@@ -123,9 +123,9 @@ describe('reportNotWarnedForMapping', () => {
     );
   });
 
-  test('it report when warn not empty as record', () => {
-    const onlyWarnsForMappingCheck = createOnlyWarnsForMappingCheck('test', {
-      depKey: ['dep1'],
+  test("it report when warn not empty as record", () => {
+    const onlyWarnsForMappingCheck = createOnlyWarnsForMappingCheck("test", {
+      depKey: ["dep1"],
     });
     reportNotWarnedForMapping(reportError, onlyWarnsForMappingCheck);
     expect(reportError).toHaveBeenCalledTimes(1);

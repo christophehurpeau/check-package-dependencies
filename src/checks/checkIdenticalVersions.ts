@@ -1,7 +1,7 @@
-import { createReportError } from '../utils/createReportError';
-import { getKeys } from '../utils/object';
-import type { DependencyTypes, PackageJson } from '../utils/packageTypes';
-import type { OnlyWarnsForCheck } from '../utils/warnForUtils';
+import { createReportError } from "../utils/createReportError";
+import { getKeys } from "../utils/object";
+import type { DependencyTypes, PackageJson } from "../utils/packageTypes";
+import type { OnlyWarnsForCheck } from "../utils/warnForUtils";
 
 export function checkIdenticalVersions(
   pkg: PackageJson,
@@ -13,7 +13,7 @@ export function checkIdenticalVersions(
 ): void {
   const pkgDependencies = pkg[type] || {};
   const reportError = customCreateReportError(
-    'Identical Versions',
+    "Identical Versions",
     pkgPathName,
   );
 

@@ -1,38 +1,38 @@
-import path from 'node:path';
-import util from 'node:util';
-import { checkDirectDuplicateDependencies } from './checks/checkDirectDuplicateDependencies';
-import { checkDirectPeerDependencies } from './checks/checkDirectPeerDependencies';
-import { checkExactVersions } from './checks/checkExactVersions';
-import { checkIdenticalVersions } from './checks/checkIdenticalVersions';
-import { checkIdenticalVersionsThanDependency } from './checks/checkIdenticalVersionsThanDependency';
-import { checkMinRangeSatisfies } from './checks/checkMinRangeSatisfies';
-import { checkNoDependencies } from './checks/checkNoDependencies';
-import type { CheckResolutionMessage } from './checks/checkResolutionsHasExplanation';
-import { checkResolutionsHasExplanation } from './checks/checkResolutionsHasExplanation';
-import { checkResolutionsVersionsMatch } from './checks/checkResolutionsVersionsMatch';
-import { checkSatisfiesVersions } from './checks/checkSatisfiesVersions';
-import { checkSatisfiesVersionsFromDependency } from './checks/checkSatisfiesVersionsFromDependency';
-import { checkSatisfiesVersionsInDependency } from './checks/checkSatisfiesVersionsInDependency';
-import type { GetDependencyPackageJson } from './utils/createGetDependencyPackageJson';
-import { createGetDependencyPackageJson } from './utils/createGetDependencyPackageJson';
-import { displayConclusion } from './utils/createReportError';
-import { getEntries } from './utils/object';
+import path from "node:path";
+import util from "node:util";
+import { checkDirectDuplicateDependencies } from "./checks/checkDirectDuplicateDependencies";
+import { checkDirectPeerDependencies } from "./checks/checkDirectPeerDependencies";
+import { checkExactVersions } from "./checks/checkExactVersions";
+import { checkIdenticalVersions } from "./checks/checkIdenticalVersions";
+import { checkIdenticalVersionsThanDependency } from "./checks/checkIdenticalVersionsThanDependency";
+import { checkMinRangeSatisfies } from "./checks/checkMinRangeSatisfies";
+import { checkNoDependencies } from "./checks/checkNoDependencies";
+import type { CheckResolutionMessage } from "./checks/checkResolutionsHasExplanation";
+import { checkResolutionsHasExplanation } from "./checks/checkResolutionsHasExplanation";
+import { checkResolutionsVersionsMatch } from "./checks/checkResolutionsVersionsMatch";
+import { checkSatisfiesVersions } from "./checks/checkSatisfiesVersions";
+import { checkSatisfiesVersionsFromDependency } from "./checks/checkSatisfiesVersionsFromDependency";
+import { checkSatisfiesVersionsInDependency } from "./checks/checkSatisfiesVersionsInDependency";
+import type { GetDependencyPackageJson } from "./utils/createGetDependencyPackageJson";
+import { createGetDependencyPackageJson } from "./utils/createGetDependencyPackageJson";
+import { displayConclusion } from "./utils/createReportError";
+import { getEntries } from "./utils/object";
 import type {
   DependenciesRanges,
   DependencyName,
   DependencyTypes,
   PackageJson,
-} from './utils/packageTypes';
-import { readPkgJson, writePkgJson } from './utils/pkgJsonUtils';
+} from "./utils/packageTypes";
+import { readPkgJson, writePkgJson } from "./utils/pkgJsonUtils";
 import type {
   OnlyWarnsForOptionalDependencyMapping,
   OnlyWarnsFor,
   OnlyWarnsForDependencyMapping,
-} from './utils/warnForUtils';
+} from "./utils/warnForUtils";
 import {
   createOnlyWarnsForArrayCheck,
   createOnlyWarnsForMappingCheck,
-} from './utils/warnForUtils';
+} from "./utils/warnForUtils";
 
 export interface CreateCheckPackageOptions {
   packageDirectoryPath?: string;
@@ -65,7 +65,7 @@ export interface OnlyWarnsForInDependencyCheckPackageRecommendedOption {
 
 export type OnlyWarnsForInDependenciesCheckPackageRecommendedOption = Record<
   // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents, @typescript-eslint/sort-type-constituents
-  '*' | string,
+  "*" | string,
   OnlyWarnsForInDependencyCheckPackageRecommendedOption
 >;
 
@@ -282,7 +282,7 @@ export interface CheckPackageApi {
 export type ShouldHaveExactVersions = (depType: DependencyTypes) => boolean;
 
 export function createCheckPackage({
-  packageDirectoryPath = '.',
+  packageDirectoryPath = ".",
   internalWorkspacePkgDirectoryPath,
   isLibrary = false,
 }: CreateCheckPackageOptions = {}): CheckPackageApi {
@@ -292,13 +292,13 @@ export function createCheckPackage({
   const pkg = readPkgJson(pkgPath);
   const copyPkg: PackageJson = JSON.parse(JSON.stringify(pkg)) as PackageJson;
   const isPkgLibrary =
-    typeof isLibrary === 'function' ? isLibrary(pkg) : isLibrary;
+    typeof isLibrary === "function" ? isLibrary(pkg) : isLibrary;
   const shouldHaveExactVersions: ShouldHaveExactVersions = (depType) =>
-    !isPkgLibrary ? true : depType === 'devDependencies';
+    !isPkgLibrary ? true : depType === "devDependencies";
 
   let tryToAutoFix = false;
 
-  if (process.argv.slice(2).includes('--fix')) {
+  if (process.argv.slice(2).includes("--fix")) {
     tryToAutoFix = true;
   }
 
@@ -315,9 +315,9 @@ export function createCheckPackage({
   let runCalled = false;
 
   if (!internalWorkspacePkgDirectoryPath) {
-    process.on('beforeExit', () => {
+    process.on("beforeExit", () => {
       if (!runCalled) {
-        throw new Error('Call .run() and await the result.');
+        throw new Error("Call .run() and await the result.");
       }
     });
   }
@@ -371,15 +371,15 @@ export function createCheckPackage({
       jobs.push(
         new Job(this.checkExactVersions.name, async () => {
           const onlyWarnsForCheck = createOnlyWarnsForArrayCheck(
-            'checkExactVersions.onlyWarnsFor',
+            "checkExactVersions.onlyWarnsFor",
             onlyWarnsFor,
           );
           await checkExactVersions(
             pkg,
             pkgPathName,
             !allowRangeVersionsInDependencies
-              ? ['dependencies', 'devDependencies', 'resolutions']
-              : ['devDependencies', 'resolutions'],
+              ? ["dependencies", "devDependencies", "resolutions"]
+              : ["devDependencies", "resolutions"],
             {
               onlyWarnsForCheck,
               internalExactVersionsIgnore,
@@ -403,10 +403,10 @@ export function createCheckPackage({
       jobs.push(
         new Job(this.checkExactDevVersions.name, async () => {
           const onlyWarnsForCheck = createOnlyWarnsForArrayCheck(
-            'checkExactDevVersions.onlyWarnsFor',
+            "checkExactDevVersions.onlyWarnsFor",
             onlyWarnsFor,
           );
-          await checkExactVersions(pkg, pkgPathName, ['devDependencies'], {
+          await checkExactVersions(pkg, pkgPathName, ["devDependencies"], {
             onlyWarnsForCheck,
             tryToAutoFix,
             getDependencyPackageJson,
@@ -417,8 +417,8 @@ export function createCheckPackage({
     },
 
     checkNoDependencies(
-      type = 'dependencies',
-      moveToSuggestion = 'devDependencies',
+      type = "dependencies",
+      moveToSuggestion = "devDependencies",
     ) {
       checkNoDependencies(pkg, pkgPathName, type, moveToSuggestion);
       return this;
@@ -427,8 +427,8 @@ export function createCheckPackage({
     checkDirectPeerDependencies({
       missingOnlyWarnsFor,
       invalidOnlyWarnsFor,
-      internalMissingConfigName = 'missingOnlyWarnsFor',
-      internalInvalidConfigName = 'invalidOnlyWarnsFor',
+      internalMissingConfigName = "missingOnlyWarnsFor",
+      internalInvalidConfigName = "invalidOnlyWarnsFor",
     } = {}) {
       jobs.push(
         new Job(this.checkDirectPeerDependencies.name, async () => {
@@ -458,7 +458,7 @@ export function createCheckPackage({
 
     checkDirectDuplicateDependencies({
       onlyWarnsFor,
-      internalConfigName = 'onlyWarnsFor',
+      internalConfigName = "onlyWarnsFor",
     } = {}) {
       jobs.push(
         new Job(this.checkDirectDuplicateDependencies.name, async () => {
@@ -466,7 +466,7 @@ export function createCheckPackage({
             pkg,
             pkgPathName,
             isPkgLibrary,
-            'dependencies',
+            "dependencies",
             getDependencyPackageJson,
             createOnlyWarnsForMappingCheck(internalConfigName, onlyWarnsFor),
           );
@@ -546,15 +546,15 @@ export function createCheckPackage({
         missingOnlyWarnsFor: internalMissingPeerDependenciesOnlyWarnsFor,
         invalidOnlyWarnsFor: internalInvalidPeerDependenciesOnlyWarnsFor,
         internalMissingConfigName:
-          'onlyWarnsForInDependencies.missingPeerDependency',
+          "onlyWarnsForInDependencies.missingPeerDependency",
         internalInvalidConfigName:
-          'onlyWarnsForInDependencies.invalidPeerDependencyVersion',
+          "onlyWarnsForInDependencies.invalidPeerDependencyVersion",
       });
 
       this.checkDirectDuplicateDependencies({
         onlyWarnsFor: internalDirectDuplicateDependenciesOnlyWarnsFor,
         internalConfigName:
-          'onlyWarnsForInDependencies.duplicateDirectDependency',
+          "onlyWarnsForInDependencies.duplicateDirectDependency",
       });
 
       if (isPkgLibrary) {
@@ -576,7 +576,7 @@ export function createCheckPackage({
             checkIdenticalVersionsThanDependency(
               pkg,
               pkgPathName,
-              'resolutions',
+              "resolutions",
               resolutions,
               depPkg,
               depPkg.dependencies,
@@ -586,7 +586,7 @@ export function createCheckPackage({
             checkIdenticalVersionsThanDependency(
               pkg,
               pkgPathName,
-              'dependencies',
+              "dependencies",
               dependencies,
               depPkg,
               depPkg.dependencies,
@@ -596,7 +596,7 @@ export function createCheckPackage({
             checkIdenticalVersionsThanDependency(
               pkg,
               pkgPathName,
-              'devDependencies',
+              "devDependencies",
               devDependencies,
               depPkg,
               depPkg.dependencies,
@@ -618,7 +618,7 @@ export function createCheckPackage({
             checkIdenticalVersionsThanDependency(
               pkg,
               pkgPathName,
-              'resolutions',
+              "resolutions",
               resolutions,
               depPkg,
               depPkg.devDependencies,
@@ -628,7 +628,7 @@ export function createCheckPackage({
             checkIdenticalVersionsThanDependency(
               pkg,
               pkgPathName,
-              'dependencies',
+              "dependencies",
               dependencies,
               depPkg,
               depPkg.devDependencies,
@@ -638,7 +638,7 @@ export function createCheckPackage({
             checkIdenticalVersionsThanDependency(
               pkg,
               pkgPathName,
-              'devDependencies',
+              "devDependencies",
               devDependencies,
               depPkg,
               depPkg.devDependencies,
@@ -674,10 +674,10 @@ export function createCheckPackage({
             checkSatisfiesVersionsFromDependency(
               pkg,
               pkgPathName,
-              'resolutions',
+              "resolutions",
               resolutions,
               depPkg,
-              'dependencies',
+              "dependencies",
               { tryToAutoFix, shouldHaveExactVersions },
             );
           }
@@ -685,10 +685,10 @@ export function createCheckPackage({
             checkSatisfiesVersionsFromDependency(
               pkg,
               pkgPathName,
-              'dependencies',
+              "dependencies",
               dependencies,
               depPkg,
-              'dependencies',
+              "dependencies",
               { tryToAutoFix, shouldHaveExactVersions },
             );
           }
@@ -696,10 +696,10 @@ export function createCheckPackage({
             checkSatisfiesVersionsFromDependency(
               pkg,
               pkgPathName,
-              'devDependencies',
+              "devDependencies",
               devDependencies,
               depPkg,
-              'dependencies',
+              "dependencies",
               { tryToAutoFix, shouldHaveExactVersions },
             );
           }
@@ -721,10 +721,10 @@ export function createCheckPackage({
               checkSatisfiesVersionsFromDependency(
                 pkg,
                 pkgPathName,
-                'resolutions',
+                "resolutions",
                 resolutions,
                 depPkg,
-                'devDependencies',
+                "devDependencies",
                 { tryToAutoFix, shouldHaveExactVersions },
               );
             }
@@ -732,10 +732,10 @@ export function createCheckPackage({
               checkSatisfiesVersionsFromDependency(
                 pkg,
                 pkgPathName,
-                'dependencies',
+                "dependencies",
                 dependencies,
                 depPkg,
-                'devDependencies',
+                "devDependencies",
                 { tryToAutoFix, shouldHaveExactVersions },
               );
             }
@@ -743,10 +743,10 @@ export function createCheckPackage({
               checkSatisfiesVersionsFromDependency(
                 pkg,
                 pkgPathName,
-                'devDependencies',
+                "devDependencies",
                 devDependencies,
                 depPkg,
-                'devDependencies',
+                "devDependencies",
                 { tryToAutoFix, shouldHaveExactVersions },
               );
             }
@@ -758,16 +758,16 @@ export function createCheckPackage({
 
     checkIdenticalVersions({ resolutions, dependencies, devDependencies }) {
       if (resolutions) {
-        checkIdenticalVersions(pkg, pkgPathName, 'resolutions', resolutions);
+        checkIdenticalVersions(pkg, pkgPathName, "resolutions", resolutions);
       }
       if (dependencies) {
-        checkIdenticalVersions(pkg, pkgPathName, 'dependencies', dependencies);
+        checkIdenticalVersions(pkg, pkgPathName, "dependencies", dependencies);
       }
       if (devDependencies) {
         checkIdenticalVersions(
           pkg,
           pkgPathName,
-          'devDependencies',
+          "devDependencies",
           devDependencies,
         );
       }
@@ -792,10 +792,10 @@ export function createCheckPackage({
               checkSatisfiesVersionsFromDependency(
                 depPkg2,
                 pkgPathName,
-                'dependencies',
+                "dependencies",
                 dependencies,
                 depPkg1,
-                'dependencies',
+                "dependencies",
                 { tryToAutoFix, shouldHaveExactVersions },
               );
             }
@@ -803,10 +803,10 @@ export function createCheckPackage({
               checkSatisfiesVersionsFromDependency(
                 depPkg2,
                 pkgPathName,
-                'devDependencies',
+                "devDependencies",
                 devDependencies,
                 depPkg1,
-                'dependencies',
+                "dependencies",
                 { tryToAutoFix, shouldHaveExactVersions },
               );
             }
@@ -836,8 +836,8 @@ export function createCheckPackage({
           checkMinRangeSatisfies(
             pkgPathName,
             pkg,
-            'dependencies',
-            'devDependencies',
+            "dependencies",
+            "devDependencies",
             { tryToAutoFix },
           );
         }),
@@ -851,8 +851,8 @@ export function createCheckPackage({
           checkMinRangeSatisfies(
             pkgPathName,
             pkg,
-            'peerDependencies',
-            'dependencies',
+            "peerDependencies",
+            "dependencies",
             { tryToAutoFix },
           );
         }),

@@ -1,8 +1,8 @@
-import { getEntries } from './object';
+import { getEntries } from "./object";
 
 export type OnlyWarnsFor = string[];
 // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
-export type OnlyWarnsForDependencyMapping = Record<string | '*', OnlyWarnsFor>;
+export type OnlyWarnsForDependencyMapping = Record<string | "*", OnlyWarnsFor>;
 export type OnlyWarnsForOptionalDependencyMapping =
   | OnlyWarnsFor
   | OnlyWarnsForDependencyMapping
@@ -41,7 +41,7 @@ export const createOnlyWarnsForArrayCheck = (
 const isMapping = (
   onlyWarnsFor: OnlyWarnsForOptionalDependencyMapping,
 ): onlyWarnsFor is OnlyWarnsForDependencyMapping => {
-  return typeof onlyWarnsFor === 'object' && !Array.isArray(onlyWarnsFor);
+  return typeof onlyWarnsFor === "object" && !Array.isArray(onlyWarnsFor);
 };
 
 export const createOnlyWarnsForMappingCheck = (
@@ -67,11 +67,11 @@ export const createOnlyWarnsForMappingCheck = (
         return {
           configName,
           getNotWarnedFor() {
-            throw new Error('Invalid call to getNotWarnedFor()');
+            throw new Error("Invalid call to getNotWarnedFor()");
           },
           shouldWarnsFor(dependencyName) {
-            if (onlyWarnsFor['*']?.includes(dependencyName)) {
-              notWarnedFor['*'].delete(dependencyName);
+            if (onlyWarnsFor["*"]?.includes(dependencyName)) {
+              notWarnedFor["*"].delete(dependencyName);
               return true;
             }
             if (onlyWarnsFor[dependencyNameLevel1]?.includes(dependencyName)) {
@@ -94,7 +94,7 @@ export const createOnlyWarnsForMappingCheck = (
     getNotWarnedFor: (): Record<string, string[]> => {
       const notWarnedFor = arrayOnlyWarnsForCheck.getNotWarnedFor();
       if (notWarnedFor.length > 0) {
-        return { '*': notWarnedFor };
+        return { "*": notWarnedFor };
       }
       return {};
     },
@@ -102,7 +102,7 @@ export const createOnlyWarnsForMappingCheck = (
       return {
         configName,
         getNotWarnedFor() {
-          throw new Error('Invalid call to getNotWarnedFor()');
+          throw new Error("Invalid call to getNotWarnedFor()");
         },
         shouldWarnsFor(dependencyName) {
           return arrayOnlyWarnsForCheck.shouldWarnsFor(dependencyName);

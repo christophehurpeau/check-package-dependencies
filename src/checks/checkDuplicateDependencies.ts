@@ -1,7 +1,7 @@
-import semver from 'semver';
-import type { ReportError } from '../utils/createReportError';
-import type { PackageJson, DependencyTypes } from '../utils/packageTypes';
-import type { OnlyWarnsForCheck } from '../utils/warnForUtils';
+import semver from "semver";
+import type { ReportError } from "../utils/createReportError";
+import type { PackageJson, DependencyTypes } from "../utils/packageTypes";
+import type { OnlyWarnsForCheck } from "../utils/warnForUtils";
 
 export function checkDuplicateDependencies(
   reportError: ReportError,
@@ -24,8 +24,8 @@ export function checkDuplicateDependencies(
     if (
       versionsIn.length === 2 &&
       isPkgLibrary &&
-      versionsIn.includes('dependencies') &&
-      versionsIn.includes('devDependencies')
+      versionsIn.includes("dependencies") &&
+      versionsIn.includes("devDependencies")
     ) {
       const depVersion = pkg.dependencies![depKey];
       const devDepVersion = pkg.devDependencies![depKey];
@@ -33,7 +33,7 @@ export function checkDuplicateDependencies(
       if (depVersion && depVersion === devDepVersion) {
         reportError(
           `Invalid "${depKey}" has same version in dependencies and devDependencies`,
-          'please place it only in dependencies or use range in dependencies',
+          "please place it only in dependencies or use range in dependencies",
         );
         continue;
       }
@@ -45,18 +45,18 @@ export function checkDuplicateDependencies(
       (versionsIn.length === 2 && !allowDuplicated)
     ) {
       reportError(
-        `Invalid "${depKey}" present in ${versionsIn.join(' and ')}`,
-        'please place it only in dependencies',
+        `Invalid "${depKey}" present in ${versionsIn.join(" and ")}`,
+        "please place it only in dependencies",
       );
     } else {
       const versions = versionsIn.map((type) => pkg[type]![depKey]);
 
       versions.forEach((version, index) => {
-        if (version.startsWith('file:') || range.startsWith('file:')) return;
+        if (version.startsWith("file:") || range.startsWith("file:")) return;
         // https://yarnpkg.com/features/workspaces#workspace-ranges-workspace
         if (
-          version.startsWith('workspace:') ||
-          range.startsWith('workspace:')
+          version.startsWith("workspace:") ||
+          range.startsWith("workspace:")
         ) {
           return;
         }

@@ -1,11 +1,11 @@
 /* eslint-disable no-console */
 
-import chalk from 'chalk';
-import { getEntries } from './object';
+import chalk from "chalk";
+import { getEntries } from "./object";
 import type {
   OnlyWarnsForCheck,
   OnlyWarnsForMappingCheck,
-} from './warnForUtils';
+} from "./warnForUtils";
 
 export type ReportError = (
   msgTitle: string,
@@ -23,7 +23,7 @@ let totalFixable = 0;
 
 export function displayConclusion(): void {
   if (!totalWarnings && !totalErrors) {
-    console.log(`\n${chalk.green('✅ No errors or warnings found')}.`);
+    console.log(`\n${chalk.green("✅ No errors or warnings found")}.`);
   } else if (!totalErrors) {
     console.log(`\nFound ${chalk.yellow(`${totalWarnings} warnings`)}.`);
   } else if (!totalWarnings) {
@@ -57,8 +57,8 @@ export function logMessage(
   console.error(
     `${
       onlyWarns ? chalk.yellow(`⚠ ${msgTitle}`) : chalk.red(`❌ ${msgTitle}`)
-    }${msgInfo ? `: ${msgInfo}` : ''}${
-      autoFixable ? ` ${chalk.bgGreenBright(chalk.black('auto-fixable'))}` : ''
+    }${msgInfo ? `: ${msgInfo}` : ""}${
+      autoFixable ? ` ${chalk.bgGreenBright(chalk.black("auto-fixable"))}` : ""
     }`,
   );
 }
@@ -98,7 +98,7 @@ export function reportNotWarnedFor(
       `Invalid config in "${onlyWarnsForCheck.configName}"`,
       `no warning was raised for ${notWarnedFor
         .map((depName) => `"${depName}"`)
-        .join(', ')}`,
+        .join(", ")}`,
       false,
     );
   }
@@ -114,7 +114,7 @@ export function reportNotWarnedForMapping(
       `Invalid config in "${onlyWarnsForMappingCheck.configName}" for "${depNameOrStar}"`,
       `no warning was raised for ${notWarnedFor
         .map((depName) => `"${depName}"`)
-        .join(', ')}`,
+        .join(", ")}`,
     );
   });
 }

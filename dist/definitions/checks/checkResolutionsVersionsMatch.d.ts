@@ -1,5 +1,5 @@
-import { createReportError } from '../utils/createReportError';
-import type { PackageJson } from '../utils/packageTypes';
+import { createReportError } from "../utils/createReportError";
+import type { PackageJson } from "../utils/packageTypes";
 export interface CheckResolutionsVersionsMatchOptions {
     tryToAutoFix?: boolean;
     customCreateReportError?: typeof createReportError;

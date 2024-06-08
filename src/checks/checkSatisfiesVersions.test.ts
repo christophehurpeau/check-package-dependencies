@@ -1,7 +1,7 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { checkSatisfiesVersions } from './checkSatisfiesVersions';
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { checkSatisfiesVersions } from "./checkSatisfiesVersions";
 
-describe('checkSatisfiesVersions', () => {
+describe("checkSatisfiesVersions", () => {
   const mockReportError = vi.fn();
   const createReportError = vi.fn().mockReturnValue(mockReportError);
 
@@ -9,24 +9,24 @@ describe('checkSatisfiesVersions', () => {
     mockReportError.mockReset();
   });
 
-  it('should return no error when range is satisfied', () => {
+  it("should return no error when range is satisfied", () => {
     checkSatisfiesVersions(
-      { name: 'test', devDependencies: { test: '1.0.0' } },
-      'path',
-      'devDependencies',
-      { test: '^1.0.0' },
+      { name: "test", devDependencies: { test: "1.0.0" } },
+      "path",
+      "devDependencies",
+      { test: "^1.0.0" },
       undefined,
       { customCreateReportError: createReportError },
     );
     expect(mockReportError).not.toHaveBeenCalled();
   });
 
-  it('should return error when version not satisfied', () => {
+  it("should return error when version not satisfied", () => {
     checkSatisfiesVersions(
-      { name: 'test', devDependencies: { test: '1.0.0' } },
-      'path',
-      'devDependencies',
-      { test: '^2.0.0' },
+      { name: "test", devDependencies: { test: "1.0.0" } },
+      "path",
+      "devDependencies",
+      { test: "^2.0.0" },
       undefined,
       { customCreateReportError: createReportError },
     );
@@ -38,12 +38,12 @@ describe('checkSatisfiesVersions', () => {
       undefined,
     );
   });
-  it('should return error when dependency is missing', () => {
+  it("should return error when dependency is missing", () => {
     checkSatisfiesVersions(
-      { name: 'test', devDependencies: { test2: '1.0.0' } },
-      'path',
-      'devDependencies',
-      { test: '^1.0.0' },
+      { name: "test", devDependencies: { test2: "1.0.0" } },
+      "path",
+      "devDependencies",
+      { test: "^1.0.0" },
       undefined,
       { customCreateReportError: createReportError },
     );

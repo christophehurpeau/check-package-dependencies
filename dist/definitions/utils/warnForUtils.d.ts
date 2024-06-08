@@ -1,5 +1,5 @@
 export type OnlyWarnsFor = string[];
-export type OnlyWarnsForDependencyMapping = Record<string | '*', OnlyWarnsFor>;
+export type OnlyWarnsForDependencyMapping = Record<string | "*", OnlyWarnsFor>;
 export type OnlyWarnsForOptionalDependencyMapping = OnlyWarnsFor | OnlyWarnsForDependencyMapping | undefined;
 export interface OnlyWarnsForCheck {
     configName: string;

@@ -1,6 +1,6 @@
-import type { PackageJson } from 'type-fest';
-import { createReportError } from '../utils/createReportError';
-import type { DependencyTypes } from '../utils/packageTypes';
+import type { PackageJson } from "type-fest";
+import { createReportError } from "../utils/createReportError";
+import type { DependencyTypes } from "../utils/packageTypes";
 export interface CheckMinRangeSatisfiesOptions {
     customCreateReportError?: typeof createReportError;
     tryToAutoFix?: boolean;

@@ -1,12 +1,12 @@
-import type { GetDependencyPackageJson } from '../utils/createGetDependencyPackageJson';
+import type { GetDependencyPackageJson } from "../utils/createGetDependencyPackageJson";
 import {
   reportNotWarnedForMapping,
   createReportError,
-} from '../utils/createReportError';
-import { getKeys } from '../utils/object';
-import type { PackageJson, DependencyTypes } from '../utils/packageTypes';
-import type { OnlyWarnsForMappingCheck } from '../utils/warnForUtils';
-import { checkDuplicateDependencies } from './checkDuplicateDependencies';
+} from "../utils/createReportError";
+import { getKeys } from "../utils/object";
+import type { PackageJson, DependencyTypes } from "../utils/packageTypes";
+import type { OnlyWarnsForMappingCheck } from "../utils/warnForUtils";
+import { checkDuplicateDependencies } from "./checkDuplicateDependencies";
 
 export async function checkDirectDuplicateDependencies(
   pkg: PackageJson,
@@ -15,7 +15,7 @@ export async function checkDirectDuplicateDependencies(
   depType: DependencyTypes,
   getDependencyPackageJson: GetDependencyPackageJson,
   onlyWarnsForCheck: OnlyWarnsForMappingCheck,
-  reportErrorNamePrefix = '',
+  reportErrorNamePrefix = "",
   customCreateReportError = createReportError,
 ): Promise<void> {
   const reportError = customCreateReportError(
@@ -28,10 +28,10 @@ export async function checkDirectDuplicateDependencies(
     searchIn: DependencyTypes[];
   }[] = [
     {
-      type: 'devDependencies',
-      searchIn: ['devDependencies', 'dependencies'],
+      type: "devDependencies",
+      searchIn: ["devDependencies", "dependencies"],
     },
-    { type: 'dependencies', searchIn: ['devDependencies', 'dependencies'] },
+    { type: "dependencies", searchIn: ["devDependencies", "dependencies"] },
   ];
 
   checks.forEach(({ type, searchIn }) => {

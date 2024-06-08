@@ -1,20 +1,20 @@
-import type { SemVer } from 'semver-utils';
-import semverUtils from 'semver-utils';
+import type { SemVer } from "semver-utils";
+import semverUtils from "semver-utils";
 
 export const parse = semverUtils.parse;
 export const parseRange = semverUtils.parseRange;
 
 // semverUtils.stringify does not support the operator
 function stringify(semver: SemVer): string {
-  let str = '';
+  let str = "";
   if (semver.operator) {
     str += semver.operator;
   }
-  str += semver.major || '0';
-  str += '.';
-  str += semver.minor || '0';
-  str += '.';
-  str += semver.patch || '0';
+  str += semver.major || "0";
+  str += ".";
+  str += semver.minor || "0";
+  str += ".";
+  str += semver.patch || "0";
   if (semver.release) {
     str += `-${semver.release}`;
   }
@@ -27,7 +27,7 @@ function stringify(semver: SemVer): string {
 export function getOperator(range: string): string | null {
   const parsedRange = parseRange(range);
   if (parsedRange.length !== 1) return null;
-  return parsedRange[0].operator || '';
+  return parsedRange[0].operator || "";
 }
 
 export function changeOperator(
@@ -38,7 +38,7 @@ export function changeOperator(
   const parsedRange = parseRange(range);
   if (parsedRange.length !== 1) return null;
   const parsed = parsedRange[0];
-  parsed.operator = operator === '' ? undefined : operator;
+  parsed.operator = operator === "" ? undefined : operator;
   return stringify(parsed);
 }
 

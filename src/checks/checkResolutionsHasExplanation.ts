@@ -1,6 +1,6 @@
-import type { GetDependencyPackageJson } from '../utils/createGetDependencyPackageJson';
-import { createReportError } from '../utils/createReportError';
-import type { PackageJson } from '../utils/packageTypes';
+import type { GetDependencyPackageJson } from "../utils/createGetDependencyPackageJson";
+import { createReportError } from "../utils/createReportError";
+import type { PackageJson } from "../utils/packageTypes";
 
 export type CheckResolutionMessage = (
   depKey: string,
@@ -20,7 +20,7 @@ export function checkResolutionsHasExplanation(
   const pkgResolutions = pkg.resolutions || {};
   const pkgResolutionsExplained = pkg.resolutionsExplained || {};
   const reportError = customCreateReportError(
-    'Resolutions has explanation',
+    "Resolutions has explanation",
     pkgPathName,
   );
 

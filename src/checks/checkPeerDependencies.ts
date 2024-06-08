@@ -1,7 +1,7 @@
-import semver from 'semver';
-import type { ReportError } from '../utils/createReportError';
-import type { PackageJson, DependencyTypes } from '../utils/packageTypes';
-import type { OnlyWarnsForCheck } from '../utils/warnForUtils';
+import semver from "semver";
+import type { ReportError } from "../utils/createReportError";
+import type { PackageJson, DependencyTypes } from "../utils/packageTypes";
+import type { OnlyWarnsForCheck } from "../utils/warnForUtils";
 
 export function checkPeerDependencies(
   pkg: PackageJson,
@@ -31,7 +31,7 @@ export function checkPeerDependencies(
         continue;
       }
 
-      let additionalDetails = '';
+      let additionalDetails = "";
       // satisfied by another direct dependency
       const providedDependenciesForDepName = providedDependencies.filter(
         ([depName]) => depName === peerDepName,
@@ -46,13 +46,13 @@ export function checkPeerDependencies(
         }
 
         additionalDetails +=
-          ' (required as some dependencies have non-satisfying range too)';
+          " (required as some dependencies have non-satisfying range too)";
       }
 
       reportError(
         `Missing "${peerDepName}" peer dependency from "${depPkg.name}" in ${type}`,
         `it should satisfies "${range}" and be in ${allowedPeerIn.join(
-          ' or ',
+          " or ",
         )}${additionalDetails}`,
         missingOnlyWarnsForCheck.shouldWarnsFor(peerDepName),
       );
@@ -62,11 +62,11 @@ export function checkPeerDependencies(
       );
 
       versions.forEach((version, index) => {
-        if (version.startsWith('npm:')) {
+        if (version.startsWith("npm:")) {
           return;
         }
 
-        if (version === '*') {
+        if (version === "*") {
           return;
         }
 

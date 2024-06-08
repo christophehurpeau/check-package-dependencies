@@ -1,9 +1,9 @@
-import semver from 'semver';
-import type { ShouldHaveExactVersions } from '../check-package';
-import { createReportError } from '../utils/createReportError';
-import type { DependencyTypes, PackageJson } from '../utils/packageTypes';
-import { changeOperator, getOperator } from '../utils/semverUtils';
-import type { OnlyWarnsForCheck } from '../utils/warnForUtils';
+import semver from "semver";
+import type { ShouldHaveExactVersions } from "../check-package";
+import { createReportError } from "../utils/createReportError";
+import type { DependencyTypes, PackageJson } from "../utils/packageTypes";
+import { changeOperator, getOperator } from "../utils/semverUtils";
+import type { OnlyWarnsForCheck } from "../utils/warnForUtils";
 
 export interface CheckSatisfiesVersionsFromDependencyOptions {
   tryToAutoFix?: boolean;
@@ -55,10 +55,10 @@ export function checkSatisfiesVersionsFromDependency(
         if (existingOperator !== null) {
           return existingOperator;
         }
-        return shouldHaveExactVersions(type) ? '' : null;
+        return shouldHaveExactVersions(type) ? "" : null;
       })();
 
-      return expectedOperator === ''
+      return expectedOperator === ""
         ? semver.minVersion(range)?.version
         : changeOperator(range, expectedOperator);
     };

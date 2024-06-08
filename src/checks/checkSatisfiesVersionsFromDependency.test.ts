@@ -1,6 +1,6 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { DependencyTypes, PackageJson } from '../utils/packageTypes';
-import { checkSatisfiesVersionsFromDependency } from './checkSatisfiesVersionsFromDependency';
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { DependencyTypes, PackageJson } from "../utils/packageTypes";
+import { checkSatisfiesVersionsFromDependency } from "./checkSatisfiesVersionsFromDependency";
 
 describe(checkSatisfiesVersionsFromDependency.name, () => {
   const mockReportError = vi.fn();
@@ -9,14 +9,14 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
   beforeEach(() => {
     mockReportError.mockReset();
   });
-  it('should return no error when no keys', () => {
+  it("should return no error when no keys", () => {
     checkSatisfiesVersionsFromDependency(
-      { name: 'test' },
-      'path',
-      'dependencies',
+      { name: "test" },
+      "path",
+      "dependencies",
       [],
-      { name: 'depTest', dependencies: {} },
-      'dependencies',
+      { name: "depTest", dependencies: {} },
+      "dependencies",
       {
         customCreateReportError: createReportError,
         shouldHaveExactVersions: () => false,
@@ -25,32 +25,32 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
     expect(mockReportError).not.toHaveBeenCalled();
   });
 
-  describe('expect no error', () => {
+  describe("expect no error", () => {
     it.each([
-      ['test1', 'devDependencies', 'is exact', '1.0.0', '1.0.0'],
-      ['test2', 'devDependencies', 'is in range (^)', '1.0.0', '1.0.0'],
+      ["test1", "devDependencies", "is exact", "1.0.0", "1.0.0"],
+      ["test2", "devDependencies", "is in range (^)", "1.0.0", "1.0.0"],
       [
-        'test3',
-        'devDependencies',
-        'is range (^) in range (^), when same',
-        '^1.0.0',
-        '^1.0.0',
+        "test3",
+        "devDependencies",
+        "is range (^) in range (^), when same",
+        "^1.0.0",
+        "^1.0.0",
       ],
       [
-        'test4',
-        'devDependencies',
-        'is range (^) in range (^), when higher',
-        '^1.0.0',
-        '^1.0.1',
+        "test4",
+        "devDependencies",
+        "is range (^) in range (^), when higher",
+        "^1.0.0",
+        "^1.0.1",
       ],
-      ['test5', 'dependencies', 'is exact', '1.0.0', '1.0.0'],
-      ['test6', 'resolutions', 'is exact', '1.0.0', '1.0.0'],
+      ["test5", "dependencies", "is exact", "1.0.0", "1.0.0"],
+      ["test6", "resolutions", "is exact", "1.0.0", "1.0.0"],
     ])(
-      'should return no error when %s in %s is %s',
+      "should return no error when %s in %s is %s",
       (depName, depTypeInDep, _, depValueInDep, depValueInPkg) => {
-        const depTypeInPkg: DependencyTypes = 'devDependencies';
+        const depTypeInPkg: DependencyTypes = "devDependencies";
         const pkg: PackageJson = {
-          name: 'test',
+          name: "test",
           ...(depValueInPkg
             ? { [depTypeInPkg]: { [depName]: depValueInPkg } }
             : {}),
@@ -58,11 +58,11 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
 
         checkSatisfiesVersionsFromDependency(
           pkg,
-          'path',
+          "path",
           depTypeInPkg,
           [depName],
           {
-            name: 'test-dep',
+            name: "test-dep",
             [depTypeInDep]: { [depName]: depValueInDep },
           } as PackageJson,
           depTypeInDep as DependencyTypes,
@@ -76,73 +76,73 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
     );
   });
 
-  describe('expect to fix', () => {
+  describe("expect to fix", () => {
     it.each([
       [
         '"devDependencies" missing',
-        '1.0.1',
+        "1.0.1",
         {},
-        { devDependencies: { expectedDep: '1.0.1' } },
+        { devDependencies: { expectedDep: "1.0.1" } },
         true,
       ],
       [
-        'dependency missing',
-        '1.0.1',
-        { devDependencies: { otherPackage: '1.0.0' } },
-        { devDependencies: { otherPackage: '1.0.0', expectedDep: '1.0.1' } },
+        "dependency missing",
+        "1.0.1",
+        { devDependencies: { otherPackage: "1.0.0" } },
+        { devDependencies: { otherPackage: "1.0.0", expectedDep: "1.0.1" } },
         true,
       ],
       [
-        'invalid version',
-        '1.0.1',
-        { devDependencies: { expectedDep: '1.0.0' } },
-        { devDependencies: { expectedDep: '1.0.1' } },
+        "invalid version",
+        "1.0.1",
+        { devDependencies: { expectedDep: "1.0.0" } },
+        { devDependencies: { expectedDep: "1.0.1" } },
         true,
       ],
       [
-        'expects exact versions with missing version',
-        '1.0.1',
+        "expects exact versions with missing version",
+        "1.0.1",
         { devDependencies: {} },
-        { devDependencies: { expectedDep: '1.0.1' } },
+        { devDependencies: { expectedDep: "1.0.1" } },
         true,
       ],
       [
-        'expects range versions with missing version',
-        '^1.0.1',
+        "expects range versions with missing version",
+        "^1.0.1",
         { devDependencies: {} },
-        { devDependencies: { expectedDep: '^1.0.1' } },
+        { devDependencies: { expectedDep: "^1.0.1" } },
         false,
       ],
       [
-        'expects exact version with existing version ; shouldHaveExactVersions = true',
-        '^1.0.1',
-        { devDependencies: { expectedDep: '1.0.0' } },
-        { devDependencies: { expectedDep: '1.0.1' } },
+        "expects exact version with existing version ; shouldHaveExactVersions = true",
+        "^1.0.1",
+        { devDependencies: { expectedDep: "1.0.0" } },
+        { devDependencies: { expectedDep: "1.0.1" } },
         true,
       ],
       [
-        'expects exact version with existing version ; shouldHaveExactVersions = false',
-        '^1.0.1',
-        { devDependencies: { expectedDep: '1.0.0' } },
-        { devDependencies: { expectedDep: '1.0.1' } },
+        "expects exact version with existing version ; shouldHaveExactVersions = false",
+        "^1.0.1",
+        { devDependencies: { expectedDep: "1.0.0" } },
+        { devDependencies: { expectedDep: "1.0.1" } },
         false,
       ],
       [
-        'expects range version with existing version ; shouldHaveExactVersions = true',
-        '^1.0.1',
-        { devDependencies: { expectedDep: '^1.0.0' } },
-        { devDependencies: { expectedDep: '^1.0.1' } },
+        "expects range version with existing version ; shouldHaveExactVersions = true",
+        "^1.0.1",
+        { devDependencies: { expectedDep: "^1.0.0" } },
+        { devDependencies: { expectedDep: "^1.0.1" } },
         true,
       ],
       [
-        'expects range version with existing version ; shouldHaveExactVersions = false ; with release',
-        '^1.0.1-beta',
-        { devDependencies: { expectedDep: '^1.0.0' } },
-        { devDependencies: { expectedDep: '^1.0.1-beta' } },
+        "expects range version with existing version ; shouldHaveExactVersions = false ; with release",
+        "^1.0.1-beta",
+        { devDependencies: { expectedDep: "^1.0.0" } },
+        { devDependencies: { expectedDep: "^1.0.1-beta" } },
         false,
       ],
     ])(
-      'should to fix when %s',
+      "should to fix when %s",
       (
         _,
         depValueInDep,
@@ -150,22 +150,22 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
         expectedPkgResult,
         shouldHaveExactVersions,
       ) => {
-        const depTypeInPkg: DependencyTypes = 'devDependencies';
-        const depTypeInDep: DependencyTypes = 'devDependencies';
+        const depTypeInPkg: DependencyTypes = "devDependencies";
+        const depTypeInDep: DependencyTypes = "devDependencies";
 
-        const depName = 'expectedDep';
+        const depName = "expectedDep";
         const pkg: PackageJson = {
-          name: 'test',
+          name: "test",
           ...pkgContent,
         };
 
         checkSatisfiesVersionsFromDependency(
           pkg,
-          'path',
+          "path",
           depTypeInPkg,
           [depName],
           {
-            name: 'test-dep',
+            name: "test-dep",
             [depTypeInDep]: { [depName]: depValueInDep },
           } as PackageJson,
           depTypeInDep as DependencyTypes,
@@ -176,57 +176,57 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
           },
         );
         expect(pkg).toEqual({
-          name: 'test',
+          name: "test",
           ...expectedPkgResult,
         });
       },
     );
   });
 
-  describe('expect error when dependency is expected', () => {
+  describe("expect error when dependency is expected", () => {
     it.each([
       [
-        'test1',
-        'devDependencies',
-        'missing in pkg',
-        { devDependencies: { test1: '1.0.0' } },
+        "test1",
+        "devDependencies",
+        "missing in pkg",
+        { devDependencies: { test1: "1.0.0" } },
         {},
         'Missing "test1" in "devDependencies" of "test"',
         'should satisfies "1.0.0" from "test-dep" in "devDependencies".',
         true,
       ],
       [
-        'test2',
-        'devDependencies',
-        'dependency missing in pkg dependency',
-        { devDependencies: { test2: '1.0.0' } },
+        "test2",
+        "devDependencies",
+        "dependency missing in pkg dependency",
+        { devDependencies: { test2: "1.0.0" } },
         { devDependencies: {} },
         'Missing "test2" in "devDependencies" of "test"',
         'should satisfies "1.0.0" from "test-dep" in "devDependencies".',
         true,
       ],
       [
-        'test3',
-        'devDependencies',
-        'devDependencies missing in pkg dependency',
+        "test3",
+        "devDependencies",
+        "devDependencies missing in pkg dependency",
         {},
-        { devDependencies: { test3: '1.0.0' } },
+        { devDependencies: { test3: "1.0.0" } },
         'Unexpected missing dependency "test3" in "test-dep"',
         'config expects "test3" in "devDependencies" of "test-dep".',
         false,
       ],
       [
-        'test4',
-        'devDependencies',
-        'invalid',
-        { devDependencies: { test4: '0.1.0' } },
-        { devDependencies: { test4: '1.0.0' } },
+        "test4",
+        "devDependencies",
+        "invalid",
+        { devDependencies: { test4: "0.1.0" } },
+        { devDependencies: { test4: "1.0.0" } },
         'Invalid "test4" in "devDependencies" of "test"',
         '"1.0.0" should satisfies "0.1.0" from "test-dep"\'s "devDependencies".',
         true,
       ],
     ])(
-      'should error when %s is %s in %s',
+      "should error when %s is %s in %s",
       (
         depName,
         depTypeInDep,
@@ -237,21 +237,21 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
         errorInfo,
         autoFixable,
       ) => {
-        const depTypeInPkg: DependencyTypes = 'devDependencies';
+        const depTypeInPkg: DependencyTypes = "devDependencies";
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         const pkg: PackageJson = {
           ...(pkgContent as PackageJson),
-          name: 'test',
+          name: "test",
         } as PackageJson;
 
         checkSatisfiesVersionsFromDependency(
           pkg,
-          'path',
+          "path",
           depTypeInPkg,
           [depName],
           {
             ...(depPkgContent as PackageJson),
-            name: 'test-dep',
+            name: "test-dep",
           } as PackageJson,
           depTypeInDep as DependencyTypes,
           {

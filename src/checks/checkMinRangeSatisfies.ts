@@ -1,9 +1,9 @@
-import semver from 'semver';
-import semverUtils from 'semver-utils';
-import type { PackageJson } from 'type-fest';
-import { createReportError } from '../utils/createReportError';
-import { getEntries } from '../utils/object';
-import type { DependencyTypes } from '../utils/packageTypes';
+import semver from "semver";
+import semverUtils from "semver-utils";
+import type { PackageJson } from "type-fest";
+import { createReportError } from "../utils/createReportError";
+import { getEntries } from "../utils/object";
+import type { DependencyTypes } from "../utils/packageTypes";
 
 export interface CheckMinRangeSatisfiesOptions {
   customCreateReportError?: typeof createReportError;
@@ -13,8 +13,8 @@ export interface CheckMinRangeSatisfiesOptions {
 export function checkMinRangeSatisfies(
   pkgPathName: string,
   pkg: PackageJson,
-  type1: DependencyTypes = 'dependencies',
-  type2: DependencyTypes = 'devDependencies',
+  type1: DependencyTypes = "dependencies",
+  type2: DependencyTypes = "devDependencies",
   {
     tryToAutoFix = false,
     customCreateReportError = createReportError,
@@ -33,7 +33,7 @@ export function checkMinRangeSatisfies(
   );
 
   for (const [depName, depRange1] of getEntries(dependencies1)) {
-    if (depRange1 === '*') continue;
+    if (depRange1 === "*") continue;
 
     const depRange2 = dependencies2[depName];
     if (!depRange2 || !depRange1) continue;
@@ -48,7 +48,7 @@ export function checkMinRangeSatisfies(
       if (tryToAutoFix) {
         const depRange1Parsed = semverUtils.parseRange(depRange1);
         dependencies1[depName] =
-          (depRange1Parsed[0]?.operator || '') +
+          (depRange1Parsed[0]?.operator || "") +
           (semver.minVersion(depRange2)?.version || depRange2);
       } else {
         reportError(

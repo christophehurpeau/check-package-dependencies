@@ -1,7 +1,7 @@
-import semver from 'semver';
-import { createReportError } from '../utils/createReportError';
-import type { DependencyTypes, PackageJson } from '../utils/packageTypes';
-import type { OnlyWarnsForCheck } from '../utils/warnForUtils';
+import semver from "semver";
+import { createReportError } from "../utils/createReportError";
+import type { DependencyTypes, PackageJson } from "../utils/packageTypes";
+import type { OnlyWarnsForCheck } from "../utils/warnForUtils";
 
 export interface CheckSatisfiesVersionsOptions {
   customCreateReportError?: typeof createReportError;
@@ -19,7 +19,7 @@ export function checkSatisfiesVersions(
 ): void {
   const pkgDependencies = pkg[type] || {};
   const reportError = customCreateReportError(
-    'Satisfies Versions',
+    "Satisfies Versions",
     pkgPathName,
   );
 

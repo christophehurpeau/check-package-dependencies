@@ -1,8 +1,8 @@
-import type { PackageJson } from './packageTypes';
+import type { PackageJson } from "./packageTypes";
 import {
   internalLoadPackageJsonFromNodeModules,
   readPkgJson,
-} from './pkgJsonUtils';
+} from "./pkgJsonUtils";
 
 export type GetDependencyPackageJson = (pkgDepName: string) => PackageJson;
 
@@ -27,7 +27,7 @@ export function createGetDependencyPackageJson({
     const existing = nodeModulesPackagePathCache.get(pkgDepName);
     if (existing) return existing;
     let pkg: PackageJson;
-    if (pkgDepName.startsWith('.')) {
+    if (pkgDepName.startsWith(".")) {
       const packagePath = `${pkgDirname}/${pkgDepName}/package.json`;
       pkg = internalReadPkgJson(packagePath);
     } else {
@@ -41,7 +41,7 @@ export function createGetDependencyPackageJson({
 
         if (
           (error as NodeJS.ErrnoException).code !==
-          'ERR_PACKAGE_PATH_NOT_EXPORTED'
+          "ERR_PACKAGE_PATH_NOT_EXPORTED"
         ) {
           throw error;
         }

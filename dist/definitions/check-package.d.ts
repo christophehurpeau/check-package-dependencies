@@ -1,7 +1,7 @@
-import type { CheckResolutionMessage } from './checks/checkResolutionsHasExplanation';
-import type { GetDependencyPackageJson } from './utils/createGetDependencyPackageJson';
-import type { DependenciesRanges, DependencyName, DependencyTypes, PackageJson } from './utils/packageTypes';
-import type { OnlyWarnsForOptionalDependencyMapping, OnlyWarnsFor } from './utils/warnForUtils';
+import type { CheckResolutionMessage } from "./checks/checkResolutionsHasExplanation";
+import type { GetDependencyPackageJson } from "./utils/createGetDependencyPackageJson";
+import type { DependenciesRanges, DependencyName, DependencyTypes, PackageJson } from "./utils/packageTypes";
+import type { OnlyWarnsForOptionalDependencyMapping, OnlyWarnsFor } from "./utils/warnForUtils";
 export interface CreateCheckPackageOptions {
     packageDirectoryPath?: string;
     isLibrary?: boolean | ((pkg: PackageJson) => boolean);
@@ -26,7 +26,7 @@ export interface OnlyWarnsForInDependencyCheckPackageRecommendedOption {
     missingPeerDependency: OnlyWarnsFor;
     invalidPeerDependencyVersion: OnlyWarnsFor;
 }
-export type OnlyWarnsForInDependenciesCheckPackageRecommendedOption = Record<'*' | string, OnlyWarnsForInDependencyCheckPackageRecommendedOption>;
+export type OnlyWarnsForInDependenciesCheckPackageRecommendedOption = Record<"*" | string, OnlyWarnsForInDependencyCheckPackageRecommendedOption>;
 export interface CheckRecommendedOptions {
     /** default is true for libraries, false otherwise */
     allowRangeVersionsInDependencies?: boolean;

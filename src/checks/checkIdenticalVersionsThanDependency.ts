@@ -1,6 +1,6 @@
-import { createReportError } from '../utils/createReportError';
-import type { PackageJson, DependencyTypes } from '../utils/packageTypes';
-import type { OnlyWarnsForCheck } from '../utils/warnForUtils';
+import { createReportError } from "../utils/createReportError";
+import type { PackageJson, DependencyTypes } from "../utils/packageTypes";
+import type { OnlyWarnsForCheck } from "../utils/warnForUtils";
 
 export function checkIdenticalVersionsThanDependency(
   pkg: PackageJson,
@@ -27,10 +27,10 @@ export function checkIdenticalVersionsThanDependency(
       return;
     }
 
-    if (version.startsWith('^') || version.startsWith('~')) {
+    if (version.startsWith("^") || version.startsWith("~")) {
       reportError(
         `Unexpected range dependency in "${depPkg.name}" for "${depKey}"`,
-        'perhaps use checkSatisfiesVersionsFromDependency() instead.',
+        "perhaps use checkSatisfiesVersionsFromDependency() instead.",
       );
       return;
     }

@@ -1,11 +1,11 @@
-import semver from 'semver';
-import type { GetDependencyPackageJson } from '../utils/createGetDependencyPackageJson';
+import semver from "semver";
+import type { GetDependencyPackageJson } from "../utils/createGetDependencyPackageJson";
 import {
   createReportError,
   reportNotWarnedFor,
-} from '../utils/createReportError';
-import type { PackageJson, DependencyTypes } from '../utils/packageTypes';
-import type { OnlyWarnsFor, OnlyWarnsForCheck } from '../utils/warnForUtils';
+} from "../utils/createReportError";
+import type { PackageJson, DependencyTypes } from "../utils/packageTypes";
+import type { OnlyWarnsFor, OnlyWarnsForCheck } from "../utils/warnForUtils";
 
 export interface CheckExactVersionsOptions {
   getDependencyPackageJson?: GetDependencyPackageJson;
@@ -16,10 +16,10 @@ export interface CheckExactVersionsOptions {
 }
 
 const isVersionRange = (version: string): boolean =>
-  version.startsWith('^') ||
-  version.startsWith('~') ||
-  version.startsWith('>') ||
-  version.startsWith('<');
+  version.startsWith("^") ||
+  version.startsWith("~") ||
+  version.startsWith(">") ||
+  version.startsWith("<");
 
 // eslint-disable-next-line @typescript-eslint/require-await
 export async function checkExactVersions(
@@ -34,7 +34,7 @@ export async function checkExactVersions(
     customCreateReportError = createReportError,
   }: CheckExactVersionsOptions,
 ): Promise<void> {
-  const reportError = customCreateReportError('Exact versions', pkgPathName);
+  const reportError = customCreateReportError("Exact versions", pkgPathName);
 
   for (const type of types) {
     const pkgDependencies = pkg[type];
@@ -44,7 +44,7 @@ export async function checkExactVersions(
       pkgDependencies,
     )) {
       let version = versionConst;
-      if (version.startsWith('npm:')) {
+      if (version.startsWith("npm:")) {
         const match = /^npm:.*@(.*)$/.exec(version);
         if (!match) throw new Error(`Invalid version match: ${version}`);
         const [, realVersion] = match;
@@ -69,7 +69,7 @@ export async function checkExactVersions(
               `expecting "${version}" to be exact${
                 tryToAutoFix
                   ? `, autofix failed to resolve "${dependencyName}".`
-                  : ''
+                  : ""
               }`,
               shouldOnlyWarn,
               false,
@@ -84,7 +84,7 @@ export async function checkExactVersions(
               `expecting "${version}" to be exact${
                 tryToAutoFix
                   ? `, autofix failed as "${dependencyName}"'s resolved version is "${resolvedDep.version}" and doesn't satisfies "${version}".`
-                  : ''
+                  : ""
               }`,
               shouldOnlyWarn,
               false,
@@ -100,9 +100,9 @@ export async function checkExactVersions(
             );
           }
         } else {
-          let exactVersion = version.slice(version[1] === '=' ? 2 : 1);
-          if (exactVersion.split('.').length < 3) {
-            if (exactVersion.split('.').length === 1) {
+          let exactVersion = version.slice(version[1] === "=" ? 2 : 1);
+          if (exactVersion.split(".").length < 3) {
+            if (exactVersion.split(".").length === 1) {
               exactVersion = `${exactVersion}.0.0`;
             } else {
               exactVersion = `${exactVersion}.0`;

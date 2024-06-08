@@ -1,10 +1,10 @@
-import { readFileSync, writeFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
-import { resolve as importResolve } from 'import-meta-resolve';
-import type { PackageJson } from './packageTypes';
+import { readFileSync, writeFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { resolve as importResolve } from "import-meta-resolve";
+import type { PackageJson } from "./packageTypes";
 
 export function readPkgJson(packagePath: string): PackageJson {
-  return JSON.parse(readFileSync(packagePath, 'utf8')) as PackageJson;
+  return JSON.parse(readFileSync(packagePath, "utf8")) as PackageJson;
 }
 
 export function writePkgJson(packagePath: string, pkg: PackageJson): void {
