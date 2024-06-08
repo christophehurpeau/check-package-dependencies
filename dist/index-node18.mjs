@@ -43,12 +43,9 @@ Found ${chalk.red(`${totalErrors} errors`)} and ${chalk.yellow(
   }
 }
 function logMessage(msgTitle, msgInfo, onlyWarns, autoFixable) {
-  if (onlyWarns)
-    totalWarnings++;
-  else
-    totalErrors++;
-  if (autoFixable)
-    totalFixable++;
+  if (onlyWarns) totalWarnings++;
+  else totalErrors++;
+  if (autoFixable) totalFixable++;
   console.error(
     `${onlyWarns ? chalk.yellow(`\u26A0 ${msgTitle}`) : chalk.red(`\u274C ${msgTitle}`)}${msgInfo ? `: ${msgInfo}` : ""}${autoFixable ? ` ${chalk.bgGreenBright(chalk.black("auto-fixable"))}` : ""}`
   );
@@ -56,8 +53,7 @@ function logMessage(msgTitle, msgInfo, onlyWarns, autoFixable) {
 function createReportError(title, pkgPathName) {
   return function reportError(msgTitle, msgInfo, onlyWarns, autoFixable = false) {
     if (titleDisplayed !== title || pkgPathName !== pkgPathDisplayed) {
-      if (titleDisplayed)
-        console.error();
+      if (titleDisplayed) console.error();
       console.error(chalk.cyan(`== ${title} in ${pkgPathName} ==`));
       titleDisplayed = title;
       pkgPathDisplayed = pkgPathName;
@@ -90,8 +86,7 @@ function reportNotWarnedForMapping(reportError, onlyWarnsForMappingCheck) {
 
 function checkDuplicateDependencies(reportError, pkg, isPkgLibrary, depType, searchIn, depPkg, onlyWarnsForCheck) {
   const dependencies = depPkg[depType];
-  if (!dependencies)
-    return;
+  if (!dependencies) return;
   const searchInExisting = searchIn.filter((type) => pkg[type]);
   for (const [depKey, range] of Object.entries(dependencies)) {
     const versionsIn = searchInExisting.filter((type) => pkg[type][depKey]);
@@ -116,8 +111,7 @@ function checkDuplicateDependencies(reportError, pkg, isPkgLibrary, depType, sea
     } else {
       const versions = versionsIn.map((type) => pkg[type][depKey]);
       versions.forEach((version, index) => {
-        if (version.startsWith("file:") || range.startsWith("file:"))
-          return;
+        if (version.startsWith("file:") || range.startsWith("file:")) return;
         if (version.startsWith("workspace:") || range.startsWith("workspace:")) {
           return;
         }
@@ -156,8 +150,7 @@ async function checkDirectDuplicateDependencies(pkg, pkgPathName, isPackageALibr
   ];
   checks.forEach(({ type, searchIn }) => {
     const dependencies = pkg[type];
-    if (!dependencies)
-      return;
+    if (!dependencies) return;
     for (const depName of getKeys(dependencies)) {
       const depPkg = getDependencyPackageJson(depName);
       checkDuplicateDependencies(
@@ -176,8 +169,7 @@ async function checkDirectDuplicateDependencies(pkg, pkgPathName, isPackageALibr
 
 function checkPeerDependencies(pkg, reportError, type, allowedPeerIn, providedDependencies, depPkg, missingOnlyWarnsForCheck, invalidOnlyWarnsForCheck) {
   const { peerDependencies, peerDependenciesMeta } = depPkg;
-  if (!peerDependencies)
-    return;
+  if (!peerDependencies) return;
   const allowedPeerInExisting = allowedPeerIn.filter(
     (allowedPeerInType) => pkg[allowedPeerInType]
   );
@@ -257,8 +249,7 @@ async function checkDirectPeerDependencies(isLibrary, pkg, pkgPathName, getDepen
   await Promise.all(
     regularDependencyTypes.map(async (depType) => {
       const dependencies = pkg[depType];
-      if (!dependencies)
-        return;
+      if (!dependencies) return;
       for (const depName of getKeys(dependencies)) {
         if (pkg.peerDependencies?.[depName]) {
           if (semver.intersects(
@@ -309,16 +300,14 @@ async function checkExactVersions(pkg, pkgPathName, types, {
   const reportError = customCreateReportError("Exact versions", pkgPathName);
   for (const type of types) {
     const pkgDependencies = pkg[type];
-    if (!pkgDependencies)
-      continue;
+    if (!pkgDependencies) continue;
     for (const [dependencyName, versionConst] of Object.entries(
       pkgDependencies
     )) {
       let version = versionConst;
       if (version.startsWith("npm:")) {
         const match = /^npm:.*@(.*)$/.exec(version);
-        if (!match)
-          throw new Error(`Invalid version match: ${version}`);
+        if (!match) throw new Error(`Invalid version match: ${version}`);
         const [, realVersion] = match;
         version = realVersion;
       }
@@ -472,11 +461,9 @@ function checkMinRangeSatisfies(pkgPathName, pkg, type1 = "dependencies", type2 
     pkgPathName
   );
   for (const [depName, depRange1] of getEntries(dependencies1)) {
-    if (depRange1 === "*")
-      continue;
+    if (depRange1 === "*") continue;
     const depRange2 = dependencies2[depName];
-    if (!depRange2 || !depRange1)
-      continue;
+    if (!depRange2 || !depRange1) continue;
     const minDepRange1 = semver.minVersion(depRange1)?.version || depRange1;
     if (!semver.satisfies(minDepRange1, depRange2, {
       includePrerelease: true
@@ -498,8 +485,7 @@ function checkMinRangeSatisfies(pkgPathName, pkg, type1 = "dependencies", type2 
 
 function checkNoDependencies(pkg, pkgPath, type = "dependencies", moveToSuggestion = "devDependencies", customCreateReportError = createReportError) {
   const pkgDependencies = pkg[type];
-  if (!pkgDependencies)
-    return;
+  if (!pkgDependencies) return;
   const reportError = customCreateReportError("No dependencies", pkgPath);
   reportError(
     `Unexpected ${type}`,
@@ -558,8 +544,7 @@ function checkResolutionsVersionsMatch(pkg, pkgPathName, {
     }
     ["dependencies", "devDependencies"].forEach((depType) => {
       const range = pkg?.[depType]?.[depName];
-      if (!range)
-        return;
+      if (!range) return;
       if (!semver.satisfies(resolutionDepVersion, range, {
         includePrerelease: true
       })) {
@@ -631,16 +616,13 @@ function stringify(semver) {
 }
 function getOperator(range) {
   const parsedRange = parseRange(range);
-  if (parsedRange.length !== 1)
-    return null;
+  if (parsedRange.length !== 1) return null;
   return parsedRange[0].operator || "";
 }
 function changeOperator(range, operator) {
-  if (operator === null)
-    return range;
+  if (operator === null) return range;
   const parsedRange = parseRange(range);
-  if (parsedRange.length !== 1)
-    return null;
+  if (parsedRange.length !== 1) return null;
   const parsed = parsedRange[0];
   parsed.operator = operator === "" ? void 0 : operator;
   return stringify(parsed);
@@ -729,8 +711,7 @@ function checkSatisfiesVersionsInDependency(pkgPathName, depPkg, dependenciesRan
   for (const [dependenciesType, dependenciesTypeRanges] of getEntries(
     dependenciesRanges
   )) {
-    if (!dependenciesTypeRanges)
-      return;
+    if (!dependenciesTypeRanges) return;
     const dependencies = depPkg[dependenciesType];
     for (const [dependencyName, dependencyRange] of getEntries(
       dependenciesTypeRanges
@@ -789,8 +770,7 @@ function createGetDependencyPackageJson({
 }) {
   return (pkgDepName) => {
     const existing = nodeModulesPackagePathCache.get(pkgDepName);
-    if (existing)
-      return existing;
+    if (existing) return existing;
     let pkg;
     if (pkgDepName.startsWith(".")) {
       const packagePath = `${pkgDirname}/${pkgDepName}/package.json`;
@@ -802,8 +782,7 @@ function createGetDependencyPackageJson({
           pkgDirname
         );
       } catch (error) {
-        if (!(error instanceof Error))
-          throw error;
+        if (!(error instanceof Error)) throw error;
         if (error.code !== "ERR_PACKAGE_PATH_NOT_EXPORTED") {
           throw error;
         }
@@ -918,10 +897,8 @@ function createCheckPackage({
     tryToAutoFix = true;
   }
   const writePackageIfChanged = () => {
-    if (!tryToAutoFix)
-      return;
-    if (util.isDeepStrictEqual(pkg, copyPkg))
-      return;
+    if (!tryToAutoFix) return;
+    if (util.isDeepStrictEqual(pkg, copyPkg)) return;
     writePkgJson(pkgPath, pkg);
   };
   const getDependencyPackageJson = createGetDependencyPackageJson({
