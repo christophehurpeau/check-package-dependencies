@@ -364,4 +364,76 @@ describe("checkDirectPeerDependencies", () => {
     );
     expect(mockReportError).not.toHaveBeenCalled();
   });
+
+  it("should error when peer dependency is marked as peer dependency but has wrong version", async () => {
+    await checkDirectPeerDependencies(
+      false,
+      {
+        name: "test",
+        devDependencies: {
+          "some-lib-using-rollup": "1.0.0",
+          rollup: "^2.0.0",
+        },
+        peerDependencies: {
+          "some-lib-using-rollup": "^1.0.0",
+        },
+      },
+      "path",
+      vi.fn().mockImplementation((name) =>
+        name === "rollup"
+          ? {
+              name: "rollup",
+            }
+          : {
+              name: "some-lib-using-rollup",
+              peerDependencies: { rollup: "^1.0.0" },
+            },
+      ),
+      createOnlyWarnsForMappingCheck("test", []),
+      createOnlyWarnsForMappingCheck("test", []),
+      createReportError,
+    );
+    expect(mockReportError).toHaveBeenCalledTimes(1);
+    expect(mockReportError).toHaveBeenLastCalledWith(
+      'Invalid "rollup" peer dependency',
+      '"^2.0.0" (in devDependencies) should satisfies "^1.0.0" from "some-lib-using-rollup" devDependencies',
+      false,
+    );
+  });
+
+  it("should error when peer dependency is marked as peer dependency but has wrong dependency version", async () => {
+    await checkDirectPeerDependencies(
+      false,
+      {
+        name: "test",
+        devDependencies: {
+          "react-native": "1.0.0",
+          react: "18.3.0",
+        },
+        peerDependencies: {
+          "react-native": "*",
+        },
+      },
+      "path",
+      vi.fn().mockImplementation((name) =>
+        name === "react-native"
+          ? {
+              name: "react-native",
+              peerDependencies: { react: "18.2.0" },
+            }
+          : {
+              name: "react",
+            },
+      ),
+      createOnlyWarnsForMappingCheck("test", []),
+      createOnlyWarnsForMappingCheck("test", []),
+      createReportError,
+    );
+    expect(mockReportError).toHaveBeenCalledTimes(1);
+    expect(mockReportError).toHaveBeenLastCalledWith(
+      'Invalid "react" peer dependency',
+      '"18.3.0" (in devDependencies) should satisfies "18.2.0" from "react-native" devDependencies',
+      false,
+    );
+  });
 });

@@ -54,6 +54,7 @@ export async function checkDirectPeerDependencies(
     name: string;
     type: RegularDependencyTypes;
     pkg: PackageJson;
+    hasDirectMatchingPeerDependency: boolean;
   }[] = [];
   const allDirectDependenciesDependencies: [string, string][] = [];
 
@@ -62,19 +63,18 @@ export async function checkDirectPeerDependencies(
       const dependencies = pkg[depType];
       if (!dependencies) return;
       for (const depName of getKeys(dependencies)) {
-        if (pkg.peerDependencies?.[depName]) {
-          if (
-            semver.intersects(
-              dependencies[depName],
-              pkg.peerDependencies[depName],
-            )
-          ) {
-            continue;
-          }
-        }
-
         const depPkg = getDependencyPackageJson(depName);
-        allDepPkgs.push({ name: depName, type: depType, pkg: depPkg });
+        allDepPkgs.push({
+          name: depName,
+          type: depType,
+          pkg: depPkg,
+          hasDirectMatchingPeerDependency: pkg.peerDependencies?.[depName]
+            ? semver.intersects(
+                dependencies[depName],
+                pkg.peerDependencies[depName],
+              )
+            : false,
+        });
 
         if (depPkg.dependencies && !isLibrary) {
           allDirectDependenciesDependencies.push(
@@ -85,13 +85,19 @@ export async function checkDirectPeerDependencies(
     }),
   );
 
-  for (const { name: depName, type: depType, pkg: depPkg } of allDepPkgs) {
+  for (const {
+    name: depName,
+    type: depType,
+    pkg: depPkg,
+    hasDirectMatchingPeerDependency,
+  } of allDepPkgs) {
     if (depPkg.peerDependencies) {
       checkPeerDependencies(
         pkg,
         reportError,
         depType,
         getAllowedPeerInFromType(depType, isLibrary),
+        hasDirectMatchingPeerDependency,
         allDirectDependenciesDependencies,
         depPkg,
         missingOnlyWarnsForCheck.createFor(depName),

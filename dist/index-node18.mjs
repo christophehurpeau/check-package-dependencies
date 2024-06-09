@@ -167,7 +167,7 @@ async function checkDirectDuplicateDependencies(pkg, pkgPathName, isPackageALibr
   reportNotWarnedForMapping(reportError, onlyWarnsForCheck);
 }
 
-function checkPeerDependencies(pkg, reportError, type, allowedPeerIn, providedDependencies, depPkg, missingOnlyWarnsForCheck, invalidOnlyWarnsForCheck) {
+function checkPeerDependencies(pkg, reportError, type, allowedPeerIn, allowMissing, providedDependencies, depPkg, missingOnlyWarnsForCheck, invalidOnlyWarnsForCheck) {
   const { peerDependencies, peerDependenciesMeta } = depPkg;
   if (!peerDependencies) return;
   const allowedPeerInExisting = allowedPeerIn.filter(
@@ -178,6 +178,9 @@ function checkPeerDependencies(pkg, reportError, type, allowedPeerIn, providedDe
       (allowedPeerInExistingType) => pkg[allowedPeerInExistingType]?.[peerDepName]
     );
     if (versionsIn.length === 0) {
+      if (allowMissing) {
+        continue;
+      }
       const peerDependenciesMetaPeerDep = peerDependenciesMeta?.[peerDepName];
       if (peerDependenciesMetaPeerDep?.optional) {
         continue;
@@ -251,16 +254,16 @@ async function checkDirectPeerDependencies(isLibrary, pkg, pkgPathName, getDepen
       const dependencies = pkg[depType];
       if (!dependencies) return;
       for (const depName of getKeys(dependencies)) {
-        if (pkg.peerDependencies?.[depName]) {
-          if (semver.intersects(
+        const depPkg = getDependencyPackageJson(depName);
+        allDepPkgs.push({
+          name: depName,
+          type: depType,
+          pkg: depPkg,
+          hasDirectMatchingPeerDependency: pkg.peerDependencies?.[depName] ? semver.intersects(
             dependencies[depName],
             pkg.peerDependencies[depName]
-          )) {
-            continue;
-          }
-        }
-        const depPkg = getDependencyPackageJson(depName);
-        allDepPkgs.push({ name: depName, type: depType, pkg: depPkg });
+          ) : false
+        });
         if (depPkg.dependencies && !isLibrary) {
           allDirectDependenciesDependencies.push(
             ...Object.entries(depPkg.dependencies)
@@ -269,13 +272,19 @@ async function checkDirectPeerDependencies(isLibrary, pkg, pkgPathName, getDepen
       }
     })
   );
-  for (const { name: depName, type: depType, pkg: depPkg } of allDepPkgs) {
+  for (const {
+    name: depName,
+    type: depType,
+    pkg: depPkg,
+    hasDirectMatchingPeerDependency
+  } of allDepPkgs) {
     if (depPkg.peerDependencies) {
       checkPeerDependencies(
         pkg,
         reportError,
         depType,
         getAllowedPeerInFromType(depType, isLibrary),
+        hasDirectMatchingPeerDependency,
         allDirectDependenciesDependencies,
         depPkg,
         missingOnlyWarnsForCheck.createFor(depName),

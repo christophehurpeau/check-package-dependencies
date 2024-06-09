@@ -8,6 +8,7 @@ export function checkPeerDependencies(
   reportError: ReportError,
   type: DependencyTypes,
   allowedPeerIn: DependencyTypes[],
+  allowMissing: boolean,
   providedDependencies: [string, string][],
   depPkg: PackageJson,
   missingOnlyWarnsForCheck: OnlyWarnsForCheck,
@@ -26,6 +27,10 @@ export function checkPeerDependencies(
         pkg[allowedPeerInExistingType]?.[peerDepName],
     );
     if (versionsIn.length === 0) {
+      if (allowMissing) {
+        continue;
+      }
+
       const peerDependenciesMetaPeerDep = peerDependenciesMeta?.[peerDepName];
       if (peerDependenciesMetaPeerDep?.optional) {
         continue;
