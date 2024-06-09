@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [7.1.2](https://github.com/christophehurpeau/check-package-dependencies/compare/v7.1.1...v7.1.2) (2024-06-09)
+
+### Bug Fixes
+
+* properly check peer dependency's dependencies for non-matching version when it is in pkg peer dependency ([b40fdaa](https://github.com/christophehurpeau/check-package-dependencies/commit/b40fdaa876dcea54822bee6e853ae55efe8013d8))
+
 ## [7.1.1](https://github.com/christophehurpeau/check-package-dependencies/compare/v7.1.0...v7.1.1) (2024-03-06)
 
 Note: no notable changes
