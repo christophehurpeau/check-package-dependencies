@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [7.2.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v7.1.2...v7.2.0) (2024-07-17)
+
+### Features
+
+* support workspace:* ([310347a](https://github.com/christophehurpeau/check-package-dependencies/commit/310347a77833a821799eaa07eb4e7164635124f2))
+
 ## [7.1.2](https://github.com/christophehurpeau/check-package-dependencies/compare/v7.1.1...v7.1.2) (2024-06-09)
 
 ### Bug Fixes
