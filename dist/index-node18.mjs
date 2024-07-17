@@ -167,6 +167,52 @@ async function checkDirectDuplicateDependencies(pkg, pkgPathName, isPackageALibr
   reportNotWarnedForMapping(reportError, onlyWarnsForCheck);
 }
 
+semverUtils.parse;
+const parseRange = semverUtils.parseRange;
+function stringify(semver) {
+  let str = "";
+  if (semver.operator) {
+    str += semver.operator;
+  }
+  str += semver.major || "0";
+  str += ".";
+  str += semver.minor || "0";
+  str += ".";
+  str += semver.patch || "0";
+  if (semver.release) {
+    str += `-${semver.release}`;
+  }
+  if (semver.build) {
+    str += `+${semver.build}`;
+  }
+  return str;
+}
+function getOperator(range) {
+  const parsedRange = parseRange(range);
+  if (parsedRange.length !== 1) return null;
+  return parsedRange[0].operator || "";
+}
+function changeOperator(range, operator) {
+  if (operator === null) return range;
+  const parsedRange = parseRange(range);
+  if (parsedRange.length !== 1) return null;
+  const parsed = parsedRange[0];
+  parsed.operator = operator === "" ? void 0 : operator;
+  return stringify(parsed);
+}
+function getRealVersion(version) {
+  if (version.startsWith("npm:")) {
+    const match = /^npm:.*@(.*)$/.exec(version);
+    if (!match) throw new Error(`Invalid version match: ${version}`);
+    const [, realVersion] = match;
+    return realVersion;
+  }
+  if (version.startsWith("workspace:")) {
+    return version.slice("workspace:".length);
+  }
+  return version;
+}
+
 function checkPeerDependencies(pkg, reportError, type, allowedPeerIn, allowMissing, providedDependencies, depPkg, missingOnlyWarnsForCheck, invalidOnlyWarnsForCheck) {
   const { peerDependencies, peerDependenciesMeta } = depPkg;
   if (!peerDependencies) return;
@@ -208,10 +254,8 @@ function checkPeerDependencies(pkg, reportError, type, allowedPeerIn, allowMissi
       const versions = versionsIn.map(
         (versionsInType) => pkg[versionsInType][peerDepName]
       );
-      versions.forEach((version, index) => {
-        if (version.startsWith("npm:")) {
-          return;
-        }
+      versions.forEach((versionValue, index) => {
+        const version = getRealVersion(versionValue);
         if (version === "*") {
           return;
         }
@@ -310,16 +354,10 @@ async function checkExactVersions(pkg, pkgPathName, types, {
   for (const type of types) {
     const pkgDependencies = pkg[type];
     if (!pkgDependencies) continue;
-    for (const [dependencyName, versionConst] of Object.entries(
+    for (const [dependencyName, versionValue] of Object.entries(
       pkgDependencies
     )) {
-      let version = versionConst;
-      if (version.startsWith("npm:")) {
-        const match = /^npm:.*@(.*)$/.exec(version);
-        if (!match) throw new Error(`Invalid version match: ${version}`);
-        const [, realVersion] = match;
-        version = realVersion;
-      }
+      const version = getRealVersion(versionValue);
       if (isVersionRange(version)) {
         if (internalExactVersionsIgnore?.includes(dependencyName)) {
           continue;
@@ -601,40 +639,6 @@ function checkSatisfiesVersions(pkg, pkgPathName, type, dependenciesRanges, only
       }
     }
   });
-}
-
-semverUtils.parse;
-const parseRange = semverUtils.parseRange;
-function stringify(semver) {
-  let str = "";
-  if (semver.operator) {
-    str += semver.operator;
-  }
-  str += semver.major || "0";
-  str += ".";
-  str += semver.minor || "0";
-  str += ".";
-  str += semver.patch || "0";
-  if (semver.release) {
-    str += `-${semver.release}`;
-  }
-  if (semver.build) {
-    str += `+${semver.build}`;
-  }
-  return str;
-}
-function getOperator(range) {
-  const parsedRange = parseRange(range);
-  if (parsedRange.length !== 1) return null;
-  return parsedRange[0].operator || "";
-}
-function changeOperator(range, operator) {
-  if (operator === null) return range;
-  const parsedRange = parseRange(range);
-  if (parsedRange.length !== 1) return null;
-  const parsed = parsedRange[0];
-  parsed.operator = operator === "" ? void 0 : operator;
-  return stringify(parsed);
 }
 
 function checkSatisfiesVersionsFromDependency(pkg, pkgPathName, type, depKeys, depPkg, depType, {

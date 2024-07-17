@@ -51,3 +51,17 @@ export function isExactParsedRange(
 export function isExactRange(range: string): boolean {
   return isExactParsedRange(parseRange(range));
 }
+
+export function getRealVersion(version: string): string {
+  if (version.startsWith("npm:")) {
+    const match = /^npm:.*@(.*)$/.exec(version);
+    if (!match) throw new Error(`Invalid version match: ${version}`);
+    const [, realVersion] = match;
+    return realVersion;
+  }
+  if (version.startsWith("workspace:")) {
+    return version.slice("workspace:".length);
+  }
+
+  return version;
+}

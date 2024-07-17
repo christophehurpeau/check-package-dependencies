@@ -5,6 +5,7 @@ import {
   reportNotWarnedFor,
 } from "../utils/createReportError";
 import type { PackageJson, DependencyTypes } from "../utils/packageTypes";
+import { getRealVersion } from "../utils/semverUtils";
 import type { OnlyWarnsFor, OnlyWarnsForCheck } from "../utils/warnForUtils";
 
 export interface CheckExactVersionsOptions {
@@ -40,16 +41,10 @@ export async function checkExactVersions(
     const pkgDependencies = pkg[type];
     if (!pkgDependencies) continue;
 
-    for (const [dependencyName, versionConst] of Object.entries(
+    for (const [dependencyName, versionValue] of Object.entries(
       pkgDependencies,
     )) {
-      let version = versionConst;
-      if (version.startsWith("npm:")) {
-        const match = /^npm:.*@(.*)$/.exec(version);
-        if (!match) throw new Error(`Invalid version match: ${version}`);
-        const [, realVersion] = match;
-        version = realVersion;
-      }
+      const version = getRealVersion(versionValue);
 
       if (isVersionRange(version)) {
         if (internalExactVersionsIgnore?.includes(dependencyName)) {

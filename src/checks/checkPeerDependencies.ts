@@ -1,6 +1,7 @@
 import semver from "semver";
 import type { ReportError } from "../utils/createReportError";
 import type { PackageJson, DependencyTypes } from "../utils/packageTypes";
+import { getRealVersion } from "../utils/semverUtils";
 import type { OnlyWarnsForCheck } from "../utils/warnForUtils";
 
 export function checkPeerDependencies(
@@ -66,10 +67,8 @@ export function checkPeerDependencies(
         (versionsInType) => pkg[versionsInType]![peerDepName],
       );
 
-      versions.forEach((version, index) => {
-        if (version.startsWith("npm:")) {
-          return;
-        }
+      versions.forEach((versionValue, index) => {
+        const version = getRealVersion(versionValue);
 
         if (version === "*") {
           return;

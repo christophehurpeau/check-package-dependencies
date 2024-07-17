@@ -436,4 +436,28 @@ describe("checkDirectPeerDependencies", () => {
       false,
     );
   });
+
+  it("should not report error when dependency is workspace:*", async () => {
+    await checkDirectPeerDependencies(
+      false,
+      {
+        name: "test",
+        devDependencies: {
+          "alouette-icons": "workspace:*",
+        },
+        peerDependencies: {
+          "lib-using-alouette-icons": "*",
+        },
+      },
+      "path",
+      vi.fn().mockImplementationOnce(() => ({
+        name: "alouette-icons",
+        peerDependencies: { "alouette-icons": "^1.0.0" },
+      })),
+      createOnlyWarnsForMappingCheck("test", []),
+      createOnlyWarnsForMappingCheck("test", []),
+      createReportError,
+    );
+    expect(mockReportError).not.toHaveBeenCalled();
+  });
 });
