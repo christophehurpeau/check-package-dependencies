@@ -1,6 +1,5 @@
+// eslint-disable-next-line import/no-unresolved
 import { defineConfig } from "vitest/config";
-
-console.log(process.env.POB_VITEST_COVERAGE);
 
 export default defineConfig({
   test: {

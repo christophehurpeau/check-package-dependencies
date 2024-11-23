@@ -39,7 +39,7 @@ const getAllowedPeerInFromType = (
   }
 };
 
-export async function checkDirectPeerDependencies(
+export function checkDirectPeerDependencies(
   isLibrary: boolean,
   pkg: PackageJson,
   pkgPathName: string,
@@ -47,7 +47,7 @@ export async function checkDirectPeerDependencies(
   missingOnlyWarnsForCheck: OnlyWarnsForMappingCheck,
   invalidOnlyWarnsForCheck: OnlyWarnsForMappingCheck,
   customCreateReportError = createReportError,
-): Promise<void> {
+): void {
   const reportError = customCreateReportError("Peer Dependencies", pkgPathName);
 
   const allDepPkgs: {
@@ -58,32 +58,30 @@ export async function checkDirectPeerDependencies(
   }[] = [];
   const allDirectDependenciesDependencies: [string, string][] = [];
 
-  await Promise.all(
-    regularDependencyTypes.map(async (depType) => {
-      const dependencies = pkg[depType];
-      if (!dependencies) return;
-      for (const depName of getKeys(dependencies)) {
-        const depPkg = getDependencyPackageJson(depName);
-        allDepPkgs.push({
-          name: depName,
-          type: depType,
-          pkg: depPkg,
-          hasDirectMatchingPeerDependency: pkg.peerDependencies?.[depName]
-            ? semver.intersects(
-                dependencies[depName],
-                pkg.peerDependencies[depName],
-              )
-            : false,
-        });
+  regularDependencyTypes.forEach((depType) => {
+    const dependencies = pkg[depType];
+    if (!dependencies) return;
+    for (const depName of getKeys(dependencies)) {
+      const depPkg = getDependencyPackageJson(depName);
+      allDepPkgs.push({
+        name: depName,
+        type: depType,
+        pkg: depPkg,
+        hasDirectMatchingPeerDependency: pkg.peerDependencies?.[depName]
+          ? semver.intersects(
+              dependencies[depName],
+              pkg.peerDependencies[depName],
+            )
+          : false,
+      });
 
-        if (depPkg.dependencies && !isLibrary) {
-          allDirectDependenciesDependencies.push(
-            ...Object.entries(depPkg.dependencies),
-          );
-        }
+      if (depPkg.dependencies && !isLibrary) {
+        allDirectDependenciesDependencies.push(
+          ...Object.entries(depPkg.dependencies),
+        );
       }
-    }),
-  );
+    }
+  });
 
   for (const {
     name: depName,

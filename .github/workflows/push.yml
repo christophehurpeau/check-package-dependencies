@@ -8,7 +8,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x, 20.x]
+        node-version: [20.x, 22.x]
 
     steps:
       - uses: actions/checkout@v4
@@ -30,33 +30,33 @@ jobs:
 
       - name: Build
         run: yarn run build
-        if: startsWith(matrix.node-version, '20.')
+        if: startsWith(matrix.node-version, '22.')
 
       - name: Prettier
         run: yarn run lint:prettier
-        if: startsWith(matrix.node-version, '20.')
+        if: startsWith(matrix.node-version, '22.')
 
       - name: Typescript
         run: yarn run tsc
-        if: startsWith(matrix.node-version, '20.')
+        if: startsWith(matrix.node-version, '22.')
 
       - name: Eslint
         run: yarn run lint:eslint
-        if: startsWith(matrix.node-version, '20.')
+        if: startsWith(matrix.node-version, '22.')
+
+      - name: Check nothing was forgotten before commit
+        if: startsWith(matrix.node-version, '22.')
+        run: yarn run repository-check-dirty
 
       - name: Generate Test Coverage
         run: yarn run test:coverage:json
-        if: startsWith(matrix.node-version, '20.')
+        if: startsWith(matrix.node-version, '22.')
         env:
           CI: true
-          NODE_V8_COVERAGE: coverage/
 
       - name: Send results to codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
+          fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
-        if: startsWith(matrix.node-version, '20.')
-
-      - name: Check nothing was forgotten before commit
-        if: startsWith(matrix.node-version, '20.')
-        run: yarn run repository-check-dirty
+        if: startsWith(matrix.node-version, '22.')

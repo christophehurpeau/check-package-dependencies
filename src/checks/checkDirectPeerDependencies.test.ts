@@ -9,8 +9,8 @@ describe("checkDirectPeerDependencies", () => {
     mockReportError.mockReset();
   });
 
-  it("should report error when peer dependency is missing", async () => {
-    await checkDirectPeerDependencies(
+  it("should report error when peer dependency is missing", () => {
+    checkDirectPeerDependencies(
       false,
       {
         name: "test",
@@ -32,8 +32,8 @@ describe("checkDirectPeerDependencies", () => {
     );
   });
 
-  it("should not report error when peer dependency is in devDependencies", async () => {
-    await checkDirectPeerDependencies(
+  it("should not report error when peer dependency is in devDependencies", () => {
+    checkDirectPeerDependencies(
       false,
       {
         name: "test",
@@ -56,8 +56,8 @@ describe("checkDirectPeerDependencies", () => {
     expect(mockReportError).not.toHaveBeenCalled();
   });
 
-  it("should not report error when peer dependency value is *", async () => {
-    await checkDirectPeerDependencies(
+  it("should not report error when peer dependency value is *", () => {
+    checkDirectPeerDependencies(
       false,
       {
         name: "test",
@@ -80,8 +80,8 @@ describe("checkDirectPeerDependencies", () => {
     expect(mockReportError).not.toHaveBeenCalled();
   });
 
-  it("should not report error when dev dependency value is a beta", async () => {
-    await checkDirectPeerDependencies(
+  it("should not report error when dev dependency value is a beta", () => {
+    checkDirectPeerDependencies(
       false,
       {
         name: "test",
@@ -107,8 +107,8 @@ describe("checkDirectPeerDependencies", () => {
     expect(mockReportError).not.toHaveBeenCalled();
   });
 
-  it("should not report error when dev dependency and peerDependency value are a beta", async () => {
-    await checkDirectPeerDependencies(
+  it("should not report error when dev dependency and peerDependency value are a beta", () => {
+    checkDirectPeerDependencies(
       false,
       {
         name: "test",
@@ -134,8 +134,8 @@ describe("checkDirectPeerDependencies", () => {
     expect(mockReportError).not.toHaveBeenCalled();
   });
 
-  it("should allow lib to have peer in both dependencies and peerDependencies", async () => {
-    await checkDirectPeerDependencies(
+  it("should allow lib to have peer in both dependencies and peerDependencies", () => {
+    checkDirectPeerDependencies(
       true,
       {
         name: "test",
@@ -160,8 +160,8 @@ describe("checkDirectPeerDependencies", () => {
     expect(mockReportError).not.toHaveBeenCalled();
   });
 
-  it("should allow missing peer dependency when optional", async () => {
-    await checkDirectPeerDependencies(
+  it("should allow missing peer dependency when optional", () => {
+    checkDirectPeerDependencies(
       false,
       {
         name: "test",
@@ -182,8 +182,8 @@ describe("checkDirectPeerDependencies", () => {
     expect(mockReportError).not.toHaveBeenCalled();
   });
 
-  it("should not report error when @types is in dev dependency of an app", async () => {
-    await checkDirectPeerDependencies(
+  it("should not report error when @types is in dev dependency of an app", () => {
+    checkDirectPeerDependencies(
       false,
       {
         name: "test",
@@ -211,8 +211,8 @@ describe("checkDirectPeerDependencies", () => {
     expect(mockReportError).not.toHaveBeenCalled();
   });
 
-  it("should not report error when @types is missing in dependencies/peerDependency of a library", async () => {
-    await checkDirectPeerDependencies(
+  it("should not report error when @types is missing in dependencies/peerDependency of a library", () => {
+    checkDirectPeerDependencies(
       true,
       {
         name: "test",
@@ -244,8 +244,8 @@ describe("checkDirectPeerDependencies", () => {
     );
   });
 
-  it("should report error even when peer dependency is provided by another dependency for libraries", async () => {
-    await checkDirectPeerDependencies(
+  it("should report error even when peer dependency is provided by another dependency for libraries", () => {
+    checkDirectPeerDependencies(
       true,
       {
         name: "test",
@@ -276,8 +276,8 @@ describe("checkDirectPeerDependencies", () => {
     );
   });
 
-  it("should not report error when peer dependency is provided by another dependency", async () => {
-    await checkDirectPeerDependencies(
+  it("should not report error when peer dependency is provided by another dependency", () => {
+    checkDirectPeerDependencies(
       false,
       {
         name: "test",
@@ -304,8 +304,8 @@ describe("checkDirectPeerDependencies", () => {
     expect(mockReportError).not.toHaveBeenCalled();
   });
 
-  it("should report error when peer dependency is provided by multiple dependencies including non-satisfying range", async () => {
-    await checkDirectPeerDependencies(
+  it("should report error when peer dependency is provided by multiple dependencies including non-satisfying range", () => {
+    checkDirectPeerDependencies(
       false,
       {
         name: "test",
@@ -341,8 +341,8 @@ describe("checkDirectPeerDependencies", () => {
     );
   });
 
-  it("should not report error when peer dependency is marked as peer dependency", async () => {
-    await checkDirectPeerDependencies(
+  it("should not report error when peer dependency is marked as peer dependency", () => {
+    checkDirectPeerDependencies(
       false,
       {
         name: "test",
@@ -365,8 +365,8 @@ describe("checkDirectPeerDependencies", () => {
     expect(mockReportError).not.toHaveBeenCalled();
   });
 
-  it("should error when peer dependency is marked as peer dependency but has wrong version", async () => {
-    await checkDirectPeerDependencies(
+  it("should error when peer dependency is marked as peer dependency but has wrong version", () => {
+    checkDirectPeerDependencies(
       false,
       {
         name: "test",
@@ -401,8 +401,8 @@ describe("checkDirectPeerDependencies", () => {
     );
   });
 
-  it("should error when peer dependency is marked as peer dependency but has wrong dependency version", async () => {
-    await checkDirectPeerDependencies(
+  it("should error when peer dependency is marked as peer dependency but has wrong dependency version", () => {
+    checkDirectPeerDependencies(
       false,
       {
         name: "test",
@@ -437,8 +437,8 @@ describe("checkDirectPeerDependencies", () => {
     );
   });
 
-  it("should not report error when dependency is workspace:*", async () => {
-    await checkDirectPeerDependencies(
+  it("should not report error when dependency is workspace:*", () => {
+    checkDirectPeerDependencies(
       false,
       {
         name: "test",

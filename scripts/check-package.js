@@ -1,4 +1,4 @@
-import { createCheckPackage } from "../dist/index-node18.mjs";
+import { createCheckPackage } from "../dist/index-node22.mjs";
 
 await createCheckPackage({
   isLibrary: true,

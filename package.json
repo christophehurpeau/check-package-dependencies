@@ -10,20 +10,20 @@
   "repository": "https://github.com/christophehurpeau/check-package-dependencies.git",
   "homepage": "https://github.com/christophehurpeau/check-package-dependencies",
   "type": "module",
-  "packageManager": "yarn@4.2.2",
+  "packageManager": "yarn@4.5.2",
   "engines": {
-    "node": ">=18.12.0"
+    "node": ">=22.11.0"
   },
   "sideEffects": false,
   "bin": "./bin/check-package-dependencies.mjs",
-  "main": "./dist/index-node18.mjs",
+  "main": "./dist/index-node22.mjs",
   "types": "./dist/definitions/index.d.ts",
   "exports": {
     "./package.json": "./package.json",
     ".": {
       "types": "./dist/definitions/index.d.ts",
       "node": {
-        "import": "./dist/index-node18.mjs"
+        "import": "./dist/index-node22.mjs"
       }
     }
   },
@@ -41,7 +41,7 @@
     "generate:api": "typedoc --tsconfig tsconfig.doc.json",
     "generate:test-coverage": "rm -Rf docs/coverage/ ; NODE_ENV=production BABEL_ENV=test jest --coverage --coverageReporters=pob-lcov-reporter --coverageDirectory=docs/coverage/",
     "lint": "yarn run lint:prettier && tsc && yarn run lint:eslint",
-    "lint:eslint": "eslint --report-unused-disable-directives --resolve-plugins-relative-to . --quiet *.{js,cjs,mjs} src bin scripts",
+    "lint:eslint": "eslint --quiet .",
     "lint:prettier": "pob-root-prettier --check .",
     "lint:prettier:fix": "pob-root-prettier --write .",
     "postinstallDev": "pob-root-postinstall",
@@ -65,7 +65,7 @@
     "envs": [
       {
         "target": "node",
-        "version": "18"
+        "version": "22"
       }
     ],
     "typescript": true
@@ -73,25 +73,25 @@
   "prettier": "@pob/root/prettier-config",
   "dependencies": {
     "chalk": "^5.2.0",
-    "glob": "^10.0.0",
-    "import-meta-resolve": "^4.0.0",
+    "import-meta-resolve": "^4.1.0",
     "semver": "^7.5.4",
     "semver-utils": "^1.1.4",
     "type-fest": "^4.0.0"
   },
   "devDependencies": {
-    "@pob/commitlint-config": "6.4.0",
-    "@pob/eslint-config": "56.0.0",
-    "@pob/eslint-config-typescript": "56.0.0",
-    "@pob/rollup-esbuild": "3.0.0",
-    "@pob/root": "12.1.1",
+    "@pob/commitlint-config": "8.0.0",
+    "@pob/eslint-config": "58.1.0",
+    "@pob/eslint-config-typescript": "58.1.0",
+    "@pob/rollup-esbuild": "5.0.0",
+    "@pob/root": "14.1.0",
+    "@types/node": "22.9.3",
     "@types/semver": "7.5.8",
     "@types/semver-utils": "1.1.3",
-    "@vitest/coverage-v8": "1.5.2",
-    "eslint": "8.57.0",
+    "@vitest/coverage-v8": "2.1.5",
+    "eslint": "9.14.0",
     "semver": "7.5.4",
-    "typedoc": "0.25.13",
-    "typescript": "5.4.5",
-    "vitest": "1.5.2"
+    "typedoc": "0.26.11",
+    "typescript": "5.6.3",
+    "vitest": "2.1.5"
   }
 }

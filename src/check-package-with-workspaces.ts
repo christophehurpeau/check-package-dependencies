@@ -1,6 +1,5 @@
-import fs from "node:fs";
+import fs, { constants } from "node:fs";
 import path from "node:path";
-import { globSync } from "glob";
 import type { Except } from "type-fest";
 import type {
   CreateCheckPackageOptions,
@@ -89,20 +88,19 @@ export function createCheckPackageWithWorkspaces(
 
   const workspacePackagesPaths: string[] = [];
 
-  if (pkgWorkspaces) {
-    pkgWorkspaces.forEach((pattern) => {
-      const match = globSync(pattern, { cwd: pkgDirname });
-      match.forEach((pathMatch) => {
-        if (!fs.existsSync(path.join(pathMatch, "package.json"))) {
-          console.log(
-            `Ignored potential directory, no package.json found: ${pathMatch}`,
-          );
-          return;
-        }
-        const subPkgDirectoryPath = path.relative(process.cwd(), pathMatch);
-        workspacePackagesPaths.push(subPkgDirectoryPath);
-      });
-    });
+  const match = fs.globSync(pkgWorkspaces, { cwd: pkgDirname });
+  for (const pathMatch of match) {
+    try {
+      fs.accessSync(path.join(pathMatch, "package.json"), constants.R_OK);
+    } catch {
+      console.log(
+        `Ignored potential directory, no package.json found: ${pathMatch}`,
+      );
+      continue;
+    }
+
+    const subPkgDirectoryPath = path.relative(process.cwd(), pathMatch);
+    workspacePackagesPaths.push(subPkgDirectoryPath);
   }
 
   const checksWorkspaces = new Map<string, CheckPackageApi>(

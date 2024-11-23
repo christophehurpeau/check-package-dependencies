@@ -3,10 +3,9 @@ import util from 'node:util';
 import chalk from 'chalk';
 import semver from 'semver';
 import semverUtils from 'semver-utils';
-import fs, { readFileSync, writeFileSync } from 'node:fs';
+import fs, { readFileSync, writeFileSync, constants } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { resolve } from 'import-meta-resolve';
-import { globSync } from 'glob';
 
 const getKeys = (o) => Object.keys(o);
 const getEntries = (o) => Object.entries(o);
@@ -1400,20 +1399,18 @@ function createCheckPackageWithWorkspaces(createCheckPackageOptions = {}) {
     throw new Error('Package is missing "workspaces"');
   }
   const workspacePackagesPaths = [];
-  if (pkgWorkspaces) {
-    pkgWorkspaces.forEach((pattern) => {
-      const match = globSync(pattern, { cwd: pkgDirname });
-      match.forEach((pathMatch) => {
-        if (!fs.existsSync(path.join(pathMatch, "package.json"))) {
-          console.log(
-            `Ignored potential directory, no package.json found: ${pathMatch}`
-          );
-          return;
-        }
-        const subPkgDirectoryPath = path.relative(process.cwd(), pathMatch);
-        workspacePackagesPaths.push(subPkgDirectoryPath);
-      });
-    });
+  const match = fs.globSync(pkgWorkspaces, { cwd: pkgDirname });
+  for (const pathMatch of match) {
+    try {
+      fs.accessSync(path.join(pathMatch, "package.json"), constants.R_OK);
+    } catch {
+      console.log(
+        `Ignored potential directory, no package.json found: ${pathMatch}`
+      );
+      continue;
+    }
+    const subPkgDirectoryPath = path.relative(process.cwd(), pathMatch);
+    workspacePackagesPaths.push(subPkgDirectoryPath);
   }
   const checksWorkspaces = new Map(
     workspacePackagesPaths.map((subPkgDirectoryPath) => {
@@ -1556,4 +1553,4 @@ function createCheckPackageWithWorkspaces(createCheckPackageOptions = {}) {
 }
 
 export { createCheckPackage, createCheckPackageWithWorkspaces };
-//# sourceMappingURL=index-node18.mjs.map
+//# sourceMappingURL=index-node22.mjs.map

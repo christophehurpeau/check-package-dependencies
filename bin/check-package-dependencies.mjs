@@ -3,11 +3,12 @@
 import {
   createCheckPackage,
   createCheckPackageWithWorkspaces,
-} from "../dist/index-node18.mjs";
+} from "../dist/index-node22.mjs";
 
 const checkPackage = createCheckPackage();
 if (checkPackage.pkg.workspaces) {
-  createCheckPackageWithWorkspaces().checkRecommended({
+  const checkPackageWithWorkspaces = await createCheckPackageWithWorkspaces();
+  checkPackageWithWorkspaces.checkRecommended({
     isLibrary: () => true,
   });
 } else {

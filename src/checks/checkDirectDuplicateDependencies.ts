@@ -8,7 +8,7 @@ import type { PackageJson, DependencyTypes } from "../utils/packageTypes";
 import type { OnlyWarnsForMappingCheck } from "../utils/warnForUtils";
 import { checkDuplicateDependencies } from "./checkDuplicateDependencies";
 
-export async function checkDirectDuplicateDependencies(
+export function checkDirectDuplicateDependencies(
   pkg: PackageJson,
   pkgPathName: string,
   isPackageALibrary: boolean,
@@ -17,7 +17,7 @@ export async function checkDirectDuplicateDependencies(
   onlyWarnsForCheck: OnlyWarnsForMappingCheck,
   reportErrorNamePrefix = "",
   customCreateReportError = createReportError,
-): Promise<void> {
+): void {
   const reportError = customCreateReportError(
     `${reportErrorNamePrefix}Direct Duplicate Dependencies`,
     pkgPathName,
