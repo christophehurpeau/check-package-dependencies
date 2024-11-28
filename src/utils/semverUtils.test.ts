@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { changeOperator } from "./semverUtils";
+import { changeOperator } from "./semverUtils.ts";
 
 describe("changeOperator", () => {
   it("should change the operator", () => {

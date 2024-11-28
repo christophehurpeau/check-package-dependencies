@@ -1,5 +1,5 @@
-import { createReportError } from "../utils/createReportError";
-import type { DependencyTypes, PackageJson } from "../utils/packageTypes";
+import { createReportError } from "../utils/createReportError.ts";
+import type { DependencyTypes, PackageJson } from "../utils/packageTypes.ts";
 
 export function checkNoDependencies(
   pkg: PackageJson,

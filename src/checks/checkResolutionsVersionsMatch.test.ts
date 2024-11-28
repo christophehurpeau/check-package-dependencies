@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { checkResolutionsVersionsMatch } from "./checkResolutionsVersionsMatch";
+import { checkResolutionsVersionsMatch } from "./checkResolutionsVersionsMatch.ts";
 
 describe("checkResolutionsVersionsMatch", () => {
   const mockReportError = vi.fn();

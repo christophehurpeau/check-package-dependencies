@@ -1,9 +1,9 @@
 import semver from "semver";
 import semverUtils from "semver-utils";
 import type { PackageJson } from "type-fest";
-import { createReportError } from "../utils/createReportError";
-import { getEntries } from "../utils/object";
-import type { DependencyTypes } from "../utils/packageTypes";
+import { createReportError } from "../utils/createReportError.ts";
+import { getEntries } from "../utils/object.ts";
+import type { DependencyTypes } from "../utils/packageTypes.ts";
 
 export interface CheckMinRangeSatisfiesOptions {
   customCreateReportError?: typeof createReportError;

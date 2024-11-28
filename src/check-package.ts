@@ -1,38 +1,38 @@
 import path from "node:path";
 import util from "node:util";
-import { checkDirectDuplicateDependencies } from "./checks/checkDirectDuplicateDependencies";
-import { checkDirectPeerDependencies } from "./checks/checkDirectPeerDependencies";
-import { checkExactVersions } from "./checks/checkExactVersions";
-import { checkIdenticalVersions } from "./checks/checkIdenticalVersions";
-import { checkIdenticalVersionsThanDependency } from "./checks/checkIdenticalVersionsThanDependency";
-import { checkMinRangeSatisfies } from "./checks/checkMinRangeSatisfies";
-import { checkNoDependencies } from "./checks/checkNoDependencies";
-import type { CheckResolutionMessage } from "./checks/checkResolutionsHasExplanation";
-import { checkResolutionsHasExplanation } from "./checks/checkResolutionsHasExplanation";
-import { checkResolutionsVersionsMatch } from "./checks/checkResolutionsVersionsMatch";
-import { checkSatisfiesVersions } from "./checks/checkSatisfiesVersions";
-import { checkSatisfiesVersionsFromDependency } from "./checks/checkSatisfiesVersionsFromDependency";
-import { checkSatisfiesVersionsInDependency } from "./checks/checkSatisfiesVersionsInDependency";
-import type { GetDependencyPackageJson } from "./utils/createGetDependencyPackageJson";
-import { createGetDependencyPackageJson } from "./utils/createGetDependencyPackageJson";
-import { displayConclusion } from "./utils/createReportError";
-import { getEntries } from "./utils/object";
+import { checkDirectDuplicateDependencies } from "./checks/checkDirectDuplicateDependencies.ts";
+import { checkDirectPeerDependencies } from "./checks/checkDirectPeerDependencies.ts";
+import { checkExactVersions } from "./checks/checkExactVersions.ts";
+import { checkIdenticalVersions } from "./checks/checkIdenticalVersions.ts";
+import { checkIdenticalVersionsThanDependency } from "./checks/checkIdenticalVersionsThanDependency.ts";
+import { checkMinRangeSatisfies } from "./checks/checkMinRangeSatisfies.ts";
+import { checkNoDependencies } from "./checks/checkNoDependencies.ts";
+import type { CheckResolutionMessage } from "./checks/checkResolutionsHasExplanation.ts";
+import { checkResolutionsHasExplanation } from "./checks/checkResolutionsHasExplanation.ts";
+import { checkResolutionsVersionsMatch } from "./checks/checkResolutionsVersionsMatch.ts";
+import { checkSatisfiesVersions } from "./checks/checkSatisfiesVersions.ts";
+import { checkSatisfiesVersionsFromDependency } from "./checks/checkSatisfiesVersionsFromDependency.ts";
+import { checkSatisfiesVersionsInDependency } from "./checks/checkSatisfiesVersionsInDependency.ts";
+import type { GetDependencyPackageJson } from "./utils/createGetDependencyPackageJson.ts";
+import { createGetDependencyPackageJson } from "./utils/createGetDependencyPackageJson.ts";
+import { displayConclusion } from "./utils/createReportError.ts";
+import { getEntries } from "./utils/object.ts";
 import type {
   DependenciesRanges,
   DependencyName,
   DependencyTypes,
   PackageJson,
-} from "./utils/packageTypes";
-import { readPkgJson, writePkgJson } from "./utils/pkgJsonUtils";
+} from "./utils/packageTypes.ts";
+import { readPkgJson, writePkgJson } from "./utils/pkgJsonUtils.ts";
 import type {
   OnlyWarnsFor,
   OnlyWarnsForDependencyMapping,
   OnlyWarnsForOptionalDependencyMapping,
-} from "./utils/warnForUtils";
+} from "./utils/warnForUtils.ts";
 import {
   createOnlyWarnsForArrayCheck,
   createOnlyWarnsForMappingCheck,
-} from "./utils/warnForUtils";
+} from "./utils/warnForUtils.ts";
 
 export interface CreateCheckPackageOptions {
   packageDirectoryPath?: string;

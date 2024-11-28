@@ -1,11 +1,11 @@
 /* eslint-disable no-console */
 
 import chalk from "chalk";
-import { getEntries } from "./object";
+import { getEntries } from "./object.ts";
 import type {
   OnlyWarnsForCheck,
   OnlyWarnsForMappingCheck,
-} from "./warnForUtils";
+} from "./warnForUtils.ts";
 
 export type ReportError = (
   msgTitle: string,

@@ -1,17 +1,17 @@
 import semver from "semver";
-import type { GetDependencyPackageJson } from "../utils/createGetDependencyPackageJson";
+import type { GetDependencyPackageJson } from "../utils/createGetDependencyPackageJson.ts";
 import {
   createReportError,
   reportNotWarnedForMapping,
-} from "../utils/createReportError";
-import { getKeys } from "../utils/object";
+} from "../utils/createReportError.ts";
+import { getKeys } from "../utils/object.ts";
 import type {
   DependencyTypes,
   PackageJson,
   RegularDependencyTypes,
-} from "../utils/packageTypes";
-import type { OnlyWarnsForMappingCheck } from "../utils/warnForUtils";
-import { checkPeerDependencies } from "./checkPeerDependencies";
+} from "../utils/packageTypes.ts";
+import type { OnlyWarnsForMappingCheck } from "../utils/warnForUtils.ts";
+import { checkPeerDependencies } from "./checkPeerDependencies.ts";
 
 const regularDependencyTypes: RegularDependencyTypes[] = [
   "devDependencies",

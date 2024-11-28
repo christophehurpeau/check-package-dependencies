@@ -1,9 +1,9 @@
 import semver from "semver";
-import type { ShouldHaveExactVersions } from "../check-package";
-import { createReportError } from "../utils/createReportError";
-import type { DependencyTypes, PackageJson } from "../utils/packageTypes";
-import { changeOperator, getOperator } from "../utils/semverUtils";
-import type { OnlyWarnsForCheck } from "../utils/warnForUtils";
+import type { ShouldHaveExactVersions } from "../check-package.ts";
+import { createReportError } from "../utils/createReportError.ts";
+import type { DependencyTypes, PackageJson } from "../utils/packageTypes.ts";
+import { changeOperator, getOperator } from "../utils/semverUtils.ts";
+import type { OnlyWarnsForCheck } from "../utils/warnForUtils.ts";
 
 export interface CheckSatisfiesVersionsFromDependencyOptions {
   tryToAutoFix?: boolean;

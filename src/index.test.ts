@@ -1,5 +1,8 @@
 import { expect, it } from "vitest";
-import { createCheckPackage, createCheckPackageWithWorkspaces } from "./index";
+import {
+  createCheckPackage,
+  createCheckPackageWithWorkspaces,
+} from "./index.ts";
 
 it.each([
   ["createCheckPackage", createCheckPackage],

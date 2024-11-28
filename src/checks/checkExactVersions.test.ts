@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { createOnlyWarnsForArrayCheck } from "../utils/warnForUtils";
-import { checkExactVersions } from "./checkExactVersions";
+import { createOnlyWarnsForArrayCheck } from "../utils/warnForUtils.ts";
+import { checkExactVersions } from "./checkExactVersions.ts";
 
 const onlyWarnsForConfigName = "checkExactVersions.test.onlyWarnsFor";
 const emptyOnlyWarnsForCheck = createOnlyWarnsForArrayCheck(

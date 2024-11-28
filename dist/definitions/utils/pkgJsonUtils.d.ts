@@ -1,4 +1,4 @@
-import type { PackageJson } from "./packageTypes";
+import type { PackageJson } from "./packageTypes.ts";
 export declare function readPkgJson(packagePath: string): PackageJson;
 export declare function writePkgJson(packagePath: string, pkg: PackageJson): void;
 /** @internal */

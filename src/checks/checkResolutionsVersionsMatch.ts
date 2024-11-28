@@ -1,6 +1,6 @@
 import semver from "semver";
-import { createReportError } from "../utils/createReportError";
-import type { PackageJson } from "../utils/packageTypes";
+import { createReportError } from "../utils/createReportError.ts";
+import type { PackageJson } from "../utils/packageTypes.ts";
 
 export interface CheckResolutionsVersionsMatchOptions {
   tryToAutoFix?: boolean;
@@ -31,7 +31,7 @@ export function checkResolutionsVersionsMatch(
       }
     }
     (["dependencies", "devDependencies"] as const).forEach((depType) => {
-      const range = pkg?.[depType]?.[depName];
+      const range = pkg[depType]?.[depName];
 
       if (!range) return;
 

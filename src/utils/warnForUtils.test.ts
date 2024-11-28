@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest";
 import {
   createOnlyWarnsForArrayCheck,
   createOnlyWarnsForMappingCheck,
-} from "./warnForUtils";
+} from "./warnForUtils.ts";
 
 describe("createOnlyWarnsForArrayCheck", () => {
   test("configName", () => {

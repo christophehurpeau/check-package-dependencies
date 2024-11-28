@@ -7,18 +7,18 @@ import type {
   OnlyWarnsForInDependenciesCheckPackageRecommendedOption,
   OnlyWarnsForInDependencyCheckPackageRecommendedOption,
   OnlyWarnsForInPackageCheckPackageRecommendedOption,
-} from "./check-package";
-import { createCheckPackage } from "./check-package";
-import { checkDuplicateDependencies } from "./checks/checkDuplicateDependencies";
-import type { CheckResolutionMessage } from "./checks/checkResolutionsHasExplanation";
+} from "./check-package.ts";
+import { createCheckPackage } from "./check-package.ts";
+import { checkDuplicateDependencies } from "./checks/checkDuplicateDependencies.ts";
+import type { CheckResolutionMessage } from "./checks/checkResolutionsHasExplanation.ts";
 import {
   createReportError,
   displayConclusion,
   reportNotWarnedForMapping,
-} from "./utils/createReportError";
-import type { PackageJson } from "./utils/packageTypes";
-import type { OnlyWarnsForOptionalDependencyMapping } from "./utils/warnForUtils";
-import { createOnlyWarnsForMappingCheck } from "./utils/warnForUtils";
+} from "./utils/createReportError.ts";
+import type { PackageJson } from "./utils/packageTypes.ts";
+import type { OnlyWarnsForOptionalDependencyMapping } from "./utils/warnForUtils.ts";
+import { createOnlyWarnsForMappingCheck } from "./utils/warnForUtils.ts";
 
 interface OnlyWarnsForInMonorepoPackageCheckPackageRecommendedOption
   extends OnlyWarnsForInPackageCheckPackageRecommendedOption {

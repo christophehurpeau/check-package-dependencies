@@ -1,12 +1,12 @@
 import semver from "semver";
-import type { GetDependencyPackageJson } from "../utils/createGetDependencyPackageJson";
+import type { GetDependencyPackageJson } from "../utils/createGetDependencyPackageJson.ts";
 import {
   createReportError,
   reportNotWarnedFor,
-} from "../utils/createReportError";
-import type { DependencyTypes, PackageJson } from "../utils/packageTypes";
-import { getRealVersion } from "../utils/semverUtils";
-import type { OnlyWarnsFor, OnlyWarnsForCheck } from "../utils/warnForUtils";
+} from "../utils/createReportError.ts";
+import type { DependencyTypes, PackageJson } from "../utils/packageTypes.ts";
+import { getRealVersion } from "../utils/semverUtils.ts";
+import type { OnlyWarnsFor, OnlyWarnsForCheck } from "../utils/warnForUtils.ts";
 
 export interface CheckExactVersionsOptions {
   getDependencyPackageJson?: GetDependencyPackageJson;

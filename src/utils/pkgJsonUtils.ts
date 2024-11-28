@@ -1,7 +1,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { resolve as importResolve } from "import-meta-resolve";
-import type { PackageJson } from "./packageTypes";
+import type { PackageJson } from "./packageTypes.ts";
 
 export function readPkgJson(packagePath: string): PackageJson {
   return JSON.parse(readFileSync(packagePath, "utf8")) as PackageJson;

@@ -1,12 +1,12 @@
-import type { GetDependencyPackageJson } from "../utils/createGetDependencyPackageJson";
+import type { GetDependencyPackageJson } from "../utils/createGetDependencyPackageJson.ts";
 import {
   createReportError,
   reportNotWarnedForMapping,
-} from "../utils/createReportError";
-import { getKeys } from "../utils/object";
-import type { DependencyTypes, PackageJson } from "../utils/packageTypes";
-import type { OnlyWarnsForMappingCheck } from "../utils/warnForUtils";
-import { checkDuplicateDependencies } from "./checkDuplicateDependencies";
+} from "../utils/createReportError.ts";
+import { getKeys } from "../utils/object.ts";
+import type { DependencyTypes, PackageJson } from "../utils/packageTypes.ts";
+import type { OnlyWarnsForMappingCheck } from "../utils/warnForUtils.ts";
+import { checkDuplicateDependencies } from "./checkDuplicateDependencies.ts";
 
 export function checkDirectDuplicateDependencies(
   pkg: PackageJson,

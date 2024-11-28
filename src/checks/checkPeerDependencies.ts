@@ -1,8 +1,8 @@
 import semver from "semver";
-import type { ReportError } from "../utils/createReportError";
-import type { DependencyTypes, PackageJson } from "../utils/packageTypes";
-import { getRealVersion } from "../utils/semverUtils";
-import type { OnlyWarnsForCheck } from "../utils/warnForUtils";
+import type { ReportError } from "../utils/createReportError.ts";
+import type { DependencyTypes, PackageJson } from "../utils/packageTypes.ts";
+import { getRealVersion } from "../utils/semverUtils.ts";
+import type { OnlyWarnsForCheck } from "../utils/warnForUtils.ts";
 
 export function checkPeerDependencies(
   pkg: PackageJson,

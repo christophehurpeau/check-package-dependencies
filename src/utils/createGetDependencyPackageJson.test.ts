@@ -1,8 +1,8 @@
 import type { PackageJson } from "type-fest";
 import { describe, expect, test, vi } from "vitest";
-import { createGetDependencyPackageJson } from "./createGetDependencyPackageJson";
+import { createGetDependencyPackageJson } from "./createGetDependencyPackageJson.ts";
 
-vi.mock("./pkgJsonUtils", () => ({
+vi.mock("./pkgJsonUtils.ts", () => ({
   readPkgJson: vi.fn(),
   writePkgJson: vi.fn(),
   internalLoadPackageJsonFromNodeModules: vi.fn(),

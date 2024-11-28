@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
-import { logMessage, reportNotWarnedForMapping } from "./createReportError";
-import { createOnlyWarnsForMappingCheck } from "./warnForUtils";
+import { logMessage, reportNotWarnedForMapping } from "./createReportError.ts";
+import { createOnlyWarnsForMappingCheck } from "./warnForUtils.ts";
 
 describe("logMessage", () => {
   beforeEach(() => {

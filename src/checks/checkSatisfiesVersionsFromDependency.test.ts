@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { DependencyTypes, PackageJson } from "../utils/packageTypes";
-import { checkSatisfiesVersionsFromDependency } from "./checkSatisfiesVersionsFromDependency";
+import type { DependencyTypes, PackageJson } from "../utils/packageTypes.ts";
+import { checkSatisfiesVersionsFromDependency } from "./checkSatisfiesVersionsFromDependency.ts";
 
 describe(checkSatisfiesVersionsFromDependency.name, () => {
   const mockReportError = vi.fn();

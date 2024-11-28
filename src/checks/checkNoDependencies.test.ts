@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { checkNoDependencies } from "./checkNoDependencies";
+import { checkNoDependencies } from "./checkNoDependencies.ts";
 
 describe("checkNoDependencies", () => {
   const mockReportError = vi.fn();

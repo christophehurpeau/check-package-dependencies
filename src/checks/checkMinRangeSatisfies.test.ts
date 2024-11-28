@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { PackageJson } from "../utils/packageTypes";
-import { checkMinRangeSatisfies } from "./checkMinRangeSatisfies";
+import type { PackageJson } from "../utils/packageTypes.ts";
+import { checkMinRangeSatisfies } from "./checkMinRangeSatisfies.ts";
 
 describe(checkMinRangeSatisfies.name, () => {
   const mockReportError = vi.fn();

@@ -1,7 +1,7 @@
 import semver from "semver";
-import { createReportError } from "../utils/createReportError";
-import { getEntries } from "../utils/object";
-import type { DependenciesRanges, PackageJson } from "../utils/packageTypes";
+import { createReportError } from "../utils/createReportError.ts";
+import { getEntries } from "../utils/object.ts";
+import type { DependenciesRanges, PackageJson } from "../utils/packageTypes.ts";
 
 interface CheckSatisfiesVersionsInDependencyOptions {
   customCreateReportError?: typeof createReportError;

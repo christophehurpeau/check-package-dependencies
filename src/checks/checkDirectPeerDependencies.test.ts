@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { createOnlyWarnsForMappingCheck } from "../utils/warnForUtils";
-import { checkDirectPeerDependencies } from "./checkDirectPeerDependencies";
+import { createOnlyWarnsForMappingCheck } from "../utils/warnForUtils.ts";
+import { checkDirectPeerDependencies } from "./checkDirectPeerDependencies.ts";
 
 describe("checkDirectPeerDependencies", () => {
   const mockReportError = vi.fn();

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { checkIdenticalVersions } from "./checkIdenticalVersions";
+import { checkIdenticalVersions } from "./checkIdenticalVersions.ts";
 
 describe("checkIdenticalVersions", () => {
   const mockReportError = vi.fn();

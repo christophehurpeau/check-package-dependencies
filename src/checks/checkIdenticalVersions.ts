@@ -1,7 +1,7 @@
-import { createReportError } from "../utils/createReportError";
-import { getKeys } from "../utils/object";
-import type { DependencyTypes, PackageJson } from "../utils/packageTypes";
-import type { OnlyWarnsForCheck } from "../utils/warnForUtils";
+import { createReportError } from "../utils/createReportError.ts";
+import { getKeys } from "../utils/object.ts";
+import type { DependencyTypes, PackageJson } from "../utils/packageTypes.ts";
+import type { OnlyWarnsForCheck } from "../utils/warnForUtils.ts";
 
 export function checkIdenticalVersions(
   pkg: PackageJson,

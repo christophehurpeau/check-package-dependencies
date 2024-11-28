@@ -1,8 +1,8 @@
 import type { Except } from "type-fest";
-import type { CheckPackageApi, CreateCheckPackageOptions, OnlyWarnsForInDependenciesCheckPackageRecommendedOption, OnlyWarnsForInDependencyCheckPackageRecommendedOption, OnlyWarnsForInPackageCheckPackageRecommendedOption } from "./check-package";
-import type { CheckResolutionMessage } from "./checks/checkResolutionsHasExplanation";
-import type { PackageJson } from "./utils/packageTypes";
-import type { OnlyWarnsForOptionalDependencyMapping } from "./utils/warnForUtils";
+import type { CheckPackageApi, CreateCheckPackageOptions, OnlyWarnsForInDependenciesCheckPackageRecommendedOption, OnlyWarnsForInDependencyCheckPackageRecommendedOption, OnlyWarnsForInPackageCheckPackageRecommendedOption } from "./check-package.ts";
+import type { CheckResolutionMessage } from "./checks/checkResolutionsHasExplanation.ts";
+import type { PackageJson } from "./utils/packageTypes.ts";
+import type { OnlyWarnsForOptionalDependencyMapping } from "./utils/warnForUtils.ts";
 interface OnlyWarnsForInMonorepoPackageCheckPackageRecommendedOption extends OnlyWarnsForInPackageCheckPackageRecommendedOption {
     duplicateDirectDependency: OnlyWarnsForInDependencyCheckPackageRecommendedOption["duplicateDirectDependency"];
 }

@@ -1,7 +1,7 @@
-import type { CheckResolutionMessage } from "./checks/checkResolutionsHasExplanation";
-import type { GetDependencyPackageJson } from "./utils/createGetDependencyPackageJson";
-import type { DependenciesRanges, DependencyName, DependencyTypes, PackageJson } from "./utils/packageTypes";
-import type { OnlyWarnsFor, OnlyWarnsForOptionalDependencyMapping } from "./utils/warnForUtils";
+import type { CheckResolutionMessage } from "./checks/checkResolutionsHasExplanation.ts";
+import type { GetDependencyPackageJson } from "./utils/createGetDependencyPackageJson.ts";
+import type { DependenciesRanges, DependencyName, DependencyTypes, PackageJson } from "./utils/packageTypes.ts";
+import type { OnlyWarnsFor, OnlyWarnsForOptionalDependencyMapping } from "./utils/warnForUtils.ts";
 export interface CreateCheckPackageOptions {
     packageDirectoryPath?: string;
     isLibrary?: boolean | ((pkg: PackageJson) => boolean);

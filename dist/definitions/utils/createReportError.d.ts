@@ -1,4 +1,4 @@
-import type { OnlyWarnsForCheck, OnlyWarnsForMappingCheck } from "./warnForUtils";
+import type { OnlyWarnsForCheck, OnlyWarnsForMappingCheck } from "./warnForUtils.ts";
 export type ReportError = (msgTitle: string, msgInfo?: string, onlyWarns?: boolean, autoFixable?: boolean) => void;
 export declare function displayConclusion(): void;
 export declare function logMessage(msgTitle: string, msgInfo?: string, onlyWarns?: boolean, autoFixable?: boolean): void;

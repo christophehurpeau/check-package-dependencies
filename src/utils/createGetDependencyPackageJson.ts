@@ -1,8 +1,8 @@
-import type { PackageJson } from "./packageTypes";
+import type { PackageJson } from "./packageTypes.ts";
 import {
   internalLoadPackageJsonFromNodeModules,
   readPkgJson,
-} from "./pkgJsonUtils";
+} from "./pkgJsonUtils.ts";
 
 export type GetDependencyPackageJson = (pkgDepName: string) => PackageJson;
 

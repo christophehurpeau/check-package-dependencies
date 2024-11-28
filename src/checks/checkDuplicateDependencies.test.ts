@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { createOnlyWarnsForArrayCheck } from "../utils/warnForUtils";
-import { checkDuplicateDependencies } from "./checkDuplicateDependencies";
+import { createOnlyWarnsForArrayCheck } from "../utils/warnForUtils.ts";
+import { checkDuplicateDependencies } from "./checkDuplicateDependencies.ts";
 
 describe("checkDuplicateDependencies", () => {
   const mockReportError = vi.fn();

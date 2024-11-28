@@ -1,6 +1,6 @@
-import type { GetDependencyPackageJson } from "../utils/createGetDependencyPackageJson";
-import { createReportError } from "../utils/createReportError";
-import type { PackageJson } from "../utils/packageTypes";
+import type { GetDependencyPackageJson } from "../utils/createGetDependencyPackageJson.ts";
+import { createReportError } from "../utils/createReportError.ts";
+import type { PackageJson } from "../utils/packageTypes.ts";
 
 export type CheckResolutionMessage = (
   depKey: string,

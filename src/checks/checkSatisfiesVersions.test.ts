@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { checkSatisfiesVersions } from "./checkSatisfiesVersions";
+import { checkSatisfiesVersions } from "./checkSatisfiesVersions.ts";
 
 describe("checkSatisfiesVersions", () => {
   const mockReportError = vi.fn();
