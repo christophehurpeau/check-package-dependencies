@@ -135,7 +135,7 @@ function checkDuplicateDependencies(reportError, pkg, isPkgLibrary, depType, sea
   }
 }
 
-async function checkDirectDuplicateDependencies(pkg, pkgPathName, isPackageALibrary, depType, getDependencyPackageJson, onlyWarnsForCheck, reportErrorNamePrefix = "", customCreateReportError = createReportError) {
+function checkDirectDuplicateDependencies(pkg, pkgPathName, isPackageALibrary, depType, getDependencyPackageJson, onlyWarnsForCheck, reportErrorNamePrefix = "", customCreateReportError = createReportError) {
   const reportError = customCreateReportError(
     `${reportErrorNamePrefix}Direct Duplicate Dependencies`,
     pkgPathName
@@ -288,33 +288,31 @@ const getAllowedPeerInFromType = (depPkgType, isLibrary) => {
       return isLibrary ? ["dependencies", "optionalDependencies", "peerDependencies"] : ["devDependencies", "dependencies"];
   }
 };
-async function checkDirectPeerDependencies(isLibrary, pkg, pkgPathName, getDependencyPackageJson, missingOnlyWarnsForCheck, invalidOnlyWarnsForCheck, customCreateReportError = createReportError) {
+function checkDirectPeerDependencies(isLibrary, pkg, pkgPathName, getDependencyPackageJson, missingOnlyWarnsForCheck, invalidOnlyWarnsForCheck, customCreateReportError = createReportError) {
   const reportError = customCreateReportError("Peer Dependencies", pkgPathName);
   const allDepPkgs = [];
   const allDirectDependenciesDependencies = [];
-  await Promise.all(
-    regularDependencyTypes.map(async (depType) => {
-      const dependencies = pkg[depType];
-      if (!dependencies) return;
-      for (const depName of getKeys(dependencies)) {
-        const depPkg = getDependencyPackageJson(depName);
-        allDepPkgs.push({
-          name: depName,
-          type: depType,
-          pkg: depPkg,
-          hasDirectMatchingPeerDependency: pkg.peerDependencies?.[depName] ? semver.intersects(
-            dependencies[depName],
-            pkg.peerDependencies[depName]
-          ) : false
-        });
-        if (depPkg.dependencies && !isLibrary) {
-          allDirectDependenciesDependencies.push(
-            ...Object.entries(depPkg.dependencies)
-          );
-        }
+  regularDependencyTypes.forEach((depType) => {
+    const dependencies = pkg[depType];
+    if (!dependencies) return;
+    for (const depName of getKeys(dependencies)) {
+      const depPkg = getDependencyPackageJson(depName);
+      allDepPkgs.push({
+        name: depName,
+        type: depType,
+        pkg: depPkg,
+        hasDirectMatchingPeerDependency: pkg.peerDependencies?.[depName] ? semver.intersects(
+          dependencies[depName],
+          pkg.peerDependencies[depName]
+        ) : false
+      });
+      if (depPkg.dependencies && !isLibrary) {
+        allDirectDependenciesDependencies.push(
+          ...Object.entries(depPkg.dependencies)
+        );
       }
-    })
-  );
+    }
+  });
   for (const {
     name: depName,
     type: depType,
@@ -1017,7 +1015,7 @@ function createCheckPackage({
       internalInvalidConfigName = "invalidOnlyWarnsFor"
     } = {}) {
       jobs.push(
-        new Job(this.checkDirectPeerDependencies.name, async () => {
+        new Job(this.checkDirectPeerDependencies.name, () => {
           const missingOnlyWarnsForCheck = createOnlyWarnsForMappingCheck(
             internalMissingConfigName,
             missingOnlyWarnsFor
@@ -1026,7 +1024,7 @@ function createCheckPackage({
             internalInvalidConfigName,
             invalidOnlyWarnsFor
           );
-          await checkDirectPeerDependencies(
+          checkDirectPeerDependencies(
             isPkgLibrary,
             pkg,
             pkgPathName,
@@ -1043,8 +1041,8 @@ function createCheckPackage({
       internalConfigName = "onlyWarnsFor"
     } = {}) {
       jobs.push(
-        new Job(this.checkDirectDuplicateDependencies.name, async () => {
-          await checkDirectDuplicateDependencies(
+        new Job(this.checkDirectDuplicateDependencies.name, () => {
+          checkDirectDuplicateDependencies(
             pkg,
             pkgPathName,
             isPkgLibrary,
@@ -1119,7 +1117,7 @@ function createCheckPackage({
     },
     checkIdenticalVersionsThanDependency(depName, { resolutions, dependencies, devDependencies }) {
       jobs.push(
-        new Job(this.checkIdenticalVersionsThanDependency.name, async () => {
+        new Job(this.checkIdenticalVersionsThanDependency.name, () => {
           const depPkg = getDependencyPackageJson(depName);
           if (resolutions) {
             checkIdenticalVersionsThanDependency(
@@ -1157,7 +1155,7 @@ function createCheckPackage({
     },
     checkIdenticalVersionsThanDevDependencyOfDependency(depName, { resolutions, dependencies, devDependencies }) {
       jobs.push(
-        new Job(this.checkSatisfiesVersionsFromDependency.name, async () => {
+        new Job(this.checkSatisfiesVersionsFromDependency.name, () => {
           const depPkg = getDependencyPackageJson(depName);
           if (resolutions) {
             checkIdenticalVersionsThanDependency(
@@ -1208,7 +1206,7 @@ function createCheckPackage({
     },
     checkSatisfiesVersionsFromDependency(depName, { resolutions, dependencies, devDependencies }) {
       jobs.push(
-        new Job(this.checkSatisfiesVersionsFromDependency.name, async () => {
+        new Job(this.checkSatisfiesVersionsFromDependency.name, () => {
           const depPkg = getDependencyPackageJson(depName);
           if (resolutions) {
             checkSatisfiesVersionsFromDependency(
@@ -1251,7 +1249,7 @@ function createCheckPackage({
       jobs.push(
         new Job(
           this.checkSatisfiesVersionsInDevDependenciesOfDependency.name,
-          async () => {
+          () => {
             const depPkg = getDependencyPackageJson(depName);
             if (resolutions) {
               checkSatisfiesVersionsFromDependency(
@@ -1346,7 +1344,7 @@ function createCheckPackage({
     },
     checkSatisfiesVersionsInDependency(depName, dependenciesRanges) {
       jobs.push(
-        new Job(this.checkSatisfiesVersionsInDependency.name, async () => {
+        new Job(this.checkSatisfiesVersionsInDependency.name, () => {
           const depPkg = getDependencyPackageJson(depName);
           checkSatisfiesVersionsInDependency(
             pkgPathName,
@@ -1359,7 +1357,7 @@ function createCheckPackage({
     },
     checkMinRangeDependenciesSatisfiesDevDependencies() {
       jobs.push(
-        new Job(this.checkSatisfiesVersionsInDependency.name, async () => {
+        new Job(this.checkSatisfiesVersionsInDependency.name, () => {
           checkMinRangeSatisfies(
             pkgPathName,
             pkg,
@@ -1373,7 +1371,7 @@ function createCheckPackage({
     },
     checkMinRangePeerDependenciesSatisfiesDependencies() {
       jobs.push(
-        new Job(this.checkSatisfiesVersionsInDependency.name, async () => {
+        new Job(this.checkSatisfiesVersionsInDependency.name, () => {
           checkMinRangeSatisfies(
             pkgPathName,
             pkg,
