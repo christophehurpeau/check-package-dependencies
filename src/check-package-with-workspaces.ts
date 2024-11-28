@@ -2,8 +2,8 @@ import fs, { constants } from "node:fs";
 import path from "node:path";
 import type { Except } from "type-fest";
 import type {
-  CreateCheckPackageOptions,
   CheckPackageApi,
+  CreateCheckPackageOptions,
   OnlyWarnsForInDependenciesCheckPackageRecommendedOption,
   OnlyWarnsForInDependencyCheckPackageRecommendedOption,
   OnlyWarnsForInPackageCheckPackageRecommendedOption,
@@ -88,6 +88,7 @@ export function createCheckPackageWithWorkspaces(
 
   const workspacePackagesPaths: string[] = [];
 
+  // eslint-disable-next-line n/no-unsupported-features/node-builtins
   const match = fs.globSync(pkgWorkspaces, { cwd: pkgDirname });
   for (const pathMatch of match) {
     try {

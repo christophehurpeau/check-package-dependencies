@@ -201,7 +201,7 @@ function changeOperator(range, operator) {
 }
 function getRealVersion(version) {
   if (version.startsWith("npm:")) {
-    const match = /^npm:.*@(.*)$/.exec(version);
+    const match = /^npm:[^@]+@(.*)$/.exec(version);
     if (!match) throw new Error(`Invalid version match: ${version}`);
     const [, realVersion] = match;
     return realVersion;

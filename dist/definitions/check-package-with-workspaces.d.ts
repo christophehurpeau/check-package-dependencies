@@ -1,5 +1,5 @@
 import type { Except } from "type-fest";
-import type { CreateCheckPackageOptions, CheckPackageApi, OnlyWarnsForInDependenciesCheckPackageRecommendedOption, OnlyWarnsForInDependencyCheckPackageRecommendedOption, OnlyWarnsForInPackageCheckPackageRecommendedOption } from "./check-package";
+import type { CheckPackageApi, CreateCheckPackageOptions, OnlyWarnsForInDependenciesCheckPackageRecommendedOption, OnlyWarnsForInDependencyCheckPackageRecommendedOption, OnlyWarnsForInPackageCheckPackageRecommendedOption } from "./check-package";
 import type { CheckResolutionMessage } from "./checks/checkResolutionsHasExplanation";
 import type { PackageJson } from "./utils/packageTypes";
 import type { OnlyWarnsForOptionalDependencyMapping } from "./utils/warnForUtils";

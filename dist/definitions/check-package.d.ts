@@ -1,7 +1,7 @@
 import type { CheckResolutionMessage } from "./checks/checkResolutionsHasExplanation";
 import type { GetDependencyPackageJson } from "./utils/createGetDependencyPackageJson";
 import type { DependenciesRanges, DependencyName, DependencyTypes, PackageJson } from "./utils/packageTypes";
-import type { OnlyWarnsForOptionalDependencyMapping, OnlyWarnsFor } from "./utils/warnForUtils";
+import type { OnlyWarnsFor, OnlyWarnsForOptionalDependencyMapping } from "./utils/warnForUtils";
 export interface CreateCheckPackageOptions {
     packageDirectoryPath?: string;
     isLibrary?: boolean | ((pkg: PackageJson) => boolean);

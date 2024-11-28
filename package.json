@@ -80,8 +80,8 @@
   },
   "devDependencies": {
     "@pob/commitlint-config": "8.0.0",
-    "@pob/eslint-config": "58.1.0",
-    "@pob/eslint-config-typescript": "58.1.0",
+    "@pob/eslint-config": "59.0.0",
+    "@pob/eslint-config-typescript": "59.0.0",
     "@pob/rollup-esbuild": "5.0.0",
     "@pob/root": "14.1.0",
     "@types/node": "22.9.3",

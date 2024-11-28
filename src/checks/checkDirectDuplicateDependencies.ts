@@ -1,10 +1,10 @@
 import type { GetDependencyPackageJson } from "../utils/createGetDependencyPackageJson";
 import {
-  reportNotWarnedForMapping,
   createReportError,
+  reportNotWarnedForMapping,
 } from "../utils/createReportError";
 import { getKeys } from "../utils/object";
-import type { PackageJson, DependencyTypes } from "../utils/packageTypes";
+import type { DependencyTypes, PackageJson } from "../utils/packageTypes";
 import type { OnlyWarnsForMappingCheck } from "../utils/warnForUtils";
 import { checkDuplicateDependencies } from "./checkDuplicateDependencies";
 

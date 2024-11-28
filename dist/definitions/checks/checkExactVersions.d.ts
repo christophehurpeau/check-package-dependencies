@@ -1,6 +1,6 @@
 import type { GetDependencyPackageJson } from "../utils/createGetDependencyPackageJson";
 import { createReportError } from "../utils/createReportError";
-import type { PackageJson, DependencyTypes } from "../utils/packageTypes";
+import type { DependencyTypes, PackageJson } from "../utils/packageTypes";
 import type { OnlyWarnsFor, OnlyWarnsForCheck } from "../utils/warnForUtils";
 export interface CheckExactVersionsOptions {
     getDependencyPackageJson?: GetDependencyPackageJson;

@@ -4,7 +4,7 @@ import {
   createReportError,
   reportNotWarnedFor,
 } from "../utils/createReportError";
-import type { PackageJson, DependencyTypes } from "../utils/packageTypes";
+import type { DependencyTypes, PackageJson } from "../utils/packageTypes";
 import { getRealVersion } from "../utils/semverUtils";
 import type { OnlyWarnsFor, OnlyWarnsForCheck } from "../utils/warnForUtils";
 

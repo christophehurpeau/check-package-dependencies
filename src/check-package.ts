@@ -25,9 +25,9 @@ import type {
 } from "./utils/packageTypes";
 import { readPkgJson, writePkgJson } from "./utils/pkgJsonUtils";
 import type {
-  OnlyWarnsForOptionalDependencyMapping,
   OnlyWarnsFor,
   OnlyWarnsForDependencyMapping,
+  OnlyWarnsForOptionalDependencyMapping,
 } from "./utils/warnForUtils";
 import {
   createOnlyWarnsForArrayCheck,

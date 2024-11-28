@@ -1,6 +1,6 @@
 import semver from "semver";
 import type { ReportError } from "../utils/createReportError";
-import type { PackageJson, DependencyTypes } from "../utils/packageTypes";
+import type { DependencyTypes, PackageJson } from "../utils/packageTypes";
 import type { OnlyWarnsForCheck } from "../utils/warnForUtils";
 
 export function checkDuplicateDependencies(
