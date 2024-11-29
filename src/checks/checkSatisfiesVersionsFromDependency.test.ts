@@ -1,14 +1,18 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { DependencyTypes, PackageJson } from "../utils/packageTypes.ts";
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
+import { createMockReportError } from "../utils/createReportError.testUtils.ts";
+import type { PackageJson } from "../utils/packageTypes.ts";
 import { checkSatisfiesVersionsFromDependency } from "./checkSatisfiesVersionsFromDependency.ts";
 
-describe(checkSatisfiesVersionsFromDependency.name, () => {
-  const mockReportError = vi.fn();
-  const createReportError = vi.fn().mockReturnValue(mockReportError);
+type DependencyTypes =
+  | "dependencies"
+  | "devDependencies"
+  | "peerDependencies"
+  | "resolutions";
 
-  beforeEach(() => {
-    mockReportError.mockReset();
-  });
+describe(checkSatisfiesVersionsFromDependency.name, () => {
+  const { mockReportError, createReportError } = createMockReportError();
+
   it("should return no error when no keys", () => {
     checkSatisfiesVersionsFromDependency(
       { name: "test" },
@@ -22,11 +26,17 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
         shouldHaveExactVersions: () => false,
       },
     );
-    expect(mockReportError).not.toHaveBeenCalled();
+    assert.equal(mockReportError.mock.calls.length, 0);
   });
 
   describe("expect no error", () => {
-    it.each([
+    const testCases: [
+      depName: string,
+      depTypeInDep: string,
+      description: string,
+      depValueInDep: string,
+      depValueInPkg: string,
+    ][] = [
       ["test1", "devDependencies", "is exact", "1.0.0", "1.0.0"],
       ["test2", "devDependencies", "is in range (^)", "1.0.0", "1.0.0"],
       [
@@ -45,9 +55,16 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
       ],
       ["test5", "dependencies", "is exact", "1.0.0", "1.0.0"],
       ["test6", "resolutions", "is exact", "1.0.0", "1.0.0"],
-    ])(
-      "should return no error when %s in %s is %s",
-      (depName, depTypeInDep, _, depValueInDep, depValueInPkg) => {
+    ];
+
+    for (const [
+      depName,
+      depTypeInDep,
+      description,
+      depValueInDep,
+      depValueInPkg,
+    ] of testCases) {
+      it(`should return no error when ${depName} in ${depTypeInDep} ${description}`, () => {
         const depTypeInPkg: DependencyTypes = "devDependencies";
         const pkg: PackageJson = {
           name: "test",
@@ -64,20 +81,26 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
           {
             name: "test-dep",
             [depTypeInDep]: { [depName]: depValueInDep },
-          } as PackageJson,
+          },
           depTypeInDep as DependencyTypes,
           {
             customCreateReportError: createReportError,
             shouldHaveExactVersions: () => false,
           },
         );
-        expect(mockReportError).not.toHaveBeenCalled();
-      },
-    );
+        assert.equal(mockReportError.mock.calls.length, 0);
+      });
+    }
   });
 
   describe("expect to fix", () => {
-    it.each([
+    const fixTestCases: [
+      description: string,
+      depValue: string,
+      pkgContent: Omit<PackageJson, "name">,
+      expectedFix: Omit<PackageJson, "name">,
+      shouldHaveExactVersions: boolean,
+    ][] = [
       [
         '"devDependencies" missing',
         "1.0.1",
@@ -141,19 +164,17 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
         { devDependencies: { expectedDep: "^1.0.1-beta" } },
         false,
       ],
-    ])(
-      "should to fix when %s",
-      (
-        _,
-        depValueInDep,
-        pkgContent,
-        expectedPkgResult,
-        shouldHaveExactVersions,
-      ) => {
-        const depTypeInPkg: DependencyTypes = "devDependencies";
-        const depTypeInDep: DependencyTypes = "devDependencies";
+    ];
 
-        const depName = "expectedDep";
+    for (const [
+      description,
+      depValue,
+      pkgContent,
+      expectedFix,
+      shouldHaveExactVersions,
+    ] of fixTestCases) {
+      it(`should fix when ${description}`, () => {
+        const depTypeInPkg: DependencyTypes = "devDependencies";
         const pkg: PackageJson = {
           name: "test",
           ...pkgContent,
@@ -163,28 +184,38 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
           pkg,
           "path",
           depTypeInPkg,
-          [depName],
+          ["expectedDep"],
           {
             name: "test-dep",
-            [depTypeInDep]: { [depName]: depValueInDep },
-          } as PackageJson,
-          depTypeInDep as DependencyTypes,
+            [depTypeInPkg]: { expectedDep: depValue },
+          },
+          depTypeInPkg,
           {
-            tryToAutoFix: true,
             customCreateReportError: createReportError,
             shouldHaveExactVersions: () => shouldHaveExactVersions,
+            tryToAutoFix: true,
           },
         );
-        expect(pkg).toEqual({
+
+        assert.deepEqual(pkg, {
           name: "test",
-          ...expectedPkgResult,
+          ...expectedFix,
         });
-      },
-    );
+      });
+    }
   });
 
-  describe("expect error when dependency is expected", () => {
-    it.each([
+  describe("expect error when not dependency is not expected", () => {
+    const testCases: [
+      depName: string,
+      depTypeInDep: string,
+      description: string,
+      depPkgContent: Omit<PackageJson, "name">,
+      pkgContent: Omit<PackageJson, "name">,
+      errorTitle: string,
+      errorInfo: string,
+      autoFixable: boolean,
+    ][] = [
       [
         "test1",
         "devDependencies",
@@ -225,24 +256,24 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
         '"1.0.0" should satisfies "0.1.0" from "test-dep"\'s "devDependencies".',
         true,
       ],
-    ])(
-      "should error when %s is %s in %s",
-      (
-        depName,
-        depTypeInDep,
-        _,
-        depPkgContent,
-        pkgContent,
-        errorTitle,
-        errorInfo,
-        autoFixable,
-      ) => {
+    ];
+
+    for (const [
+      depName,
+      depTypeInDep,
+      description,
+      depPkgContent,
+      pkgContent,
+      errorTitle,
+      errorInfo,
+      autoFixable,
+    ] of testCases) {
+      it(`should error when ${depName} is ${description} in ${depTypeInDep}`, () => {
         const depTypeInPkg: DependencyTypes = "devDependencies";
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         const pkg: PackageJson = {
-          ...(pkgContent as PackageJson),
+          ...pkgContent,
           name: "test",
-        } as PackageJson;
+        };
 
         checkSatisfiesVersionsFromDependency(
           pkg,
@@ -250,22 +281,23 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
           depTypeInPkg,
           [depName],
           {
-            ...(depPkgContent as PackageJson),
+            ...depPkgContent,
             name: "test-dep",
-          } as PackageJson,
+          },
           depTypeInDep as DependencyTypes,
           {
             customCreateReportError: createReportError,
             shouldHaveExactVersions: () => false,
           },
         );
-        expect(mockReportError).toHaveBeenCalledWith(
+        assert.equal(mockReportError.mock.calls.length, 1);
+        assert.deepEqual(mockReportError.mock.calls[0].arguments, [
           errorTitle,
           errorInfo,
           undefined,
           autoFixable,
-        );
-      },
-    );
+        ]);
+      });
+    }
   });
 });

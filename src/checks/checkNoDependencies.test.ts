@@ -1,13 +1,11 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
+import { createMockReportError } from "../utils/createReportError.testUtils.ts";
 import { checkNoDependencies } from "./checkNoDependencies.ts";
 
 describe("checkNoDependencies", () => {
-  const mockReportError = vi.fn();
-  const createReportError = vi.fn().mockReturnValue(mockReportError);
+  const { mockReportError, createReportError } = createMockReportError();
 
-  beforeEach(() => {
-    mockReportError.mockReset();
-  });
   it('should return no error when no "dependencies" is present', () => {
     checkNoDependencies(
       { name: "test", devDependencies: { test: "1.0.0" } },
@@ -16,8 +14,9 @@ describe("checkNoDependencies", () => {
       undefined,
       createReportError,
     );
-    expect(mockReportError).not.toHaveBeenCalled();
+    assert.equal(mockReportError.mock.calls.length, 0);
   });
+
   it('should return no error when no "devDependencies" is present', () => {
     checkNoDependencies(
       { name: "test", dependencies: { test: "1.0.0" } },
@@ -26,7 +25,7 @@ describe("checkNoDependencies", () => {
       undefined,
       createReportError,
     );
-    expect(mockReportError).not.toHaveBeenCalled();
+    assert.equal(mockReportError.mock.calls.length, 0);
   });
 
   it('should return no error when "dependencies" is present', () => {
@@ -37,15 +36,19 @@ describe("checkNoDependencies", () => {
       undefined,
       createReportError,
     );
-    expect(createReportError).toHaveBeenCalledWith("No dependencies", "path");
-    expect(mockReportError).toHaveBeenCalledTimes(1);
-    expect(mockReportError).toHaveBeenCalledWith(
+    assert.equal(createReportError.mock.calls.length, 1);
+    assert.deepEqual(createReportError.mock.calls[0].arguments, [
+      "No dependencies",
+      "path",
+    ]);
+    assert.equal(mockReportError.mock.calls.length, 1);
+    assert.deepEqual(mockReportError.mock.calls[0].arguments, [
       "Unexpected dependencies",
       "you should move them in devDependencies",
-    );
+    ]);
   });
 
-  it('should return no error when "dependencies" is present, with suggestion', () => {
+  it('should return no error when "dependencies" is present and is in onlyWarnsFor', () => {
     checkNoDependencies(
       { name: "test", dependencies: { test: "1.0.0" } },
       "path",
@@ -53,10 +56,15 @@ describe("checkNoDependencies", () => {
       "peerDependencies",
       createReportError,
     );
-    expect(mockReportError).toHaveBeenCalledTimes(1);
-    expect(mockReportError).toHaveBeenCalledWith(
+    assert.equal(createReportError.mock.calls.length, 1);
+    assert.deepEqual(createReportError.mock.calls[0].arguments, [
+      "No dependencies",
+      "path",
+    ]);
+    assert.equal(mockReportError.mock.calls.length, 1);
+    assert.deepEqual(mockReportError.mock.calls[0].arguments, [
       "Unexpected dependencies",
       "you should move them in peerDependencies",
-    );
+    ]);
   });
 });

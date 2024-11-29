@@ -1,24 +1,30 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
+import { createMockReportError } from "../utils/createReportError.testUtils.js";
 import { checkSatisfiesVersions } from "./checkSatisfiesVersions.js";
 describe("checkSatisfiesVersions", () => {
-    const mockReportError = vi.fn();
-    const createReportError = vi.fn().mockReturnValue(mockReportError);
-    beforeEach(() => {
-        mockReportError.mockReset();
-    });
+    const { mockReportError, createReportError } = createMockReportError();
     it("should return no error when range is satisfied", () => {
         checkSatisfiesVersions({ name: "test", devDependencies: { test: "1.0.0" } }, "path", "devDependencies", { test: "^1.0.0" }, undefined, { customCreateReportError: createReportError });
-        expect(mockReportError).not.toHaveBeenCalled();
+        assert.equal(mockReportError.mock.calls.length, 0);
     });
     it("should return error when version not satisfied", () => {
         checkSatisfiesVersions({ name: "test", devDependencies: { test: "1.0.0" } }, "path", "devDependencies", { test: "^2.0.0" }, undefined, { customCreateReportError: createReportError });
-        expect(mockReportError).toHaveBeenCalledTimes(1);
-        expect(mockReportError).toHaveBeenNthCalledWith(1, 'Invalid "test" in devDependencies', '"1.0.0" (in "test") should satisfies "^2.0.0".', undefined);
+        assert.equal(mockReportError.mock.calls.length, 1);
+        assert.deepEqual(mockReportError.mock.calls[0].arguments, [
+            'Invalid "test" in devDependencies',
+            '"1.0.0" (in "test") should satisfies "^2.0.0".',
+            undefined,
+        ]);
     });
     it("should return error when dependency is missing", () => {
         checkSatisfiesVersions({ name: "test", devDependencies: { test2: "1.0.0" } }, "path", "devDependencies", { test: "^1.0.0" }, undefined, { customCreateReportError: createReportError });
-        expect(mockReportError).toHaveBeenCalledTimes(1);
-        expect(mockReportError).toHaveBeenNthCalledWith(1, 'Missing "test" in devDependencies', 'should satisfies "^1.0.0".', undefined);
+        assert.equal(mockReportError.mock.calls.length, 1);
+        assert.deepEqual(mockReportError.mock.calls[0].arguments, [
+            'Missing "test" in devDependencies',
+            'should satisfies "^1.0.0".',
+            undefined,
+        ]);
     });
 });
 //# sourceMappingURL=checkSatisfiesVersions.test.js.map

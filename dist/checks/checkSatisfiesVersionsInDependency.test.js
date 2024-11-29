@@ -1,17 +1,15 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
+import { createMockReportError } from "../utils/createReportError.testUtils.js";
 import { checkSatisfiesVersionsInDependency } from "./checkSatisfiesVersionsInDependency.js";
 describe(checkSatisfiesVersionsInDependency.name, () => {
-    const mockReportError = vi.fn();
-    const createReportError = vi.fn().mockReturnValue(mockReportError);
-    beforeEach(() => {
-        mockReportError.mockReset();
-    });
+    const { mockReportError, createReportError } = createMockReportError();
     it("should return no error when no ranges is set", () => {
         checkSatisfiesVersionsInDependency("path", { name: "test" }, {}, { customCreateReportError: createReportError });
-        expect(mockReportError).not.toHaveBeenCalled();
+        assert.equal(mockReportError.mock.calls.length, 0);
     });
     describe("expect no error", () => {
-        it.each([
+        const testCases = [
             ["test1", "devDependencies", "not set", null, {}],
             ["test2", "dependencies", "not set", null, {}],
             ["test3", "resolutions", "not set", null, {}],
@@ -64,13 +62,16 @@ describe(checkSatisfiesVersionsInDependency.name, () => {
                 "^1.0.0",
                 { dependencies: { test3: "^1.1.0" } },
             ],
-        ])("should return no error when %s in %s is %s", (depName, depType, _, depValue, pkgContent) => {
-            checkSatisfiesVersionsInDependency("path", { name: "test", ...pkgContent }, { [depType]: { [depName]: depValue } }, { customCreateReportError: createReportError });
-            expect(mockReportError).not.toHaveBeenCalled();
-        });
+        ];
+        for (const [depName, depType, description, depValue, pkgContent,] of testCases) {
+            it(`should return no error when ${depName} in ${depType} is ${description}`, () => {
+                checkSatisfiesVersionsInDependency("path", { name: "test", ...pkgContent }, { [depType]: { [depName]: depValue } }, { customCreateReportError: createReportError });
+                assert.equal(mockReportError.mock.calls.length, 0);
+            });
+        }
     });
     describe("expect error when not dependency is not expected", () => {
-        it.each([
+        const testCases = [
             [
                 "test1",
                 "devDependencies",
@@ -92,13 +93,20 @@ describe(checkSatisfiesVersionsInDependency.name, () => {
                 'Invalid "test3" in resolutions of "test"',
                 "it should not be present",
             ],
-        ])("should error when %s is not expected in %s", (depName, depType, pkgContent, errorTitle, errorInfo) => {
-            checkSatisfiesVersionsInDependency("path", { name: "test", ...pkgContent }, { [depType]: { [depName]: null } }, { customCreateReportError: createReportError });
-            expect(mockReportError).toHaveBeenCalledWith(errorTitle, errorInfo);
-        });
+        ];
+        for (const [depName, depType, pkgContent, errorTitle, errorInfo,] of testCases) {
+            it(`should error when ${depName} is not expected in ${depType}`, () => {
+                checkSatisfiesVersionsInDependency("path", { name: "test", ...pkgContent }, { [depType]: { [depName]: null } }, { customCreateReportError: createReportError });
+                assert.equal(mockReportError.mock.calls.length, 1);
+                assert.deepEqual(mockReportError.mock.calls[0].arguments, [
+                    errorTitle,
+                    errorInfo,
+                ]);
+            });
+        }
     });
     describe("expect error when dependency is expected", () => {
-        it.each([
+        const testCases = [
             [
                 "test1",
                 "missing",
@@ -135,10 +143,17 @@ describe(checkSatisfiesVersionsInDependency.name, () => {
                 'Invalid "test4" in dependencies of "test"',
                 '"0.1.0" does not satisfies "^1.0.0"',
             ],
-        ])("should error when %s is %s in %s", (depName, _, depType, depRange, pkgContent, errorTitle, errorInfo) => {
-            checkSatisfiesVersionsInDependency("path", { name: "test", ...pkgContent }, { [depType]: { [depName]: depRange } }, { customCreateReportError: createReportError });
-            expect(mockReportError).toHaveBeenCalledWith(errorTitle, errorInfo);
-        });
+        ];
+        for (const [depName, status, depType, depRange, pkgContent, errorTitle, errorInfo,] of testCases) {
+            it(`should error when ${depName} is ${status} in ${depType}`, () => {
+                checkSatisfiesVersionsInDependency("path", { name: "test", ...pkgContent }, { [depType]: { [depName]: depRange } }, { customCreateReportError: createReportError });
+                assert.equal(mockReportError.mock.calls.length, 1);
+                assert.deepEqual(mockReportError.mock.calls[0].arguments, [
+                    errorTitle,
+                    errorInfo,
+                ]);
+            });
+        }
     });
 });
 //# sourceMappingURL=checkSatisfiesVersionsInDependency.test.js.map

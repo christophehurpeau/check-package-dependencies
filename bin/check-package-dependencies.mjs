@@ -3,7 +3,7 @@
 import {
   createCheckPackage,
   createCheckPackageWithWorkspaces,
-} from "../dist/index-node22.mjs";
+} from "../dist/index.js";
 
 const checkPackage = createCheckPackage();
 if (checkPackage.pkg.workspaces) {

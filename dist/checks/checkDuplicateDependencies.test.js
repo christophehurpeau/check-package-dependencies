@@ -1,11 +1,10 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
+import { createMockReportError } from "../utils/createReportError.testUtils.js";
 import { createOnlyWarnsForArrayCheck } from "../utils/warnForUtils.js";
 import { checkDuplicateDependencies } from "./checkDuplicateDependencies.js";
 describe("checkDuplicateDependencies", () => {
-    const mockReportError = vi.fn();
-    beforeEach(() => {
-        mockReportError.mockReset();
-    });
+    const { mockReportError } = createMockReportError();
     it("should report error when is in multiple types and not a library", () => {
         checkDuplicateDependencies(mockReportError, {
             name: "test",
@@ -19,7 +18,11 @@ describe("checkDuplicateDependencies", () => {
             name: "some-lib-using-rollup",
             dependencies: { rollup: "^2.0.0" },
         }, createOnlyWarnsForArrayCheck("test", []));
-        expect(mockReportError).toHaveBeenCalledWith('Invalid "rollup" present in dependencies and devDependencies', "please place it only in dependencies");
+        assert.equal(mockReportError.mock.calls.length, 1);
+        assert.deepEqual(mockReportError.mock.calls[0].arguments, [
+            'Invalid "rollup" present in dependencies and devDependencies',
+            "please place it only in dependencies",
+        ]);
     });
     it("should report error when is in multiple types with same version and is a library", () => {
         checkDuplicateDependencies(mockReportError, {
@@ -34,7 +37,11 @@ describe("checkDuplicateDependencies", () => {
             name: "some-lib-using-rollup",
             dependencies: { rollup: "^2.0.0" },
         }, createOnlyWarnsForArrayCheck("test", []));
-        expect(mockReportError).toHaveBeenCalledWith('Invalid "rollup" has same version in dependencies and devDependencies', "please place it only in dependencies or use range in dependencies");
+        assert.equal(mockReportError.mock.calls.length, 1);
+        assert.deepEqual(mockReportError.mock.calls[0].arguments, [
+            'Invalid "rollup" has same version in dependencies and devDependencies',
+            "please place it only in dependencies or use range in dependencies",
+        ]);
     });
     it("should report error when dependency does not intersect", () => {
         checkDuplicateDependencies(mockReportError, {
@@ -47,7 +54,12 @@ describe("checkDuplicateDependencies", () => {
             name: "some-lib-using-rollup",
             dependencies: { rollup: "^2.0.0" },
         }, createOnlyWarnsForArrayCheck("test", []));
-        expect(mockReportError).toHaveBeenCalledWith('Invalid duplicate dependency "rollup"', '"1.0.0" (in devDependencies) should satisfies "^2.0.0" from "some-lib-using-rollup" dependencies.', false);
+        assert.equal(mockReportError.mock.calls.length, 1);
+        assert.deepEqual(mockReportError.mock.calls[0].arguments, [
+            'Invalid duplicate dependency "rollup"',
+            '"1.0.0" (in devDependencies) should satisfies "^2.0.0" from "some-lib-using-rollup" dependencies.',
+            false,
+        ]);
     });
     it("should not report error when dev dependency value is a beta", () => {
         checkDuplicateDependencies(mockReportError, {
@@ -60,19 +72,56 @@ describe("checkDuplicateDependencies", () => {
             name: "some-lib-using-rollup",
             dependencies: { rollup: "^1.0.0-beta.0" },
         }, createOnlyWarnsForArrayCheck("test", []));
-        expect(mockReportError).not.toHaveBeenCalled();
+        assert.equal(mockReportError.mock.calls.length, 0);
     });
-    it("should not report error when dependency value is also a range", () => {
+    it("should not report error when dependency is in onlyWarnsFor", () => {
         checkDuplicateDependencies(mockReportError, {
             name: "test",
-            dependencies: {
-                rollup: "^1.0.1",
+            devDependencies: {
+                rollup: "1.0.0",
+                "some-lib-using-rollup": "1.0.0",
             },
-        }, false, "dependencies", ["dependencies"], {
+        }, false, "dependencies", ["devDependencies"], {
             name: "some-lib-using-rollup",
-            dependencies: { rollup: "^1.0.0" },
+            dependencies: { rollup: "^2.0.0" },
+        }, createOnlyWarnsForArrayCheck("test", ["rollup"]));
+        assert.equal(mockReportError.mock.calls.length, 1);
+        assert.deepEqual(mockReportError.mock.calls[0].arguments, [
+            'Invalid duplicate dependency "rollup"',
+            '"1.0.0" (in devDependencies) should satisfies "^2.0.0" from "some-lib-using-rollup" dependencies.',
+            true,
+        ]);
+    });
+    it("should not report error when dependency is in peerDependencies", () => {
+        checkDuplicateDependencies(mockReportError, {
+            name: "test",
+            devDependencies: {
+                rollup: "1.0.0",
+                "some-lib-using-rollup": "1.0.0",
+            },
+        }, false, "peerDependencies", ["devDependencies"], {
+            name: "some-lib-using-rollup",
+            peerDependencies: { rollup: "^1.0.0" },
         }, createOnlyWarnsForArrayCheck("test", []));
-        expect(mockReportError).not.toHaveBeenCalled();
+        assert.equal(mockReportError.mock.calls.length, 0);
+    });
+    it("should report error when dependency is in peerDependencies and allowPeerDependencies is false", () => {
+        checkDuplicateDependencies(mockReportError, {
+            name: "test",
+            devDependencies: {
+                rollup: "1.0.0",
+                "some-lib-using-rollup": "1.0.0",
+            },
+        }, true, "peerDependencies", ["devDependencies"], {
+            name: "some-lib-using-rollup",
+            peerDependencies: { rollup: "^2.0.0" },
+        }, createOnlyWarnsForArrayCheck("test", []));
+        assert.equal(mockReportError.mock.calls.length, 1);
+        assert.deepEqual(mockReportError.mock.calls[0].arguments, [
+            'Invalid duplicate dependency "rollup"',
+            '"1.0.0" (in devDependencies) should satisfies "^2.0.0" from "some-lib-using-rollup" peerDependencies.',
+            false,
+        ]);
     });
 });
 //# sourceMappingURL=checkDuplicateDependencies.test.js.map

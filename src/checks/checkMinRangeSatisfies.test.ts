@@ -1,21 +1,19 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
+import { createMockReportError } from "../utils/createReportError.testUtils.ts";
 import type { PackageJson } from "../utils/packageTypes.ts";
 import { checkMinRangeSatisfies } from "./checkMinRangeSatisfies.ts";
 
 describe(checkMinRangeSatisfies.name, () => {
-  const mockReportError = vi.fn();
-  const createReportError = vi.fn().mockReturnValue(mockReportError);
+  const { mockReportError, createReportError } = createMockReportError();
 
-  beforeEach(() => {
-    mockReportError.mockReset();
-  });
   it("should return no error when no dependencies is set", () => {
     checkMinRangeSatisfies("path", { name: "test" });
-    expect(mockReportError).not.toHaveBeenCalled();
+    assert.equal(mockReportError.mock.calls.length, 0);
   });
 
   describe("expect no error", () => {
-    it.each([
+    const testCases: [string, Omit<PackageJson, "name">][] = [
       [
         "exact dev dependency and exact dependency",
         {
@@ -58,20 +56,30 @@ describe(checkMinRangeSatisfies.name, () => {
           devDependencies: { test1: "^1.1.0" },
         },
       ],
-    ])("should have no error when %s", (_, pkgContent) => {
-      checkMinRangeSatisfies(
-        "path",
-        { name: "test", ...pkgContent },
-        "dependencies",
-        "devDependencies",
-        { customCreateReportError: createReportError },
-      );
-      expect(mockReportError).not.toHaveBeenCalled();
-    });
+    ];
+
+    for (const [description, pkgContent] of testCases) {
+      it(`should have no error when ${description}`, () => {
+        checkMinRangeSatisfies(
+          "path",
+          { name: "test", ...pkgContent },
+          "dependencies",
+          "devDependencies",
+          { customCreateReportError: createReportError },
+        );
+        assert.equal(mockReportError.mock.calls.length, 0);
+      });
+    }
   });
 
   describe("expect error when not dependency is invalid", () => {
-    it.each([
+    const testCases: [
+      string,
+      Omit<PackageJson, "name">,
+      string,
+      string,
+      Omit<PackageJson, "name"> | undefined,
+    ][] = [
       [
         "exact dev dependency is higher than exact dependency",
         {
@@ -156,9 +164,16 @@ describe(checkMinRangeSatisfies.name, () => {
           dependencies: { test1: ">=1.0.0" },
         },
       ],
-    ])(
-      "should error when %s",
-      (_, pkgContent, errorTitle, errorInfo, expectedFix) => {
+    ];
+
+    for (const [
+      description,
+      pkgContent,
+      errorTitle,
+      errorInfo,
+      expectedFix,
+    ] of testCases) {
+      it(`should error when ${description}`, () => {
         checkMinRangeSatisfies(
           "path",
           { name: "test", ...pkgContent },
@@ -166,12 +181,13 @@ describe(checkMinRangeSatisfies.name, () => {
           "devDependencies",
           { customCreateReportError: createReportError },
         );
-        expect(mockReportError).toHaveBeenCalledWith(
+        assert.equal(mockReportError.mock.calls.length, 1);
+        assert.deepEqual(mockReportError.mock.calls[0].arguments, [
           errorTitle,
           errorInfo,
           false,
           true,
-        );
+        ]);
 
         if (expectedFix) {
           const pkg = JSON.parse(
@@ -185,9 +201,9 @@ describe(checkMinRangeSatisfies.name, () => {
             { tryToAutoFix: true },
           );
 
-          expect(pkg).toStrictEqual({ ...pkg, ...expectedFix });
+          assert.deepEqual(pkg, { ...pkg, ...expectedFix });
         }
-      },
-    );
+      });
+    }
   });
 });

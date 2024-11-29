@@ -43,11 +43,11 @@
     "lint:prettier": "pob-root-prettier --check .",
     "lint:prettier:fix": "pob-root-prettier --write .",
     "postinstallDev": "pob-root-postinstall",
-    "test": "vitest",
-    "test:coverage": "POB_VITEST_COVERAGE=json,text vitest run --coverage",
-    "test:coverage:json": "POB_VITEST_COVERAGE=json vitest run --coverage",
+    "test": "node --disable-warning=ExperimentalWarning --experimental-strip-types --test src/**/*.test.ts",
+    "test:coverage": "npx c8 --all --src ./src node --disable-warning=ExperimentalWarning --experimental-strip-types --test src/**/*.test.ts",
+    "test:coverage:json": "npx c8 --reporter=json --all --src ./src node --disable-warning=ExperimentalWarning --experimental-strip-types --test src/**/*.test.ts",
     "test:coverage:lcov": "POB_VITEST_COVERAGE=lcovvitest run --coverage",
-    "test:watch": "vitest --watch",
+    "test:watch": "node --disable-warning=ExperimentalWarning --experimental-strip-types --test src/**/*.test.ts",
     "watch": "yarn clean:build && rollup --config rollup.config.mjs --watch"
   },
   "commitlint": {
@@ -81,16 +81,14 @@
   "devDependencies": {
     "@pob/commitlint-config": "8.0.0",
     "@pob/eslint-config": "59.0.0",
-    "@pob/eslint-config-typescript": "59.1.0",
+    "@pob/eslint-config-typescript": "59.1.2",
     "@pob/root": "14.1.0",
     "@types/node": "22.9.3",
     "@types/semver": "7.5.8",
     "@types/semver-utils": "1.1.3",
-    "@vitest/coverage-v8": "2.1.6",
     "eslint": "9.14.0",
     "semver": "7.5.4",
     "typedoc": "0.27.1",
-    "typescript": "5.7.2",
-    "vitest": "2.1.6"
+    "typescript": "5.7.2"
   }
 }

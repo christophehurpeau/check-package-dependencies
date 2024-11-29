@@ -1,13 +1,10 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
+import { createMockReportError } from "../utils/createReportError.testUtils.ts";
 import { checkIdenticalVersions } from "./checkIdenticalVersions.ts";
 
 describe("checkIdenticalVersions", () => {
-  const mockReportError = vi.fn();
-  const createReportError = vi.fn().mockReturnValue(mockReportError);
-
-  beforeEach(() => {
-    mockReportError.mockReset();
-  });
+  const { mockReportError, createReportError } = createMockReportError();
 
   describe("devDependencies in array", () => {
     it("should return no error when all versions are identical", () => {
@@ -24,11 +21,12 @@ describe("checkIdenticalVersions", () => {
         undefined,
         createReportError,
       );
-      expect(createReportError).toHaveBeenCalledWith(
+      assert.equal(createReportError.mock.calls.length, 1);
+      assert.deepEqual(createReportError.mock.calls[0].arguments, [
         "Identical Versions",
         "path",
-      );
-      expect(mockReportError).not.toHaveBeenCalled();
+      ]);
+      assert.equal(mockReportError.mock.calls.length, 0);
     });
 
     it("should return error when versions are not identical", () => {
@@ -45,16 +43,17 @@ describe("checkIdenticalVersions", () => {
         undefined,
         createReportError,
       );
-      expect(createReportError).toHaveBeenCalledWith(
+      assert.equal(createReportError.mock.calls.length, 1);
+      assert.deepEqual(createReportError.mock.calls[0].arguments, [
         "Identical Versions",
         "path",
-      );
-      expect(mockReportError).toHaveBeenCalledTimes(1);
-      expect(mockReportError).toHaveBeenCalledWith(
+      ]);
+      assert.equal(mockReportError.mock.calls.length, 1);
+      assert.deepEqual(mockReportError.mock.calls[0].arguments, [
         'Invalid "react-dom" in devDependencies',
         'expecting "1.0.1" be "1.0.0".',
         undefined,
-      );
+      ]);
     });
   });
 
@@ -77,11 +76,12 @@ describe("checkIdenticalVersions", () => {
         undefined,
         createReportError,
       );
-      expect(createReportError).toHaveBeenCalledWith(
+      assert.equal(createReportError.mock.calls.length, 1);
+      assert.deepEqual(createReportError.mock.calls[0].arguments, [
         "Identical Versions",
         "path",
-      );
-      expect(mockReportError).not.toHaveBeenCalled();
+      ]);
+      assert.equal(mockReportError.mock.calls.length, 0);
     });
 
     it("should return error when versions are not identical", () => {
@@ -102,21 +102,22 @@ describe("checkIdenticalVersions", () => {
         undefined,
         createReportError,
       );
-      expect(createReportError).toHaveBeenCalledWith(
+      assert.equal(createReportError.mock.calls.length, 1);
+      assert.deepEqual(createReportError.mock.calls[0].arguments, [
         "Identical Versions",
         "path",
-      );
-      expect(mockReportError).toHaveBeenCalledTimes(2);
-      expect(mockReportError).toHaveBeenCalledWith(
+      ]);
+      assert.equal(mockReportError.mock.calls.length, 2);
+      assert.deepEqual(mockReportError.mock.calls[0].arguments, [
         'Invalid "react-dom" in dependencies',
         'expecting "1.0.1" be "1.0.0".',
         undefined,
-      );
-      expect(mockReportError).toHaveBeenCalledWith(
+      ]);
+      assert.deepEqual(mockReportError.mock.calls[1].arguments, [
         'Invalid "react-test-renderer" in devDependencies',
         'expecting "1.0.1" be "1.0.0".',
         undefined,
-      );
+      ]);
     });
   });
 });

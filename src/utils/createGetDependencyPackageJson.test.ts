@@ -1,46 +1,46 @@
-import type { PackageJson } from "type-fest";
-import { describe, expect, test, vi } from "vitest";
+import assert from "node:assert/strict";
+import { beforeEach, describe, mock, test } from "node:test";
 import { createGetDependencyPackageJson } from "./createGetDependencyPackageJson.ts";
-
-vi.mock("./pkgJsonUtils.ts", () => ({
-  readPkgJson: vi.fn(),
-  writePkgJson: vi.fn(),
-  internalLoadPackageJsonFromNodeModules: vi.fn(),
-}));
+import type { PackageJson } from "./packageTypes.ts";
 
 describe("createGetDependencyPackageJson", () => {
+  beforeEach(() => {
+    mock.reset();
+  });
+
   test("on windows with error", () => {
-    const internalLoadPackageJsonFromNodeModulesMock = vi
-      .fn()
-      .mockImplementationOnce(() => {
-        const err: NodeJS.ErrnoException = new Error(
-          "Package subpath './package.json' is not defined by \"exports\" in C:\\test\\check-package-dependencies\\node_modules\\test1\\package.json imported from C:\\test\\check-package-dependencies\\package.json",
-        );
-        err.code = "ERR_PACKAGE_PATH_NOT_EXPORTED";
+    const internalLoadPackageJsonFromNodeModulesMock = mock.fn(() => {
+      const err: NodeJS.ErrnoException = new Error(
+        "Package subpath './package.json' is not defined by \"exports\" in C:\\test\\check-package-dependencies\\node_modules\\test1\\package.json imported from C:\\test\\check-package-dependencies\\package.json",
+      );
+      err.code = "ERR_PACKAGE_PATH_NOT_EXPORTED";
+      throw err;
+    });
 
-        throw err;
-      });
-
-    const mockPkg: PackageJson = {};
-    const readPkgJsonMock = vi.fn((pkgPath: string) => mockPkg);
+    const mockPkg: PackageJson = { name: "test1" };
+    const readPkgJsonMock = mock.fn(() => mockPkg);
 
     const getDependencyPackageJson = createGetDependencyPackageJson({
       pkgDirname: "test",
       internalCustomLoadPackageJsonFromNodeModules:
         internalLoadPackageJsonFromNodeModulesMock,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      internalReadPkgJson: readPkgJsonMock as any,
+      internalReadPkgJson: readPkgJsonMock,
     });
 
     const res = getDependencyPackageJson("test1");
 
-    expect(res).toBe(mockPkg);
-    expect(internalLoadPackageJsonFromNodeModulesMock).toBeCalledWith(
-      "test1",
-      "test",
+    assert.equal(res, mockPkg);
+    assert.equal(
+      internalLoadPackageJsonFromNodeModulesMock.mock.calls.length,
+      1,
     );
-    expect(readPkgJsonMock).toBeCalledWith(
+    assert.deepEqual(
+      internalLoadPackageJsonFromNodeModulesMock.mock.calls[0].arguments,
+      ["test1", "test"],
+    );
+    assert.equal(readPkgJsonMock.mock.calls.length, 1);
+    assert.deepEqual(readPkgJsonMock.mock.calls[0].arguments, [
       "C:\\test\\check-package-dependencies\\node_modules\\test1\\package.json",
-    );
+    ]);
   });
 });

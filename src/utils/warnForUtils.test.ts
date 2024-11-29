@@ -1,4 +1,5 @@
-import { describe, expect, test } from "vitest";
+import assert from "node:assert/strict";
+import { describe, test } from "node:test";
 import {
   createOnlyWarnsForArrayCheck,
   createOnlyWarnsForMappingCheck,
@@ -7,48 +8,50 @@ import {
 describe("createOnlyWarnsForArrayCheck", () => {
   test("configName", () => {
     const onlyWarnsForCheck = createOnlyWarnsForArrayCheck("test");
-    expect(onlyWarnsForCheck.configName).toBe("test");
+    assert.equal(onlyWarnsForCheck.configName, "test");
   });
+
   test("undefined", () => {
     const onlyWarnsForCheck = createOnlyWarnsForArrayCheck("test");
-    expect(onlyWarnsForCheck.getNotWarnedFor()).toStrictEqual([]);
+    assert.deepEqual(onlyWarnsForCheck.getNotWarnedFor(), []);
   });
 
   test("empty array", () => {
     const onlyWarnsForCheck = createOnlyWarnsForArrayCheck("test", []);
-    expect(onlyWarnsForCheck.getNotWarnedFor()).toStrictEqual([]);
+    assert.deepEqual(onlyWarnsForCheck.getNotWarnedFor(), []);
   });
 
   test("array with one value", () => {
     const onlyWarnsForCheck = createOnlyWarnsForArrayCheck("test", ["1"]);
-    expect(onlyWarnsForCheck.getNotWarnedFor()).toStrictEqual(["1"]);
+    assert.deepEqual(onlyWarnsForCheck.getNotWarnedFor(), ["1"]);
   });
 
   test("array with two values", () => {
     const onlyWarnsForCheck = createOnlyWarnsForArrayCheck("test", ["1", "2"]);
-    expect(onlyWarnsForCheck.getNotWarnedFor()).toStrictEqual(["1", "2"]);
+    assert.deepEqual(onlyWarnsForCheck.getNotWarnedFor(), ["1", "2"]);
   });
 
   test("array with two values with first used", () => {
     const onlyWarnsForCheck = createOnlyWarnsForArrayCheck("test", ["1", "2"]);
     onlyWarnsForCheck.shouldWarnsFor("1");
-    expect(onlyWarnsForCheck.getNotWarnedFor()).toStrictEqual(["2"]);
+    assert.deepEqual(onlyWarnsForCheck.getNotWarnedFor(), ["2"]);
   });
 
   test("array with two values with all used", () => {
     const onlyWarnsForCheck = createOnlyWarnsForArrayCheck("test", ["1", "2"]);
     onlyWarnsForCheck.shouldWarnsFor("1");
     onlyWarnsForCheck.shouldWarnsFor("2");
-    expect(onlyWarnsForCheck.getNotWarnedFor()).toStrictEqual([]);
+    assert.deepEqual(onlyWarnsForCheck.getNotWarnedFor(), []);
   });
 });
+
 describe("createOnlyWarnsForMappingCheck", () => {
   test("configName", () => {
     const onlyWarnsForMappingCheck = createOnlyWarnsForMappingCheck(
       "test",
       undefined,
     );
-    expect(onlyWarnsForMappingCheck.configName).toBe("test");
+    assert.equal(onlyWarnsForMappingCheck.configName, "test");
   });
 
   test("undefined", () => {
@@ -56,19 +59,19 @@ describe("createOnlyWarnsForMappingCheck", () => {
       "test",
       undefined,
     );
-    expect(onlyWarnsForMappingCheck.getNotWarnedFor()).toStrictEqual({});
+    assert.deepEqual(onlyWarnsForMappingCheck.getNotWarnedFor(), {});
   });
 
   test("empty array", () => {
     const onlyWarnsForMappingCheck = createOnlyWarnsForMappingCheck("test", []);
-    expect(onlyWarnsForMappingCheck.getNotWarnedFor()).toStrictEqual({});
+    assert.deepEqual(onlyWarnsForMappingCheck.getNotWarnedFor(), {});
   });
 
   test("array with one value", () => {
     const onlyWarnsForMappingCheck = createOnlyWarnsForMappingCheck("test", [
       "1",
     ]);
-    expect(onlyWarnsForMappingCheck.getNotWarnedFor()).toStrictEqual({
+    assert.deepEqual(onlyWarnsForMappingCheck.getNotWarnedFor(), {
       "*": ["1"],
     });
   });
@@ -78,7 +81,7 @@ describe("createOnlyWarnsForMappingCheck", () => {
       "1",
       "2",
     ]);
-    expect(onlyWarnsForMappingCheck.getNotWarnedFor()).toStrictEqual({
+    assert.deepEqual(onlyWarnsForMappingCheck.getNotWarnedFor(), {
       "*": ["1", "2"],
     });
   });
@@ -90,7 +93,7 @@ describe("createOnlyWarnsForMappingCheck", () => {
     ]);
     const onlyWarnsForCheck = onlyWarnsForMappingCheck.createFor("test");
     onlyWarnsForCheck.shouldWarnsFor("1");
-    expect(onlyWarnsForMappingCheck.getNotWarnedFor()).toStrictEqual({
+    assert.deepEqual(onlyWarnsForMappingCheck.getNotWarnedFor(), {
       "*": ["2"],
     });
   });
@@ -103,19 +106,19 @@ describe("createOnlyWarnsForMappingCheck", () => {
     const onlyWarnsForCheck = onlyWarnsForMappingCheck.createFor("test");
     onlyWarnsForCheck.shouldWarnsFor("1");
     onlyWarnsForCheck.shouldWarnsFor("2");
-    expect(onlyWarnsForMappingCheck.getNotWarnedFor()).toStrictEqual({});
+    assert.deepEqual(onlyWarnsForMappingCheck.getNotWarnedFor(), {});
   });
 
   test("empty record", () => {
     const onlyWarnsForMappingCheck = createOnlyWarnsForMappingCheck("test", {});
-    expect(onlyWarnsForMappingCheck.getNotWarnedFor()).toStrictEqual({});
+    assert.deepEqual(onlyWarnsForMappingCheck.getNotWarnedFor(), {});
   });
 
   test("star record with one value", () => {
     const onlyWarnsForMappingCheck = createOnlyWarnsForMappingCheck("test", {
       "*": ["1"],
     });
-    expect(onlyWarnsForMappingCheck.getNotWarnedFor()).toStrictEqual({
+    assert.deepEqual(onlyWarnsForMappingCheck.getNotWarnedFor(), {
       "*": ["1"],
     });
   });
@@ -124,7 +127,7 @@ describe("createOnlyWarnsForMappingCheck", () => {
     const onlyWarnsForMappingCheck = createOnlyWarnsForMappingCheck("test", {
       "*": ["1", "2"],
     });
-    expect(onlyWarnsForMappingCheck.getNotWarnedFor()).toStrictEqual({
+    assert.deepEqual(onlyWarnsForMappingCheck.getNotWarnedFor(), {
       "*": ["1", "2"],
     });
   });
@@ -135,7 +138,7 @@ describe("createOnlyWarnsForMappingCheck", () => {
     });
     const onlyWarnsForCheck = onlyWarnsForMappingCheck.createFor("test");
     onlyWarnsForCheck.shouldWarnsFor("1");
-    expect(onlyWarnsForMappingCheck.getNotWarnedFor()).toStrictEqual({
+    assert.deepEqual(onlyWarnsForMappingCheck.getNotWarnedFor(), {
       "*": ["2"],
     });
   });
@@ -147,14 +150,14 @@ describe("createOnlyWarnsForMappingCheck", () => {
     const onlyWarnsForCheck = onlyWarnsForMappingCheck.createFor("test");
     onlyWarnsForCheck.shouldWarnsFor("1");
     onlyWarnsForCheck.shouldWarnsFor("2");
-    expect(onlyWarnsForMappingCheck.getNotWarnedFor()).toStrictEqual({});
+    assert.deepEqual(onlyWarnsForMappingCheck.getNotWarnedFor(), {});
   });
 
   test("record with one value", () => {
     const onlyWarnsForMappingCheck = createOnlyWarnsForMappingCheck("test", {
       dep: ["1"],
     });
-    expect(onlyWarnsForMappingCheck.getNotWarnedFor()).toStrictEqual({
+    assert.deepEqual(onlyWarnsForMappingCheck.getNotWarnedFor(), {
       dep: ["1"],
     });
   });
@@ -163,7 +166,7 @@ describe("createOnlyWarnsForMappingCheck", () => {
     const onlyWarnsForMappingCheck = createOnlyWarnsForMappingCheck("test", {
       dep: ["1", "2"],
     });
-    expect(onlyWarnsForMappingCheck.getNotWarnedFor()).toStrictEqual({
+    assert.deepEqual(onlyWarnsForMappingCheck.getNotWarnedFor(), {
       dep: ["1", "2"],
     });
   });
@@ -174,7 +177,7 @@ describe("createOnlyWarnsForMappingCheck", () => {
     });
     const onlyWarnsForCheck = onlyWarnsForMappingCheck.createFor("dep");
     onlyWarnsForCheck.shouldWarnsFor("1");
-    expect(onlyWarnsForMappingCheck.getNotWarnedFor()).toStrictEqual({
+    assert.deepEqual(onlyWarnsForMappingCheck.getNotWarnedFor(), {
       dep: ["2"],
     });
   });
@@ -184,8 +187,8 @@ describe("createOnlyWarnsForMappingCheck", () => {
       dep: ["1", "2"],
     });
     const onlyWarnsForCheck = onlyWarnsForMappingCheck.createFor("otherDep");
-    expect(onlyWarnsForCheck.shouldWarnsFor("1")).toBe(false);
-    expect(onlyWarnsForMappingCheck.getNotWarnedFor()).toStrictEqual({
+    assert.equal(onlyWarnsForCheck.shouldWarnsFor("1"), false);
+    assert.deepEqual(onlyWarnsForMappingCheck.getNotWarnedFor(), {
       dep: ["1", "2"],
     });
   });
@@ -197,7 +200,7 @@ describe("createOnlyWarnsForMappingCheck", () => {
     const onlyWarnsForCheck = onlyWarnsForMappingCheck.createFor("dep");
     onlyWarnsForCheck.shouldWarnsFor("1");
     onlyWarnsForCheck.shouldWarnsFor("2");
-    expect(onlyWarnsForMappingCheck.getNotWarnedFor()).toStrictEqual({});
+    assert.deepEqual(onlyWarnsForMappingCheck.getNotWarnedFor(), {});
   });
 
   test("complex record", () => {
@@ -208,21 +211,21 @@ describe("createOnlyWarnsForMappingCheck", () => {
       "*": ["7", "8", "c"],
     });
     const onlyWarnsForCheckDep = onlyWarnsForMappingCheck.createFor("dep");
-    expect(onlyWarnsForCheckDep.shouldWarnsFor("1")).toBe(true);
-    expect(onlyWarnsForCheckDep.shouldWarnsFor("8")).toBe(true);
-    expect(onlyWarnsForCheckDep.shouldWarnsFor("a")).toBe(true);
-    expect(onlyWarnsForCheckDep.shouldWarnsFor("c")).toBe(true);
+    assert.equal(onlyWarnsForCheckDep.shouldWarnsFor("1"), true);
+    assert.equal(onlyWarnsForCheckDep.shouldWarnsFor("8"), true);
+    assert.equal(onlyWarnsForCheckDep.shouldWarnsFor("a"), true);
+    assert.equal(onlyWarnsForCheckDep.shouldWarnsFor("c"), true);
 
     const onlyWarnsForCheckOtherDep =
       onlyWarnsForMappingCheck.createFor("otherDep");
-    expect(onlyWarnsForCheckOtherDep.shouldWarnsFor("1")).toBe(false);
-    expect(onlyWarnsForCheckOtherDep.shouldWarnsFor("3")).toBe(true);
-    expect(onlyWarnsForCheckOtherDep.shouldWarnsFor("4")).toBe(true);
-    expect(onlyWarnsForCheckOtherDep.shouldWarnsFor("8")).toBe(true);
-    expect(onlyWarnsForCheckOtherDep.shouldWarnsFor("a")).toBe(true);
-    expect(onlyWarnsForCheckOtherDep.shouldWarnsFor("b")).toBe(true);
+    assert.equal(onlyWarnsForCheckOtherDep.shouldWarnsFor("1"), false);
+    assert.equal(onlyWarnsForCheckOtherDep.shouldWarnsFor("3"), true);
+    assert.equal(onlyWarnsForCheckOtherDep.shouldWarnsFor("4"), true);
+    assert.equal(onlyWarnsForCheckOtherDep.shouldWarnsFor("8"), true);
+    assert.equal(onlyWarnsForCheckOtherDep.shouldWarnsFor("a"), true);
+    assert.equal(onlyWarnsForCheckOtherDep.shouldWarnsFor("b"), true);
 
-    expect(onlyWarnsForMappingCheck.getNotWarnedFor()).toStrictEqual({
+    assert.deepEqual(onlyWarnsForMappingCheck.getNotWarnedFor(), {
       dep: ["2", "b", "c"],
       test: ["5", "6", "a", "b"],
       "*": ["7"],
