@@ -23,7 +23,12 @@ export function checkResolutionsVersionsMatch(pkg, pkgPathName, { tryToAutoFix, 
                     pkg[depType][depName] = resolutionDepVersion;
                 }
                 else {
-                    reportError(`Invalid "${depName}" in ${depType}`, `expecting "${range}" be "${resolutionDepVersion}" from resolutions.`, false, true);
+                    reportError({
+                        title: `Invalid "${range}"`,
+                        info: `expecting "${range}" be "${resolutionDepVersion}" from resolutions`,
+                        dependency: { name: depName, origin: depType },
+                        autoFixable: true,
+                    });
                 }
             }
         });

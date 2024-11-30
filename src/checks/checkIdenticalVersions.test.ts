@@ -1,10 +1,15 @@
-import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { createMockReportError } from "../utils/createReportError.testUtils.ts";
+import {
+  assertCreateReportErrorCall,
+  assertNoMessages,
+  assertSeveralMessages,
+  assertSingleMessage,
+  createMockReportError,
+} from "../utils/createReportError.testUtils.ts";
 import { checkIdenticalVersions } from "./checkIdenticalVersions.ts";
 
 describe("checkIdenticalVersions", () => {
-  const { mockReportError, createReportError } = createMockReportError();
+  const { createReportError, messages } = createMockReportError();
 
   describe("devDependencies in array", () => {
     it("should return no error when all versions are identical", () => {
@@ -21,12 +26,12 @@ describe("checkIdenticalVersions", () => {
         undefined,
         createReportError,
       );
-      assert.equal(createReportError.mock.calls.length, 1);
-      assert.deepEqual(createReportError.mock.calls[0].arguments, [
+      assertCreateReportErrorCall(
+        createReportError,
         "Identical Versions",
         "path",
-      ]);
-      assert.equal(mockReportError.mock.calls.length, 0);
+      );
+      assertNoMessages(messages);
     });
 
     it("should return error when versions are not identical", () => {
@@ -43,17 +48,17 @@ describe("checkIdenticalVersions", () => {
         undefined,
         createReportError,
       );
-      assert.equal(createReportError.mock.calls.length, 1);
-      assert.deepEqual(createReportError.mock.calls[0].arguments, [
+      assertCreateReportErrorCall(
+        createReportError,
         "Identical Versions",
         "path",
-      ]);
-      assert.equal(mockReportError.mock.calls.length, 1);
-      assert.deepEqual(mockReportError.mock.calls[0].arguments, [
-        'Invalid "react-dom" in devDependencies',
-        'expecting "1.0.1" be "1.0.0".',
-        undefined,
-      ]);
+      );
+      assertSingleMessage(messages, {
+        title: 'Invalid "react-dom"',
+        info: 'expecting "1.0.1" to be "1.0.0"',
+        dependency: { name: "react", origin: "devDependencies" },
+        onlyWarns: undefined,
+      });
     });
   });
 
@@ -76,12 +81,12 @@ describe("checkIdenticalVersions", () => {
         undefined,
         createReportError,
       );
-      assert.equal(createReportError.mock.calls.length, 1);
-      assert.deepEqual(createReportError.mock.calls[0].arguments, [
+      assertCreateReportErrorCall(
+        createReportError,
         "Identical Versions",
         "path",
-      ]);
-      assert.equal(mockReportError.mock.calls.length, 0);
+      );
+      assertNoMessages(messages);
     });
 
     it("should return error when versions are not identical", () => {
@@ -102,21 +107,24 @@ describe("checkIdenticalVersions", () => {
         undefined,
         createReportError,
       );
-      assert.equal(createReportError.mock.calls.length, 1);
-      assert.deepEqual(createReportError.mock.calls[0].arguments, [
+      assertCreateReportErrorCall(
+        createReportError,
         "Identical Versions",
         "path",
-      ]);
-      assert.equal(mockReportError.mock.calls.length, 2);
-      assert.deepEqual(mockReportError.mock.calls[0].arguments, [
-        'Invalid "react-dom" in dependencies',
-        'expecting "1.0.1" be "1.0.0".',
-        undefined,
-      ]);
-      assert.deepEqual(mockReportError.mock.calls[1].arguments, [
-        'Invalid "react-test-renderer" in devDependencies',
-        'expecting "1.0.1" be "1.0.0".',
-        undefined,
+      );
+      assertSeveralMessages(messages, [
+        {
+          title: 'Invalid "react-dom"',
+          info: 'expecting "1.0.1" to be "1.0.0"',
+          dependency: { name: "react", origin: "dependencies" },
+          onlyWarns: undefined,
+        },
+        {
+          title: 'Invalid "react-test-renderer"',
+          info: 'expecting "1.0.1" to be "1.0.0"',
+          dependency: { name: "react", origin: "devDependencies" },
+          onlyWarns: undefined,
+        },
       ]);
     });
   });

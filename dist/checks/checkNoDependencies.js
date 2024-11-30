@@ -4,6 +4,10 @@ export function checkNoDependencies(pkg, pkgPath, type = "dependencies", moveToS
     if (!pkgDependencies)
         return;
     const reportError = customCreateReportError("No dependencies", pkgPath);
-    reportError(`Unexpected ${type}`, `you should move them in ${moveToSuggestion}`);
+    reportError({
+        title: `Unexpected ${type}`,
+        info: `you should move them in ${moveToSuggestion}`,
+        autoFixable: false,
+    });
 }
 //# sourceMappingURL=checkNoDependencies.js.map

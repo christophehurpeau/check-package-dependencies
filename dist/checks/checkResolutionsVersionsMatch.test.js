@@ -1,16 +1,18 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { createMockReportError } from "../utils/createReportError.testUtils.js";
+import { assertCreateReportErrorCall, assertNoMessages, assertSeveralMessages, createMockReportError, } from "../utils/createReportError.testUtils.js";
 import { checkResolutionsVersionsMatch } from "./checkResolutionsVersionsMatch.js";
 describe("checkResolutionsVersionsMatch", () => {
-    const { mockReportError, createReportError } = createMockReportError();
+    const { createReportError, messages } = createMockReportError();
     it('should return no error when no "resolutions" is present', () => {
         checkResolutionsVersionsMatch({ name: "test", devDependencies: { test: "1.0.0" } }, "path", { customCreateReportError: createReportError });
-        assert.equal(mockReportError.mock.calls.length, 0);
+        assertCreateReportErrorCall(createReportError, "Resolutions match other dependencies", "path");
+        assertNoMessages(messages);
     });
     it('should return no error when "resolutions" has dependency not in other dependencies type', () => {
         checkResolutionsVersionsMatch({ name: "test", resolutions: { test: "1.0.0" } }, "path", { customCreateReportError: createReportError });
-        assert.equal(mockReportError.mock.calls.length, 0);
+        assertCreateReportErrorCall(createReportError, "Resolutions match other dependencies", "path");
+        assertNoMessages(messages);
     });
     it('should return no error when "resolutions" has dependency matching', () => {
         checkResolutionsVersionsMatch({
@@ -24,7 +26,8 @@ describe("checkResolutionsVersionsMatch", () => {
             devDependencies: { test1: "1.0.0", test4: "1.1.0" },
             dependencies: { test2: "1.0.0", test3: "^1.0.0" },
         }, "path", { customCreateReportError: createReportError });
-        assert.equal(mockReportError.mock.calls.length, 0);
+        assertCreateReportErrorCall(createReportError, "Resolutions match other dependencies", "path");
+        assertNoMessages(messages);
     });
     it("should return error when multiple dependencies not matching", () => {
         checkResolutionsVersionsMatch({
@@ -38,30 +41,32 @@ describe("checkResolutionsVersionsMatch", () => {
             devDependencies: { test1: "1.1.0" },
             dependencies: { test2: "1.2.0", test3: "1.0.0", test4: "1.2.0" },
         }, "path", { customCreateReportError: createReportError });
-        assert.equal(mockReportError.mock.calls.length, 4);
-        assert.deepEqual(mockReportError.mock.calls[0].arguments, [
-            'Invalid "test1" in devDependencies',
-            'expecting "1.1.0" be "1.0.0" from resolutions.',
-            false,
-            true,
-        ]);
-        assert.deepEqual(mockReportError.mock.calls[1].arguments, [
-            'Invalid "test2" in dependencies',
-            'expecting "1.2.0" be "1.0.0" from resolutions.',
-            false,
-            true,
-        ]);
-        assert.deepEqual(mockReportError.mock.calls[2].arguments, [
-            'Invalid "test3" in dependencies',
-            'expecting "1.0.0" be "1.1.0" from resolutions.',
-            false,
-            true,
-        ]);
-        assert.deepEqual(mockReportError.mock.calls[3].arguments, [
-            'Invalid "test4" in dependencies',
-            'expecting "1.2.0" be "1.1.0" from resolutions.',
-            false,
-            true,
+        assertCreateReportErrorCall(createReportError, "Resolutions match other dependencies", "path");
+        assertSeveralMessages(messages, [
+            {
+                title: 'Invalid "1.1.0"',
+                info: 'expecting "1.1.0" be "1.0.0" from resolutions',
+                dependency: { name: "test1", origin: "devDependencies" },
+                autoFixable: true,
+            },
+            {
+                title: 'Invalid "1.2.0"',
+                info: 'expecting "1.2.0" be "1.0.0" from resolutions',
+                dependency: { name: "test2", origin: "dependencies" },
+                autoFixable: true,
+            },
+            {
+                title: 'Invalid "1.0.0"',
+                info: 'expecting "1.0.0" be "1.1.0" from resolutions',
+                dependency: { name: "test3", origin: "dependencies" },
+                autoFixable: true,
+            },
+            {
+                title: 'Invalid "1.2.0"',
+                info: 'expecting "1.2.0" be "1.1.0" from resolutions',
+                dependency: { name: "test4", origin: "dependencies" },
+                autoFixable: true,
+            },
         ]);
     });
     it('should fix without error when "resolutions" has dependency not matching', () => {
@@ -75,7 +80,8 @@ describe("checkResolutionsVersionsMatch", () => {
             customCreateReportError: createReportError,
             tryToAutoFix: true,
         });
-        assert.equal(mockReportError.mock.calls.length, 0);
+        assertCreateReportErrorCall(createReportError, "Resolutions match other dependencies", "path");
+        assertNoMessages(messages);
         assert.equal(pkg.devDependencies.test1, "1.0.0");
         assert.equal(pkg.dependencies.test2, "1.0.0");
     });

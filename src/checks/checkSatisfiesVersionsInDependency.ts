@@ -16,7 +16,7 @@ export function checkSatisfiesVersionsInDependency(
   }: CheckSatisfiesVersionsInDependencyOptions = {},
 ): void {
   const reportError = customCreateReportError(
-    `Satisfies Versions In Dependency "${depPkg.name}"`,
+    "Satisfies Versions In Dependency",
     pkgPathName,
   );
 
@@ -31,21 +31,24 @@ export function checkSatisfiesVersionsInDependency(
     )) {
       if (dependencyRange == null) {
         if (dependencies?.[dependencyName]) {
-          reportError(
-            `Invalid "${dependencyName}" in ${dependenciesType} of "${depPkg.name}"`,
-            "it should not be present",
-          );
+          reportError({
+            title: `Invalid "${dependencyName}" in ${dependenciesType} of "${depPkg.name}"`,
+            info: "it should not be present",
+            dependency: { name: dependencyName },
+          });
         }
       } else if (!dependencies) {
-        reportError(
-          `Missing "${dependencyName}" in ${dependenciesType} of "${depPkg.name}"`,
-          `"${dependenciesType}" is missing in "${depPkg.name}"`,
-        );
+        reportError({
+          title: `Missing "${dependencyName}" in ${dependenciesType} of "${depPkg.name}"`,
+          info: `"${dependenciesType}" is missing`,
+          dependency: { name: dependencyName },
+        });
       } else if (!dependencies[dependencyName]) {
-        reportError(
-          `Missing "${dependencyName}" in ${dependenciesType} of "${depPkg.name}"`,
-          `"${dependencyName}" is missing in ${dependenciesType}`,
-        );
+        reportError({
+          title: `Missing "${dependencyName}" in ${dependenciesType} of "${depPkg.name}"`,
+          info: `"${dependencyName}" is missing in ${dependenciesType} of "${depPkg.name}"`,
+          dependency: { name: dependencyName },
+        });
       } else if (
         !semver.satisfies(dependencies[dependencyName], dependencyRange, {
           includePrerelease: true,
@@ -54,10 +57,11 @@ export function checkSatisfiesVersionsInDependency(
           includePrerelease: true,
         })
       ) {
-        reportError(
-          `Invalid "${dependencyName}" in ${dependenciesType} of "${depPkg.name}"`,
-          `"${dependencies[dependencyName]}" does not satisfies "${dependencyRange}"`,
-        );
+        reportError({
+          title: `Invalid "${dependencyName}" in ${dependenciesType} of "${depPkg.name}"`,
+          info: `"${dependencies[dependencyName]}" does not satisfies "${dependencyRange}"`,
+          dependency: { name: dependencyName },
+        });
       }
     }
   }

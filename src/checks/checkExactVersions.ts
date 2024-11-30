@@ -59,40 +59,41 @@ export async function checkExactVersions(
             resolvedDep = null;
           }
           if (!resolvedDep?.version) {
-            reportError(
-              `Unexpected range dependency in "${type}" for "${dependencyName}"`,
-              `expecting "${version}" to be exact${
+            reportError({
+              title: "Unexpected range dependency",
+              info: `expecting "${version}" to be exact${
                 tryToAutoFix
-                  ? `, autofix failed to resolve "${dependencyName}".`
+                  ? `, autofix failed to resolve "${dependencyName}"`
                   : ""
               }`,
-              shouldOnlyWarn,
-              false,
-            );
+              dependency: { name: dependencyName, origin: type },
+              onlyWarns: shouldOnlyWarn,
+            });
           } else if (
             !semver.satisfies(resolvedDep.version, version, {
               includePrerelease: true,
             })
           ) {
-            reportError(
-              `Unexpected range dependency in "${type}" for "${dependencyName}"`,
-              `expecting "${version}" to be exact${
+            reportError({
+              title: "Unexpected range dependency",
+              info: `expecting "${version}" to be exact${
                 tryToAutoFix
-                  ? `, autofix failed as "${dependencyName}"'s resolved version is "${resolvedDep.version}" and doesn't satisfies "${version}".`
+                  ? `, autofix failed as resolved version "${resolvedDep.version}" doesn't satisfy "${version}"`
                   : ""
               }`,
-              shouldOnlyWarn,
-              false,
-            );
+              dependency: { name: dependencyName, origin: type },
+              onlyWarns: shouldOnlyWarn,
+            });
           } else if (tryToAutoFix) {
             pkgDependencies[dependencyName] = resolvedDep.version;
           } else {
-            reportError(
-              `Unexpected range dependency in "${type}" for "${dependencyName}"`,
-              `expecting "${version}" to be exact "${resolvedDep.version}".`,
-              shouldOnlyWarn,
-              true,
-            );
+            reportError({
+              title: "Unexpected range dependency",
+              info: `expecting "${version}" to be exact "${resolvedDep.version}"`,
+              dependency: { name: dependencyName, origin: type },
+              onlyWarns: shouldOnlyWarn,
+              autoFixable: true,
+            });
           }
         } else {
           let exactVersion = version.slice(version[1] === "=" ? 2 : 1);
@@ -103,12 +104,12 @@ export async function checkExactVersions(
               exactVersion = `${exactVersion}.0`;
             }
           }
-          reportError(
-            `Unexpected range dependency in "${type}" for "${dependencyName}"`,
-            `expecting "${version}" to be exact "${exactVersion}".`,
-            shouldOnlyWarn,
-            false,
-          );
+          reportError({
+            title: "Unexpected range dependency",
+            info: `expecting "${version}" to be exact "${exactVersion}"`,
+            dependency: { name: dependencyName, origin: type },
+            onlyWarns: shouldOnlyWarn,
+          });
         }
       }
     }

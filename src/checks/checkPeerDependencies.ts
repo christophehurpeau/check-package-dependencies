@@ -55,13 +55,12 @@ export function checkPeerDependencies(
           " (required as some dependencies have non-satisfying range too)";
       }
 
-      reportError(
-        `Missing "${peerDepName}" peer dependency from "${depPkg.name}" in ${type}`,
-        `it should satisfies "${range}" and be in ${allowedPeerIn.join(
-          " or ",
-        )}${additionalDetails}`,
-        missingOnlyWarnsForCheck.shouldWarnsFor(peerDepName),
-      );
+      reportError({
+        title: `Missing "${peerDepName}" peer dependency from "${depPkg.name}" in ${type}`,
+        info: `it should satisfies "${range}" and be in ${allowedPeerIn.join(" or ")}${additionalDetails}`,
+        dependency: { name: peerDepName },
+        onlyWarns: missingOnlyWarnsForCheck.shouldWarnsFor(peerDepName),
+      });
     } else {
       const versions = versionsIn.map(
         (versionsInType) => pkg[versionsInType]![peerDepName],
@@ -81,11 +80,15 @@ export function checkPeerDependencies(
             includePrerelease: true,
           })
         ) {
-          reportError(
-            `Invalid "${peerDepName}" peer dependency`,
-            `"${version}" (in ${allowedPeerInExisting[index]}) should satisfies "${range}" from "${depPkg.name}" ${type}`,
-            invalidOnlyWarnsForCheck.shouldWarnsFor(peerDepName),
-          );
+          reportError({
+            title: "Invalid peer dependency version",
+            info: `"${version}" should satisfies "${range}" from "${depPkg.name}" in ${type}`,
+            dependency: {
+              name: peerDepName,
+              origin: allowedPeerInExisting[index],
+            },
+            onlyWarns: invalidOnlyWarnsForCheck.shouldWarnsFor(peerDepName),
+          });
         }
       });
     }

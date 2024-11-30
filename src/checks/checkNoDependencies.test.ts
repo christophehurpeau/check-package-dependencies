@@ -1,10 +1,14 @@
-import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { createMockReportError } from "../utils/createReportError.testUtils.ts";
+import {
+  assertCreateReportErrorCall,
+  assertNoMessages,
+  assertSingleMessage,
+  createMockReportError,
+} from "../utils/createReportError.testUtils.ts";
 import { checkNoDependencies } from "./checkNoDependencies.ts";
 
 describe("checkNoDependencies", () => {
-  const { mockReportError, createReportError } = createMockReportError();
+  const { createReportError, messages } = createMockReportError();
 
   it('should return no error when no "dependencies" is present', () => {
     checkNoDependencies(
@@ -14,7 +18,7 @@ describe("checkNoDependencies", () => {
       undefined,
       createReportError,
     );
-    assert.equal(mockReportError.mock.calls.length, 0);
+    assertNoMessages(messages);
   });
 
   it('should return no error when no "devDependencies" is present', () => {
@@ -25,7 +29,7 @@ describe("checkNoDependencies", () => {
       undefined,
       createReportError,
     );
-    assert.equal(mockReportError.mock.calls.length, 0);
+    assertNoMessages(messages);
   });
 
   it('should return no error when "dependencies" is present', () => {
@@ -36,16 +40,12 @@ describe("checkNoDependencies", () => {
       undefined,
       createReportError,
     );
-    assert.equal(createReportError.mock.calls.length, 1);
-    assert.deepEqual(createReportError.mock.calls[0].arguments, [
-      "No dependencies",
-      "path",
-    ]);
-    assert.equal(mockReportError.mock.calls.length, 1);
-    assert.deepEqual(mockReportError.mock.calls[0].arguments, [
-      "Unexpected dependencies",
-      "you should move them in devDependencies",
-    ]);
+    assertCreateReportErrorCall(createReportError, "No dependencies", "path");
+    assertSingleMessage(messages, {
+      title: "Unexpected dependencies",
+      info: "you should move them in devDependencies",
+      autoFixable: false,
+    });
   });
 
   it('should return no error when "dependencies" is present and is in onlyWarnsFor', () => {
@@ -56,15 +56,11 @@ describe("checkNoDependencies", () => {
       "peerDependencies",
       createReportError,
     );
-    assert.equal(createReportError.mock.calls.length, 1);
-    assert.deepEqual(createReportError.mock.calls[0].arguments, [
-      "No dependencies",
-      "path",
-    ]);
-    assert.equal(mockReportError.mock.calls.length, 1);
-    assert.deepEqual(mockReportError.mock.calls[0].arguments, [
-      "Unexpected dependencies",
-      "you should move them in peerDependencies",
-    ]);
+    assertCreateReportErrorCall(createReportError, "No dependencies", "path");
+    assertSingleMessage(messages, {
+      title: "Unexpected dependencies",
+      info: "you should move them in peerDependencies",
+      autoFixable: false,
+    });
   });
 });

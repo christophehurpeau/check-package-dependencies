@@ -13,7 +13,7 @@ import { checkDuplicateDependencies } from "./checks/checkDuplicateDependencies.
 import type { CheckResolutionMessage } from "./checks/checkResolutionsHasExplanation.ts";
 import {
   createReportError,
-  displayConclusion,
+  displayMessages,
   reportNotWarnedForMapping,
 } from "./utils/createReportError.ts";
 import type { PackageJson } from "./utils/packageTypes.ts";
@@ -122,10 +122,10 @@ export function createCheckPackageWithWorkspaces(
         checkPackage,
         ...checksWorkspaces.values(),
       ]) {
-        await checksWorkspace.run({ skipDisplayConclusion: true });
+        await checksWorkspace.run({ skipDisplayMessages: true });
       }
 
-      displayConclusion();
+      displayMessages();
     },
 
     checkRecommended({

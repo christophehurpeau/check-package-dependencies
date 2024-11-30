@@ -1,6 +1,11 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { createMockReportError } from "../utils/createReportError.testUtils.ts";
+import {
+  assertCreateReportErrorCall,
+  assertNoMessages,
+  assertSingleMessage,
+  createMockReportError,
+} from "../utils/createReportError.testUtils.ts";
 import type { PackageJson } from "../utils/packageTypes.ts";
 import { checkSatisfiesVersionsFromDependency } from "./checkSatisfiesVersionsFromDependency.ts";
 
@@ -11,7 +16,7 @@ type DependencyTypes =
   | "resolutions";
 
 describe(checkSatisfiesVersionsFromDependency.name, () => {
-  const { mockReportError, createReportError } = createMockReportError();
+  const { createReportError, messages } = createMockReportError();
 
   it("should return no error when no keys", () => {
     checkSatisfiesVersionsFromDependency(
@@ -26,7 +31,12 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
         shouldHaveExactVersions: () => false,
       },
     );
-    assert.equal(mockReportError.mock.calls.length, 0);
+    assertCreateReportErrorCall(
+      createReportError,
+      "Satisfies Versions From Dependency",
+      "path",
+    );
+    assertNoMessages(messages);
   });
 
   describe("expect no error", () => {
@@ -88,7 +98,12 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
             shouldHaveExactVersions: () => false,
           },
         );
-        assert.equal(mockReportError.mock.calls.length, 0);
+        assertCreateReportErrorCall(
+          createReportError,
+          "Satisfies Versions From Dependency",
+          "path",
+        );
+        assertNoMessages(messages);
       });
     }
   });
@@ -214,7 +229,7 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
       pkgContent: Omit<PackageJson, "name">,
       errorTitle: string,
       errorInfo: string,
-      autoFixable: boolean,
+      autoFixable?: boolean,
     ][] = [
       [
         "test1",
@@ -222,8 +237,8 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
         "missing in pkg",
         { devDependencies: { test1: "1.0.0" } },
         {},
-        'Missing "test1" in "devDependencies" of "test"',
-        'should satisfies "1.0.0" from "test-dep" in "devDependencies".',
+        "Missing dependency",
+        'should satisfies "1.0.0" from "test-dep" in "devDependencies"',
         true,
       ],
       [
@@ -232,8 +247,8 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
         "dependency missing in pkg dependency",
         { devDependencies: { test2: "1.0.0" } },
         { devDependencies: {} },
-        'Missing "test2" in "devDependencies" of "test"',
-        'should satisfies "1.0.0" from "test-dep" in "devDependencies".',
+        "Missing dependency",
+        'should satisfies "1.0.0" from "test-dep" in "devDependencies"',
         true,
       ],
       [
@@ -242,9 +257,8 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
         "devDependencies missing in pkg dependency",
         {},
         { devDependencies: { test3: "1.0.0" } },
-        'Unexpected missing dependency "test3" in "test-dep"',
-        'config expects "test3" in "devDependencies" of "test-dep".',
-        false,
+        "Unexpected missing dependency",
+        'config expects "test3" in "devDependencies" of "test-dep"',
       ],
       [
         "test4",
@@ -252,8 +266,8 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
         "invalid",
         { devDependencies: { test4: "0.1.0" } },
         { devDependencies: { test4: "1.0.0" } },
-        'Invalid "test4" in "devDependencies" of "test"',
-        '"1.0.0" should satisfies "0.1.0" from "test-dep"\'s "devDependencies".',
+        "Invalid",
+        '"1.0.0" should satisfies "0.1.0" from "test-dep" in "devDependencies"',
         true,
       ],
     ];
@@ -290,13 +304,18 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
             shouldHaveExactVersions: () => false,
           },
         );
-        assert.equal(mockReportError.mock.calls.length, 1);
-        assert.deepEqual(mockReportError.mock.calls[0].arguments, [
-          errorTitle,
-          errorInfo,
-          undefined,
+        assertCreateReportErrorCall(
+          createReportError,
+          "Satisfies Versions From Dependency",
+          "path",
+        );
+        assertSingleMessage(messages, {
+          title: errorTitle,
+          info: errorInfo,
+          dependency: { name: depName, origin: depTypeInPkg },
+          onlyWarns: undefined,
           autoFixable,
-        ]);
+        });
       });
     }
   });

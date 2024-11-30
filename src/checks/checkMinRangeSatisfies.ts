@@ -51,12 +51,12 @@ export function checkMinRangeSatisfies(
           (depRange1Parsed[0]?.operator || "") +
           (semver.minVersion(depRange2)?.version || depRange2);
       } else {
-        reportError(
-          `Invalid "${depName}" in ${type1}`,
-          `"${depRange1}" should satisfies "${depRange2}" from "${type2}".`,
-          false,
-          true,
-        );
+        reportError({
+          title: `Invalid "${depRange1}"`,
+          info: `"${depRange1}" should satisfies "${depRange2}" from "${type2}"`,
+          dependency: { name: depName, origin: type1 },
+          autoFixable: true,
+        });
       }
     }
   }

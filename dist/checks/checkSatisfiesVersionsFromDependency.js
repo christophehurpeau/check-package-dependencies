@@ -4,11 +4,17 @@ import { changeOperator, getOperator } from "../utils/semverUtils.js";
 export function checkSatisfiesVersionsFromDependency(pkg, pkgPathName, type, depKeys, depPkg, depType, { tryToAutoFix, shouldHaveExactVersions, onlyWarnsForCheck, customCreateReportError = createReportError, }) {
     const pkgDependencies = pkg[type] || {};
     const dependencies = depPkg[depType] || {};
-    const reportError = customCreateReportError(`Satisfies Versions from "${depPkg.name}"`, pkgPathName);
+    const reportError = customCreateReportError("Satisfies Versions From Dependency", pkgPathName);
     depKeys.forEach((depKey) => {
         const range = dependencies[depKey];
         if (!range) {
-            reportError(`Unexpected missing dependency "${depKey}" in "${depPkg.name}"`, `config expects "${depKey}" in "${depType}" of "${depPkg.name}".`, undefined, false);
+            reportError({
+                title: "Unexpected missing dependency",
+                info: `config expects "${depKey}" in "${depType}" of "${depPkg.name}"`,
+                dependency: { name: depKey, origin: depType },
+                onlyWarns: undefined,
+                autoFixable: undefined,
+            });
             return;
         }
         const version = pkgDependencies[depKey];
@@ -33,7 +39,13 @@ export function checkSatisfiesVersionsFromDependency(pkg, pkgPathName, type, dep
         if (!version) {
             const fix = getAutoFixIfExists();
             if (!fix || !tryToAutoFix) {
-                reportError(`Missing "${depKey}" in "${type}" of "${pkg.name}"`, `should satisfies "${range}" from "${depPkg.name}" in "${depType}".`, onlyWarnsForCheck?.shouldWarnsFor(depKey), !!fix);
+                reportError({
+                    title: "Missing dependency",
+                    info: `should satisfies "${range}" from "${depPkg.name}" in "${depType}"`,
+                    dependency: { name: depKey, origin: type },
+                    onlyWarns: onlyWarnsForCheck?.shouldWarnsFor(depKey),
+                    autoFixable: !!fix,
+                });
             }
             else {
                 autoFix(fix);
@@ -47,7 +59,13 @@ export function checkSatisfiesVersionsFromDependency(pkg, pkgPathName, type, dep
                 })) {
                 const fix = getAutoFixIfExists();
                 if (!fix || !tryToAutoFix) {
-                    reportError(`Invalid "${depKey}" in "${type}" of "${pkg.name}"`, `"${version}" should satisfies "${range}" from "${depPkg.name}"'s "${depType}".`, onlyWarnsForCheck?.shouldWarnsFor(depKey), !!fix);
+                    reportError({
+                        title: "Invalid",
+                        info: `"${version}" should satisfies "${range}" from "${depPkg.name}" in "${depType}"`,
+                        dependency: { name: depKey, origin: type },
+                        onlyWarns: onlyWarnsForCheck?.shouldWarnsFor(depKey),
+                        autoFixable: !!fix,
+                    });
                 }
                 else {
                     autoFix(fix);

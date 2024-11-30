@@ -14,14 +14,20 @@ export function checkDuplicateDependencies(reportError, pkg, isPkgLibrary, depTy
             const depVersion = pkg.dependencies[depKey];
             const devDepVersion = pkg.devDependencies[depKey];
             if (depVersion && depVersion === devDepVersion) {
-                reportError(`Invalid "${depKey}" has same version in dependencies and devDependencies`, "please place it only in dependencies or use range in dependencies");
+                reportError({
+                    title: `Invalid "${depKey}" has same version in dependencies and devDependencies`,
+                    info: "please place it only in dependencies or use range in dependencies",
+                });
                 continue;
             }
             allowDuplicated = true;
         }
         if (versionsIn.length > 2 ||
             (versionsIn.length === 2 && !allowDuplicated)) {
-            reportError(`Invalid "${depKey}" present in ${versionsIn.join(" and ")}`, "please place it only in dependencies");
+            reportError({
+                title: `Invalid "${depKey}" present in ${versionsIn.join(" and ")}`,
+                info: "please place it only in dependencies",
+            });
         }
         else {
             const versions = versionsIn.map((type) => pkg[type][depKey]);
@@ -46,7 +52,12 @@ export function checkDuplicateDependencies(reportError, pkg, isPkgLibrary, depTy
                     return;
                 }
                 const versionInType = versionsIn[index];
-                reportError(`Invalid duplicate dependency "${depKey}"`, `"${versions[0]}" (in ${versionInType}) should satisfies "${range}" from "${depPkg.name}" ${depType}.`, onlyWarnsForCheck.shouldWarnsFor(depKey));
+                reportError({
+                    title: "Invalid duplicate dependency",
+                    info: `"${versions[0]}" should satisfies "${range}" from ${depPkg.name} in ${depType}`,
+                    onlyWarns: onlyWarnsForCheck.shouldWarnsFor(depKey),
+                    dependency: { name: depKey, origin: versionInType },
+                });
             });
         }
     }

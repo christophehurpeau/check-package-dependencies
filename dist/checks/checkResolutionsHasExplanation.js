@@ -5,19 +5,26 @@ export function checkResolutionsHasExplanation(pkg, pkgPathName, checkMessage, g
     const reportError = customCreateReportError("Resolutions has explanation", pkgPathName);
     Object.keys(pkgResolutions).forEach((depKey) => {
         if (!pkgResolutionsExplained[depKey]) {
-            reportError(`Missing "${depKey}" in resolutionsExplained.`);
+            reportError({
+                title: `Missing "${depKey}" in resolutionsExplained`,
+            });
         }
     });
     Object.keys(pkgResolutionsExplained).forEach((depKey) => {
         if (!pkgResolutions[depKey]) {
-            reportError(`Found "${depKey}" in resolutionsExplained but not in resolutions.`);
+            reportError({
+                title: `Found "${depKey}" in resolutionsExplained but not in resolutions`,
+            });
         }
         else {
             const error = checkMessage(depKey, pkgResolutionsExplained[depKey], {
                 getDependencyPackageJson,
             });
             if (error) {
-                reportError(`Invalid message for "${depKey}" in resolutionsExplained`, `${error}.`);
+                reportError({
+                    title: `Invalid message for "${depKey}" in resolutionsExplained`,
+                    info: error,
+                });
             }
         }
     });

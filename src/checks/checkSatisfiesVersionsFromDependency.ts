@@ -30,7 +30,7 @@ export function checkSatisfiesVersionsFromDependency(
   const dependencies = depPkg[depType] || {};
 
   const reportError = customCreateReportError(
-    `Satisfies Versions from "${depPkg.name}"`,
+    "Satisfies Versions From Dependency",
     pkgPathName,
   );
 
@@ -38,12 +38,13 @@ export function checkSatisfiesVersionsFromDependency(
     const range = dependencies[depKey];
 
     if (!range) {
-      reportError(
-        `Unexpected missing dependency "${depKey}" in "${depPkg.name}"`,
-        `config expects "${depKey}" in "${depType}" of "${depPkg.name}".`,
-        undefined,
-        false,
-      );
+      reportError({
+        title: "Unexpected missing dependency",
+        info: `config expects "${depKey}" in "${depType}" of "${depPkg.name}"`,
+        dependency: { name: depKey, origin: depType },
+        onlyWarns: undefined,
+        autoFixable: undefined,
+      });
       return;
     }
 
@@ -73,12 +74,13 @@ export function checkSatisfiesVersionsFromDependency(
     if (!version) {
       const fix = getAutoFixIfExists();
       if (!fix || !tryToAutoFix) {
-        reportError(
-          `Missing "${depKey}" in "${type}" of "${pkg.name}"`,
-          `should satisfies "${range}" from "${depPkg.name}" in "${depType}".`,
-          onlyWarnsForCheck?.shouldWarnsFor(depKey),
-          !!fix,
-        );
+        reportError({
+          title: "Missing dependency",
+          info: `should satisfies "${range}" from "${depPkg.name}" in "${depType}"`,
+          dependency: { name: depKey, origin: type },
+          onlyWarns: onlyWarnsForCheck?.shouldWarnsFor(depKey),
+          autoFixable: !!fix,
+        });
       } else {
         autoFix(fix);
       }
@@ -92,12 +94,13 @@ export function checkSatisfiesVersionsFromDependency(
       ) {
         const fix = getAutoFixIfExists();
         if (!fix || !tryToAutoFix) {
-          reportError(
-            `Invalid "${depKey}" in "${type}" of "${pkg.name}"`,
-            `"${version}" should satisfies "${range}" from "${depPkg.name}"'s "${depType}".`,
-            onlyWarnsForCheck?.shouldWarnsFor(depKey),
-            !!fix,
-          );
+          reportError({
+            title: "Invalid",
+            info: `"${version}" should satisfies "${range}" from "${depPkg.name}" in "${depType}"`,
+            dependency: { name: depKey, origin: type },
+            onlyWarns: onlyWarnsForCheck?.shouldWarnsFor(depKey),
+            autoFixable: !!fix,
+          });
         } else {
           autoFix(fix);
         }

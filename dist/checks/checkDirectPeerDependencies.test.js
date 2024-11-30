@@ -1,12 +1,12 @@
 import assert from "node:assert/strict";
 import { beforeEach, describe, it, mock } from "node:test";
-import { createMockReportError } from "../utils/createReportError.testUtils.js";
+import { assertNoMessages, assertSingleMessage, createMockReportError, } from "../utils/createReportError.testUtils.js";
 import { createOnlyWarnsForMappingCheck } from "../utils/warnForUtils.js";
 import { checkDirectPeerDependencies } from "./checkDirectPeerDependencies.js";
 describe("checkDirectPeerDependencies", () => {
-    const { mockReportError, createReportError } = createMockReportError();
+    const { createReportError, messages } = createMockReportError();
     beforeEach(() => {
-        mockReportError.mock.resetCalls();
+        messages.length = 0;
     });
     it("should report error when peer dependency is missing", () => {
         const getDependencyPackageJsonMock = mock.fn();
@@ -18,12 +18,12 @@ describe("checkDirectPeerDependencies", () => {
             name: "test",
             devDependencies: { "some-lib-using-rollup": "1.0.0" },
         }, "path", getDependencyPackageJsonMock, createOnlyWarnsForMappingCheck("test", []), createOnlyWarnsForMappingCheck("test", []), createReportError);
-        assert.equal(mockReportError.mock.calls.length, 1);
-        assert.deepEqual(mockReportError.mock.calls[0].arguments, [
-            'Missing "rollup" peer dependency from "some-lib-using-rollup" in devDependencies',
-            'it should satisfies "^1.0.0" and be in devDependencies or dependencies',
-            false,
-        ]);
+        assertSingleMessage(messages, {
+            title: 'Missing "rollup" peer dependency from "some-lib-using-rollup" in devDependencies',
+            info: 'it should satisfies "^1.0.0" and be in devDependencies or dependencies',
+            onlyWarns: false,
+            dependency: { name: "rollup" },
+        });
     });
     it("should not report error when peer dependency is in devDependencies", () => {
         const getDependencyPackageJsonMock = mock.fn();
@@ -38,7 +38,7 @@ describe("checkDirectPeerDependencies", () => {
             name: "test",
             devDependencies: { rollup: "^1.0.0", "some-lib-using-rollup": "1.0.0" },
         }, "path", getDependencyPackageJsonMock, createOnlyWarnsForMappingCheck("test", []), createOnlyWarnsForMappingCheck("test", []), createReportError);
-        assert.equal(mockReportError.mock.calls.length, 0);
+        assertNoMessages(messages);
     });
     it("should not report error when peer dependency value is *", () => {
         const getDependencyPackageJsonMock = mock.fn();
@@ -53,7 +53,7 @@ describe("checkDirectPeerDependencies", () => {
             name: "test",
             devDependencies: { rollup: "^1.0.0", "some-lib-using-rollup": "1.0.0" },
         }, "path", getDependencyPackageJsonMock, createOnlyWarnsForMappingCheck("test", []), createOnlyWarnsForMappingCheck("test", []), createReportError);
-        assert.equal(mockReportError.mock.calls.length, 0);
+        assertNoMessages(messages);
     });
     it("should not report error when dev dependency value is a beta", () => {
         const getDependencyPackageJsonMock = mock.fn();
@@ -71,7 +71,7 @@ describe("checkDirectPeerDependencies", () => {
                 "some-lib-using-rollup": "1.0.0",
             },
         }, "path", getDependencyPackageJsonMock, createOnlyWarnsForMappingCheck("test", []), createOnlyWarnsForMappingCheck("test", []), createReportError);
-        assert.equal(mockReportError.mock.calls.length, 0);
+        assertNoMessages(messages);
     });
     it("should not report error when dev dependency and peerDependency value are a beta", () => {
         const getDependencyPackageJsonMock = mock.fn();
@@ -89,7 +89,7 @@ describe("checkDirectPeerDependencies", () => {
                 "some-lib-using-rollup": "1.0.0",
             },
         }, "path", getDependencyPackageJsonMock, createOnlyWarnsForMappingCheck("test", []), createOnlyWarnsForMappingCheck("test", []), createReportError);
-        assert.equal(mockReportError.mock.calls.length, 0);
+        assertNoMessages(messages);
     });
     it("should allow lib to have peer in both dependencies and peerDependencies", () => {
         const getDependencyPackageJsonMock = mock.fn();
@@ -106,7 +106,7 @@ describe("checkDirectPeerDependencies", () => {
             dependencies: { rollup: "^1.0.0" },
             devDependencies: { "some-lib-using-rollup": "1.0.0" },
         }, "path", getDependencyPackageJsonMock, createOnlyWarnsForMappingCheck("test", []), createOnlyWarnsForMappingCheck("test", []), createReportError);
-        assert.equal(mockReportError.mock.calls.length, 0);
+        assertNoMessages(messages);
     });
     it("should allow missing peer dependency when optional", () => {
         const getDependencyPackageJsonMock = mock.fn();
@@ -121,7 +121,7 @@ describe("checkDirectPeerDependencies", () => {
             name: "test",
             devDependencies: { "some-lib-using-rollup": "1.0.0" },
         }, "path", getDependencyPackageJsonMock, createOnlyWarnsForMappingCheck("test", []), createOnlyWarnsForMappingCheck("test", []), createReportError);
-        assert.equal(mockReportError.mock.calls.length, 0);
+        assertNoMessages(messages);
     });
     it("should not report error when @types is in dev dependency of an app", () => {
         const getDependencyPackageJsonMock = mock.fn();
@@ -141,7 +141,7 @@ describe("checkDirectPeerDependencies", () => {
                 "@types/a": "1.0.0",
             },
         }, "path", getDependencyPackageJsonMock, createOnlyWarnsForMappingCheck("test", []), createOnlyWarnsForMappingCheck("test", []), createReportError);
-        assert.equal(mockReportError.mock.calls.length, 0);
+        assertNoMessages(messages);
     });
     it("should not report error when @types is missing in dependencies/peerDependency of a library", () => {
         const getDependencyPackageJsonMock = mock.fn();
@@ -161,12 +161,12 @@ describe("checkDirectPeerDependencies", () => {
                 "@types/a": "1.0.0",
             },
         }, "path", getDependencyPackageJsonMock, createOnlyWarnsForMappingCheck("test", []), createOnlyWarnsForMappingCheck("test", []), createReportError);
-        assert.equal(mockReportError.mock.calls.length, 1);
-        assert.deepEqual(mockReportError.mock.calls[0].arguments, [
-            'Missing "@types/a" peer dependency from "some-lib-using-types" in dependencies',
-            'it should satisfies "^1.0.0" and be in dependencies or peerDependencies',
-            false,
-        ]);
+        assertSingleMessage(messages, {
+            title: 'Missing "@types/a" peer dependency from "some-lib-using-types" in dependencies',
+            info: 'it should satisfies "^1.0.0" and be in dependencies or peerDependencies',
+            onlyWarns: false,
+            dependency: { name: "@types/a" },
+        });
     });
     it("should report error even when peer dependency is provided by another dependency for libraries", () => {
         const getDependencyPackageJsonMock = mock.fn();
@@ -185,12 +185,12 @@ describe("checkDirectPeerDependencies", () => {
                 "some-lib-providing-rollup": "1.0.0",
             },
         }, "path", getDependencyPackageJsonMock, createOnlyWarnsForMappingCheck("test", []), createOnlyWarnsForMappingCheck("test", []), createReportError);
-        assert.equal(mockReportError.mock.calls.length, 1);
-        assert.deepEqual(mockReportError.mock.calls[0].arguments, [
-            'Missing "rollup" peer dependency from "some-lib-using-rollup" in dependencies',
-            'it should satisfies "^1.0.0" and be in dependencies or peerDependencies',
-            false,
-        ]);
+        assertSingleMessage(messages, {
+            title: 'Missing "rollup" peer dependency from "some-lib-using-rollup" in dependencies',
+            info: 'it should satisfies "^1.0.0" and be in dependencies or peerDependencies',
+            onlyWarns: false,
+            dependency: { name: "rollup" },
+        });
     });
     it("should not report error when peer dependency is provided by another dependency", () => {
         const getDependencyPackageJsonMock = mock.fn();
@@ -209,7 +209,7 @@ describe("checkDirectPeerDependencies", () => {
                 "some-lib-providing-rollup": "1.0.0",
             },
         }, "path", getDependencyPackageJsonMock, createOnlyWarnsForMappingCheck("test", []), createOnlyWarnsForMappingCheck("test", []), createReportError);
-        assert.equal(mockReportError.mock.calls.length, 0);
+        assertNoMessages(messages);
     });
     it("should report error when peer dependency is provided by multiple dependencies including non-satisfying range", () => {
         const getDependencyPackageJsonMock = mock.fn();
@@ -238,12 +238,12 @@ describe("checkDirectPeerDependencies", () => {
             ["some-lib-providing-rollup-1"],
             ["some-lib-providing-rollup-2"],
         ]);
-        assert.equal(mockReportError.mock.calls.length, 1);
-        assert.deepEqual(mockReportError.mock.calls[0].arguments, [
-            'Missing "rollup" peer dependency from "some-lib-using-rollup" in dependencies',
-            'it should satisfies "^1.0.0" and be in devDependencies or dependencies (required as some dependencies have non-satisfying range too)',
-            false,
-        ]);
+        assertSingleMessage(messages, {
+            title: 'Missing "rollup" peer dependency from "some-lib-using-rollup" in dependencies',
+            info: 'it should satisfies "^1.0.0" and be in devDependencies or dependencies (required as some dependencies have non-satisfying range too)',
+            onlyWarns: false,
+            dependency: { name: "rollup" },
+        });
     });
     it("should not report error when peer dependency is marked as peer dependency", () => {
         const getDependencyPackageJsonMock = mock.fn();
@@ -260,7 +260,7 @@ describe("checkDirectPeerDependencies", () => {
                 "some-lib-using-rollup": "^1.0.0",
             },
         }, "path", getDependencyPackageJsonMock, createOnlyWarnsForMappingCheck("test", []), createOnlyWarnsForMappingCheck("test", []), createReportError);
-        assert.equal(mockReportError.mock.calls.length, 0);
+        assertNoMessages(messages);
     });
     it("should error when peer dependency is marked as peer dependency but has wrong version", () => {
         const getDependencyPackageJsonMock = mock.fn();
@@ -282,12 +282,12 @@ describe("checkDirectPeerDependencies", () => {
                 "some-lib-using-rollup": "^1.0.0",
             },
         }, "path", getDependencyPackageJsonMock, createOnlyWarnsForMappingCheck("test", []), createOnlyWarnsForMappingCheck("test", []), createReportError);
-        assert.equal(mockReportError.mock.calls.length, 1);
-        assert.deepEqual(mockReportError.mock.calls[0].arguments, [
-            'Invalid "rollup" peer dependency',
-            '"^2.0.0" (in devDependencies) should satisfies "^1.0.0" from "some-lib-using-rollup" devDependencies',
-            false,
-        ]);
+        assertSingleMessage(messages, {
+            title: "Invalid peer dependency version",
+            info: '"^2.0.0" should satisfies "^1.0.0" from "some-lib-using-rollup" in devDependencies',
+            onlyWarns: false,
+            dependency: { name: "rollup", origin: "devDependencies" },
+        });
     });
     it("should error when peer dependency is marked as peer dependency but has wrong dependency version", () => {
         const getDependencyPackageJsonMock = mock.fn();
@@ -301,20 +301,22 @@ describe("checkDirectPeerDependencies", () => {
             });
         checkDirectPeerDependencies(false, {
             name: "test",
-            devDependencies: {
+            dependencies: {
                 "react-native": "1.0.0",
+            },
+            devDependencies: {
                 react: "18.3.0",
             },
             peerDependencies: {
                 "react-native": "*",
             },
         }, "path", getDependencyPackageJsonMock, createOnlyWarnsForMappingCheck("test", []), createOnlyWarnsForMappingCheck("test", []), createReportError);
-        assert.equal(mockReportError.mock.calls.length, 1);
-        assert.deepEqual(mockReportError.mock.calls[0].arguments, [
-            'Invalid "react" peer dependency',
-            '"18.3.0" (in devDependencies) should satisfies "18.2.0" from "react-native" devDependencies',
-            false,
-        ]);
+        assertSingleMessage(messages, {
+            title: "Invalid peer dependency version",
+            info: '"18.3.0" should satisfies "18.2.0" from "react-native" in dependencies',
+            dependency: { name: "react", origin: "devDependencies" },
+            onlyWarns: false,
+        });
     });
     it("should not report error when dependency is workspace:*", () => {
         const getDependencyPackageJsonMock = mock.fn();
@@ -331,7 +333,7 @@ describe("checkDirectPeerDependencies", () => {
                 "lib-using-alouette-icons": "*",
             },
         }, "path", getDependencyPackageJsonMock, createOnlyWarnsForMappingCheck("test", []), createOnlyWarnsForMappingCheck("test", []), createReportError);
-        assert.equal(mockReportError.mock.calls.length, 0);
+        assertNoMessages(messages);
     });
 });
 //# sourceMappingURL=checkDirectPeerDependencies.test.js.map

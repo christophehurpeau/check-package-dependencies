@@ -1,9 +1,8 @@
-import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { createMockReportError } from "../utils/createReportError.testUtils.js";
+import { assertCreateReportErrorCall, assertNoMessages, assertSeveralMessages, assertSingleMessage, createMockReportError, } from "../utils/createReportError.testUtils.js";
 import { checkIdenticalVersions } from "./checkIdenticalVersions.js";
 describe("checkIdenticalVersions", () => {
-    const { mockReportError, createReportError } = createMockReportError();
+    const { createReportError, messages } = createMockReportError();
     describe("devDependencies in array", () => {
         it("should return no error when all versions are identical", () => {
             checkIdenticalVersions({
@@ -12,12 +11,8 @@ describe("checkIdenticalVersions", () => {
             }, "path", "devDependencies", {
                 react: ["react-dom"],
             }, undefined, createReportError);
-            assert.equal(createReportError.mock.calls.length, 1);
-            assert.deepEqual(createReportError.mock.calls[0].arguments, [
-                "Identical Versions",
-                "path",
-            ]);
-            assert.equal(mockReportError.mock.calls.length, 0);
+            assertCreateReportErrorCall(createReportError, "Identical Versions", "path");
+            assertNoMessages(messages);
         });
         it("should return error when versions are not identical", () => {
             checkIdenticalVersions({
@@ -26,17 +21,13 @@ describe("checkIdenticalVersions", () => {
             }, "path", "devDependencies", {
                 react: ["react-dom"],
             }, undefined, createReportError);
-            assert.equal(createReportError.mock.calls.length, 1);
-            assert.deepEqual(createReportError.mock.calls[0].arguments, [
-                "Identical Versions",
-                "path",
-            ]);
-            assert.equal(mockReportError.mock.calls.length, 1);
-            assert.deepEqual(mockReportError.mock.calls[0].arguments, [
-                'Invalid "react-dom" in devDependencies',
-                'expecting "1.0.1" be "1.0.0".',
-                undefined,
-            ]);
+            assertCreateReportErrorCall(createReportError, "Identical Versions", "path");
+            assertSingleMessage(messages, {
+                title: 'Invalid "react-dom"',
+                info: 'expecting "1.0.1" to be "1.0.0"',
+                dependency: { name: "react", origin: "devDependencies" },
+                onlyWarns: undefined,
+            });
         });
     });
     describe("object with dependencies and devDependencies", () => {
@@ -51,12 +42,8 @@ describe("checkIdenticalVersions", () => {
                     devDependencies: ["react-test-renderer"],
                 },
             }, undefined, createReportError);
-            assert.equal(createReportError.mock.calls.length, 1);
-            assert.deepEqual(createReportError.mock.calls[0].arguments, [
-                "Identical Versions",
-                "path",
-            ]);
-            assert.equal(mockReportError.mock.calls.length, 0);
+            assertCreateReportErrorCall(createReportError, "Identical Versions", "path");
+            assertNoMessages(messages);
         });
         it("should return error when versions are not identical", () => {
             checkIdenticalVersions({
@@ -69,21 +56,20 @@ describe("checkIdenticalVersions", () => {
                     devDependencies: ["react-test-renderer"],
                 },
             }, undefined, createReportError);
-            assert.equal(createReportError.mock.calls.length, 1);
-            assert.deepEqual(createReportError.mock.calls[0].arguments, [
-                "Identical Versions",
-                "path",
-            ]);
-            assert.equal(mockReportError.mock.calls.length, 2);
-            assert.deepEqual(mockReportError.mock.calls[0].arguments, [
-                'Invalid "react-dom" in dependencies',
-                'expecting "1.0.1" be "1.0.0".',
-                undefined,
-            ]);
-            assert.deepEqual(mockReportError.mock.calls[1].arguments, [
-                'Invalid "react-test-renderer" in devDependencies',
-                'expecting "1.0.1" be "1.0.0".',
-                undefined,
+            assertCreateReportErrorCall(createReportError, "Identical Versions", "path");
+            assertSeveralMessages(messages, [
+                {
+                    title: 'Invalid "react-dom"',
+                    info: 'expecting "1.0.1" to be "1.0.0"',
+                    dependency: { name: "react", origin: "dependencies" },
+                    onlyWarns: undefined,
+                },
+                {
+                    title: 'Invalid "react-test-renderer"',
+                    info: 'expecting "1.0.1" to be "1.0.0"',
+                    dependency: { name: "react", origin: "devDependencies" },
+                    onlyWarns: undefined,
+                },
             ]);
         });
     });

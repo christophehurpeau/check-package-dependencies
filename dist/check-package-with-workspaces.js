@@ -2,7 +2,7 @@ import fs, { constants } from "node:fs";
 import path from "node:path";
 import { createCheckPackage } from "./check-package.js";
 import { checkDuplicateDependencies } from "./checks/checkDuplicateDependencies.js";
-import { createReportError, displayConclusion, reportNotWarnedForMapping, } from "./utils/createReportError.js";
+import { createReportError, displayMessages, reportNotWarnedForMapping, } from "./utils/createReportError.js";
 import { createOnlyWarnsForMappingCheck } from "./utils/warnForUtils.js";
 export function createCheckPackageWithWorkspaces(createCheckPackageOptions = {}) {
     const checkPackage = createCheckPackage({
@@ -44,9 +44,9 @@ export function createCheckPackageWithWorkspaces(createCheckPackageOptions = {})
                 checkPackage,
                 ...checksWorkspaces.values(),
             ]) {
-                await checksWorkspace.run({ skipDisplayConclusion: true });
+                await checksWorkspace.run({ skipDisplayMessages: true });
             }
-            displayConclusion();
+            displayMessages();
         },
         checkRecommended({ allowRangeVersionsInLibraries = true, onlyWarnsForInRootPackage, onlyWarnsForInMonorepoPackages, onlyWarnsForInRootDependencies, onlyWarnsForInMonorepoPackagesDependencies = {}, monorepoDirectDuplicateDependenciesOnlyWarnsFor, checkResolutionMessage, } = {}) {
             checkPackage.checkNoDependencies();

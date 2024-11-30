@@ -27,11 +27,12 @@ export function checkSatisfiesVersions(
     const version = pkgDependencies[depKey];
 
     if (!version) {
-      reportError(
-        `Missing "${depKey}" in ${type}`,
-        `should satisfies "${range}".`,
-        onlyWarnsForCheck?.shouldWarnsFor(depKey),
-      );
+      reportError({
+        title: "Missing",
+        info: `should satisfies "${range}"`,
+        dependency: { name: depKey, origin: type },
+        onlyWarns: onlyWarnsForCheck?.shouldWarnsFor(depKey),
+      });
     } else {
       const minVersionOfVersion = semver.minVersion(version);
       if (
@@ -40,11 +41,12 @@ export function checkSatisfiesVersions(
           includePrerelease: true,
         })
       ) {
-        reportError(
-          `Invalid "${depKey}" in ${type}`,
-          `"${version}" (in "${depKey}") should satisfies "${range}".`,
-          onlyWarnsForCheck?.shouldWarnsFor(depKey),
-        );
+        reportError({
+          title: "Invalid",
+          info: `"${version}" should satisfies "${range}"`,
+          dependency: { name: depKey, origin: type },
+          onlyWarns: onlyWarnsForCheck?.shouldWarnsFor(depKey),
+        });
       }
     }
   });

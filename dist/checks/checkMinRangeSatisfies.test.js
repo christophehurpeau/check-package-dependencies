@@ -1,12 +1,12 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { createMockReportError } from "../utils/createReportError.testUtils.js";
+import { assertCreateReportErrorCall, assertNoMessages, assertSingleMessage, createMockReportError, } from "../utils/createReportError.testUtils.js";
 import { checkMinRangeSatisfies } from "./checkMinRangeSatisfies.js";
 describe(checkMinRangeSatisfies.name, () => {
-    const { mockReportError, createReportError } = createMockReportError();
+    const { createReportError, messages } = createMockReportError();
     it("should return no error when no dependencies is set", () => {
         checkMinRangeSatisfies("path", { name: "test" });
-        assert.equal(mockReportError.mock.calls.length, 0);
+        assertNoMessages(messages);
     });
     describe("expect no error", () => {
         const testCases = [
@@ -56,7 +56,8 @@ describe(checkMinRangeSatisfies.name, () => {
         for (const [description, pkgContent] of testCases) {
             it(`should have no error when ${description}`, () => {
                 checkMinRangeSatisfies("path", { name: "test", ...pkgContent }, "dependencies", "devDependencies", { customCreateReportError: createReportError });
-                assert.equal(mockReportError.mock.calls.length, 0);
+                assertCreateReportErrorCall(createReportError, '"dependencies" minimum range satisfies "devDependencies"', "path");
+                assertNoMessages(messages);
             });
         }
     });
@@ -68,8 +69,8 @@ describe(checkMinRangeSatisfies.name, () => {
                     dependencies: { test1: "1.1.0" },
                     devDependencies: { test1: "1.0.0" },
                 },
-                'Invalid "test1" in dependencies',
-                '"1.1.0" should satisfies "1.0.0" from "devDependencies".',
+                'Invalid "1.1.0"',
+                '"1.1.0" should satisfies "1.0.0" from "devDependencies"',
                 {
                     dependencies: { test1: "1.0.0" },
                 },
@@ -80,8 +81,8 @@ describe(checkMinRangeSatisfies.name, () => {
                     dependencies: { test1: "^1.0.0" },
                     devDependencies: { test1: "1.1.0" },
                 },
-                'Invalid "test1" in dependencies',
-                '"^1.0.0" should satisfies "1.1.0" from "devDependencies".',
+                'Invalid "^1.0.0"',
+                '"^1.0.0" should satisfies "1.1.0" from "devDependencies"',
                 {
                     dependencies: { test1: "^1.1.0" },
                 },
@@ -92,8 +93,8 @@ describe(checkMinRangeSatisfies.name, () => {
                     dependencies: { test1: "^1.1.0" },
                     devDependencies: { test1: "1.0.0" },
                 },
-                'Invalid "test1" in dependencies',
-                '"^1.1.0" should satisfies "1.0.0" from "devDependencies".',
+                'Invalid "^1.1.0"',
+                '"^1.1.0" should satisfies "1.0.0" from "devDependencies"',
                 {
                     dependencies: { test1: "^1.0.0" },
                 },
@@ -104,8 +105,8 @@ describe(checkMinRangeSatisfies.name, () => {
                     dependencies: { test1: "~1.0.0" },
                     devDependencies: { test1: "1.1.0" },
                 },
-                'Invalid "test1" in dependencies',
-                '"~1.0.0" should satisfies "1.1.0" from "devDependencies".',
+                'Invalid "~1.0.0"',
+                '"~1.0.0" should satisfies "1.1.0" from "devDependencies"',
                 {
                     dependencies: { test1: "~1.1.0" },
                 },
@@ -116,8 +117,8 @@ describe(checkMinRangeSatisfies.name, () => {
                     dependencies: { test1: "~1.1.0" },
                     devDependencies: { test1: "1.0.0" },
                 },
-                'Invalid "test1" in dependencies',
-                '"~1.1.0" should satisfies "1.0.0" from "devDependencies".',
+                'Invalid "~1.1.0"',
+                '"~1.1.0" should satisfies "1.0.0" from "devDependencies"',
                 {
                     dependencies: { test1: "~1.0.0" },
                 },
@@ -128,8 +129,8 @@ describe(checkMinRangeSatisfies.name, () => {
                     dependencies: { test1: ">=1.0.0" },
                     devDependencies: { test1: "1.1.0" },
                 },
-                'Invalid "test1" in dependencies',
-                '">=1.0.0" should satisfies "1.1.0" from "devDependencies".',
+                'Invalid ">=1.0.0"',
+                '">=1.0.0" should satisfies "1.1.0" from "devDependencies"',
                 {
                     dependencies: { test1: ">=1.1.0" },
                 },
@@ -140,8 +141,8 @@ describe(checkMinRangeSatisfies.name, () => {
                     dependencies: { test1: ">=1.1.0" },
                     devDependencies: { test1: "1.0.0" },
                 },
-                'Invalid "test1" in dependencies',
-                '">=1.1.0" should satisfies "1.0.0" from "devDependencies".',
+                'Invalid ">=1.1.0"',
+                '">=1.1.0" should satisfies "1.0.0" from "devDependencies"',
                 {
                     dependencies: { test1: ">=1.0.0" },
                 },
@@ -150,13 +151,13 @@ describe(checkMinRangeSatisfies.name, () => {
         for (const [description, pkgContent, errorTitle, errorInfo, expectedFix,] of testCases) {
             it(`should error when ${description}`, () => {
                 checkMinRangeSatisfies("path", { name: "test", ...pkgContent }, "dependencies", "devDependencies", { customCreateReportError: createReportError });
-                assert.equal(mockReportError.mock.calls.length, 1);
-                assert.deepEqual(mockReportError.mock.calls[0].arguments, [
-                    errorTitle,
-                    errorInfo,
-                    false,
-                    true,
-                ]);
+                assertCreateReportErrorCall(createReportError, '"dependencies" minimum range satisfies "devDependencies"', "path");
+                assertSingleMessage(messages, {
+                    title: errorTitle,
+                    info: errorInfo,
+                    dependency: { name: "test1", origin: "dependencies" },
+                    autoFixable: true,
+                });
                 if (expectedFix) {
                     const pkg = JSON.parse(JSON.stringify({ name: "test", ...pkgContent }));
                     checkMinRangeSatisfies("path", pkg, "dependencies", "devDependencies", { tryToAutoFix: true });

@@ -15,7 +15,7 @@ import { checkSatisfiesVersionsFromDependency } from "./checks/checkSatisfiesVer
 import { checkSatisfiesVersionsInDependency } from "./checks/checkSatisfiesVersionsInDependency.ts";
 import type { GetDependencyPackageJson } from "./utils/createGetDependencyPackageJson.ts";
 import { createGetDependencyPackageJson } from "./utils/createGetDependencyPackageJson.ts";
-import { displayConclusion } from "./utils/createReportError.ts";
+import { displayMessages } from "./utils/createReportError.ts";
 import { getEntries } from "./utils/object.ts";
 import type {
   DependenciesRanges,
@@ -89,7 +89,7 @@ export interface CheckExactVersionsOptions {
 
 export interface CheckPackageApiRunOptions {
   /** @internal */
-  skipDisplayConclusion?: boolean;
+  skipDisplayMessages?: boolean;
 }
 
 export interface CheckPackageApi {
@@ -344,17 +344,17 @@ export function createCheckPackage({
   const jobs: Job[] = [];
 
   return {
-    async run({
-      skipDisplayConclusion = false,
-    }: CheckPackageApiRunOptions = {}) {
+    async run({ skipDisplayMessages = false }: CheckPackageApiRunOptions = {}) {
       runCalled = true;
       // TODO parallel
       for (const job of jobs) {
         await job.run();
       }
-      writePackageIfChanged();
-      if (!skipDisplayConclusion) {
-        displayConclusion();
+      if (tryToAutoFix) {
+        writePackageIfChanged();
+      }
+      if (!skipDisplayMessages) {
+        displayMessages();
       }
     },
 

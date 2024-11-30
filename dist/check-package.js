@@ -13,7 +13,7 @@ import { checkSatisfiesVersions } from "./checks/checkSatisfiesVersions.js";
 import { checkSatisfiesVersionsFromDependency } from "./checks/checkSatisfiesVersionsFromDependency.js";
 import { checkSatisfiesVersionsInDependency } from "./checks/checkSatisfiesVersionsInDependency.js";
 import { createGetDependencyPackageJson } from "./utils/createGetDependencyPackageJson.js";
-import { displayConclusion } from "./utils/createReportError.js";
+import { displayMessages } from "./utils/createReportError.js";
 import { getEntries } from "./utils/object.js";
 import { readPkgJson, writePkgJson } from "./utils/pkgJsonUtils.js";
 import { createOnlyWarnsForArrayCheck, createOnlyWarnsForMappingCheck, } from "./utils/warnForUtils.js";
@@ -65,15 +65,17 @@ export function createCheckPackage({ packageDirectoryPath = ".", internalWorkspa
     }
     const jobs = [];
     return {
-        async run({ skipDisplayConclusion = false, } = {}) {
+        async run({ skipDisplayMessages = false } = {}) {
             runCalled = true;
             // TODO parallel
             for (const job of jobs) {
                 await job.run();
             }
-            writePackageIfChanged();
-            if (!skipDisplayConclusion) {
-                displayConclusion();
+            if (tryToAutoFix) {
+                writePackageIfChanged();
+            }
+            if (!skipDisplayMessages) {
+                displayMessages();
             }
         },
         pkg,

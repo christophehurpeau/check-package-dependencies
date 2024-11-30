@@ -45,7 +45,7 @@ export interface CheckExactVersionsOptions {
 }
 export interface CheckPackageApiRunOptions {
     /** @internal */
-    skipDisplayConclusion?: boolean;
+    skipDisplayMessages?: boolean;
 }
 export interface CheckPackageApi {
     run: (options?: CheckPackageApiRunOptions) => Promise<void>;

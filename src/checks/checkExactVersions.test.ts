@@ -1,7 +1,13 @@
 import assert from "node:assert/strict";
 import { describe, it, mock } from "node:test";
 import type { GetDependencyPackageJson } from "../utils/createGetDependencyPackageJson.ts";
-import { createMockReportError } from "../utils/createReportError.testUtils.ts";
+import {
+  assertCreateReportErrorCall,
+  assertNoMessages,
+  assertSeveralMessages,
+  assertSingleMessage,
+  createMockReportError,
+} from "../utils/createReportError.testUtils.ts";
 import { createOnlyWarnsForArrayCheck } from "../utils/warnForUtils.ts";
 import { checkExactVersions } from "./checkExactVersions.ts";
 
@@ -12,7 +18,7 @@ const emptyOnlyWarnsForCheck = createOnlyWarnsForArrayCheck(
 );
 
 describe("checkExactVersions", () => {
-  const { mockReportError, createReportError } = createMockReportError();
+  const { createReportError, messages } = createMockReportError();
 
   it("should return no error when all versions are exact", async () => {
     await checkExactVersions(
@@ -24,12 +30,8 @@ describe("checkExactVersions", () => {
         customCreateReportError: createReportError,
       },
     );
-    assert.equal(createReportError.mock.calls.length, 1);
-    assert.deepEqual(createReportError.mock.calls[0].arguments, [
-      "Exact versions",
-      "path",
-    ]);
-    assert.equal(mockReportError.mock.calls.length, 0);
+    assertCreateReportErrorCall(createReportError, "Exact versions", "path");
+    assertNoMessages(messages);
   });
 
   it("should return an error when one version has a caret range", async () => {
@@ -42,14 +44,13 @@ describe("checkExactVersions", () => {
         customCreateReportError: createReportError,
       },
     );
-    assert.ok(createReportError.mock.calls.length > 0);
-    assert.equal(mockReportError.mock.calls.length, 1);
-    assert.deepEqual(mockReportError.mock.calls[0].arguments, [
-      'Unexpected range dependency in "devDependencies" for "test"',
-      'expecting "^1.0.0" to be exact "1.0.0".',
-      false,
-      false,
-    ]);
+    assertCreateReportErrorCall(createReportError, "Exact versions", "path");
+    assertSingleMessage(messages, {
+      title: "Unexpected range dependency",
+      info: 'expecting "^1.0.0" to be exact "1.0.0"',
+      dependency: { name: "test", origin: "devDependencies" },
+      onlyWarns: false,
+    });
   });
 
   for (const comparator of ["<", "<=", ">", ">="]) {
@@ -63,14 +64,13 @@ describe("checkExactVersions", () => {
           customCreateReportError: createReportError,
         },
       );
-      assert.ok(createReportError.mock.calls.length > 0);
-      assert.equal(mockReportError.mock.calls.length, 1);
-      assert.deepEqual(mockReportError.mock.calls[0].arguments, [
-        'Unexpected range dependency in "devDependencies" for "test"',
-        `expecting "${comparator}1.0.0" to be exact "1.0.0".`,
-        false,
-        false,
-      ]);
+      assertCreateReportErrorCall(createReportError, "Exact versions", "path");
+      assertSingleMessage(messages, {
+        title: "Unexpected range dependency",
+        info: `expecting "${comparator}1.0.0" to be exact "1.0.0"`,
+        dependency: { name: "test", origin: "devDependencies" },
+        onlyWarns: false,
+      });
     });
   }
 
@@ -87,14 +87,13 @@ describe("checkExactVersions", () => {
         customCreateReportError: createReportError,
       },
     );
-    assert.ok(createReportError.mock.calls.length > 0);
-    assert.equal(mockReportError.mock.calls.length, 1);
-    assert.deepEqual(mockReportError.mock.calls[0].arguments, [
-      'Unexpected range dependency in "devDependencies" for "test"',
-      'expecting "^1.0.0" to be exact "1.0.0".',
-      true,
-      false,
-    ]);
+    assertCreateReportErrorCall(createReportError, "Exact versions", "path");
+    assertSingleMessage(messages, {
+      title: "Unexpected range dependency",
+      info: 'expecting "^1.0.0" to be exact "1.0.0"',
+      dependency: { name: "test", origin: "devDependencies" },
+      onlyWarns: true,
+    });
   });
 
   it("should return an error when one version has a tilde range", async () => {
@@ -107,14 +106,13 @@ describe("checkExactVersions", () => {
         customCreateReportError: createReportError,
       },
     );
-    assert.ok(createReportError.mock.calls.length > 0);
-    assert.equal(mockReportError.mock.calls.length, 1);
-    assert.deepEqual(mockReportError.mock.calls[0].arguments, [
-      'Unexpected range dependency in "devDependencies" for "test"',
-      'expecting "~1.0.0" to be exact "1.0.0".',
-      false,
-      false,
-    ]);
+    assertCreateReportErrorCall(createReportError, "Exact versions", "path");
+    assertSingleMessage(messages, {
+      title: "Unexpected range dependency",
+      info: 'expecting "~1.0.0" to be exact "1.0.0"',
+      dependency: { name: "test", origin: "devDependencies" },
+      onlyWarns: false,
+    });
   });
 
   it("should return multiple errors when multiple versions have range", async () => {
@@ -135,31 +133,32 @@ describe("checkExactVersions", () => {
         customCreateReportError: createReportError,
       },
     );
-    assert.ok(createReportError.mock.calls.length > 0);
-    assert.equal(mockReportError.mock.calls.length, 4);
-    assert.deepEqual(mockReportError.mock.calls[0].arguments, [
-      'Unexpected range dependency in "devDependencies" for "test1"',
-      'expecting "~1.0.0" to be exact "1.0.0".',
-      false,
-      false,
-    ]);
-    assert.deepEqual(mockReportError.mock.calls[1].arguments, [
-      'Unexpected range dependency in "devDependencies" for "test2"',
-      'expecting "~1.0.0" to be exact "1.0.0".',
-      false,
-      false,
-    ]);
-    assert.deepEqual(mockReportError.mock.calls[2].arguments, [
-      'Unexpected range dependency in "devDependencies" for "test3"',
-      'expecting "^18" to be exact "18.0.0".',
-      false,
-      false,
-    ]);
-    assert.deepEqual(mockReportError.mock.calls[3].arguments, [
-      'Unexpected range dependency in "devDependencies" for "test4"',
-      'expecting "^18.1" to be exact "18.1.0".',
-      false,
-      false,
+    assertCreateReportErrorCall(createReportError, "Exact versions", "path");
+    assertSeveralMessages(messages, [
+      {
+        title: "Unexpected range dependency",
+        info: 'expecting "~1.0.0" to be exact "1.0.0"',
+        dependency: { name: "test1", origin: "devDependencies" },
+        onlyWarns: false,
+      },
+      {
+        title: "Unexpected range dependency",
+        info: 'expecting "~1.0.0" to be exact "1.0.0"',
+        dependency: { name: "test2", origin: "devDependencies" },
+        onlyWarns: false,
+      },
+      {
+        title: "Unexpected range dependency",
+        info: 'expecting "^18" to be exact "18.0.0"',
+        dependency: { name: "test3", origin: "devDependencies" },
+        onlyWarns: false,
+      },
+      {
+        title: "Unexpected range dependency",
+        info: 'expecting "^18.1" to be exact "18.1.0"',
+        dependency: { name: "test4", origin: "devDependencies" },
+        onlyWarns: false,
+      },
     ]);
   });
 
@@ -177,8 +176,8 @@ describe("checkExactVersions", () => {
       getDependencyPackageJson: getDependencyPackageJsonMock,
       customCreateReportError: createReportError,
     });
-    assert.ok(createReportError.mock.calls.length > 0);
-    assert.equal(mockReportError.mock.calls.length, 0);
+    assertCreateReportErrorCall(createReportError, "Exact versions", "path");
+    assertNoMessages(messages);
     assert.ok(getDependencyPackageJsonMock.mock.calls.length > 0);
     assert.deepEqual(pkg, {
       name: "test",
@@ -199,15 +198,13 @@ describe("checkExactVersions", () => {
       getDependencyPackageJson: getDependencyPackageJsonMock,
       customCreateReportError: createReportError,
     });
-    assert.ok(createReportError.mock.calls.length > 0);
-    assert.ok(getDependencyPackageJsonMock.mock.calls.length > 0);
-    assert.equal(mockReportError.mock.calls.length, 1);
-    assert.deepEqual(mockReportError.mock.calls[0].arguments, [
-      'Unexpected range dependency in "devDependencies" for "test1"',
-      'expecting "~1.0.0" to be exact, autofix failed to resolve "test1".',
-      false,
-      false,
-    ]);
+    assertCreateReportErrorCall(createReportError, "Exact versions", "path");
+    assertSingleMessage(messages, {
+      title: "Unexpected range dependency",
+      info: 'expecting "~1.0.0" to be exact, autofix failed to resolve "test1"',
+      dependency: { name: "test1", origin: "devDependencies" },
+      onlyWarns: false,
+    });
   });
 
   it("should error if autofix failed because version doesn't match range", async () => {
@@ -221,15 +218,13 @@ describe("checkExactVersions", () => {
       getDependencyPackageJson: getDependencyPackageJsonMock,
       customCreateReportError: createReportError,
     });
-    assert.ok(createReportError.mock.calls.length > 0);
-    assert.ok(getDependencyPackageJsonMock.mock.calls.length > 0);
-    assert.equal(mockReportError.mock.calls.length, 1);
-    assert.deepEqual(mockReportError.mock.calls[0].arguments, [
-      'Unexpected range dependency in "devDependencies" for "test1"',
-      'expecting "~1.0.0" to be exact, autofix failed as "test1"\'s resolved version is "2.0.0" and doesn\'t satisfies "~1.0.0".',
-      false,
-      false,
-    ]);
+    assertCreateReportErrorCall(createReportError, "Exact versions", "path");
+    assertSingleMessage(messages, {
+      title: "Unexpected range dependency",
+      info: 'expecting "~1.0.0" to be exact, autofix failed as resolved version "2.0.0" doesn\'t satisfy "~1.0.0"',
+      dependency: { name: "test1", origin: "devDependencies" },
+      onlyWarns: false,
+    });
   });
 
   it("should support npm: prefix", async () => {
@@ -247,15 +242,15 @@ describe("checkExactVersions", () => {
         customCreateReportError: createReportError,
       },
     );
-    assert.ok(createReportError.mock.calls.length > 0);
-    assert.equal(mockReportError.mock.calls.length, 1);
-    assert.deepEqual(mockReportError.mock.calls[0].arguments, [
-      'Unexpected range dependency in "devDependencies" for "rollupv1"',
-      'expecting "^1.0.1" to be exact "1.0.1".',
-      false,
-      false,
-    ]);
+    assertCreateReportErrorCall(createReportError, "Exact versions", "path");
+    assertSingleMessage(messages, {
+      title: "Unexpected range dependency",
+      info: 'expecting "^1.0.1" to be exact "1.0.1"',
+      dependency: { name: "rollupv1", origin: "devDependencies" },
+      onlyWarns: false,
+    });
   });
+
   it("should warn when onlyWarnsFor is passed", async () => {
     await checkExactVersions(
       { name: "test", devDependencies: { test1: "~1.0.0", test2: "~1.0.0" } },
@@ -269,21 +264,23 @@ describe("checkExactVersions", () => {
         customCreateReportError: createReportError,
       },
     );
-    assert.ok(createReportError.mock.calls.length > 0);
-    assert.equal(mockReportError.mock.calls.length, 2);
-    assert.deepEqual(mockReportError.mock.calls[0].arguments, [
-      'Unexpected range dependency in "devDependencies" for "test1"',
-      'expecting "~1.0.0" to be exact "1.0.0".',
-      true,
-      false,
-    ]);
-    assert.deepEqual(mockReportError.mock.calls[1].arguments, [
-      'Unexpected range dependency in "devDependencies" for "test2"',
-      'expecting "~1.0.0" to be exact "1.0.0".',
-      false,
-      false,
+    assertCreateReportErrorCall(createReportError, "Exact versions", "path");
+    assertSeveralMessages(messages, [
+      {
+        title: "Unexpected range dependency",
+        info: 'expecting "~1.0.0" to be exact "1.0.0"',
+        dependency: { name: "test1", origin: "devDependencies" },
+        onlyWarns: true,
+      },
+      {
+        title: "Unexpected range dependency",
+        info: 'expecting "~1.0.0" to be exact "1.0.0"',
+        dependency: { name: "test2", origin: "devDependencies" },
+        onlyWarns: false,
+      },
     ]);
   });
+
   it("should error when onlyWarnsFor is not fully used", async () => {
     await checkExactVersions({ name: "test" }, "path", ["devDependencies"], {
       onlyWarnsForCheck: createOnlyWarnsForArrayCheck(onlyWarnsForConfigName, [
@@ -291,12 +288,10 @@ describe("checkExactVersions", () => {
       ]),
       customCreateReportError: createReportError,
     });
-    assert.ok(createReportError.mock.calls.length > 0);
-    assert.equal(mockReportError.mock.calls.length, 1);
-    assert.deepEqual(mockReportError.mock.calls[0].arguments, [
-      'Invalid config in "checkExactVersions.test.onlyWarnsFor"',
-      'no warning was raised for "testa"',
-      false,
-    ]);
+    assertCreateReportErrorCall(createReportError, "Exact versions", "path");
+    assertSingleMessage(messages, {
+      title: `Invalid config in "${onlyWarnsForConfigName}"`,
+      info: 'no warning was raised for "testa"',
+    });
   });
 });

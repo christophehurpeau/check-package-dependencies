@@ -20,7 +20,10 @@ export function checkIdenticalVersions(
   getKeys(deps).forEach((depKey) => {
     const version = pkgDependencies[depKey];
     if (!version) {
-      reportError(`Unexpected missing ${type} for "${depKey}".`);
+      reportError({
+        title: `Unexpected missing ${type}`,
+        info: `missing "${depKey}"`,
+      });
       return;
     }
 
@@ -34,19 +37,21 @@ export function checkIdenticalVersions(
       depConfig[depKeyType]?.forEach((depKeyIdentical) => {
         const value = pkgDependenciesType[depKeyIdentical];
         if (!value) {
-          reportError(
-            `Missing "${depKeyIdentical}" in ${depKeyType}`,
-            `it should be "${version}".`,
-            onlyWarnsForCheck?.shouldWarnsFor(depKey),
-          );
+          reportError({
+            title: `Missing "${depKeyIdentical}"`,
+            info: `it should be "${version}"`,
+            dependency: { name: depKey, origin: depKeyType },
+            onlyWarns: onlyWarnsForCheck?.shouldWarnsFor(depKey),
+          });
         }
 
         if (value !== version) {
-          reportError(
-            `Invalid "${depKeyIdentical}" in ${depKeyType}`,
-            `expecting "${value}" be "${version}".`,
-            onlyWarnsForCheck?.shouldWarnsFor(depKey),
-          );
+          reportError({
+            title: `Invalid "${depKeyIdentical}"`,
+            info: `expecting "${value}" to be "${version}"`,
+            dependency: { name: depKey, origin: depKeyType },
+            onlyWarns: onlyWarnsForCheck?.shouldWarnsFor(depKey),
+          });
         }
       });
     });

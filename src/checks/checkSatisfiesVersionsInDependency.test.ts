@@ -1,11 +1,15 @@
-import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { createMockReportError } from "../utils/createReportError.testUtils.ts";
+import {
+  assertCreateReportErrorCall,
+  assertNoMessages,
+  assertSingleMessage,
+  createMockReportError,
+} from "../utils/createReportError.testUtils.ts";
 import type { PackageJson } from "../utils/packageTypes.ts";
 import { checkSatisfiesVersionsInDependency } from "./checkSatisfiesVersionsInDependency.ts";
 
 describe(checkSatisfiesVersionsInDependency.name, () => {
-  const { mockReportError, createReportError } = createMockReportError();
+  const { createReportError, messages } = createMockReportError();
 
   it("should return no error when no ranges is set", () => {
     checkSatisfiesVersionsInDependency(
@@ -14,7 +18,12 @@ describe(checkSatisfiesVersionsInDependency.name, () => {
       {},
       { customCreateReportError: createReportError },
     );
-    assert.equal(mockReportError.mock.calls.length, 0);
+    assertCreateReportErrorCall(
+      createReportError,
+      "Satisfies Versions In Dependency",
+      "path",
+    );
+    assertNoMessages(messages);
   });
 
   describe("expect no error", () => {
@@ -93,7 +102,12 @@ describe(checkSatisfiesVersionsInDependency.name, () => {
           { [depType]: { [depName]: depValue } },
           { customCreateReportError: createReportError },
         );
-        assert.equal(mockReportError.mock.calls.length, 0);
+        assertCreateReportErrorCall(
+          createReportError,
+          "Satisfies Versions In Dependency",
+          "path",
+        );
+        assertNoMessages(messages);
       });
     }
   });
@@ -143,11 +157,16 @@ describe(checkSatisfiesVersionsInDependency.name, () => {
           { [depType]: { [depName]: null } },
           { customCreateReportError: createReportError },
         );
-        assert.equal(mockReportError.mock.calls.length, 1);
-        assert.deepEqual(mockReportError.mock.calls[0].arguments, [
-          errorTitle,
-          errorInfo,
-        ]);
+        assertCreateReportErrorCall(
+          createReportError,
+          "Satisfies Versions In Dependency",
+          "path",
+        );
+        assertSingleMessage(messages, {
+          title: errorTitle,
+          info: errorInfo,
+          dependency: { name: depName },
+        });
       });
     }
   });
@@ -169,7 +188,7 @@ describe(checkSatisfiesVersionsInDependency.name, () => {
         "1.0.0",
         {},
         'Missing "test1" in devDependencies of "test"',
-        '"devDependencies" is missing in "test"',
+        '"devDependencies" is missing',
       ],
       [
         "test2",
@@ -178,7 +197,7 @@ describe(checkSatisfiesVersionsInDependency.name, () => {
         "1.0.0",
         { dependencies: {} },
         'Missing "test2" in devDependencies of "test"',
-        '"devDependencies" is missing in "test"',
+        '"devDependencies" is missing',
       ],
       [
         "test3",
@@ -187,7 +206,7 @@ describe(checkSatisfiesVersionsInDependency.name, () => {
         "^1.0.0",
         { dependencies: { test2: "^1.0.0" } },
         'Missing "test3" in dependencies of "test"',
-        '"test3" is missing in dependencies',
+        '"test3" is missing in dependencies of "test"',
       ],
       [
         "test4",
@@ -216,11 +235,16 @@ describe(checkSatisfiesVersionsInDependency.name, () => {
           { [depType]: { [depName]: depRange } },
           { customCreateReportError: createReportError },
         );
-        assert.equal(mockReportError.mock.calls.length, 1);
-        assert.deepEqual(mockReportError.mock.calls[0].arguments, [
-          errorTitle,
-          errorInfo,
-        ]);
+        assertCreateReportErrorCall(
+          createReportError,
+          "Satisfies Versions In Dependency",
+          "path",
+        );
+        assertSingleMessage(messages, {
+          title: errorTitle,
+          info: errorInfo,
+          dependency: { name: depName },
+        });
       });
     }
   });
