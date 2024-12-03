@@ -79,7 +79,7 @@
     "type-fest": "^4.0.0"
   },
   "devDependencies": {
-    "@pob/commitlint-config": "8.0.0",
+    "@pob/commitlint-config": "8.0.1",
     "@pob/eslint-config": "59.0.0",
     "@pob/eslint-config-typescript": "59.1.2",
     "@pob/root": "14.1.0",
