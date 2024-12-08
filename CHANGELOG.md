@@ -3,6 +3,11 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [8.0.1](https://github.com/christophehurpeau/check-package-dependencies/compare/v8.0.0...v8.0.1) (2024-12-08)
+
+Note: no notable changes
+
+
 ## [8.0.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v7.2.0...v8.0.0) (2024-12-08)
 
 ### ⚠ BREAKING CHANGES
