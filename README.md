@@ -113,9 +113,7 @@ await createCheckPackage(/* '.' */)
 ```
 
 ```js
-"use script";
-
-const { createCheckPackage } = require("check-package-dependencies");
+import { createCheckPackage } from "check-package-dependencies";
 
 await createCheckPackage(/* '.' */)
   // Call .checkExactVersions(), checkDirectPeerDependencies(), checkDirectDuplicateDependencies()
@@ -127,11 +125,7 @@ await createCheckPackage(/* '.' */)
 If you use workspaces:
 
 ```js
-"use script";
-
-const {
-  createCheckPackageWithWorkspaces,
-} = require("check-package-dependencies");
+import { createCheckPackageWithWorkspaces } from "check-package-dependencies";
 
 await createCheckPackageWithWorkspaces()
   // Call .checkExactVersions(), checkDirectPeerDependencies(), checkDirectDuplicateDependencies()
