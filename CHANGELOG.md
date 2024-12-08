@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [8.0.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v7.2.0...v8.0.0) (2024-12-08)
+
+### ⚠ BREAKING CHANGES
+
+* drop node 18 and node 20
+* change message format
+* parse package to get line:column in error messages
+
+### Features
+
+* change message format ([0f64246](https://github.com/christophehurpeau/check-package-dependencies/commit/0f64246cd01cda2c459afee6a81e27f6e87b4f63))
+* parse package to get line:column in error messages ([6c82228](https://github.com/christophehurpeau/check-package-dependencies/commit/6c82228f64afacbff8cf9d04a87f6104b08004da))
+
+### Code Refactoring
+
+* update to node 22 and use fs.glob ([10d509a](https://github.com/christophehurpeau/check-package-dependencies/commit/10d509a72b722f838b55ef672e214024b3798996))
+
 ## [7.2.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v7.1.2...v7.2.0) (2024-07-17)
 
 ### Features
