@@ -77,21 +77,21 @@ describe(checkSatisfiesVersionsInDependency.name, () => {
                 "test1",
                 "devDependencies",
                 { devDependencies: { test1: "1.0.0" } },
-                'Invalid "test1" in devDependencies of "test"',
+                'Invalid "test1" in "devDependencies" of "test"',
                 "it should not be present",
             ],
             [
                 "test2",
                 "dependencies",
                 { dependencies: { test2: "^1.0.0" } },
-                'Invalid "test2" in dependencies of "test"',
+                'Invalid "test2" in "dependencies" of "test"',
                 "it should not be present",
             ],
             [
                 "test3",
                 "resolutions",
                 { resolutions: { test3: "1.x" } },
-                'Invalid "test3" in resolutions of "test"',
+                'Invalid "test3" in "resolutions" of "test"',
                 "it should not be present",
             ],
         ];
@@ -115,7 +115,7 @@ describe(checkSatisfiesVersionsInDependency.name, () => {
                 "devDependencies",
                 "1.0.0",
                 {},
-                'Missing "test1" in devDependencies of "test"',
+                'Missing "test1" in "devDependencies" of "test"',
                 '"devDependencies" is missing',
             ],
             [
@@ -124,7 +124,7 @@ describe(checkSatisfiesVersionsInDependency.name, () => {
                 "devDependencies",
                 "1.0.0",
                 { dependencies: {} },
-                'Missing "test2" in devDependencies of "test"',
+                'Missing "test2" in "devDependencies" of "test"',
                 '"devDependencies" is missing',
             ],
             [
@@ -133,8 +133,8 @@ describe(checkSatisfiesVersionsInDependency.name, () => {
                 "dependencies",
                 "^1.0.0",
                 { dependencies: { test2: "^1.0.0" } },
-                'Missing "test3" in dependencies of "test"',
-                '"test3" is missing in dependencies of "test"',
+                'Missing "test3" in "dependencies" of "test"',
+                '"test3" is missing but should satisfies "^1.0.0"',
             ],
             [
                 "test4",
@@ -142,7 +142,7 @@ describe(checkSatisfiesVersionsInDependency.name, () => {
                 "dependencies",
                 "^1.0.0",
                 { dependencies: { test4: "0.1.0" } },
-                'Invalid "test4" in dependencies of "test"',
+                'Invalid "test4" in "dependencies" of "test"',
                 '"0.1.0" does not satisfies "^1.0.0"',
             ],
         ];
