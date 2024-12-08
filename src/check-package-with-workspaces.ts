@@ -1,6 +1,6 @@
 import fs, { constants } from "node:fs";
 import path from "node:path";
-import type { Except } from "type-fest";
+import type { Except, PackageJson } from "type-fest";
 import type {
   CheckPackageApi,
   CreateCheckPackageOptions,
@@ -16,7 +16,6 @@ import {
   displayMessages,
   reportNotWarnedForMapping,
 } from "./utils/createReportError.ts";
-import type { PackageJson } from "./utils/packageTypes.ts";
 import type { OnlyWarnsForOptionalDependencyMapping } from "./utils/warnForUtils.ts";
 import { createOnlyWarnsForMappingCheck } from "./utils/warnForUtils.ts";
 
@@ -112,6 +111,9 @@ export function createCheckPackageWithWorkspaces(
         internalWorkspacePkgDirectoryPath:
           createCheckPackageOptions.packageDirectoryPath || ".",
       });
+      if (!checkPkg.pkg.name) {
+        throw new Error(`Package "${subPkgDirectoryPath}" is missing name`);
+      }
       return [checkPkg.pkg.name, checkPkg];
     }),
   );
@@ -179,7 +181,7 @@ export function createCheckPackageWithWorkspaces(
         // Root
         checkDuplicateDependencies(
           reportMonorepoDDDError,
-          checkSubPackage.pkg,
+          checkSubPackage.parsedPkg,
           checkSubPackage.isPkgLibrary,
           "devDependencies",
           ["dependencies", "devDependencies"],
@@ -192,7 +194,7 @@ export function createCheckPackageWithWorkspaces(
         previousCheckedWorkspaces.forEach((previousCheckSubPackage) => {
           checkDuplicateDependencies(
             reportMonorepoDDDError,
-            checkSubPackage.pkg,
+            checkSubPackage.parsedPkg,
             checkSubPackage.isPkgLibrary,
             "devDependencies",
             ["dependencies", "devDependencies"],
@@ -203,7 +205,7 @@ export function createCheckPackageWithWorkspaces(
           );
           checkDuplicateDependencies(
             reportMonorepoDDDError,
-            checkSubPackage.pkg,
+            checkSubPackage.parsedPkg,
             checkSubPackage.isPkgLibrary,
             "dependencies",
             ["dependencies", "devDependencies"],
@@ -214,7 +216,7 @@ export function createCheckPackageWithWorkspaces(
           );
           checkDuplicateDependencies(
             reportMonorepoDDDError,
-            checkSubPackage.pkg,
+            checkSubPackage.parsedPkg,
             checkSubPackage.isPkgLibrary,
             "peerDependencies",
             ["peerDependencies"],

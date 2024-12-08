@@ -10,20 +10,21 @@ import { checkNoDependencies } from "./checks/checkNoDependencies.js";
 import { checkResolutionsHasExplanation } from "./checks/checkResolutionsHasExplanation.js";
 import { checkResolutionsVersionsMatch } from "./checks/checkResolutionsVersionsMatch.js";
 import { checkSatisfiesVersions } from "./checks/checkSatisfiesVersions.js";
+import { checkSatisfiesVersionsBetweenDependencies } from "./checks/checkSatisfiesVersionsBetweenDependencies.js";
 import { checkSatisfiesVersionsFromDependency } from "./checks/checkSatisfiesVersionsFromDependency.js";
 import { checkSatisfiesVersionsInDependency } from "./checks/checkSatisfiesVersionsInDependency.js";
 import { createGetDependencyPackageJson } from "./utils/createGetDependencyPackageJson.js";
 import { displayMessages } from "./utils/createReportError.js";
 import { getEntries } from "./utils/object.js";
-import { readPkgJson, writePkgJson } from "./utils/pkgJsonUtils.js";
+import { readAndParsePkgJson, writePkgJson } from "./utils/pkgJsonUtils.js";
 import { createOnlyWarnsForArrayCheck, createOnlyWarnsForMappingCheck, } from "./utils/warnForUtils.js";
 export function createCheckPackage({ packageDirectoryPath = ".", internalWorkspacePkgDirectoryPath, isLibrary = false, } = {}) {
     const pkgDirname = path.resolve(packageDirectoryPath);
     const pkgPath = `${pkgDirname}/package.json`;
     const pkgPathName = `${packageDirectoryPath}/package.json`;
-    const pkg = readPkgJson(pkgPath);
-    const copyPkg = JSON.parse(JSON.stringify(pkg));
-    const isPkgLibrary = typeof isLibrary === "function" ? isLibrary(pkg) : isLibrary;
+    const parsedPkg = readAndParsePkgJson(pkgPath);
+    const copyPkg = JSON.parse(JSON.stringify(parsedPkg));
+    const isPkgLibrary = typeof isLibrary === "function" ? isLibrary(parsedPkg.value) : isLibrary;
     const shouldHaveExactVersions = (depType) => !isPkgLibrary ? true : depType === "devDependencies";
     let tryToAutoFix = false;
     if (process.argv.slice(2).includes("--fix")) {
@@ -32,9 +33,9 @@ export function createCheckPackage({ packageDirectoryPath = ".", internalWorkspa
     const writePackageIfChanged = () => {
         if (!tryToAutoFix)
             return;
-        if (util.isDeepStrictEqual(pkg, copyPkg))
+        if (util.isDeepStrictEqual(parsedPkg.value, copyPkg))
             return;
-        writePkgJson(pkgPath, pkg);
+        writePkgJson(pkgPath, parsedPkg.value);
     };
     const getDependencyPackageJson = createGetDependencyPackageJson({
         pkgDirname,
@@ -78,7 +79,8 @@ export function createCheckPackage({ packageDirectoryPath = ".", internalWorkspa
                 displayMessages();
             }
         },
-        pkg,
+        parsedPkg,
+        pkg: parsedPkg.value,
         pkgDirname,
         pkgPathName,
         isPkgLibrary,
@@ -86,7 +88,7 @@ export function createCheckPackage({ packageDirectoryPath = ".", internalWorkspa
         checkExactVersions({ onlyWarnsFor, internalExactVersionsIgnore, allowRangeVersionsInDependencies = true, } = {}) {
             jobs.push(new Job(this.checkExactVersions.name, async () => {
                 const onlyWarnsForCheck = createOnlyWarnsForArrayCheck("checkExactVersions.onlyWarnsFor", onlyWarnsFor);
-                await checkExactVersions(pkg, pkgPathName, !allowRangeVersionsInDependencies
+                await checkExactVersions(parsedPkg, !allowRangeVersionsInDependencies
                     ? ["dependencies", "devDependencies", "resolutions"]
                     : ["devDependencies", "resolutions"], {
                     onlyWarnsForCheck,
@@ -98,7 +100,7 @@ export function createCheckPackage({ packageDirectoryPath = ".", internalWorkspa
             return this;
         },
         checkResolutionsVersionsMatch() {
-            checkResolutionsVersionsMatch(pkg, pkgPathName, {
+            checkResolutionsVersionsMatch(parsedPkg, {
                 tryToAutoFix,
             });
             return this;
@@ -106,7 +108,7 @@ export function createCheckPackage({ packageDirectoryPath = ".", internalWorkspa
         checkExactDevVersions({ onlyWarnsFor } = {}) {
             jobs.push(new Job(this.checkExactDevVersions.name, async () => {
                 const onlyWarnsForCheck = createOnlyWarnsForArrayCheck("checkExactDevVersions.onlyWarnsFor", onlyWarnsFor);
-                await checkExactVersions(pkg, pkgPathName, ["devDependencies"], {
+                await checkExactVersions(parsedPkg, ["devDependencies"], {
                     onlyWarnsForCheck,
                     tryToAutoFix,
                     getDependencyPackageJson,
@@ -115,7 +117,7 @@ export function createCheckPackage({ packageDirectoryPath = ".", internalWorkspa
             return this;
         },
         checkNoDependencies(type = "dependencies", moveToSuggestion = "devDependencies") {
-            checkNoDependencies(pkg, pkgPathName, type, moveToSuggestion);
+            checkNoDependencies(parsedPkg, type, moveToSuggestion);
             return this;
         },
         checkDirectPeerDependencies({ missingOnlyWarnsFor, invalidOnlyWarnsFor, internalMissingConfigName = "missingOnlyWarnsFor", internalInvalidConfigName = "invalidOnlyWarnsFor", } = {}) {
@@ -124,18 +126,18 @@ export function createCheckPackage({ packageDirectoryPath = ".", internalWorkspa
                 const invalidOnlyWarnsForCheck = internalInvalidConfigName === internalMissingConfigName
                     ? missingOnlyWarnsForCheck
                     : createOnlyWarnsForMappingCheck(internalInvalidConfigName, invalidOnlyWarnsFor);
-                checkDirectPeerDependencies(isPkgLibrary, pkg, pkgPathName, getDependencyPackageJson, missingOnlyWarnsForCheck, invalidOnlyWarnsForCheck);
+                checkDirectPeerDependencies(isPkgLibrary, parsedPkg, getDependencyPackageJson, missingOnlyWarnsForCheck, invalidOnlyWarnsForCheck);
             }));
             return this;
         },
         checkDirectDuplicateDependencies({ onlyWarnsFor, internalConfigName = "onlyWarnsFor", } = {}) {
             jobs.push(new Job(this.checkDirectDuplicateDependencies.name, () => {
-                checkDirectDuplicateDependencies(pkg, pkgPathName, isPkgLibrary, "dependencies", getDependencyPackageJson, createOnlyWarnsForMappingCheck(internalConfigName, onlyWarnsFor));
+                checkDirectDuplicateDependencies(parsedPkg, isPkgLibrary, "dependencies", getDependencyPackageJson, createOnlyWarnsForMappingCheck(internalConfigName, onlyWarnsFor));
             }));
             return this;
         },
         checkResolutionsHasExplanation(checkMessage = (depKey, message) => undefined) {
-            checkResolutionsHasExplanation(pkg, pkgPathName, checkMessage, getDependencyPackageJson);
+            checkResolutionsHasExplanation(parsedPkg, checkMessage, getDependencyPackageJson);
             return this;
         },
         checkRecommended({ onlyWarnsForInPackage, onlyWarnsForInDependencies, allowRangeVersionsInDependencies = isPkgLibrary, internalExactVersionsIgnore, checkResolutionMessage, } = {}) {
@@ -189,13 +191,13 @@ export function createCheckPackage({ packageDirectoryPath = ".", internalWorkspa
             jobs.push(new Job(this.checkIdenticalVersionsThanDependency.name, () => {
                 const depPkg = getDependencyPackageJson(depName);
                 if (resolutions) {
-                    checkIdenticalVersionsThanDependency(pkg, pkgPathName, "resolutions", resolutions, depPkg, depPkg.dependencies);
+                    checkIdenticalVersionsThanDependency(parsedPkg, "resolutions", resolutions, depPkg, depPkg.dependencies);
                 }
                 if (dependencies) {
-                    checkIdenticalVersionsThanDependency(pkg, pkgPathName, "dependencies", dependencies, depPkg, depPkg.dependencies);
+                    checkIdenticalVersionsThanDependency(parsedPkg, "dependencies", dependencies, depPkg, depPkg.dependencies);
                 }
                 if (devDependencies) {
-                    checkIdenticalVersionsThanDependency(pkg, pkgPathName, "devDependencies", devDependencies, depPkg, depPkg.dependencies);
+                    checkIdenticalVersionsThanDependency(parsedPkg, "devDependencies", devDependencies, depPkg, depPkg.dependencies);
                 }
             }));
             return this;
@@ -204,20 +206,20 @@ export function createCheckPackage({ packageDirectoryPath = ".", internalWorkspa
             jobs.push(new Job(this.checkSatisfiesVersionsFromDependency.name, () => {
                 const depPkg = getDependencyPackageJson(depName);
                 if (resolutions) {
-                    checkIdenticalVersionsThanDependency(pkg, pkgPathName, "resolutions", resolutions, depPkg, depPkg.devDependencies);
+                    checkIdenticalVersionsThanDependency(parsedPkg, "resolutions", resolutions, depPkg, depPkg.devDependencies);
                 }
                 if (dependencies) {
-                    checkIdenticalVersionsThanDependency(pkg, pkgPathName, "dependencies", dependencies, depPkg, depPkg.devDependencies);
+                    checkIdenticalVersionsThanDependency(parsedPkg, "dependencies", dependencies, depPkg, depPkg.devDependencies);
                 }
                 if (devDependencies) {
-                    checkIdenticalVersionsThanDependency(pkg, pkgPathName, "devDependencies", devDependencies, depPkg, depPkg.devDependencies);
+                    checkIdenticalVersionsThanDependency(parsedPkg, "devDependencies", devDependencies, depPkg, depPkg.devDependencies);
                 }
             }));
             return this;
         },
         checkSatisfiesVersions(dependencies) {
             Object.entries(dependencies).forEach(([dependencyType, dependenciesRanges]) => {
-                checkSatisfiesVersions(pkg, pkgPathName, dependencyType, dependenciesRanges);
+                checkSatisfiesVersions(parsedPkg, dependencyType, dependenciesRanges);
             });
             return this;
         },
@@ -225,13 +227,13 @@ export function createCheckPackage({ packageDirectoryPath = ".", internalWorkspa
             jobs.push(new Job(this.checkSatisfiesVersionsFromDependency.name, () => {
                 const depPkg = getDependencyPackageJson(depName);
                 if (resolutions) {
-                    checkSatisfiesVersionsFromDependency(pkg, pkgPathName, "resolutions", resolutions, depPkg, "dependencies", { tryToAutoFix, shouldHaveExactVersions });
+                    checkSatisfiesVersionsFromDependency(parsedPkg, "resolutions", resolutions, depPkg, "dependencies", { tryToAutoFix, shouldHaveExactVersions });
                 }
                 if (dependencies) {
-                    checkSatisfiesVersionsFromDependency(pkg, pkgPathName, "dependencies", dependencies, depPkg, "dependencies", { tryToAutoFix, shouldHaveExactVersions });
+                    checkSatisfiesVersionsFromDependency(parsedPkg, "dependencies", dependencies, depPkg, "dependencies", { tryToAutoFix, shouldHaveExactVersions });
                 }
                 if (devDependencies) {
-                    checkSatisfiesVersionsFromDependency(pkg, pkgPathName, "devDependencies", devDependencies, depPkg, "dependencies", { tryToAutoFix, shouldHaveExactVersions });
+                    checkSatisfiesVersionsFromDependency(parsedPkg, "devDependencies", devDependencies, depPkg, "dependencies", { tryToAutoFix, shouldHaveExactVersions });
                 }
             }));
             return this;
@@ -240,26 +242,26 @@ export function createCheckPackage({ packageDirectoryPath = ".", internalWorkspa
             jobs.push(new Job(this.checkSatisfiesVersionsInDevDependenciesOfDependency.name, () => {
                 const depPkg = getDependencyPackageJson(depName);
                 if (resolutions) {
-                    checkSatisfiesVersionsFromDependency(pkg, pkgPathName, "resolutions", resolutions, depPkg, "devDependencies", { tryToAutoFix, shouldHaveExactVersions });
+                    checkSatisfiesVersionsFromDependency(parsedPkg, "resolutions", resolutions, depPkg, "devDependencies", { tryToAutoFix, shouldHaveExactVersions });
                 }
                 if (dependencies) {
-                    checkSatisfiesVersionsFromDependency(pkg, pkgPathName, "dependencies", dependencies, depPkg, "devDependencies", { tryToAutoFix, shouldHaveExactVersions });
+                    checkSatisfiesVersionsFromDependency(parsedPkg, "dependencies", dependencies, depPkg, "devDependencies", { tryToAutoFix, shouldHaveExactVersions });
                 }
                 if (devDependencies) {
-                    checkSatisfiesVersionsFromDependency(pkg, pkgPathName, "devDependencies", devDependencies, depPkg, "devDependencies", { tryToAutoFix, shouldHaveExactVersions });
+                    checkSatisfiesVersionsFromDependency(parsedPkg, "devDependencies", devDependencies, depPkg, "devDependencies", { tryToAutoFix, shouldHaveExactVersions });
                 }
             }));
             return this;
         },
         checkIdenticalVersions({ resolutions, dependencies, devDependencies }) {
             if (resolutions) {
-                checkIdenticalVersions(pkg, pkgPathName, "resolutions", resolutions);
+                checkIdenticalVersions(parsedPkg, "resolutions", resolutions);
             }
             if (dependencies) {
-                checkIdenticalVersions(pkg, pkgPathName, "dependencies", dependencies);
+                checkIdenticalVersions(parsedPkg, "dependencies", dependencies);
             }
             if (devDependencies) {
-                checkIdenticalVersions(pkg, pkgPathName, "devDependencies", devDependencies);
+                checkIdenticalVersions(parsedPkg, "devDependencies", devDependencies);
             }
             return this;
         },
@@ -270,10 +272,10 @@ export function createCheckPackage({ packageDirectoryPath = ".", internalWorkspa
                     getDependencyPackageJson(depName2),
                 ]);
                 if (dependencies) {
-                    checkSatisfiesVersionsFromDependency(depPkg2, pkgPathName, "dependencies", dependencies, depPkg1, "dependencies", { tryToAutoFix, shouldHaveExactVersions });
+                    checkSatisfiesVersionsBetweenDependencies(depName2, depPkg2, "dependencies", dependencies, depPkg1, "dependencies", { tryToAutoFix, shouldHaveExactVersions });
                 }
                 if (devDependencies) {
-                    checkSatisfiesVersionsFromDependency(depPkg2, pkgPathName, "devDependencies", devDependencies, depPkg1, "dependencies", { tryToAutoFix, shouldHaveExactVersions });
+                    checkSatisfiesVersionsBetweenDependencies(depName2, depPkg2, "devDependencies", devDependencies, depPkg1, "dependencies", { tryToAutoFix, shouldHaveExactVersions });
                 }
             }));
             return this;
@@ -287,13 +289,17 @@ export function createCheckPackage({ packageDirectoryPath = ".", internalWorkspa
         },
         checkMinRangeDependenciesSatisfiesDevDependencies() {
             jobs.push(new Job(this.checkSatisfiesVersionsInDependency.name, () => {
-                checkMinRangeSatisfies(pkgPathName, pkg, "dependencies", "devDependencies", { tryToAutoFix });
+                checkMinRangeSatisfies(parsedPkg, "dependencies", "devDependencies", {
+                    tryToAutoFix,
+                });
             }));
             return this;
         },
         checkMinRangePeerDependenciesSatisfiesDependencies() {
             jobs.push(new Job(this.checkSatisfiesVersionsInDependency.name, () => {
-                checkMinRangeSatisfies(pkgPathName, pkg, "peerDependencies", "dependencies", { tryToAutoFix });
+                checkMinRangeSatisfies(parsedPkg, "peerDependencies", "dependencies", {
+                    tryToAutoFix,
+                });
             }));
             return this;
         },

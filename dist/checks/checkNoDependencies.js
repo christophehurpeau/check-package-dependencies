@@ -1,12 +1,12 @@
 import { createReportError } from "../utils/createReportError.js";
-export function checkNoDependencies(pkg, pkgPath, type = "dependencies", moveToSuggestion = "devDependencies", customCreateReportError = createReportError) {
+export function checkNoDependencies(pkg, type = "dependencies", moveToSuggestion = "devDependencies", customCreateReportError = createReportError) {
     const pkgDependencies = pkg[type];
     if (!pkgDependencies)
         return;
-    const reportError = customCreateReportError("No dependencies", pkgPath);
+    const reportError = customCreateReportError("No dependencies", pkg.path);
     reportError({
-        title: `Unexpected ${type}`,
-        info: `you should move them in ${moveToSuggestion}`,
+        errorMessage: `Unexpected ${type}`,
+        errorDetails: `you should move them in ${moveToSuggestion}`,
         autoFixable: false,
     });
 }

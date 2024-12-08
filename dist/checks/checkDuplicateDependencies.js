@@ -4,7 +4,7 @@ export function checkDuplicateDependencies(reportError, pkg, isPkgLibrary, depTy
     if (!dependencies)
         return;
     const searchInExisting = searchIn.filter((type) => pkg[type]);
-    for (const [depKey, range] of Object.entries(dependencies)) {
+    for (const [depKey, depRange] of Object.entries(dependencies)) {
         const versionsIn = searchInExisting.filter((type) => pkg[type][depKey]);
         let allowDuplicated = false;
         if (versionsIn.length === 2 &&
@@ -13,10 +13,11 @@ export function checkDuplicateDependencies(reportError, pkg, isPkgLibrary, depTy
             versionsIn.includes("devDependencies")) {
             const depVersion = pkg.dependencies[depKey];
             const devDepVersion = pkg.devDependencies[depKey];
-            if (depVersion && depVersion === devDepVersion) {
+            if (depVersion && depVersion.value === devDepVersion?.value) {
                 reportError({
-                    title: `Invalid "${depKey}" has same version in dependencies and devDependencies`,
-                    info: "please place it only in dependencies or use range in dependencies",
+                    errorMessage: `Invalid "${depKey}" has same version in dependencies and devDependencies`,
+                    errorDetails: "please place it only in dependencies or use range in dependencies",
+                    dependency: depVersion,
                 });
                 continue;
             }
@@ -25,24 +26,34 @@ export function checkDuplicateDependencies(reportError, pkg, isPkgLibrary, depTy
         if (versionsIn.length > 2 ||
             (versionsIn.length === 2 && !allowDuplicated)) {
             reportError({
-                title: `Invalid "${depKey}" present in ${versionsIn.join(" and ")}`,
-                info: "please place it only in dependencies",
+                errorMessage: `Invalid "${depKey}" present in ${versionsIn.join(" and ")}`,
+                errorDetails: "please place it only in dependencies",
             });
         }
         else {
             const versions = versionsIn.map((type) => pkg[type][depKey]);
             versions.forEach((version, index) => {
-                if (version.startsWith("file:") || range.startsWith("file:"))
+                if (!version)
                     return;
-                // https://yarnpkg.com/features/workspaces#workspace-ranges-workspace
-                if (version.startsWith("workspace:") ||
-                    range.startsWith("workspace:")) {
+                if (!version)
+                    return;
+                if (!version)
+                    return;
+                if (!version)
+                    return;
+                const versionValue = version.value;
+                if (versionValue.startsWith("file:") || depRange.startsWith("file:")) {
                     return;
                 }
-                if (semver.satisfies(version, range, {
+                // https://yarnpkg.com/features/workspaces#workspace-ranges-workspace
+                if (versionValue.startsWith("workspace:") ||
+                    depRange.startsWith("workspace:")) {
+                    return;
+                }
+                if (semver.satisfies(versionValue, depRange, {
                     includePrerelease: true,
                 }) ||
-                    semver.intersects(version, range, {
+                    semver.intersects(versionValue, depRange, {
                         includePrerelease: true,
                     })) {
                     return;
@@ -53,10 +64,10 @@ export function checkDuplicateDependencies(reportError, pkg, isPkgLibrary, depTy
                 }
                 const versionInType = versionsIn[index];
                 reportError({
-                    title: "Invalid duplicate dependency",
-                    info: `"${versions[0]}" should satisfies "${range}" from ${depPkg.name} in ${depType}`,
+                    errorMessage: "Invalid duplicate dependency",
+                    errorDetails: `"${versions[0].value}" should satisfies "${depRange}" from ${depPkg.name || ""} in ${depType}`,
                     onlyWarns: onlyWarnsForCheck.shouldWarnsFor(depKey),
-                    dependency: { name: depKey, origin: versionInType },
+                    dependency: pkg[versionInType][depKey],
                 });
             });
         }

@@ -1,11 +1,16 @@
 import semver from "semver";
+import { fromDependency } from "../utils/createReportError.ts";
 import type { ReportError } from "../utils/createReportError.ts";
-import type { DependencyTypes, PackageJson } from "../utils/packageTypes.ts";
+import type {
+  DependencyTypes,
+  PackageJson,
+  ParsedPackageJson,
+} from "../utils/packageTypes.ts";
 import { getRealVersion } from "../utils/semverUtils.ts";
 import type { OnlyWarnsForCheck } from "../utils/warnForUtils.ts";
 
 export function checkPeerDependencies(
-  pkg: PackageJson,
+  pkg: ParsedPackageJson,
   reportError: ReportError,
   type: DependencyTypes,
   allowedPeerIn: DependencyTypes[],
@@ -56,17 +61,17 @@ export function checkPeerDependencies(
       }
 
       reportError({
-        title: `Missing "${peerDepName}" peer dependency from "${depPkg.name}" in ${type}`,
-        info: `it should satisfies "${range}" and be in ${allowedPeerIn.join(" or ")}${additionalDetails}`,
+        errorMessage: `Missing "${peerDepName}" peer dependency ${fromDependency(depPkg, type)}`,
+        errorDetails: `it should satisfies "${range}" and be in ${allowedPeerIn.join(" or ")}${additionalDetails}`,
         dependency: { name: peerDepName },
         onlyWarns: missingOnlyWarnsForCheck.shouldWarnsFor(peerDepName),
       });
     } else {
       const versions = versionsIn.map(
-        (versionsInType) => pkg[versionsInType]![peerDepName],
+        (versionsInType) => pkg[versionsInType]![peerDepName]!,
       );
 
-      versions.forEach((versionValue, index) => {
+      versions.forEach(({ value: versionValue }, index) => {
         const version = getRealVersion(versionValue);
 
         if (version === "*") {
@@ -81,11 +86,11 @@ export function checkPeerDependencies(
           })
         ) {
           reportError({
-            title: "Invalid peer dependency version",
-            info: `"${version}" should satisfies "${range}" from "${depPkg.name}" in ${type}`,
+            errorMessage: "Invalid peer dependency version",
+            errorDetails: `"${version}" should satisfies "${range}" ${fromDependency(depPkg, type)}`,
             dependency: {
               name: peerDepName,
-              origin: allowedPeerInExisting[index],
+              fieldName: allowedPeerInExisting[index],
             },
             onlyWarns: invalidOnlyWarnsForCheck.shouldWarnsFor(peerDepName),
           });

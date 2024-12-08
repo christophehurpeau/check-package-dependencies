@@ -1,6 +1,6 @@
 import type { GetDependencyPackageJson } from "../utils/createGetDependencyPackageJson.ts";
 import { createReportError } from "../utils/createReportError.ts";
-import type { PackageJson } from "../utils/packageTypes.ts";
+import type { ParsedPackageJson } from "../utils/packageTypes.ts";
 
 export type CheckResolutionMessage = (
   depKey: string,
@@ -11,8 +11,7 @@ export type CheckResolutionMessage = (
 ) => string | undefined;
 
 export function checkResolutionsHasExplanation(
-  pkg: PackageJson,
-  pkgPathName: string,
+  pkg: ParsedPackageJson,
   checkMessage: CheckResolutionMessage,
   getDependencyPackageJson: GetDependencyPackageJson,
   customCreateReportError = createReportError,
@@ -21,30 +20,32 @@ export function checkResolutionsHasExplanation(
   const pkgResolutionsExplained = pkg.resolutionsExplained || {};
   const reportError = customCreateReportError(
     "Resolutions has explanation",
-    pkgPathName,
+    pkg.path,
   );
 
   Object.keys(pkgResolutions).forEach((depKey) => {
     if (!pkgResolutionsExplained[depKey]) {
       reportError({
-        title: `Missing "${depKey}" in resolutionsExplained`,
+        errorMessage: `Missing "${depKey}" in resolutionsExplained`,
       });
     }
   });
 
-  Object.keys(pkgResolutionsExplained).forEach((depKey) => {
+  Object.entries(pkgResolutionsExplained).forEach(([depKey, depValue]) => {
+    if (!depValue) return;
     if (!pkgResolutions[depKey]) {
       reportError({
-        title: `Found "${depKey}" in resolutionsExplained but not in resolutions`,
+        errorMessage: `Found "${depKey}" in resolutionsExplained but not in resolutions`,
       });
     } else {
-      const error = checkMessage(depKey, pkgResolutionsExplained[depKey], {
+      const error = checkMessage(depKey, depValue.value, {
         getDependencyPackageJson,
       });
       if (error) {
         reportError({
-          title: `Invalid message for "${depKey}" in resolutionsExplained`,
-          info: error,
+          errorMessage: "Invalid message",
+          dependency: pkgResolutionsExplained[depKey],
+          errorDetails: error,
         });
       }
     }

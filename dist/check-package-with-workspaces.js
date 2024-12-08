@@ -36,6 +36,9 @@ export function createCheckPackageWithWorkspaces(createCheckPackageOptions = {})
             packageDirectoryPath: subPkgDirectoryPath,
             internalWorkspacePkgDirectoryPath: createCheckPackageOptions.packageDirectoryPath || ".",
         });
+        if (!checkPkg.pkg.name) {
+            throw new Error(`Package "${subPkgDirectoryPath}" is missing name`);
+        }
         return [checkPkg.pkg.name, checkPkg];
     }));
     return {
@@ -77,12 +80,12 @@ export function createCheckPackageWithWorkspaces(createCheckPackageOptions = {})
                 });
                 const reportMonorepoDDDError = createReportError("Monorepo Direct Duplicate Dependencies", checkSubPackage.pkgPathName);
                 // Root
-                checkDuplicateDependencies(reportMonorepoDDDError, checkSubPackage.pkg, checkSubPackage.isPkgLibrary, "devDependencies", ["dependencies", "devDependencies"], pkg, monorepoDirectDuplicateDependenciesOnlyWarnsForCheck.createFor(checkSubPackage.pkg.name));
+                checkDuplicateDependencies(reportMonorepoDDDError, checkSubPackage.parsedPkg, checkSubPackage.isPkgLibrary, "devDependencies", ["dependencies", "devDependencies"], pkg, monorepoDirectDuplicateDependenciesOnlyWarnsForCheck.createFor(checkSubPackage.pkg.name));
                 // previous packages
                 previousCheckedWorkspaces.forEach((previousCheckSubPackage) => {
-                    checkDuplicateDependencies(reportMonorepoDDDError, checkSubPackage.pkg, checkSubPackage.isPkgLibrary, "devDependencies", ["dependencies", "devDependencies"], previousCheckSubPackage.pkg, monorepoDirectDuplicateDependenciesOnlyWarnsForCheck.createFor(checkSubPackage.pkg.name));
-                    checkDuplicateDependencies(reportMonorepoDDDError, checkSubPackage.pkg, checkSubPackage.isPkgLibrary, "dependencies", ["dependencies", "devDependencies"], previousCheckSubPackage.pkg, monorepoDirectDuplicateDependenciesOnlyWarnsForCheck.createFor(checkSubPackage.pkg.name));
-                    checkDuplicateDependencies(reportMonorepoDDDError, checkSubPackage.pkg, checkSubPackage.isPkgLibrary, "peerDependencies", ["peerDependencies"], previousCheckSubPackage.pkg, monorepoDirectDuplicateDependenciesOnlyWarnsForCheck.createFor(checkSubPackage.pkg.name));
+                    checkDuplicateDependencies(reportMonorepoDDDError, checkSubPackage.parsedPkg, checkSubPackage.isPkgLibrary, "devDependencies", ["dependencies", "devDependencies"], previousCheckSubPackage.pkg, monorepoDirectDuplicateDependenciesOnlyWarnsForCheck.createFor(checkSubPackage.pkg.name));
+                    checkDuplicateDependencies(reportMonorepoDDDError, checkSubPackage.parsedPkg, checkSubPackage.isPkgLibrary, "dependencies", ["dependencies", "devDependencies"], previousCheckSubPackage.pkg, monorepoDirectDuplicateDependenciesOnlyWarnsForCheck.createFor(checkSubPackage.pkg.name));
+                    checkDuplicateDependencies(reportMonorepoDDDError, checkSubPackage.parsedPkg, checkSubPackage.isPkgLibrary, "peerDependencies", ["peerDependencies"], previousCheckSubPackage.pkg, monorepoDirectDuplicateDependenciesOnlyWarnsForCheck.createFor(checkSubPackage.pkg.name));
                 });
                 previousCheckedWorkspaces.set(id, checkSubPackage);
             });

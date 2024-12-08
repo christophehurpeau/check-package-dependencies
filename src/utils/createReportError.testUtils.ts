@@ -1,34 +1,37 @@
 import assert from "node:assert/strict";
 import { beforeEach, mock } from "node:test";
 import type { Mock } from "node:test";
+import type { Except } from "type-fest";
 import type { ReportError, ReportErrorMessage } from "./createReportError.ts";
 
 export interface CollectedMessages {
   path: string;
-  title: string;
-  messages: ReportErrorMessage[];
+  ruleName: string;
+  messages: Except<ReportErrorMessage, "ruleName">[];
 }
 
 export interface MockReportErrorResult {
   mockReportError: Mock<ReportError>;
-  createReportError: Mock<(title: string, pkgPathName: string) => ReportError>;
+  createReportError: Mock<
+    (ruleName: string, pkgPathName: string) => ReportError
+  >;
   messages: CollectedMessages[];
 }
 
 export function createMockReportError(
   path = "test/path",
-  title = "Test Title",
+  ruleName = "Test Rule Name",
 ): MockReportErrorResult {
   const messages: CollectedMessages[] = [];
 
-  const reportError = mock.fn((message: ReportErrorMessage) => {
+  const reportError = mock.fn<ReportError>((message) => {
     const currentPath = messages.find((m) => m.path === path);
     if (currentPath) {
       currentPath.messages.push(message);
     } else {
       messages.push({
         path,
-        title,
+        ruleName,
         messages: [message],
       });
     }
@@ -53,29 +56,69 @@ export function assertNoMessages(messages: CollectedMessages[]): void {
 
 export function assertSingleMessage(
   messages: CollectedMessages[],
-  expected: ReportErrorMessage,
+  expected: Except<ReportErrorMessage, "ruleName">,
 ): void {
   assert.equal(messages.length, 1);
   assert.equal(messages[0].messages.length, 1);
-  assert.deepEqual(messages[0].messages[0], expected);
+  assert.deepEqual(
+    messages[0].messages[0],
+    !expected.dependency?.value
+      ? expected
+      : {
+          ...expected,
+          dependency: {
+            changeValue: messages[0].messages[0]?.dependency?.changeValue,
+            line: messages[0].messages[0]?.dependency?.line,
+            column: messages[0].messages[0]?.dependency?.column,
+            ...expected.dependency,
+          },
+        },
+  );
 }
 
 export function assertSeveralMessages(
   messages: CollectedMessages[],
-  expected: ReportErrorMessage[],
+  expected: Except<ReportErrorMessage, "ruleName">[],
 ): void {
   assert.equal(messages.length, 1);
-  assert.deepEqual(messages[0].messages, expected);
+  assert.deepEqual(
+    messages[0].messages,
+    expected.map((e, i) =>
+      !e.dependency?.value
+        ? e
+        : {
+            ...e,
+            dependency: {
+              changeValue: messages[0].messages[i].dependency?.changeValue,
+              line: messages[0].messages[i].dependency?.line,
+              column: messages[0].messages[i].dependency?.column,
+              ...e.dependency,
+            },
+          },
+    ),
+  );
 }
 
 export function assertCreateReportErrorCall(
-  createReportError: Mock<(title: string, pkgPathName: string) => ReportError>,
-  expectedTitle: string,
-  expectedPath: string,
+  createReportError: Mock<
+    (ruleName: string, pkgPathName: string) => ReportError
+  >,
+  expectedRuleName: string,
+  expectedPath = "unknown_path",
 ): void {
   assert.equal(createReportError.mock.calls.length, 1);
   assert.deepEqual(createReportError.mock.calls[0].arguments, [
-    expectedTitle,
+    expectedRuleName,
     expectedPath,
   ]);
+}
+
+export function assertDeepEqualIgnoringPrototypes(
+  actual: unknown,
+  expected: unknown,
+): void {
+  assert.deepEqual(
+    JSON.parse(JSON.stringify(actual)),
+    JSON.parse(JSON.stringify(expected)),
+  );
 }

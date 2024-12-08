@@ -100,8 +100,8 @@ describe(checkSatisfiesVersionsInDependency.name, () => {
                 checkSatisfiesVersionsInDependency("path", { name: "test", ...pkgContent }, { [depType]: { [depName]: null } }, { customCreateReportError: createReportError });
                 assertCreateReportErrorCall(createReportError, "Satisfies Versions In Dependency", "path");
                 assertSingleMessage(messages, {
-                    title: errorTitle,
-                    info: errorInfo,
+                    errorMessage: errorTitle,
+                    errorDetails: errorInfo,
                     dependency: { name: depName },
                 });
             });
@@ -151,8 +151,8 @@ describe(checkSatisfiesVersionsInDependency.name, () => {
                 checkSatisfiesVersionsInDependency("path", { name: "test", ...pkgContent }, { [depType]: { [depName]: depRange } }, { customCreateReportError: createReportError });
                 assertCreateReportErrorCall(createReportError, "Satisfies Versions In Dependency", "path");
                 assertSingleMessage(messages, {
-                    title: errorTitle,
-                    info: errorInfo,
+                    errorMessage: errorTitle,
+                    errorDetails: errorInfo,
                     dependency: { name: depName },
                 });
             });

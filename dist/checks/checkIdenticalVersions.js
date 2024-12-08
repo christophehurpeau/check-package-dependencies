@@ -1,14 +1,14 @@
 import { createReportError } from "../utils/createReportError.js";
 import { getKeys } from "../utils/object.js";
-export function checkIdenticalVersions(pkg, pkgPathName, type, deps, onlyWarnsForCheck, customCreateReportError = createReportError) {
+export function checkIdenticalVersions(pkg, type, deps, onlyWarnsForCheck, customCreateReportError = createReportError) {
     const pkgDependencies = pkg[type] || {};
-    const reportError = customCreateReportError("Identical Versions", pkgPathName);
+    const reportError = customCreateReportError("Identical Versions", pkg.path);
     getKeys(deps).forEach((depKey) => {
-        const version = pkgDependencies[depKey];
+        const version = pkgDependencies[depKey]?.value;
         if (!version) {
             reportError({
-                title: `Unexpected missing ${type}`,
-                info: `missing "${depKey}"`,
+                errorMessage: `Unexpected missing ${type}`,
+                errorDetails: `missing "${depKey}"`,
             });
             return;
         }
@@ -19,20 +19,22 @@ export function checkIdenticalVersions(pkg, pkgPathName, type, deps, onlyWarnsFo
         getKeys(depConfig).forEach((depKeyType) => {
             const pkgDependenciesType = pkg[depKeyType] || {};
             depConfig[depKeyType]?.forEach((depKeyIdentical) => {
-                const value = pkgDependenciesType[depKeyIdentical];
+                const depValue = pkgDependenciesType[depKeyIdentical];
+                const value = depValue?.value;
                 if (!value) {
                     reportError({
-                        title: `Missing "${depKeyIdentical}"`,
-                        info: `it should be "${version}"`,
-                        dependency: { name: depKey, origin: depKeyType },
+                        errorMessage: `Missing "${depKeyIdentical}" in "${depKeyType}"`,
+                        errorDetails: `it should be "${version}" identical to "${depKey}" in "${type}"`,
+                        dependency: { name: depKeyIdentical, fieldName: depKeyType },
                         onlyWarns: onlyWarnsForCheck?.shouldWarnsFor(depKey),
                     });
+                    return;
                 }
                 if (value !== version) {
                     reportError({
-                        title: `Invalid "${depKeyIdentical}"`,
-                        info: `expecting "${value}" to be "${version}"`,
-                        dependency: { name: depKey, origin: depKeyType },
+                        errorMessage: `Invalid "${depKeyIdentical}"`,
+                        errorDetails: `expecting "${value}" to be "${version}" identical to "${depKey}" in "${type}"`,
+                        dependency: depValue,
                         onlyWarns: onlyWarnsForCheck?.shouldWarnsFor(depKey),
                     });
                 }

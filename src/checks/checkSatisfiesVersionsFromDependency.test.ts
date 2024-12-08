@@ -1,12 +1,13 @@
-import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
   assertCreateReportErrorCall,
+  assertDeepEqualIgnoringPrototypes,
   assertNoMessages,
   assertSingleMessage,
   createMockReportError,
 } from "../utils/createReportError.testUtils.ts";
 import type { PackageJson } from "../utils/packageTypes.ts";
+import { parsePkgValue } from "../utils/pkgJsonUtils.ts";
 import { checkSatisfiesVersionsFromDependency } from "./checkSatisfiesVersionsFromDependency.ts";
 
 type DependencyTypes =
@@ -20,8 +21,7 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
 
   it("should return no error when no keys", () => {
     checkSatisfiesVersionsFromDependency(
-      { name: "test" },
-      "path",
+      parsePkgValue({ name: "test" }),
       "dependencies",
       [],
       { name: "depTest", dependencies: {} },
@@ -34,7 +34,6 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
     assertCreateReportErrorCall(
       createReportError,
       "Satisfies Versions From Dependency",
-      "path",
     );
     assertNoMessages(messages);
   });
@@ -76,16 +75,15 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
     ] of testCases) {
       it(`should return no error when ${depName} in ${depTypeInDep} ${description}`, () => {
         const depTypeInPkg: DependencyTypes = "devDependencies";
-        const pkg: PackageJson = {
+        const parsedPkg = parsePkgValue({
           name: "test",
           ...(depValueInPkg
             ? { [depTypeInPkg]: { [depName]: depValueInPkg } }
             : {}),
-        };
+        });
 
         checkSatisfiesVersionsFromDependency(
-          pkg,
-          "path",
+          parsedPkg,
           depTypeInPkg,
           [depName],
           {
@@ -101,7 +99,6 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
         assertCreateReportErrorCall(
           createReportError,
           "Satisfies Versions From Dependency",
-          "path",
         );
         assertNoMessages(messages);
       });
@@ -112,8 +109,8 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
     const fixTestCases: [
       description: string,
       depValue: string,
-      pkgContent: Omit<PackageJson, "name">,
-      expectedFix: Omit<PackageJson, "name">,
+      pkgContent: PackageJson,
+      expectedFix: PackageJson,
       shouldHaveExactVersions: boolean,
     ][] = [
       [
@@ -190,14 +187,10 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
     ] of fixTestCases) {
       it(`should fix when ${description}`, () => {
         const depTypeInPkg: DependencyTypes = "devDependencies";
-        const pkg: PackageJson = {
-          name: "test",
-          ...pkgContent,
-        };
+        const parsedPkg = parsePkgValue({ name: "test", ...pkgContent });
 
         checkSatisfiesVersionsFromDependency(
-          pkg,
-          "path",
+          parsedPkg,
           depTypeInPkg,
           ["expectedDep"],
           {
@@ -212,7 +205,7 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
           },
         );
 
-        assert.deepEqual(pkg, {
+        assertDeepEqualIgnoringPrototypes(parsedPkg.value, {
           name: "test",
           ...expectedFix,
         });
@@ -225,10 +218,11 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
       depName: string,
       depTypeInDep: string,
       description: string,
-      depPkgContent: Omit<PackageJson, "name">,
-      pkgContent: Omit<PackageJson, "name">,
+      depPkgContent: PackageJson,
+      pkgContent: PackageJson,
       errorTitle: string,
       errorInfo: string,
+      issueIn?: DependencyTypes,
       autoFixable?: boolean,
     ][] = [
       [
@@ -239,6 +233,7 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
         {},
         "Missing dependency",
         'should satisfies "1.0.0" from "test-dep" in "devDependencies"',
+        "devDependencies",
         true,
       ],
       [
@@ -249,6 +244,7 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
         { devDependencies: {} },
         "Missing dependency",
         'should satisfies "1.0.0" from "test-dep" in "devDependencies"',
+        "devDependencies",
         true,
       ],
       [
@@ -268,6 +264,7 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
         { devDependencies: { test4: "1.0.0" } },
         "Invalid",
         '"1.0.0" should satisfies "0.1.0" from "test-dep" in "devDependencies"',
+        "devDependencies",
         true,
       ],
     ];
@@ -280,24 +277,21 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
       pkgContent,
       errorTitle,
       errorInfo,
+      issueIn,
       autoFixable,
     ] of testCases) {
       it(`should error when ${depName} is ${description} in ${depTypeInDep}`, () => {
         const depTypeInPkg: DependencyTypes = "devDependencies";
-        const pkg: PackageJson = {
-          ...pkgContent,
-          name: "test",
-        };
+        const parsedPkg = parsePkgValue({ ...pkgContent, name: "test" });
 
         checkSatisfiesVersionsFromDependency(
-          pkg,
-          "path",
+          parsedPkg,
           depTypeInPkg,
           [depName],
           {
             ...depPkgContent,
             name: "test-dep",
-          },
+          } as PackageJson,
           depTypeInDep as DependencyTypes,
           {
             customCreateReportError: createReportError,
@@ -307,12 +301,23 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
         assertCreateReportErrorCall(
           createReportError,
           "Satisfies Versions From Dependency",
-          "path",
         );
         assertSingleMessage(messages, {
-          title: errorTitle,
-          info: errorInfo,
-          dependency: { name: depName, origin: depTypeInPkg },
+          errorMessage: errorTitle,
+          errorDetails: errorInfo,
+          ...(issueIn
+            ? {
+                dependency: {
+                  name: depName,
+                  fieldName: issueIn,
+                  ...(pkgContent[issueIn]?.[depName]
+                    ? {
+                        value: pkgContent[issueIn][depName],
+                      }
+                    : {}),
+                },
+              }
+            : {}),
           onlyWarns: undefined,
           autoFixable,
         });

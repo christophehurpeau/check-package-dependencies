@@ -22,37 +22,46 @@ describe("logMessage", () => {
 
   test("it should display error with no info", () => {
     const errorFn = mock.method(console, "error", () => {});
-    logMessage({ title: "test" });
-    assert.equal(errorFn.mock.calls.length, 1);
+    logMessage({ ruleName: "rule-test", errorMessage: "test" });
     assert.deepEqual(errorFn.mock.calls[0].arguments, [
-      "\u001B[31m❌ test\u001B[39m",
+      "  0:0  \u001B[31merror\u001B[39m  \u001B[31mtest\u001B[39m  \u001B[34mrule-test\u001B[39m",
     ]);
   });
 
   test("it should display error with info", () => {
     const errorFn = mock.method(console, "error", () => {});
-    logMessage({ title: "test", info: "info" });
-    assert.equal(errorFn.mock.calls.length, 1);
+    logMessage({
+      ruleName: "rule-test",
+      errorMessage: "test",
+      errorDetails: "info",
+    });
     assert.deepEqual(errorFn.mock.calls[0].arguments, [
-      "\u001B[31m❌ test\u001B[39m: info",
+      "  0:0  \u001B[31merror\u001B[39m  \u001B[31mtest\u001B[39m: info  \u001B[34mrule-test\u001B[39m",
     ]);
   });
 
   test("it should display warning with no info", () => {
     const errorFn = mock.method(console, "error", () => {});
-    logMessage({ title: "test", onlyWarns: true });
-    assert.equal(errorFn.mock.calls.length, 1);
+    logMessage({
+      ruleName: "rule-test",
+      errorMessage: "test",
+      onlyWarns: true,
+    });
     assert.deepEqual(errorFn.mock.calls[0].arguments, [
-      "\u001B[33m⚠ test\u001B[39m",
+      "  0:0  \u001B[33mwarning\u001B[39m  \u001B[33mtest\u001B[39m  \u001B[34mrule-test\u001B[39m",
     ]);
   });
 
   test("it should display warning with info", () => {
     const errorFn = mock.method(console, "error", () => {});
-    logMessage({ title: "test", info: "info", onlyWarns: true });
-    assert.equal(errorFn.mock.calls.length, 1);
+    logMessage({
+      ruleName: "rule-test",
+      errorMessage: "test",
+      errorDetails: "info",
+      onlyWarns: true,
+    });
     assert.deepEqual(errorFn.mock.calls[0].arguments, [
-      "\u001B[33m⚠ test\u001B[39m: info",
+      "  0:0  \u001B[33mwarning\u001B[39m  \u001B[33mtest\u001B[39m: info  \u001B[34mrule-test\u001B[39m",
     ]);
   });
 });
@@ -78,9 +87,8 @@ describe("reportNotWarnedForMapping", () => {
     reportNotWarnedForMapping(mockReportError, onlyWarnsForMappingCheck);
     assert.equal(mockReportError.mock.calls.length, 1);
     assert.deepEqual(mockReportError.mock.calls[0].arguments[0], {
-      title: 'Invalid config in "test"',
-      info: 'no warning was raised for "dep1"',
-      dependency: { name: "*" },
+      errorMessage: 'Invalid config in "test"',
+      errorDetails: 'no warning was raised for "dep1"',
     });
   });
 
@@ -91,9 +99,8 @@ describe("reportNotWarnedForMapping", () => {
     reportNotWarnedForMapping(mockReportError, onlyWarnsForMappingCheck);
     assert.equal(mockReportError.mock.calls.length, 1);
     assert.deepEqual(mockReportError.mock.calls[0].arguments[0], {
-      title: 'Invalid config in "test"',
-      info: 'no warning was raised for "dep1"',
-      dependency: { name: "*" },
+      errorMessage: 'Invalid config in "test"',
+      errorDetails: 'no warning was raised for "dep1"',
     });
   });
 
@@ -104,9 +111,8 @@ describe("reportNotWarnedForMapping", () => {
     reportNotWarnedForMapping(mockReportError, onlyWarnsForMappingCheck);
     assert.equal(mockReportError.mock.calls.length, 1);
     assert.deepEqual(mockReportError.mock.calls[0].arguments[0], {
-      title: 'Invalid config in "test"',
-      info: 'no warning was raised for "dep1"',
-      dependency: { name: "depKey" },
+      errorMessage: 'Invalid config in "test"',
+      errorDetails: 'no warning was raised for "dep1"',
     });
   });
 });
@@ -119,28 +125,30 @@ describe("createReportError", () => {
 
   test("it should store general message", () => {
     const reportError = createReportError("Test Title", "test/path");
-    reportError({ title: "Error message" });
+    reportError({
+      errorMessage: "Error message",
+    });
 
     const errorFn = mock.method(console, "error", () => {});
     displayMessages();
 
-    assert.equal(errorFn.mock.calls.length, 3);
     assert.deepEqual(errorFn.mock.calls[0].arguments, [
-      "\u001B[36m== test/path ==\u001B[39m",
+      "\u001B[4mtest/path\u001B[24m",
     ]);
     assert.deepEqual(errorFn.mock.calls[1].arguments, [
-      "\u001B[36mTest Title\u001B[39m",
-    ]);
-    assert.deepEqual(errorFn.mock.calls[2].arguments, [
-      "\u001B[31m❌ Test Title\u001B[39m",
+      "  0:0  \u001B[31merror\u001B[39m  \u001B[31mError message\u001B[39m  \u001B[34mTest Title\u001B[39m",
     ]);
   });
 
-  test("it should store dependency message", () => {
-    const reportError = createReportError("Test Title", "test/path");
+  test("it should store dependency message with location", () => {
+    const reportError = createReportError("test-rule", "test/path");
     reportError({
-      title: "Error message",
-      dependency: { name: "dep1" },
+      errorMessage: "Error message",
+      dependency: {
+        name: "dep1",
+        line: 42,
+        column: 10,
+      },
     });
 
     const errorFn = mock.method(console, "error", () => {});
@@ -148,13 +156,31 @@ describe("createReportError", () => {
 
     assert.equal(errorFn.mock.calls.length, 3);
     assert.deepEqual(errorFn.mock.calls[0].arguments, [
-      "\u001B[36m== test/path ==\u001B[39m",
+      "\u001B[4mtest/path\u001B[24m",
     ]);
     assert.deepEqual(errorFn.mock.calls[1].arguments, [
-      "\u001B[36mIssues for dep1 in test/path:\u001B[39m",
+      "  42:10  \u001B[31merror\u001B[39m  \u001B[90mdep1 \u001B[39m\u001B[31mError message\u001B[39m  \u001B[34mtest-rule\u001B[39m",
     ]);
-    assert.deepEqual(errorFn.mock.calls[2].arguments, [
-      "\u001B[31m❌ Test Title\u001B[39m",
+  });
+
+  test("it should handle dependency with type", () => {
+    const reportError = createReportError("test-rule", "test/path");
+    reportError({
+      errorMessage: "Error message",
+      dependency: {
+        name: "dep1",
+        fieldName: "dependencies",
+        line: 15,
+        column: 5,
+      },
+    });
+
+    const errorFn = mock.method(console, "error", () => {});
+    displayMessages();
+
+    assert.equal(errorFn.mock.calls.length, 3);
+    assert.deepEqual(errorFn.mock.calls[1].arguments, [
+      "  15:5  \u001B[31merror\u001B[39m  \u001B[90mdependencies > dep1 \u001B[39m\u001B[31mError message\u001B[39m  \u001B[34mtest-rule\u001B[39m",
     ]);
   });
 
@@ -162,10 +188,15 @@ describe("createReportError", () => {
     const reportError = createReportError("Test Title", "test/path");
 
     process.exitCode = 0;
-    reportError({ title: "Warning", onlyWarns: true });
+    reportError({
+      errorMessage: "Warning",
+      onlyWarns: true,
+    });
     assert.equal(process.exitCode, 0);
 
-    reportError({ title: "Error" });
+    reportError({
+      errorMessage: "Error",
+    });
     assert.equal(process.exitCode, 1);
   });
 });
@@ -185,13 +216,16 @@ describe("displayMessages", () => {
     assert.equal(errorFn.mock.calls.length, 0);
     assert.equal(logFn.mock.calls.length, 1);
     assert.deepEqual(logFn.mock.calls[0].arguments, [
-      "\n\u001B[32m✅ No errors or warnings found\u001B[39m.",
+      "\u001B[32m\u001B[39m\n\u001B[32m✨ No problems found\u001B[39m",
     ]);
   });
 
   test("it should display messages and conclusion with warnings", () => {
     const reportError = createReportError("Test Title", "test/path");
-    reportError({ title: "Warning", onlyWarns: true });
+    reportError({
+      errorMessage: "Warning",
+      onlyWarns: true,
+    });
 
     const errorFn = mock.method(console, "error", () => {});
     const logFn = mock.method(console, "log", () => {});
@@ -201,13 +235,15 @@ describe("displayMessages", () => {
     assert.equal(errorFn.mock.calls.length, 3);
     assert.equal(logFn.mock.calls.length, 1);
     assert.deepEqual(logFn.mock.calls[0].arguments, [
-      "\nFound \u001B[33m1 warnings\u001B[39m.",
+      "\n✖ Found \u001B[33m1 warning\u001B[39m",
     ]);
   });
 
   test("it should display messages and conclusion with errors", () => {
     const reportError = createReportError("Test Title", "test/path");
-    reportError({ title: "Error" });
+    reportError({
+      errorMessage: "Error",
+    });
 
     const errorFn = mock.method(console, "error", () => {});
     const logFn = mock.method(console, "log", () => {});
@@ -217,13 +253,16 @@ describe("displayMessages", () => {
     assert.equal(errorFn.mock.calls.length, 3);
     assert.equal(logFn.mock.calls.length, 1);
     assert.deepEqual(logFn.mock.calls[0].arguments, [
-      "\nFound \u001B[31m1 errors\u001B[39m.",
+      "\n✖ Found \u001B[31m1 error\u001B[39m",
     ]);
   });
 
   test("it should display messages and conclusion with auto-fixable errors", () => {
     const reportError = createReportError("Test Title", "test/path");
-    reportError({ title: "Error", autoFixable: true });
+    reportError({
+      errorMessage: "Error",
+      autoFixable: true,
+    });
 
     const errorFn = mock.method(console, "error", () => {});
     const logFn = mock.method(console, "log", () => {});
@@ -232,18 +271,27 @@ describe("displayMessages", () => {
 
     assert.equal(errorFn.mock.calls.length, 3);
     assert.equal(logFn.mock.calls.length, 2);
-    assert.deepEqual(logFn.mock.calls[0].arguments, [
-      "\nFound \u001B[31m1 errors\u001B[39m.",
-    ]);
-    assert.deepEqual(logFn.mock.calls[1].arguments, [
-      'Found \u001B[32m1 auto-fixable\u001B[39m errors or warnings, run the command with "--fix" to fix them.',
-    ]);
+
+    assert.deepEqual(
+      logFn.mock.calls.map((call) => call.arguments),
+      [
+        ["\n✖ Found \u001B[31m1 error\u001B[39m"],
+        [
+          "\u001B[90m\u001B[39m\n\u001B[90m1 issue fixable with the --fix option\u001B[39m",
+        ],
+      ],
+    );
   });
 
   test("it should display messages and conclusion with both errors and warnings", () => {
     const reportError = createReportError("Test Title", "test/path");
-    reportError({ title: "Warning", onlyWarns: true });
-    reportError({ title: "Error" });
+    reportError({
+      errorMessage: "Warning",
+      onlyWarns: true,
+    });
+    reportError({
+      errorMessage: "Error",
+    });
 
     const errorFn = mock.method(console, "error", () => {});
     const logFn = mock.method(console, "log", () => {});
@@ -251,32 +299,23 @@ describe("displayMessages", () => {
     displayMessages();
 
     assert.equal(errorFn.mock.calls.length, 4);
+    assert.equal(logFn.mock.calls.length, 1);
     assert.deepEqual(errorFn.mock.calls[0].arguments, [
-      "\u001B[36m== test/path ==\u001B[39m",
+      "\u001B[4mtest/path\u001B[24m",
     ]);
     assert.deepEqual(errorFn.mock.calls[1].arguments, [
-      "\u001B[36mTest Title\u001B[39m",
-    ]);
-    assert.deepEqual(errorFn.mock.calls[2].arguments, [
-      "\u001B[33m⚠ Test Title\u001B[39m",
-    ]);
-    assert.deepEqual(errorFn.mock.calls[3].arguments, [
-      "\u001B[31m❌ Test Title\u001B[39m",
-    ]);
-    assert.equal(logFn.mock.calls.length, 1);
-    assert.deepEqual(logFn.mock.calls[0].arguments, [
-      "\nFound \u001B[31m1 errors\u001B[39m and \u001B[33m1 warnings\u001B[39m.",
+      "  0:0  \u001B[33mwarning\u001B[39m  \u001B[33mWarning\u001B[39m  \u001B[34mTest Title\u001B[39m",
     ]);
   });
 
   test("it should group multiple messages for same dependency", () => {
     const reportError = createReportError("Test Title", "test/path");
     reportError({
-      title: "First Error",
+      errorMessage: "First Error",
       dependency: { name: "dep1" },
     });
     reportError({
-      title: "Second Error",
+      errorMessage: "Second Error",
       dependency: { name: "dep1" },
     });
 
@@ -285,32 +324,32 @@ describe("displayMessages", () => {
 
     displayMessages();
 
+    assert.equal(logFn.mock.calls.length, 1);
     assert.equal(errorFn.mock.calls.length, 4);
     assert.deepEqual(errorFn.mock.calls[0].arguments, [
-      "\u001B[36m== test/path ==\u001B[39m",
+      "\u001B[4mtest/path\u001B[24m",
     ]);
     assert.deepEqual(errorFn.mock.calls[1].arguments, [
-      "\u001B[36mIssues for dep1 in test/path:\u001B[39m",
+      "  0:0  \u001B[31merror\u001B[39m  \u001B[90mdep1 \u001B[39m\u001B[31mFirst Error\u001B[39m  \u001B[34mTest Title\u001B[39m",
     ]);
     assert.deepEqual(errorFn.mock.calls[2].arguments, [
-      "\u001B[31m❌ Test Title\u001B[39m",
+      "  0:0  \u001B[31merror\u001B[39m  \u001B[90mdep1 \u001B[39m\u001B[31mSecond Error\u001B[39m  \u001B[34mTest Title\u001B[39m",
     ]);
-    assert.deepEqual(errorFn.mock.calls[3].arguments, [
-      "\u001B[31m❌ Test Title\u001B[39m",
-    ]);
-    assert.equal(logFn.mock.calls.length, 1);
+    assert.deepEqual(errorFn.mock.calls[3].arguments, []);
     assert.deepEqual(logFn.mock.calls[0].arguments, [
-      "\nFound \u001B[31m2 errors\u001B[39m.",
+      "\n✖ Found \u001B[31m2 errors\u001B[39m",
     ]);
   });
 
   test("it should handle dependency with origin", () => {
-    const reportError = createReportError("Test Title", "test/path");
+    const reportError = createReportError("test-rule", "test/path");
     reportError({
-      title: "Error",
+      errorMessage: "Error",
       dependency: {
         name: "dep1",
-        origin: "dependencies",
+        fieldName: "dependencies",
+        line: 15,
+        column: 5,
       },
     });
 
@@ -319,16 +358,22 @@ describe("displayMessages", () => {
 
     displayMessages();
 
-    assert.equal(errorFn.mock.calls.length, 3);
-    assert.deepEqual(errorFn.mock.calls[1].arguments, [
-      "\u001B[36mIssues for dependencies : dep1 in test/path:\u001B[39m",
-    ]);
-    assert.deepEqual(errorFn.mock.calls[2].arguments, [
-      "\u001B[31m❌ Test Title\u001B[39m",
-    ]);
     assert.equal(logFn.mock.calls.length, 1);
+    assert.equal(errorFn.mock.calls.length, 3);
+
     assert.deepEqual(logFn.mock.calls[0].arguments, [
-      "\nFound \u001B[31m1 errors\u001B[39m.",
+      "\n✖ Found \u001B[31m1 error\u001B[39m",
     ]);
+
+    assert.deepEqual(
+      errorFn.mock.calls.map((call) => call.arguments),
+      [
+        ["\u001B[4mtest/path\u001B[24m"],
+        [
+          "  15:5  \u001B[31merror\u001B[39m  \u001B[90mdependencies > dep1 \u001B[39m\u001B[31mError\u001B[39m  \u001B[34mtest-rule\u001B[39m",
+        ],
+        [],
+      ],
+    );
   });
 });

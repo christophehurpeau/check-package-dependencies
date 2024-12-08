@@ -1,9 +1,11 @@
 import { createReportError } from "../utils/createReportError.ts";
-import type { DependencyTypes, PackageJson } from "../utils/packageTypes.ts";
+import type {
+  DependencyTypes,
+  ParsedPackageJson,
+} from "../utils/packageTypes.ts";
 
 export function checkNoDependencies(
-  pkg: PackageJson,
-  pkgPath: string,
+  pkg: ParsedPackageJson,
   type: DependencyTypes = "dependencies",
   moveToSuggestion: DependencyTypes = "devDependencies",
   customCreateReportError = createReportError,
@@ -11,10 +13,10 @@ export function checkNoDependencies(
   const pkgDependencies = pkg[type];
   if (!pkgDependencies) return;
 
-  const reportError = customCreateReportError("No dependencies", pkgPath);
+  const reportError = customCreateReportError("No dependencies", pkg.path);
   reportError({
-    title: `Unexpected ${type}`,
-    info: `you should move them in ${moveToSuggestion}`,
+    errorMessage: `Unexpected ${type}`,
+    errorDetails: `you should move them in ${moveToSuggestion}`,
     autoFixable: false,
   });
 }

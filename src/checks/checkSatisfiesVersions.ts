@@ -1,6 +1,9 @@
 import semver from "semver";
 import { createReportError } from "../utils/createReportError.ts";
-import type { DependencyTypes, PackageJson } from "../utils/packageTypes.ts";
+import type {
+  DependencyTypes,
+  ParsedPackageJson,
+} from "../utils/packageTypes.ts";
 import type { OnlyWarnsForCheck } from "../utils/warnForUtils.ts";
 
 export interface CheckSatisfiesVersionsOptions {
@@ -8,8 +11,7 @@ export interface CheckSatisfiesVersionsOptions {
 }
 
 export function checkSatisfiesVersions(
-  pkg: PackageJson,
-  pkgPathName: string,
+  pkg: ParsedPackageJson,
   type: DependencyTypes,
   dependenciesRanges: Record<string, string>,
   onlyWarnsForCheck?: OnlyWarnsForCheck,
@@ -18,23 +20,20 @@ export function checkSatisfiesVersions(
   }: CheckSatisfiesVersionsOptions = {},
 ): void {
   const pkgDependencies = pkg[type] || {};
-  const reportError = customCreateReportError(
-    "Satisfies Versions",
-    pkgPathName,
-  );
+  const reportError = customCreateReportError("Satisfies Versions", pkg.path);
 
   Object.entries(dependenciesRanges).forEach(([depKey, range]) => {
-    const version = pkgDependencies[depKey];
+    const pkgRange = pkgDependencies[depKey];
 
-    if (!version) {
+    if (!pkgRange?.value) {
       reportError({
-        title: "Missing",
-        info: `should satisfies "${range}"`,
-        dependency: { name: depKey, origin: type },
+        errorMessage: "Missing",
+        errorDetails: `should satisfies "${range}"`,
+        dependency: { name: depKey, fieldName: type },
         onlyWarns: onlyWarnsForCheck?.shouldWarnsFor(depKey),
       });
     } else {
-      const minVersionOfVersion = semver.minVersion(version);
+      const minVersionOfVersion = semver.minVersion(pkgRange.value);
       if (
         !minVersionOfVersion ||
         !semver.satisfies(minVersionOfVersion, range, {
@@ -42,9 +41,9 @@ export function checkSatisfiesVersions(
         })
       ) {
         reportError({
-          title: "Invalid",
-          info: `"${version}" should satisfies "${range}"`,
-          dependency: { name: depKey, origin: type },
+          errorMessage: "Invalid",
+          errorDetails: `"${pkgRange.value}" should satisfies "${range}"`,
+          dependency: pkgRange,
           onlyWarns: onlyWarnsForCheck?.shouldWarnsFor(depKey),
         });
       }

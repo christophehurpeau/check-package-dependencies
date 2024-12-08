@@ -1,7 +1,15 @@
 import semver from "semver";
 import type { ShouldHaveExactVersions } from "../check-package.ts";
-import { createReportError } from "../utils/createReportError.ts";
-import type { DependencyTypes, PackageJson } from "../utils/packageTypes.ts";
+import {
+  createReportError,
+  fromDependency,
+  inDependency,
+} from "../utils/createReportError.ts";
+import type {
+  DependencyTypes,
+  PackageJson,
+  ParsedPackageJson,
+} from "../utils/packageTypes.ts";
 import { changeOperator, getOperator } from "../utils/semverUtils.ts";
 import type { OnlyWarnsForCheck } from "../utils/warnForUtils.ts";
 
@@ -13,8 +21,7 @@ export interface CheckSatisfiesVersionsFromDependencyOptions {
 }
 
 export function checkSatisfiesVersionsFromDependency(
-  pkg: PackageJson,
-  pkgPathName: string,
+  pkg: ParsedPackageJson,
   type: DependencyTypes,
   depKeys: string[],
   depPkg: PackageJson,
@@ -31,7 +38,7 @@ export function checkSatisfiesVersionsFromDependency(
 
   const reportError = customCreateReportError(
     "Satisfies Versions From Dependency",
-    pkgPathName,
+    pkg.path,
   );
 
   depKeys.forEach((depKey) => {
@@ -39,19 +46,18 @@ export function checkSatisfiesVersionsFromDependency(
 
     if (!range) {
       reportError({
-        title: "Unexpected missing dependency",
-        info: `config expects "${depKey}" in "${depType}" of "${depPkg.name}"`,
-        dependency: { name: depKey, origin: depType },
+        errorMessage: "Unexpected missing dependency",
+        errorDetails: `config expects "${depKey}" ${inDependency(depPkg, depType)}`,
         onlyWarns: undefined,
         autoFixable: undefined,
       });
       return;
     }
 
-    const version = pkgDependencies[depKey];
+    const pkgRange = pkgDependencies[depKey];
 
     const getAutoFixIfExists = (): string | null | undefined => {
-      const existingOperator = version ? getOperator(version) : null;
+      const existingOperator = pkgRange ? getOperator(pkgRange.value) : null;
       const expectedOperator = (() => {
         if (existingOperator !== null) {
           return existingOperator;
@@ -64,28 +70,21 @@ export function checkSatisfiesVersionsFromDependency(
         : changeOperator(range, expectedOperator);
     };
 
-    const autoFix = (versionToApply: string): void => {
-      pkg[type] = {
-        ...pkg[type],
-        [depKey]: versionToApply,
-      };
-    };
-
-    if (!version) {
+    if (!pkgRange) {
       const fix = getAutoFixIfExists();
       if (!fix || !tryToAutoFix) {
         reportError({
-          title: "Missing dependency",
-          info: `should satisfies "${range}" from "${depPkg.name}" in "${depType}"`,
-          dependency: { name: depKey, origin: type },
+          errorMessage: "Missing dependency",
+          errorDetails: `should satisfies "${range}" ${fromDependency(depPkg, depType)}`,
+          dependency: { name: depKey, fieldName: type },
           onlyWarns: onlyWarnsForCheck?.shouldWarnsFor(depKey),
           autoFixable: !!fix,
         });
       } else {
-        autoFix(fix);
+        pkg.change(type, depKey, fix);
       }
     } else {
-      const minVersionOfVersion = semver.minVersion(version);
+      const minVersionOfVersion = semver.minVersion(pkgRange.value);
       if (
         !minVersionOfVersion ||
         !semver.satisfies(minVersionOfVersion, range, {
@@ -95,14 +94,14 @@ export function checkSatisfiesVersionsFromDependency(
         const fix = getAutoFixIfExists();
         if (!fix || !tryToAutoFix) {
           reportError({
-            title: "Invalid",
-            info: `"${version}" should satisfies "${range}" from "${depPkg.name}" in "${depType}"`,
-            dependency: { name: depKey, origin: type },
+            errorMessage: "Invalid",
+            errorDetails: `"${pkgRange.value}" should satisfies "${range}" ${fromDependency(depPkg, depType)}`,
+            dependency: pkgRange,
             onlyWarns: onlyWarnsForCheck?.shouldWarnsFor(depKey),
             autoFixable: !!fix,
           });
         } else {
-          autoFix(fix);
+          pkgRange.changeValue(fix);
         }
       }
     }

@@ -6,6 +6,7 @@ import {
   assertSeveralMessages,
   createMockReportError,
 } from "../utils/createReportError.testUtils.ts";
+import { parsePkgValue } from "../utils/pkgJsonUtils.ts";
 import { checkResolutionsVersionsMatch } from "./checkResolutionsVersionsMatch.ts";
 
 describe("checkResolutionsVersionsMatch", () => {
@@ -13,35 +14,31 @@ describe("checkResolutionsVersionsMatch", () => {
 
   it('should return no error when no "resolutions" is present', () => {
     checkResolutionsVersionsMatch(
-      { name: "test", devDependencies: { test: "1.0.0" } },
-      "path",
+      parsePkgValue({ name: "test", devDependencies: { test: "1.0.0" } }),
       { customCreateReportError: createReportError },
     );
     assertCreateReportErrorCall(
       createReportError,
       "Resolutions match other dependencies",
-      "path",
     );
     assertNoMessages(messages);
   });
 
   it('should return no error when "resolutions" has dependency not in other dependencies type', () => {
     checkResolutionsVersionsMatch(
-      { name: "test", resolutions: { test: "1.0.0" } },
-      "path",
+      parsePkgValue({ name: "test", resolutions: { test: "1.0.0" } }),
       { customCreateReportError: createReportError },
     );
     assertCreateReportErrorCall(
       createReportError,
       "Resolutions match other dependencies",
-      "path",
     );
     assertNoMessages(messages);
   });
 
   it('should return no error when "resolutions" has dependency matching', () => {
     checkResolutionsVersionsMatch(
-      {
+      parsePkgValue({
         name: "test",
         resolutions: {
           test1: "1.0.0",
@@ -51,21 +48,19 @@ describe("checkResolutionsVersionsMatch", () => {
         },
         devDependencies: { test1: "1.0.0", test4: "1.1.0" },
         dependencies: { test2: "1.0.0", test3: "^1.0.0" },
-      },
-      "path",
+      }),
       { customCreateReportError: createReportError },
     );
     assertCreateReportErrorCall(
       createReportError,
       "Resolutions match other dependencies",
-      "path",
     );
     assertNoMessages(messages);
   });
 
   it("should return error when multiple dependencies not matching", () => {
     checkResolutionsVersionsMatch(
-      {
+      parsePkgValue({
         name: "test",
         resolutions: {
           test1: "1.0.0",
@@ -75,61 +70,74 @@ describe("checkResolutionsVersionsMatch", () => {
         },
         devDependencies: { test1: "1.1.0" },
         dependencies: { test2: "1.2.0", test3: "1.0.0", test4: "1.2.0" },
-      },
-      "path",
+      }),
       { customCreateReportError: createReportError },
     );
     assertCreateReportErrorCall(
       createReportError,
       "Resolutions match other dependencies",
-      "path",
     );
     assertSeveralMessages(messages, [
       {
-        title: 'Invalid "1.1.0"',
-        info: 'expecting "1.1.0" be "1.0.0" from resolutions',
-        dependency: { name: "test1", origin: "devDependencies" },
+        errorMessage: 'Invalid "1.1.0"',
+        errorDetails: 'expecting "1.1.0" be "1.0.0" from resolutions',
+        dependency: {
+          name: "test1",
+          fieldName: "devDependencies",
+          value: "1.1.0",
+        },
         autoFixable: true,
       },
       {
-        title: 'Invalid "1.2.0"',
-        info: 'expecting "1.2.0" be "1.0.0" from resolutions',
-        dependency: { name: "test2", origin: "dependencies" },
+        errorMessage: 'Invalid "1.2.0"',
+        errorDetails: 'expecting "1.2.0" be "1.0.0" from resolutions',
+        dependency: {
+          name: "test2",
+          fieldName: "dependencies",
+          value: "1.2.0",
+        },
         autoFixable: true,
       },
       {
-        title: 'Invalid "1.0.0"',
-        info: 'expecting "1.0.0" be "1.1.0" from resolutions',
-        dependency: { name: "test3", origin: "dependencies" },
+        errorMessage: 'Invalid "1.0.0"',
+        errorDetails: 'expecting "1.0.0" be "1.1.0" from resolutions',
+        dependency: {
+          name: "test3",
+          fieldName: "dependencies",
+          value: "1.0.0",
+        },
         autoFixable: true,
       },
       {
-        title: 'Invalid "1.2.0"',
-        info: 'expecting "1.2.0" be "1.1.0" from resolutions',
-        dependency: { name: "test4", origin: "dependencies" },
+        errorMessage: 'Invalid "1.2.0"',
+        errorDetails: 'expecting "1.2.0" be "1.1.0" from resolutions',
+        dependency: {
+          name: "test4",
+          fieldName: "dependencies",
+          value: "1.2.0",
+        },
         autoFixable: true,
       },
     ]);
   });
 
   it('should fix without error when "resolutions" has dependency not matching', () => {
-    const pkg = {
+    const pkg = parsePkgValue({
       name: "test",
       resolutions: { test1: "1.0.0", test2: "1.0.0" },
       devDependencies: { test1: "1.1.0" },
       dependencies: { test2: "1.2.0" },
-    };
-    checkResolutionsVersionsMatch(pkg, "path", {
+    });
+    checkResolutionsVersionsMatch(pkg, {
       customCreateReportError: createReportError,
       tryToAutoFix: true,
     });
     assertCreateReportErrorCall(
       createReportError,
       "Resolutions match other dependencies",
-      "path",
     );
     assertNoMessages(messages);
-    assert.equal(pkg.devDependencies.test1, "1.0.0");
-    assert.equal(pkg.dependencies.test2, "1.0.0");
+    assert.equal(pkg.value.devDependencies?.test1, "1.0.0");
+    assert.equal(pkg.value.dependencies?.test2, "1.0.0");
   });
 });

@@ -8,6 +8,7 @@ import { getKeys } from "../utils/object.ts";
 import type {
   DependencyTypes,
   PackageJson,
+  ParsedPackageJson,
   RegularDependencyTypes,
 } from "../utils/packageTypes.ts";
 import type { OnlyWarnsForMappingCheck } from "../utils/warnForUtils.ts";
@@ -41,14 +42,13 @@ const getAllowedPeerInFromType = (
 
 export function checkDirectPeerDependencies(
   isLibrary: boolean,
-  pkg: PackageJson,
-  pkgPathName: string,
+  pkg: ParsedPackageJson,
   getDependencyPackageJson: GetDependencyPackageJson,
   missingOnlyWarnsForCheck: OnlyWarnsForMappingCheck,
   invalidOnlyWarnsForCheck: OnlyWarnsForMappingCheck,
   customCreateReportError = createReportError,
 ): void {
-  const reportError = customCreateReportError("Peer Dependencies", pkgPathName);
+  const reportError = customCreateReportError("Peer Dependencies", pkg.path);
 
   const allDepPkgs: {
     name: string;
@@ -69,8 +69,8 @@ export function checkDirectPeerDependencies(
         pkg: depPkg,
         hasDirectMatchingPeerDependency: pkg.peerDependencies?.[depName]
           ? semver.intersects(
-              dependencies[depName],
-              pkg.peerDependencies[depName],
+              dependencies[depName]!.value,
+              pkg.peerDependencies[depName].value,
             )
           : false,
       });

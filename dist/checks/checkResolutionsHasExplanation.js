@@ -1,29 +1,32 @@
 import { createReportError } from "../utils/createReportError.js";
-export function checkResolutionsHasExplanation(pkg, pkgPathName, checkMessage, getDependencyPackageJson, customCreateReportError = createReportError) {
+export function checkResolutionsHasExplanation(pkg, checkMessage, getDependencyPackageJson, customCreateReportError = createReportError) {
     const pkgResolutions = pkg.resolutions || {};
     const pkgResolutionsExplained = pkg.resolutionsExplained || {};
-    const reportError = customCreateReportError("Resolutions has explanation", pkgPathName);
+    const reportError = customCreateReportError("Resolutions has explanation", pkg.path);
     Object.keys(pkgResolutions).forEach((depKey) => {
         if (!pkgResolutionsExplained[depKey]) {
             reportError({
-                title: `Missing "${depKey}" in resolutionsExplained`,
+                errorMessage: `Missing "${depKey}" in resolutionsExplained`,
             });
         }
     });
-    Object.keys(pkgResolutionsExplained).forEach((depKey) => {
+    Object.entries(pkgResolutionsExplained).forEach(([depKey, depValue]) => {
+        if (!depValue)
+            return;
         if (!pkgResolutions[depKey]) {
             reportError({
-                title: `Found "${depKey}" in resolutionsExplained but not in resolutions`,
+                errorMessage: `Found "${depKey}" in resolutionsExplained but not in resolutions`,
             });
         }
         else {
-            const error = checkMessage(depKey, pkgResolutionsExplained[depKey], {
+            const error = checkMessage(depKey, depValue.value, {
                 getDependencyPackageJson,
             });
             if (error) {
                 reportError({
-                    title: `Invalid message for "${depKey}" in resolutionsExplained`,
-                    info: error,
+                    errorMessage: "Invalid message",
+                    dependency: pkgResolutionsExplained[depKey],
+                    errorDetails: error,
                 });
             }
         }

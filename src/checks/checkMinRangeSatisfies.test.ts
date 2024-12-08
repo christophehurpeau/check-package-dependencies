@@ -1,24 +1,25 @@
-import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
   assertCreateReportErrorCall,
+  assertDeepEqualIgnoringPrototypes,
   assertNoMessages,
   assertSingleMessage,
   createMockReportError,
 } from "../utils/createReportError.testUtils.ts";
 import type { PackageJson } from "../utils/packageTypes.ts";
+import { parsePkgValue } from "../utils/pkgJsonUtils.ts";
 import { checkMinRangeSatisfies } from "./checkMinRangeSatisfies.ts";
 
 describe(checkMinRangeSatisfies.name, () => {
   const { createReportError, messages } = createMockReportError();
 
   it("should return no error when no dependencies is set", () => {
-    checkMinRangeSatisfies("path", { name: "test" });
+    checkMinRangeSatisfies(parsePkgValue({ name: "test" }));
     assertNoMessages(messages);
   });
 
   describe("expect no error", () => {
-    const testCases: [string, Omit<PackageJson, "name">][] = [
+    const testCases: [string, PackageJson][] = [
       [
         "exact dev dependency and exact dependency",
         {
@@ -66,8 +67,7 @@ describe(checkMinRangeSatisfies.name, () => {
     for (const [description, pkgContent] of testCases) {
       it(`should have no error when ${description}`, () => {
         checkMinRangeSatisfies(
-          "path",
-          { name: "test", ...pkgContent },
+          parsePkgValue({ name: "test", ...pkgContent }),
           "dependencies",
           "devDependencies",
           { customCreateReportError: createReportError },
@@ -75,7 +75,6 @@ describe(checkMinRangeSatisfies.name, () => {
         assertCreateReportErrorCall(
           createReportError,
           '"dependencies" minimum range satisfies "devDependencies"',
-          "path",
         );
         assertNoMessages(messages);
       });
@@ -85,10 +84,10 @@ describe(checkMinRangeSatisfies.name, () => {
   describe("expect error when not dependency is invalid", () => {
     const testCases: [
       string,
-      Omit<PackageJson, "name">,
+      PackageJson,
       string,
       string,
-      Omit<PackageJson, "name"> | undefined,
+      PackageJson | undefined,
     ][] = [
       [
         "exact dev dependency is higher than exact dependency",
@@ -185,8 +184,7 @@ describe(checkMinRangeSatisfies.name, () => {
     ] of testCases) {
       it(`should error when ${description}`, () => {
         checkMinRangeSatisfies(
-          "path",
-          { name: "test", ...pkgContent },
+          parsePkgValue({ name: "test", ...pkgContent }),
           "dependencies",
           "devDependencies",
           { customCreateReportError: createReportError },
@@ -194,28 +192,29 @@ describe(checkMinRangeSatisfies.name, () => {
         assertCreateReportErrorCall(
           createReportError,
           '"dependencies" minimum range satisfies "devDependencies"',
-          "path",
         );
         assertSingleMessage(messages, {
-          title: errorTitle,
-          info: errorInfo,
-          dependency: { name: "test1", origin: "dependencies" },
+          errorMessage: errorTitle,
+          errorDetails: errorInfo,
+          dependency: {
+            name: "test1",
+            fieldName: "dependencies",
+            value: pkgContent.dependencies?.test1,
+          },
           autoFixable: true,
         });
 
         if (expectedFix) {
-          const pkg = JSON.parse(
-            JSON.stringify({ name: "test", ...pkgContent }),
-          ) as PackageJson;
-          checkMinRangeSatisfies(
-            "path",
-            pkg,
-            "dependencies",
-            "devDependencies",
-            { tryToAutoFix: true },
-          );
+          const pkgValue = { name: "test", ...pkgContent };
+          const parsedPkg = parsePkgValue(pkgValue);
+          checkMinRangeSatisfies(parsedPkg, "dependencies", "devDependencies", {
+            tryToAutoFix: true,
+          });
 
-          assert.deepEqual(pkg, { ...pkg, ...expectedFix });
+          assertDeepEqualIgnoringPrototypes(parsedPkg.value, {
+            ...pkgValue,
+            ...expectedFix,
+          });
         }
       });
     }

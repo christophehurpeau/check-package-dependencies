@@ -32,7 +32,7 @@ describe(checkSatisfiesVersionsInDependency.name, () => {
       depType: string,
       description: string,
       depValue: string | null,
-      pkgContent: Omit<PackageJson, "name">,
+      pkgContent: PackageJson,
     ][] = [
       ["test1", "devDependencies", "not set", null, {}],
       ["test2", "dependencies", "not set", null, {}],
@@ -98,7 +98,7 @@ describe(checkSatisfiesVersionsInDependency.name, () => {
       it(`should return no error when ${depName} in ${depType} is ${description}`, () => {
         checkSatisfiesVersionsInDependency(
           "path",
-          { name: "test", ...pkgContent },
+          { name: "test", ...pkgContent } as PackageJson,
           { [depType]: { [depName]: depValue } },
           { customCreateReportError: createReportError },
         );
@@ -116,7 +116,7 @@ describe(checkSatisfiesVersionsInDependency.name, () => {
     const testCases: [
       depName: string,
       depType: string,
-      pkgContent: Omit<PackageJson, "name">,
+      pkgContent: PackageJson,
       errorTitle: string,
       errorInfo: string,
     ][] = [
@@ -124,21 +124,21 @@ describe(checkSatisfiesVersionsInDependency.name, () => {
         "test1",
         "devDependencies",
         { devDependencies: { test1: "1.0.0" } },
-        'Invalid "test1" in devDependencies of "test"',
+        'Invalid "test1" in "devDependencies" of "test"',
         "it should not be present",
       ],
       [
         "test2",
         "dependencies",
         { dependencies: { test2: "^1.0.0" } },
-        'Invalid "test2" in dependencies of "test"',
+        'Invalid "test2" in "dependencies" of "test"',
         "it should not be present",
       ],
       [
         "test3",
         "resolutions",
         { resolutions: { test3: "1.x" } },
-        'Invalid "test3" in resolutions of "test"',
+        'Invalid "test3" in "resolutions" of "test"',
         "it should not be present",
       ],
     ];
@@ -153,7 +153,7 @@ describe(checkSatisfiesVersionsInDependency.name, () => {
       it(`should error when ${depName} is not expected in ${depType}`, () => {
         checkSatisfiesVersionsInDependency(
           "path",
-          { name: "test", ...pkgContent },
+          { name: "test", ...pkgContent } as PackageJson,
           { [depType]: { [depName]: null } },
           { customCreateReportError: createReportError },
         );
@@ -163,8 +163,8 @@ describe(checkSatisfiesVersionsInDependency.name, () => {
           "path",
         );
         assertSingleMessage(messages, {
-          title: errorTitle,
-          info: errorInfo,
+          errorMessage: errorTitle,
+          errorDetails: errorInfo,
           dependency: { name: depName },
         });
       });
@@ -177,7 +177,7 @@ describe(checkSatisfiesVersionsInDependency.name, () => {
       status: string,
       depType: string,
       depRange: string,
-      pkgContent: Omit<PackageJson, "name">,
+      pkgContent: PackageJson,
       errorTitle: string,
       errorInfo: string,
     ][] = [
@@ -187,7 +187,7 @@ describe(checkSatisfiesVersionsInDependency.name, () => {
         "devDependencies",
         "1.0.0",
         {},
-        'Missing "test1" in devDependencies of "test"',
+        'Missing "test1" in "devDependencies" of "test"',
         '"devDependencies" is missing',
       ],
       [
@@ -196,7 +196,7 @@ describe(checkSatisfiesVersionsInDependency.name, () => {
         "devDependencies",
         "1.0.0",
         { dependencies: {} },
-        'Missing "test2" in devDependencies of "test"',
+        'Missing "test2" in "devDependencies" of "test"',
         '"devDependencies" is missing',
       ],
       [
@@ -205,8 +205,8 @@ describe(checkSatisfiesVersionsInDependency.name, () => {
         "dependencies",
         "^1.0.0",
         { dependencies: { test2: "^1.0.0" } },
-        'Missing "test3" in dependencies of "test"',
-        '"test3" is missing in dependencies of "test"',
+        'Missing "test3" in "dependencies" of "test"',
+        '"test3" is missing but should satisfies "^1.0.0"',
       ],
       [
         "test4",
@@ -214,7 +214,7 @@ describe(checkSatisfiesVersionsInDependency.name, () => {
         "dependencies",
         "^1.0.0",
         { dependencies: { test4: "0.1.0" } },
-        'Invalid "test4" in dependencies of "test"',
+        'Invalid "test4" in "dependencies" of "test"',
         '"0.1.0" does not satisfies "^1.0.0"',
       ],
     ];
@@ -231,7 +231,7 @@ describe(checkSatisfiesVersionsInDependency.name, () => {
       it(`should error when ${depName} is ${status} in ${depType}`, () => {
         checkSatisfiesVersionsInDependency(
           "path",
-          { name: "test", ...pkgContent },
+          { name: "test", ...pkgContent } as PackageJson,
           { [depType]: { [depName]: depRange } },
           { customCreateReportError: createReportError },
         );
@@ -241,8 +241,8 @@ describe(checkSatisfiesVersionsInDependency.name, () => {
           "path",
         );
         assertSingleMessage(messages, {
-          title: errorTitle,
-          info: errorInfo,
+          errorMessage: errorTitle,
+          errorDetails: errorInfo,
           dependency: { name: depName },
         });
       });

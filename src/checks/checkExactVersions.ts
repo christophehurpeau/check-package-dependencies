@@ -4,7 +4,10 @@ import {
   createReportError,
   reportNotWarnedFor,
 } from "../utils/createReportError.ts";
-import type { DependencyTypes, PackageJson } from "../utils/packageTypes.ts";
+import type {
+  DependencyTypes,
+  ParsedPackageJson,
+} from "../utils/packageTypes.ts";
 import { getRealVersion } from "../utils/semverUtils.ts";
 import type { OnlyWarnsFor, OnlyWarnsForCheck } from "../utils/warnForUtils.ts";
 
@@ -24,8 +27,7 @@ const isVersionRange = (version: string): boolean =>
 
 // eslint-disable-next-line @typescript-eslint/require-await
 export async function checkExactVersions(
-  pkg: PackageJson,
-  pkgPathName: string,
+  pkg: ParsedPackageJson,
   types: DependencyTypes[],
   {
     getDependencyPackageJson,
@@ -35,16 +37,17 @@ export async function checkExactVersions(
     customCreateReportError = createReportError,
   }: CheckExactVersionsOptions,
 ): Promise<void> {
-  const reportError = customCreateReportError("Exact versions", pkgPathName);
+  const reportError = customCreateReportError("Exact versions", pkg.path);
 
   for (const type of types) {
     const pkgDependencies = pkg[type];
     if (!pkgDependencies) continue;
 
-    for (const [dependencyName, versionValue] of Object.entries(
+    for (const [dependencyName, dependencyValue] of Object.entries(
       pkgDependencies,
     )) {
-      const version = getRealVersion(versionValue);
+      if (!dependencyValue) continue;
+      const version = getRealVersion(dependencyValue.value);
 
       if (isVersionRange(version)) {
         if (internalExactVersionsIgnore?.includes(dependencyName)) {
@@ -60,13 +63,13 @@ export async function checkExactVersions(
           }
           if (!resolvedDep?.version) {
             reportError({
-              title: "Unexpected range dependency",
-              info: `expecting "${version}" to be exact${
+              errorMessage: "Unexpected range dependency",
+              errorDetails: `expecting "${version}" to be exact${
                 tryToAutoFix
                   ? `, autofix failed to resolve "${dependencyName}"`
                   : ""
               }`,
-              dependency: { name: dependencyName, origin: type },
+              dependency: dependencyValue,
               onlyWarns: shouldOnlyWarn,
             });
           } else if (
@@ -75,22 +78,22 @@ export async function checkExactVersions(
             })
           ) {
             reportError({
-              title: "Unexpected range dependency",
-              info: `expecting "${version}" to be exact${
+              errorMessage: "Unexpected range dependency",
+              errorDetails: `expecting "${version}" to be exact${
                 tryToAutoFix
                   ? `, autofix failed as resolved version "${resolvedDep.version}" doesn't satisfy "${version}"`
                   : ""
               }`,
-              dependency: { name: dependencyName, origin: type },
+              dependency: dependencyValue,
               onlyWarns: shouldOnlyWarn,
             });
           } else if (tryToAutoFix) {
-            pkgDependencies[dependencyName] = resolvedDep.version;
+            dependencyValue.changeValue(resolvedDep.version);
           } else {
             reportError({
-              title: "Unexpected range dependency",
-              info: `expecting "${version}" to be exact "${resolvedDep.version}"`,
-              dependency: { name: dependencyName, origin: type },
+              errorMessage: "Unexpected range dependency",
+              errorDetails: `expecting "${version}" to be exact "${resolvedDep.version}"`,
+              dependency: dependencyValue,
               onlyWarns: shouldOnlyWarn,
               autoFixable: true,
             });
@@ -105,9 +108,9 @@ export async function checkExactVersions(
             }
           }
           reportError({
-            title: "Unexpected range dependency",
-            info: `expecting "${version}" to be exact "${exactVersion}"`,
-            dependency: { name: dependencyName, origin: type },
+            errorMessage: "Unexpected range dependency",
+            errorDetails: `expecting "${version}" to be exact "${exactVersion}"`,
+            dependency: dependencyValue,
             onlyWarns: shouldOnlyWarn,
           });
         }

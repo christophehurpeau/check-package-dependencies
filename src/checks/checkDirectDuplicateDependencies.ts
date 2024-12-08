@@ -4,13 +4,15 @@ import {
   reportNotWarnedForMapping,
 } from "../utils/createReportError.ts";
 import { getKeys } from "../utils/object.ts";
-import type { DependencyTypes, PackageJson } from "../utils/packageTypes.ts";
+import type {
+  DependencyTypes,
+  ParsedPackageJson,
+} from "../utils/packageTypes.ts";
 import type { OnlyWarnsForMappingCheck } from "../utils/warnForUtils.ts";
 import { checkDuplicateDependencies } from "./checkDuplicateDependencies.ts";
 
 export function checkDirectDuplicateDependencies(
-  pkg: PackageJson,
-  pkgPathName: string,
+  pkg: ParsedPackageJson,
   isPackageALibrary: boolean,
   depType: DependencyTypes,
   getDependencyPackageJson: GetDependencyPackageJson,
@@ -20,7 +22,7 @@ export function checkDirectDuplicateDependencies(
 ): void {
   const reportError = customCreateReportError(
     `${reportErrorNamePrefix}Direct Duplicate Dependencies`,
-    pkgPathName,
+    pkg.path,
   );
 
   const checks: {

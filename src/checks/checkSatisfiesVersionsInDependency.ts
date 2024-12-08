@@ -1,5 +1,5 @@
 import semver from "semver";
-import { createReportError } from "../utils/createReportError.ts";
+import { createReportError, inDependency } from "../utils/createReportError.ts";
 import { getEntries } from "../utils/object.ts";
 import type { DependenciesRanges, PackageJson } from "../utils/packageTypes.ts";
 
@@ -32,21 +32,21 @@ export function checkSatisfiesVersionsInDependency(
       if (dependencyRange == null) {
         if (dependencies?.[dependencyName]) {
           reportError({
-            title: `Invalid "${dependencyName}" in ${dependenciesType} of "${depPkg.name}"`,
-            info: "it should not be present",
+            errorMessage: `Invalid "${dependencyName}" ${inDependency(depPkg, dependenciesType)}`,
+            errorDetails: "it should not be present",
             dependency: { name: dependencyName },
           });
         }
       } else if (!dependencies) {
         reportError({
-          title: `Missing "${dependencyName}" in ${dependenciesType} of "${depPkg.name}"`,
-          info: `"${dependenciesType}" is missing`,
+          errorMessage: `Missing "${dependencyName}" ${inDependency(depPkg, dependenciesType)}`,
+          errorDetails: `"${dependenciesType}" is missing`,
           dependency: { name: dependencyName },
         });
       } else if (!dependencies[dependencyName]) {
         reportError({
-          title: `Missing "${dependencyName}" in ${dependenciesType} of "${depPkg.name}"`,
-          info: `"${dependencyName}" is missing in ${dependenciesType} of "${depPkg.name}"`,
+          errorMessage: `Missing "${dependencyName}" ${inDependency(depPkg, dependenciesType)}`,
+          errorDetails: `"${dependencyName}" is missing but should satisfies "${dependencyRange}"`,
           dependency: { name: dependencyName },
         });
       } else if (
@@ -58,8 +58,8 @@ export function checkSatisfiesVersionsInDependency(
         })
       ) {
         reportError({
-          title: `Invalid "${dependencyName}" in ${dependenciesType} of "${depPkg.name}"`,
-          info: `"${dependencies[dependencyName]}" does not satisfies "${dependencyRange}"`,
+          errorMessage: `Invalid "${dependencyName}" ${inDependency(depPkg, dependenciesType)}`,
+          errorDetails: `"${dependencies[dependencyName]}" does not satisfies "${dependencyRange}"`,
           dependency: { name: dependencyName },
         });
       }

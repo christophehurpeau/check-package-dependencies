@@ -5,51 +5,61 @@ const pathMessages = new Map();
 let totalWarnings = 0;
 let totalErrors = 0;
 let totalFixable = 0;
+// eslint-disable-next-line complexity
+function formatErrorMessage({ errorMessage, errorDetails, onlyWarns, autoFixable, ruleName, dependency, }) {
+    const location = dependency?.line
+        ? `${dependency.line}:${dependency.column || 0}`
+        : "0:0";
+    const messageType = onlyWarns ? chalk.yellow("warning") : chalk.red("error");
+    const dependencyInfo = dependency
+        ? chalk.gray(`${dependency.fieldName ? `${dependency.fieldName} > ` : ""}${dependency.name} `)
+        : "";
+    const details = errorDetails ? `: ${errorDetails}` : "";
+    const messageTitle = onlyWarns
+        ? chalk.yellow(errorMessage)
+        : chalk.red(errorMessage);
+    return `  ${location}  ${messageType}  ${dependencyInfo}${messageTitle}${details}  ${chalk.blue(ruleName)}${autoFixable ? chalk.gray(" (--fix)") : ""}`;
+}
 export function logMessage(message) {
-    const { title, info, onlyWarns, autoFixable } = message;
-    if (onlyWarns)
+    if (message.onlyWarns)
         totalWarnings++;
     else
         totalErrors++;
-    if (autoFixable)
+    if (message.autoFixable)
         totalFixable++;
-    console.error(`${onlyWarns ? chalk.yellow(`⚠ ${title}`) : chalk.red(`❌ ${title}`)}${info ? `: ${info}` : ""}${autoFixable ? ` ${chalk.bgGreenBright(chalk.black("auto-fixable"))}` : ""}`);
+    console.error(formatErrorMessage(message));
 }
 function displayMessagesForPath(path, { generalMessages, dependencyGroups, }) {
-    console.error(chalk.cyan(`== ${path} ==`));
+    console.error(chalk.underline(path));
     // Display general messages first
     if (generalMessages.length > 0) {
-        const title = generalMessages[0].title;
-        console.error(chalk.cyan(title));
         for (const message of generalMessages) {
             logMessage(message);
         }
     }
     // Then display dependency groups
-    for (const [dependency, group] of dependencyGroups) {
-        if (generalMessages.length > 0)
-            console.error();
-        console.error(chalk.cyan(`Issues for ${dependency} in ${path}:`));
+    for (const [, group] of dependencyGroups) {
         for (const message of group.messages) {
             logMessage(message);
         }
     }
+    console.error(); // Add empty line between files
 }
 function displayConclusion() {
     if (!totalWarnings && !totalErrors) {
-        console.log(`\n${chalk.green("✅ No errors or warnings found")}.`);
+        console.log(chalk.green("\n✨ No problems found"));
+        return;
     }
-    else if (!totalErrors) {
-        console.log(`\nFound ${chalk.yellow(`${totalWarnings} warnings`)}.`);
+    const problems = [];
+    if (totalErrors) {
+        problems.push(chalk.red(`${totalErrors} ${totalErrors === 1 ? "error" : "errors"}`));
     }
-    else if (!totalWarnings) {
-        console.log(`\nFound ${chalk.red(`${totalErrors} errors`)}.`);
+    if (totalWarnings) {
+        problems.push(chalk.yellow(`${totalWarnings} ${totalWarnings === 1 ? "warning" : "warnings"}`));
     }
-    else {
-        console.log(`\nFound ${chalk.red(`${totalErrors} errors`)} and ${chalk.yellow(`${totalWarnings} warnings`)}.`);
-    }
+    console.log(`\n✖ Found ${problems.join(" and ")}`);
     if (totalFixable) {
-        console.log(`Found ${chalk.green(`${totalFixable} auto-fixable`)} errors or warnings, run the command with "--fix" to fix them.`);
+        console.log(chalk.gray(`\n${totalFixable} ${totalFixable === 1 ? "issue" : "issues"} fixable with the --fix option`));
     }
 }
 export function displayMessages() {
@@ -59,7 +69,7 @@ export function displayMessages() {
     }
     displayConclusion();
 }
-export function createReportError(title, pkgPathName) {
+export function createReportError(ruleName, pkgPathName) {
     return function reportError(message) {
         let pathData = pathMessages.get(pkgPathName);
         if (!pathData) {
@@ -70,16 +80,16 @@ export function createReportError(title, pkgPathName) {
             pathMessages.set(pkgPathName, pathData);
         }
         if (message.dependency) {
-            const dependencyKey = `${message.dependency.origin ? `${message.dependency.origin} : ` : ""}${message.dependency.name}`;
+            const dependencyKey = `${message.dependency.fieldName ? `${message.dependency.fieldName} > ` : ""}${message.dependency.name}`;
             let group = pathData.dependencyGroups.get(dependencyKey);
             if (!group) {
                 group = { messages: [] };
                 pathData.dependencyGroups.set(dependencyKey, group);
             }
-            group.messages.push({ ...message, title });
+            group.messages.push({ ...message, ruleName });
         }
         else {
-            pathData.generalMessages.push({ ...message, title });
+            pathData.generalMessages.push({ ...message, ruleName });
         }
         if (!message.onlyWarns) {
             process.exitCode = 1;
@@ -90,8 +100,8 @@ export function reportNotWarnedFor(reportError, onlyWarnsForCheck) {
     const notWarnedFor = onlyWarnsForCheck.getNotWarnedFor();
     if (notWarnedFor.length > 0) {
         reportError({
-            title: `Invalid config in "${onlyWarnsForCheck.configName}"`,
-            info: `no warning was raised for ${notWarnedFor
+            errorMessage: `Invalid config in "${onlyWarnsForCheck.configName}"`,
+            errorDetails: `no warning was raised for ${notWarnedFor
                 .map((depName) => `"${depName}"`)
                 .join(", ")}`,
         });
@@ -101,11 +111,10 @@ export function reportNotWarnedForMapping(reportError, onlyWarnsForMappingCheck)
     const notWarnedForMapping = onlyWarnsForMappingCheck.getNotWarnedFor();
     getEntries(notWarnedForMapping).forEach(([depNameOrStar, notWarnedFor]) => {
         reportError({
-            title: `Invalid config in "${onlyWarnsForMappingCheck.configName}"`,
-            info: `no warning was raised for ${notWarnedFor
+            errorMessage: `Invalid config in "${onlyWarnsForMappingCheck.configName}"`,
+            errorDetails: `no warning was raised for ${notWarnedFor
                 .map((depName) => `"${depName}"`)
                 .join(", ")}`,
-            dependency: { name: depNameOrStar },
         });
     });
 }
@@ -114,5 +123,11 @@ export function resetMessages() {
     totalWarnings = 0;
     totalErrors = 0;
     totalFixable = 0;
+}
+export function fromDependency(depPkg, depType) {
+    return `from "${depPkg.name || ""}"${depType ? ` in "${depType}"` : ""}`;
+}
+export function inDependency(depPkg, depType) {
+    return `in ${depType ? `"${depType}" of ` : ""}"${depPkg.name || ""}"`;
 }
 //# sourceMappingURL=createReportError.js.map

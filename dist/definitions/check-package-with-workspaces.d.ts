@@ -1,7 +1,6 @@
-import type { Except } from "type-fest";
+import type { Except, PackageJson } from "type-fest";
 import type { CheckPackageApi, CreateCheckPackageOptions, OnlyWarnsForInDependenciesCheckPackageRecommendedOption, OnlyWarnsForInDependencyCheckPackageRecommendedOption, OnlyWarnsForInPackageCheckPackageRecommendedOption } from "./check-package.ts";
 import type { CheckResolutionMessage } from "./checks/checkResolutionsHasExplanation.ts";
-import type { PackageJson } from "./utils/packageTypes.ts";
 import type { OnlyWarnsForOptionalDependencyMapping } from "./utils/warnForUtils.ts";
 interface OnlyWarnsForInMonorepoPackageCheckPackageRecommendedOption extends OnlyWarnsForInPackageCheckPackageRecommendedOption {
     duplicateDirectDependency: OnlyWarnsForInDependencyCheckPackageRecommendedOption["duplicateDirectDependency"];

@@ -5,6 +5,7 @@ import {
   assertSingleMessage,
   createMockReportError,
 } from "../utils/createReportError.testUtils.ts";
+import { parsePkgValue } from "../utils/pkgJsonUtils.ts";
 import { checkNoDependencies } from "./checkNoDependencies.ts";
 
 describe("checkNoDependencies", () => {
@@ -12,8 +13,7 @@ describe("checkNoDependencies", () => {
 
   it('should return no error when no "dependencies" is present', () => {
     checkNoDependencies(
-      { name: "test", devDependencies: { test: "1.0.0" } },
-      "path",
+      parsePkgValue({ name: "test", devDependencies: { test: "1.0.0" } }),
       undefined,
       undefined,
       createReportError,
@@ -23,8 +23,7 @@ describe("checkNoDependencies", () => {
 
   it('should return no error when no "devDependencies" is present', () => {
     checkNoDependencies(
-      { name: "test", dependencies: { test: "1.0.0" } },
-      "path",
+      parsePkgValue({ name: "test", dependencies: { test: "1.0.0" } }),
       "devDependencies",
       undefined,
       createReportError,
@@ -34,32 +33,30 @@ describe("checkNoDependencies", () => {
 
   it('should return no error when "dependencies" is present', () => {
     checkNoDependencies(
-      { name: "test", dependencies: { test: "1.0.0" } },
-      "path",
+      parsePkgValue({ name: "test", dependencies: { test: "1.0.0" } }),
       undefined,
       undefined,
       createReportError,
     );
-    assertCreateReportErrorCall(createReportError, "No dependencies", "path");
+    assertCreateReportErrorCall(createReportError, "No dependencies");
     assertSingleMessage(messages, {
-      title: "Unexpected dependencies",
-      info: "you should move them in devDependencies",
+      errorMessage: "Unexpected dependencies",
+      errorDetails: "you should move them in devDependencies",
       autoFixable: false,
     });
   });
 
   it('should return no error when "dependencies" is present and is in onlyWarnsFor', () => {
     checkNoDependencies(
-      { name: "test", dependencies: { test: "1.0.0" } },
-      "path",
+      parsePkgValue({ name: "test", dependencies: { test: "1.0.0" } }),
       "dependencies",
       "peerDependencies",
       createReportError,
     );
-    assertCreateReportErrorCall(createReportError, "No dependencies", "path");
+    assertCreateReportErrorCall(createReportError, "No dependencies");
     assertSingleMessage(messages, {
-      title: "Unexpected dependencies",
-      info: "you should move them in peerDependencies",
+      errorMessage: "Unexpected dependencies",
+      errorDetails: "you should move them in peerDependencies",
       autoFixable: false,
     });
   });

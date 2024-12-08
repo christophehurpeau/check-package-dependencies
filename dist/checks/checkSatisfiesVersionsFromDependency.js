@@ -1,25 +1,24 @@
 import semver from "semver";
-import { createReportError } from "../utils/createReportError.js";
+import { createReportError, fromDependency, inDependency, } from "../utils/createReportError.js";
 import { changeOperator, getOperator } from "../utils/semverUtils.js";
-export function checkSatisfiesVersionsFromDependency(pkg, pkgPathName, type, depKeys, depPkg, depType, { tryToAutoFix, shouldHaveExactVersions, onlyWarnsForCheck, customCreateReportError = createReportError, }) {
+export function checkSatisfiesVersionsFromDependency(pkg, type, depKeys, depPkg, depType, { tryToAutoFix, shouldHaveExactVersions, onlyWarnsForCheck, customCreateReportError = createReportError, }) {
     const pkgDependencies = pkg[type] || {};
     const dependencies = depPkg[depType] || {};
-    const reportError = customCreateReportError("Satisfies Versions From Dependency", pkgPathName);
+    const reportError = customCreateReportError("Satisfies Versions From Dependency", pkg.path);
     depKeys.forEach((depKey) => {
         const range = dependencies[depKey];
         if (!range) {
             reportError({
-                title: "Unexpected missing dependency",
-                info: `config expects "${depKey}" in "${depType}" of "${depPkg.name}"`,
-                dependency: { name: depKey, origin: depType },
+                errorMessage: "Unexpected missing dependency",
+                errorDetails: `config expects "${depKey}" ${inDependency(depPkg, depType)}`,
                 onlyWarns: undefined,
                 autoFixable: undefined,
             });
             return;
         }
-        const version = pkgDependencies[depKey];
+        const pkgRange = pkgDependencies[depKey];
         const getAutoFixIfExists = () => {
-            const existingOperator = version ? getOperator(version) : null;
+            const existingOperator = pkgRange ? getOperator(pkgRange.value) : null;
             const expectedOperator = (() => {
                 if (existingOperator !== null) {
                     return existingOperator;
@@ -30,29 +29,23 @@ export function checkSatisfiesVersionsFromDependency(pkg, pkgPathName, type, dep
                 ? semver.minVersion(range)?.version
                 : changeOperator(range, expectedOperator);
         };
-        const autoFix = (versionToApply) => {
-            pkg[type] = {
-                ...pkg[type],
-                [depKey]: versionToApply,
-            };
-        };
-        if (!version) {
+        if (!pkgRange) {
             const fix = getAutoFixIfExists();
             if (!fix || !tryToAutoFix) {
                 reportError({
-                    title: "Missing dependency",
-                    info: `should satisfies "${range}" from "${depPkg.name}" in "${depType}"`,
-                    dependency: { name: depKey, origin: type },
+                    errorMessage: "Missing dependency",
+                    errorDetails: `should satisfies "${range}" ${fromDependency(depPkg, depType)}`,
+                    dependency: { name: depKey, fieldName: type },
                     onlyWarns: onlyWarnsForCheck?.shouldWarnsFor(depKey),
                     autoFixable: !!fix,
                 });
             }
             else {
-                autoFix(fix);
+                pkg.change(type, depKey, fix);
             }
         }
         else {
-            const minVersionOfVersion = semver.minVersion(version);
+            const minVersionOfVersion = semver.minVersion(pkgRange.value);
             if (!minVersionOfVersion ||
                 !semver.satisfies(minVersionOfVersion, range, {
                     includePrerelease: true,
@@ -60,15 +53,15 @@ export function checkSatisfiesVersionsFromDependency(pkg, pkgPathName, type, dep
                 const fix = getAutoFixIfExists();
                 if (!fix || !tryToAutoFix) {
                     reportError({
-                        title: "Invalid",
-                        info: `"${version}" should satisfies "${range}" from "${depPkg.name}" in "${depType}"`,
-                        dependency: { name: depKey, origin: type },
+                        errorMessage: "Invalid",
+                        errorDetails: `"${pkgRange.value}" should satisfies "${range}" ${fromDependency(depPkg, depType)}`,
+                        dependency: pkgRange,
                         onlyWarns: onlyWarnsForCheck?.shouldWarnsFor(depKey),
                         autoFixable: !!fix,
                     });
                 }
                 else {
-                    autoFix(fix);
+                    pkgRange.changeValue(fix);
                 }
             }
         }

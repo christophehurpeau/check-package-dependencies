@@ -22,8 +22,8 @@ const getAllowedPeerInFromType = (depPkgType, isLibrary) => {
         // no default
     }
 };
-export function checkDirectPeerDependencies(isLibrary, pkg, pkgPathName, getDependencyPackageJson, missingOnlyWarnsForCheck, invalidOnlyWarnsForCheck, customCreateReportError = createReportError) {
-    const reportError = customCreateReportError("Peer Dependencies", pkgPathName);
+export function checkDirectPeerDependencies(isLibrary, pkg, getDependencyPackageJson, missingOnlyWarnsForCheck, invalidOnlyWarnsForCheck, customCreateReportError = createReportError) {
+    const reportError = customCreateReportError("Peer Dependencies", pkg.path);
     const allDepPkgs = [];
     const allDirectDependenciesDependencies = [];
     regularDependencyTypes.forEach((depType) => {
@@ -37,7 +37,7 @@ export function checkDirectPeerDependencies(isLibrary, pkg, pkgPathName, getDepe
                 type: depType,
                 pkg: depPkg,
                 hasDirectMatchingPeerDependency: pkg.peerDependencies?.[depName]
-                    ? semver.intersects(dependencies[depName], pkg.peerDependencies[depName])
+                    ? semver.intersects(dependencies[depName].value, pkg.peerDependencies[depName].value)
                     : false,
             });
             if (depPkg.dependencies && !isLibrary) {

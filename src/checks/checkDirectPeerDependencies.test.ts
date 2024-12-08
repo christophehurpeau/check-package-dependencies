@@ -7,6 +7,7 @@ import {
   createMockReportError,
 } from "../utils/createReportError.testUtils.ts";
 import type { PackageJson } from "../utils/packageTypes.ts";
+import { parsePkgValue } from "../utils/pkgJsonUtils.ts";
 import { createOnlyWarnsForMappingCheck } from "../utils/warnForUtils.ts";
 import { checkDirectPeerDependencies } from "./checkDirectPeerDependencies.ts";
 
@@ -26,11 +27,10 @@ describe("checkDirectPeerDependencies", () => {
 
     checkDirectPeerDependencies(
       false,
-      {
+      parsePkgValue({
         name: "test",
         devDependencies: { "some-lib-using-rollup": "1.0.0" },
-      },
-      "path",
+      }),
       getDependencyPackageJsonMock,
       createOnlyWarnsForMappingCheck("test", []),
       createOnlyWarnsForMappingCheck("test", []),
@@ -38,9 +38,10 @@ describe("checkDirectPeerDependencies", () => {
     );
 
     assertSingleMessage(messages, {
-      title:
-        'Missing "rollup" peer dependency from "some-lib-using-rollup" in devDependencies',
-      info: 'it should satisfies "^1.0.0" and be in devDependencies or dependencies',
+      errorMessage:
+        'Missing "rollup" peer dependency from "some-lib-using-rollup" in "devDependencies"',
+      errorDetails:
+        'it should satisfies "^1.0.0" and be in devDependencies or dependencies',
       onlyWarns: false,
       dependency: { name: "rollup" },
     });
@@ -64,11 +65,10 @@ describe("checkDirectPeerDependencies", () => {
 
     checkDirectPeerDependencies(
       false,
-      {
+      parsePkgValue({
         name: "test",
         devDependencies: { rollup: "^1.0.0", "some-lib-using-rollup": "1.0.0" },
-      },
-      "path",
+      }),
       getDependencyPackageJsonMock,
       createOnlyWarnsForMappingCheck("test", []),
       createOnlyWarnsForMappingCheck("test", []),
@@ -94,11 +94,10 @@ describe("checkDirectPeerDependencies", () => {
     );
     checkDirectPeerDependencies(
       false,
-      {
+      parsePkgValue({
         name: "test",
         devDependencies: { rollup: "^1.0.0", "some-lib-using-rollup": "1.0.0" },
-      },
-      "path",
+      }),
       getDependencyPackageJsonMock,
       createOnlyWarnsForMappingCheck("test", []),
       createOnlyWarnsForMappingCheck("test", []),
@@ -125,14 +124,13 @@ describe("checkDirectPeerDependencies", () => {
 
     checkDirectPeerDependencies(
       false,
-      {
+      parsePkgValue({
         name: "test",
         devDependencies: {
           rollup: "^1.0.0-beta.0",
           "some-lib-using-rollup": "1.0.0",
         },
-      },
-      "path",
+      }),
       getDependencyPackageJsonMock,
       createOnlyWarnsForMappingCheck("test", []),
       createOnlyWarnsForMappingCheck("test", []),
@@ -159,14 +157,13 @@ describe("checkDirectPeerDependencies", () => {
 
     checkDirectPeerDependencies(
       false,
-      {
+      parsePkgValue({
         name: "test",
         devDependencies: {
           rollup: "1.0.0-beta.15",
           "some-lib-using-rollup": "1.0.0",
         },
-      },
-      "path",
+      }),
       getDependencyPackageJsonMock,
       createOnlyWarnsForMappingCheck("test", []),
       createOnlyWarnsForMappingCheck("test", []),
@@ -193,13 +190,12 @@ describe("checkDirectPeerDependencies", () => {
 
     checkDirectPeerDependencies(
       true,
-      {
+      parsePkgValue({
         name: "test",
         peerDependencies: { rollup: "^1.0.0" },
         dependencies: { rollup: "^1.0.0" },
         devDependencies: { "some-lib-using-rollup": "1.0.0" },
-      },
-      "path",
+      }),
       getDependencyPackageJsonMock,
       createOnlyWarnsForMappingCheck("test", []),
       createOnlyWarnsForMappingCheck("test", []),
@@ -220,11 +216,10 @@ describe("checkDirectPeerDependencies", () => {
 
     checkDirectPeerDependencies(
       false,
-      {
+      parsePkgValue({
         name: "test",
         devDependencies: { "some-lib-using-rollup": "1.0.0" },
-      },
-      "path",
+      }),
       getDependencyPackageJsonMock,
       createOnlyWarnsForMappingCheck("test", []),
       createOnlyWarnsForMappingCheck("test", []),
@@ -251,7 +246,7 @@ describe("checkDirectPeerDependencies", () => {
 
     checkDirectPeerDependencies(
       false,
-      {
+      parsePkgValue({
         name: "test",
         dependencies: {
           "some-lib-using-types": "1.0.0",
@@ -259,8 +254,7 @@ describe("checkDirectPeerDependencies", () => {
         devDependencies: {
           "@types/a": "1.0.0",
         },
-      },
-      "path",
+      }),
       getDependencyPackageJsonMock,
       createOnlyWarnsForMappingCheck("test", []),
       createOnlyWarnsForMappingCheck("test", []),
@@ -287,7 +281,7 @@ describe("checkDirectPeerDependencies", () => {
 
     checkDirectPeerDependencies(
       true,
-      {
+      parsePkgValue({
         name: "test",
         dependencies: {
           "some-lib-using-types": "1.0.0",
@@ -295,17 +289,17 @@ describe("checkDirectPeerDependencies", () => {
         devDependencies: {
           "@types/a": "1.0.0",
         },
-      },
-      "path",
+      }),
       getDependencyPackageJsonMock,
       createOnlyWarnsForMappingCheck("test", []),
       createOnlyWarnsForMappingCheck("test", []),
       createReportError,
     );
     assertSingleMessage(messages, {
-      title:
-        'Missing "@types/a" peer dependency from "some-lib-using-types" in dependencies',
-      info: 'it should satisfies "^1.0.0" and be in dependencies or peerDependencies',
+      errorMessage:
+        'Missing "@types/a" peer dependency from "some-lib-using-types" in "dependencies"',
+      errorDetails:
+        'it should satisfies "^1.0.0" and be in dependencies or peerDependencies',
       onlyWarns: false,
       dependency: { name: "@types/a" },
     });
@@ -330,23 +324,23 @@ describe("checkDirectPeerDependencies", () => {
 
     checkDirectPeerDependencies(
       true,
-      {
+      parsePkgValue({
         name: "test",
         dependencies: {
           "some-lib-using-rollup": "1.0.0",
           "some-lib-providing-rollup": "1.0.0",
         },
-      },
-      "path",
+      }),
       getDependencyPackageJsonMock,
       createOnlyWarnsForMappingCheck("test", []),
       createOnlyWarnsForMappingCheck("test", []),
       createReportError,
     );
     assertSingleMessage(messages, {
-      title:
-        'Missing "rollup" peer dependency from "some-lib-using-rollup" in dependencies',
-      info: 'it should satisfies "^1.0.0" and be in dependencies or peerDependencies',
+      errorMessage:
+        'Missing "rollup" peer dependency from "some-lib-using-rollup" in "dependencies"',
+      errorDetails:
+        'it should satisfies "^1.0.0" and be in dependencies or peerDependencies',
       onlyWarns: false,
       dependency: { name: "rollup" },
     });
@@ -371,14 +365,13 @@ describe("checkDirectPeerDependencies", () => {
 
     checkDirectPeerDependencies(
       false,
-      {
+      parsePkgValue({
         name: "test",
         dependencies: {
           "some-lib-using-rollup": "1.0.0",
           "some-lib-providing-rollup": "1.0.0",
         },
-      },
-      "path",
+      }),
       getDependencyPackageJsonMock,
       createOnlyWarnsForMappingCheck("test", []),
       createOnlyWarnsForMappingCheck("test", []),
@@ -413,15 +406,14 @@ describe("checkDirectPeerDependencies", () => {
 
     checkDirectPeerDependencies(
       false,
-      {
+      parsePkgValue({
         name: "test",
         dependencies: {
           "some-lib-using-rollup": "1.0.0",
           "some-lib-providing-rollup-1": "1.0.0",
           "some-lib-providing-rollup-2": "1.0.0",
         },
-      },
-      "path",
+      }),
       getDependencyPackageJsonMock,
       createOnlyWarnsForMappingCheck("test", []),
       createOnlyWarnsForMappingCheck("test", []),
@@ -436,9 +428,10 @@ describe("checkDirectPeerDependencies", () => {
       ],
     );
     assertSingleMessage(messages, {
-      title:
-        'Missing "rollup" peer dependency from "some-lib-using-rollup" in dependencies',
-      info: 'it should satisfies "^1.0.0" and be in devDependencies or dependencies (required as some dependencies have non-satisfying range too)',
+      errorMessage:
+        'Missing "rollup" peer dependency from "some-lib-using-rollup" in "dependencies"',
+      errorDetails:
+        'it should satisfies "^1.0.0" and be in devDependencies or dependencies (required as some dependencies have non-satisfying range too)',
       onlyWarns: false,
       dependency: { name: "rollup" },
     });
@@ -453,7 +446,7 @@ describe("checkDirectPeerDependencies", () => {
 
     checkDirectPeerDependencies(
       true,
-      {
+      parsePkgValue({
         name: "test",
         devDependencies: {
           "some-lib-using-rollup": "1.0.0",
@@ -461,8 +454,7 @@ describe("checkDirectPeerDependencies", () => {
         peerDependencies: {
           "some-lib-using-rollup": "^1.0.0",
         },
-      },
-      "path",
+      }),
       getDependencyPackageJsonMock,
       createOnlyWarnsForMappingCheck("test", []),
       createOnlyWarnsForMappingCheck("test", []),
@@ -487,7 +479,7 @@ describe("checkDirectPeerDependencies", () => {
 
     checkDirectPeerDependencies(
       false,
-      {
+      parsePkgValue({
         name: "test",
         devDependencies: {
           "some-lib-using-rollup": "1.0.0",
@@ -496,18 +488,18 @@ describe("checkDirectPeerDependencies", () => {
         peerDependencies: {
           "some-lib-using-rollup": "^1.0.0",
         },
-      },
-      "path",
+      }),
       getDependencyPackageJsonMock,
       createOnlyWarnsForMappingCheck("test", []),
       createOnlyWarnsForMappingCheck("test", []),
       createReportError,
     );
     assertSingleMessage(messages, {
-      title: "Invalid peer dependency version",
-      info: '"^2.0.0" should satisfies "^1.0.0" from "some-lib-using-rollup" in devDependencies',
+      errorMessage: "Invalid peer dependency version",
+      errorDetails:
+        '"^2.0.0" should satisfies "^1.0.0" from "some-lib-using-rollup" in "devDependencies"',
       onlyWarns: false,
-      dependency: { name: "rollup", origin: "devDependencies" },
+      dependency: { name: "rollup", fieldName: "devDependencies" },
     });
   });
 
@@ -527,7 +519,7 @@ describe("checkDirectPeerDependencies", () => {
 
     checkDirectPeerDependencies(
       false,
-      {
+      parsePkgValue({
         name: "test",
         dependencies: {
           "react-native": "1.0.0",
@@ -538,17 +530,17 @@ describe("checkDirectPeerDependencies", () => {
         peerDependencies: {
           "react-native": "*",
         },
-      },
-      "path",
+      }),
       getDependencyPackageJsonMock,
       createOnlyWarnsForMappingCheck("test", []),
       createOnlyWarnsForMappingCheck("test", []),
       createReportError,
     );
     assertSingleMessage(messages, {
-      title: "Invalid peer dependency version",
-      info: '"18.3.0" should satisfies "18.2.0" from "react-native" in dependencies',
-      dependency: { name: "react", origin: "devDependencies" },
+      errorMessage: "Invalid peer dependency version",
+      errorDetails:
+        '"18.3.0" should satisfies "18.2.0" from "react-native" in "dependencies"',
+      dependency: { name: "react", fieldName: "devDependencies" },
       onlyWarns: false,
     });
   });
@@ -562,7 +554,7 @@ describe("checkDirectPeerDependencies", () => {
 
     checkDirectPeerDependencies(
       false,
-      {
+      parsePkgValue({
         name: "test",
         devDependencies: {
           "alouette-icons": "workspace:*",
@@ -570,8 +562,7 @@ describe("checkDirectPeerDependencies", () => {
         peerDependencies: {
           "lib-using-alouette-icons": "*",
         },
-      },
-      "path",
+      }),
       getDependencyPackageJsonMock,
       createOnlyWarnsForMappingCheck("test", []),
       createOnlyWarnsForMappingCheck("test", []),

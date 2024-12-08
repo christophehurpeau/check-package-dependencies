@@ -1,38 +1,39 @@
-import { createReportError } from "../utils/createReportError.js";
-export function checkIdenticalVersionsThanDependency(pkg, pkgPathName, type, depKeys, depPkg, dependencies = {}, onlyWarnsForCheck, customCreateReportError = createReportError) {
+import { createReportError, fromDependency, inDependency, } from "../utils/createReportError.js";
+export function checkIdenticalVersionsThanDependency(pkg, type, depKeys, depPkg, dependencies = {}, onlyWarnsForCheck, customCreateReportError = createReportError) {
     const pkgDependencies = pkg[type] || {};
-    const reportError = customCreateReportError(`Same Versions than ${depPkg.name}`, pkgPathName);
+    const reportError = customCreateReportError(`Same Versions than ${depPkg.name || ""}`, pkg.path);
     depKeys.forEach((depKey) => {
         const version = dependencies[depKey];
+        const depValue = pkgDependencies[depKey];
         if (!version) {
             reportError({
-                title: `Unexpected missing dependency "${depKey}" in "${depPkg.name}"`,
-                dependency: { name: depKey, origin: type },
+                errorMessage: `Unexpected missing dependency "${depKey}" ${inDependency(depPkg)}`,
+                errorDetails: `config expects "${depKey}" to be present`,
             });
             return;
         }
         if (version.startsWith("^") || version.startsWith("~")) {
             reportError({
-                title: `Unexpected range dependency "${depKey}" in "${depPkg.name}"`,
-                info: "perhaps use checkSatisfiesVersionsFromDependency() instead",
-                dependency: { name: depKey, origin: type },
+                errorMessage: `Unexpected range dependency "${depKey}" ${inDependency(depPkg)}`,
+                errorDetails: "perhaps use checkSatisfiesVersionsFromDependency() instead",
             });
             return;
         }
-        const value = pkgDependencies[depKey];
+        const value = depValue?.value;
         if (!value) {
             reportError({
-                title: `Missing "${depKey}"`,
-                info: `expecting to be "${version}"`,
-                dependency: { name: depKey, origin: type },
+                errorMessage: `Missing "${depKey}"`,
+                errorDetails: `expecting to be "${version}"`,
+                dependency: { name: depKey, fieldName: type },
                 onlyWarns: onlyWarnsForCheck?.shouldWarnsFor(depKey),
             });
+            return;
         }
         if (value !== version) {
             reportError({
-                title: `Invalid "${value}"`,
-                info: `expecting "${value}" to be "${version}" from "${depPkg.name}"`,
-                dependency: { name: depKey, origin: type },
+                errorMessage: `Invalid "${value}"`,
+                errorDetails: `expecting "${value}" to be "${version}" ${fromDependency(depPkg)}`,
+                dependency: depValue,
                 onlyWarns: onlyWarnsForCheck?.shouldWarnsFor(depKey),
             });
         }

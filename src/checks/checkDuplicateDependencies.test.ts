@@ -4,6 +4,7 @@ import {
   assertSingleMessage,
   createMockReportError,
 } from "../utils/createReportError.testUtils.ts";
+import { parsePkgValue } from "../utils/pkgJsonUtils.ts";
 import { createOnlyWarnsForArrayCheck } from "../utils/warnForUtils.ts";
 import { checkDuplicateDependencies } from "./checkDuplicateDependencies.ts";
 
@@ -13,11 +14,11 @@ describe("checkDuplicateDependencies", () => {
   it("should report error when is in multiple types and not a library", () => {
     checkDuplicateDependencies(
       mockReportError,
-      {
+      parsePkgValue({
         name: "test",
         devDependencies: { rollup: "1.0.0" },
         dependencies: { rollup: "1.0.0" },
-      },
+      }),
       false,
       "dependencies",
       ["dependencies", "devDependencies"],
@@ -29,46 +30,49 @@ describe("checkDuplicateDependencies", () => {
     );
 
     assertSingleMessage(messages, {
-      title: 'Invalid "rollup" present in dependencies and devDependencies',
-      info: "please place it only in dependencies",
+      errorMessage:
+        'Invalid "rollup" present in dependencies and devDependencies',
+      errorDetails: "please place it only in dependencies",
     });
   });
 
   it("should report error when is in multiple types with same version and is a library", () => {
     checkDuplicateDependencies(
       mockReportError,
-      {
+      parsePkgValue({
         name: "test",
         devDependencies: { rollup: "1.0.0" },
         dependencies: { rollup: "1.0.0" },
-      },
+      }),
       true,
       "dependencies",
       ["dependencies", "devDependencies"],
       {
         name: "some-lib-using-rollup",
-        dependencies: { rollup: "^2.0.0" },
+        dependencies: { rollup: "^1.0.0" },
       },
       createOnlyWarnsForArrayCheck("test", []),
     );
 
     assertSingleMessage(messages, {
-      title:
+      errorMessage:
         'Invalid "rollup" has same version in dependencies and devDependencies',
-      info: "please place it only in dependencies or use range in dependencies",
+      errorDetails:
+        "please place it only in dependencies or use range in dependencies",
+      dependency: { name: "rollup", fieldName: "dependencies", value: "1.0.0" },
     });
   });
 
   it("should report error when dependency does not intersect", () => {
     checkDuplicateDependencies(
       mockReportError,
-      {
+      parsePkgValue({
         name: "test",
         devDependencies: {
           rollup: "1.0.0",
           "some-lib-using-rollup": "1.0.0",
         },
-      },
+      }),
       false,
       "dependencies",
       ["devDependencies"],
@@ -80,23 +84,28 @@ describe("checkDuplicateDependencies", () => {
     );
 
     assertSingleMessage(messages, {
-      title: "Invalid duplicate dependency",
-      info: '"1.0.0" should satisfies "^2.0.0" from some-lib-using-rollup in dependencies',
+      errorMessage: "Invalid duplicate dependency",
+      errorDetails:
+        '"1.0.0" should satisfies "^2.0.0" from some-lib-using-rollup in dependencies',
       onlyWarns: false,
-      dependency: { name: "rollup", origin: "devDependencies" },
+      dependency: {
+        name: "rollup",
+        fieldName: "devDependencies",
+        value: "1.0.0",
+      },
     });
   });
 
   it("should not report error when dev dependency value is a beta", () => {
     checkDuplicateDependencies(
       mockReportError,
-      {
+      parsePkgValue({
         name: "test",
         devDependencies: {
           rollup: "1.0.0-beta.0",
           "some-lib-using-rollup": "1.0.0",
         },
-      },
+      }),
       false,
       "dependencies",
       ["devDependencies"],
@@ -113,13 +122,13 @@ describe("checkDuplicateDependencies", () => {
   it("should not report error when dependency is in onlyWarnsFor", () => {
     checkDuplicateDependencies(
       mockReportError,
-      {
+      parsePkgValue({
         name: "test",
         devDependencies: {
           rollup: "1.0.0",
           "some-lib-using-rollup": "1.0.0",
         },
-      },
+      }),
       false,
       "dependencies",
       ["devDependencies"],
@@ -131,23 +140,28 @@ describe("checkDuplicateDependencies", () => {
     );
 
     assertSingleMessage(messages, {
-      title: "Invalid duplicate dependency",
-      info: '"1.0.0" should satisfies "^2.0.0" from some-lib-using-rollup in dependencies',
+      errorMessage: "Invalid duplicate dependency",
+      errorDetails:
+        '"1.0.0" should satisfies "^2.0.0" from some-lib-using-rollup in dependencies',
       onlyWarns: true,
-      dependency: { name: "rollup", origin: "devDependencies" },
+      dependency: {
+        name: "rollup",
+        fieldName: "devDependencies",
+        value: "1.0.0",
+      },
     });
   });
 
   it("should not report error when dependency is in peerDependencies", () => {
     checkDuplicateDependencies(
       mockReportError,
-      {
+      parsePkgValue({
         name: "test",
         devDependencies: {
           rollup: "1.0.0",
           "some-lib-using-rollup": "1.0.0",
         },
-      },
+      }),
       false,
       "peerDependencies",
       ["devDependencies"],
@@ -164,13 +178,13 @@ describe("checkDuplicateDependencies", () => {
   it("should report error when dependency is in peerDependencies and allowPeerDependencies is false", () => {
     checkDuplicateDependencies(
       mockReportError,
-      {
+      parsePkgValue({
         name: "test",
         devDependencies: {
           rollup: "1.0.0",
           "some-lib-using-rollup": "1.0.0",
         },
-      },
+      }),
       true,
       "peerDependencies",
       ["devDependencies"],
@@ -182,10 +196,15 @@ describe("checkDuplicateDependencies", () => {
     );
 
     assertSingleMessage(messages, {
-      title: "Invalid duplicate dependency",
-      info: '"1.0.0" should satisfies "^2.0.0" from some-lib-using-rollup in peerDependencies',
+      errorMessage: "Invalid duplicate dependency",
+      errorDetails:
+        '"1.0.0" should satisfies "^2.0.0" from some-lib-using-rollup in peerDependencies',
       onlyWarns: false,
-      dependency: { name: "rollup", origin: "devDependencies" },
+      dependency: {
+        name: "rollup",
+        fieldName: "devDependencies",
+        value: "1.0.0",
+      },
     });
   });
 });

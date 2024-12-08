@@ -1,22 +1,27 @@
 /* eslint-disable no-console */
 
 import chalk from "chalk";
+import type { Except, PackageJson } from "type-fest";
 import { getEntries } from "./object.ts";
-import type { DependencyTypes } from "./packageTypes.ts";
+import type { DependencyTypes, DependencyValue } from "./packageTypes.ts";
 import type {
   OnlyWarnsForCheck,
   OnlyWarnsForMappingCheck,
 } from "./warnForUtils.ts";
 
 export interface ReportErrorMessage {
-  title: string;
-  info?: string;
-  dependency?: { name: string; origin?: DependencyTypes };
+  ruleName: string;
+  errorMessage: string;
+  errorDetails?: string;
+  dependency?: Omit<Partial<DependencyValue>, "name"> &
+    Pick<DependencyValue, "name">;
   onlyWarns?: boolean;
   autoFixable?: boolean;
 }
 
-export type ReportError = (message: ReportErrorMessage) => void;
+export type ReportError = (
+  message: Except<ReportErrorMessage, "ruleName">,
+) => void;
 
 interface ErrorGroup {
   messages: ReportErrorMessage[];
@@ -34,20 +39,38 @@ let totalWarnings = 0;
 let totalErrors = 0;
 let totalFixable = 0;
 
+// eslint-disable-next-line complexity
+function formatErrorMessage({
+  errorMessage,
+  errorDetails,
+  onlyWarns,
+  autoFixable,
+  ruleName,
+  dependency,
+}: ReportErrorMessage): string {
+  const location = dependency?.line
+    ? `${dependency.line}:${dependency.column || 0}`
+    : "0:0";
+  const messageType = onlyWarns ? chalk.yellow("warning") : chalk.red("error");
+  const dependencyInfo = dependency
+    ? chalk.gray(
+        `${dependency.fieldName ? `${dependency.fieldName} > ` : ""}${dependency.name} `,
+      )
+    : "";
+  const details = errorDetails ? `: ${errorDetails}` : "";
+  const messageTitle = onlyWarns
+    ? chalk.yellow(errorMessage)
+    : chalk.red(errorMessage);
+
+  return `  ${location}  ${messageType}  ${dependencyInfo}${messageTitle}${details}  ${chalk.blue(ruleName)}${autoFixable ? chalk.gray(" (--fix)") : ""}`;
+}
+
 export function logMessage(message: ReportErrorMessage): void {
-  const { title, info, onlyWarns, autoFixable } = message;
-
-  if (onlyWarns) totalWarnings++;
+  if (message.onlyWarns) totalWarnings++;
   else totalErrors++;
-  if (autoFixable) totalFixable++;
+  if (message.autoFixable) totalFixable++;
 
-  console.error(
-    `${
-      onlyWarns ? chalk.yellow(`⚠ ${title}`) : chalk.red(`❌ ${title}`)
-    }${info ? `: ${info}` : ""}${
-      autoFixable ? ` ${chalk.bgGreenBright(chalk.black("auto-fixable"))}` : ""
-    }`,
-  );
+  console.error(formatErrorMessage(message));
 }
 
 function displayMessagesForPath(
@@ -60,48 +83,52 @@ function displayMessagesForPath(
     dependencyGroups: Map<string, ErrorGroup>;
   },
 ): void {
-  console.error(chalk.cyan(`== ${path} ==`));
+  console.error(chalk.underline(path));
 
   // Display general messages first
   if (generalMessages.length > 0) {
-    const title = generalMessages[0].title;
-    console.error(chalk.cyan(title));
     for (const message of generalMessages) {
       logMessage(message);
     }
   }
 
   // Then display dependency groups
-  for (const [dependency, group] of dependencyGroups) {
-    if (generalMessages.length > 0) console.error();
-    console.error(chalk.cyan(`Issues for ${dependency} in ${path}:`));
-
+  for (const [, group] of dependencyGroups) {
     for (const message of group.messages) {
       logMessage(message);
     }
   }
+
+  console.error(); // Add empty line between files
 }
 
 function displayConclusion(): void {
   if (!totalWarnings && !totalErrors) {
-    console.log(`\n${chalk.green("✅ No errors or warnings found")}.`);
-  } else if (!totalErrors) {
-    console.log(`\nFound ${chalk.yellow(`${totalWarnings} warnings`)}.`);
-  } else if (!totalWarnings) {
-    console.log(`\nFound ${chalk.red(`${totalErrors} errors`)}.`);
-  } else {
-    console.log(
-      `\nFound ${chalk.red(`${totalErrors} errors`)} and ${chalk.yellow(
-        `${totalWarnings} warnings`,
-      )}.`,
+    console.log(chalk.green("\n✨ No problems found"));
+    return;
+  }
+
+  const problems = [];
+  if (totalErrors) {
+    problems.push(
+      chalk.red(`${totalErrors} ${totalErrors === 1 ? "error" : "errors"}`),
+    );
+  }
+  if (totalWarnings) {
+    problems.push(
+      chalk.yellow(
+        `${totalWarnings} ${totalWarnings === 1 ? "warning" : "warnings"}`,
+      ),
     );
   }
 
+  console.log(`\n✖ Found ${problems.join(" and ")}`);
+
   if (totalFixable) {
     console.log(
-      `Found ${chalk.green(
-        `${totalFixable} auto-fixable`,
-      )} errors or warnings, run the command with "--fix" to fix them.`,
+      chalk.gray(
+        `\n${totalFixable} ${totalFixable === 1 ? "issue" : "issues"} fixable with the --fix option`,
+      ),
     );
   }
 }
@@ -116,10 +143,12 @@ export function displayMessages(): void {
 }
 
 export function createReportError(
-  title: string,
+  ruleName: string,
   pkgPathName: string,
 ): ReportError {
-  return function reportError(message: ReportErrorMessage): void {
+  return function reportError(
+    message: Except<ReportErrorMessage, "ruleName">,
+  ): void {
     let pathData = pathMessages.get(pkgPathName);
     if (!pathData) {
       pathData = {
@@ -130,15 +159,17 @@ export function createReportError(
     }
 
     if (message.dependency) {
-      const dependencyKey = `${message.dependency.origin ? `${message.dependency.origin} : ` : ""}${message.dependency.name}`;
+      const dependencyKey = `${
+        message.dependency.fieldName ? `${message.dependency.fieldName} > ` : ""
+      }${message.dependency.name}`;
       let group = pathData.dependencyGroups.get(dependencyKey);
       if (!group) {
         group = { messages: [] };
         pathData.dependencyGroups.set(dependencyKey, group);
       }
-      group.messages.push({ ...message, title });
+      group.messages.push({ ...message, ruleName });
     } else {
-      pathData.generalMessages.push({ ...message, title });
+      pathData.generalMessages.push({ ...message, ruleName });
     }
 
     if (!message.onlyWarns) {
@@ -154,8 +185,8 @@ export function reportNotWarnedFor(
   const notWarnedFor = onlyWarnsForCheck.getNotWarnedFor();
   if (notWarnedFor.length > 0) {
     reportError({
-      title: `Invalid config in "${onlyWarnsForCheck.configName}"`,
-      info: `no warning was raised for ${notWarnedFor
+      errorMessage: `Invalid config in "${onlyWarnsForCheck.configName}"`,
+      errorDetails: `no warning was raised for ${notWarnedFor
         .map((depName) => `"${depName}"`)
         .join(", ")}`,
     });
@@ -169,11 +200,10 @@ export function reportNotWarnedForMapping(
   const notWarnedForMapping = onlyWarnsForMappingCheck.getNotWarnedFor();
   getEntries(notWarnedForMapping).forEach(([depNameOrStar, notWarnedFor]) => {
     reportError({
-      title: `Invalid config in "${onlyWarnsForMappingCheck.configName}"`,
-      info: `no warning was raised for ${notWarnedFor
+      errorMessage: `Invalid config in "${onlyWarnsForMappingCheck.configName}"`,
+      errorDetails: `no warning was raised for ${notWarnedFor
         .map((depName) => `"${depName}"`)
         .join(", ")}`,
-      dependency: { name: depNameOrStar },
     });
   });
 }
@@ -183,4 +213,18 @@ export function resetMessages(): void {
   totalWarnings = 0;
   totalErrors = 0;
   totalFixable = 0;
+}
+
+export function fromDependency(
+  depPkg: PackageJson,
+  depType?: DependencyTypes,
+): string {
+  return `from "${depPkg.name || ""}"${depType ? ` in "${depType}"` : ""}`;
+}
+
+export function inDependency(
+  depPkg: PackageJson,
+  depType?: DependencyTypes,
+): string {
+  return `in ${depType ? `"${depType}" of ` : ""}"${depPkg.name || ""}"`;
 }

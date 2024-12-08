@@ -1,6 +1,7 @@
+import type { SetRequired } from "type-fest";
 import type { CheckResolutionMessage } from "./checks/checkResolutionsHasExplanation.ts";
 import type { GetDependencyPackageJson } from "./utils/createGetDependencyPackageJson.ts";
-import type { DependenciesRanges, DependencyName, DependencyTypes, PackageJson } from "./utils/packageTypes.ts";
+import type { DependenciesRanges, DependencyName, DependencyTypes, PackageJson, ParsedPackageJson } from "./utils/packageTypes.ts";
 import type { OnlyWarnsFor, OnlyWarnsForOptionalDependencyMapping } from "./utils/warnForUtils.ts";
 export interface CreateCheckPackageOptions {
     packageDirectoryPath?: string;
@@ -50,7 +51,9 @@ export interface CheckPackageApiRunOptions {
 export interface CheckPackageApi {
     run: (options?: CheckPackageApiRunOptions) => Promise<void>;
     /** @internal */
-    pkg: PackageJson;
+    parsedPkg: ParsedPackageJson;
+    /** @internal */
+    pkg: SetRequired<PackageJson, "name">;
     /** @internal */
     pkgDirname: string;
     /** @internal */

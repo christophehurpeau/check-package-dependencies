@@ -1,5 +1,6 @@
 import path from "node:path";
 import util from "node:util";
+import type { SetRequired } from "type-fest";
 import { checkDirectDuplicateDependencies } from "./checks/checkDirectDuplicateDependencies.ts";
 import { checkDirectPeerDependencies } from "./checks/checkDirectPeerDependencies.ts";
 import { checkExactVersions } from "./checks/checkExactVersions.ts";
@@ -11,6 +12,7 @@ import type { CheckResolutionMessage } from "./checks/checkResolutionsHasExplana
 import { checkResolutionsHasExplanation } from "./checks/checkResolutionsHasExplanation.ts";
 import { checkResolutionsVersionsMatch } from "./checks/checkResolutionsVersionsMatch.ts";
 import { checkSatisfiesVersions } from "./checks/checkSatisfiesVersions.ts";
+import { checkSatisfiesVersionsBetweenDependencies } from "./checks/checkSatisfiesVersionsBetweenDependencies.ts";
 import { checkSatisfiesVersionsFromDependency } from "./checks/checkSatisfiesVersionsFromDependency.ts";
 import { checkSatisfiesVersionsInDependency } from "./checks/checkSatisfiesVersionsInDependency.ts";
 import type { GetDependencyPackageJson } from "./utils/createGetDependencyPackageJson.ts";
@@ -22,8 +24,9 @@ import type {
   DependencyName,
   DependencyTypes,
   PackageJson,
+  ParsedPackageJson,
 } from "./utils/packageTypes.ts";
-import { readPkgJson, writePkgJson } from "./utils/pkgJsonUtils.ts";
+import { readAndParsePkgJson, writePkgJson } from "./utils/pkgJsonUtils.ts";
 import type {
   OnlyWarnsFor,
   OnlyWarnsForDependencyMapping,
@@ -96,7 +99,9 @@ export interface CheckPackageApi {
   run: (options?: CheckPackageApiRunOptions) => Promise<void>;
 
   /** @internal */
-  pkg: PackageJson;
+  parsedPkg: ParsedPackageJson;
+  /** @internal */
+  pkg: SetRequired<PackageJson, "name">;
   /** @internal */
   pkgDirname: string;
   /** @internal */
@@ -289,10 +294,12 @@ export function createCheckPackage({
   const pkgDirname = path.resolve(packageDirectoryPath);
   const pkgPath = `${pkgDirname}/package.json`;
   const pkgPathName = `${packageDirectoryPath}/package.json`;
-  const pkg = readPkgJson(pkgPath);
-  const copyPkg: PackageJson = JSON.parse(JSON.stringify(pkg)) as PackageJson;
+  const parsedPkg = readAndParsePkgJson(pkgPath);
+  const copyPkg: PackageJson = JSON.parse(
+    JSON.stringify(parsedPkg),
+  ) as PackageJson;
   const isPkgLibrary =
-    typeof isLibrary === "function" ? isLibrary(pkg) : isLibrary;
+    typeof isLibrary === "function" ? isLibrary(parsedPkg.value) : isLibrary;
   const shouldHaveExactVersions: ShouldHaveExactVersions = (depType) =>
     !isPkgLibrary ? true : depType === "devDependencies";
 
@@ -304,8 +311,8 @@ export function createCheckPackage({
 
   const writePackageIfChanged = (): void => {
     if (!tryToAutoFix) return;
-    if (util.isDeepStrictEqual(pkg, copyPkg)) return;
-    writePkgJson(pkgPath, pkg);
+    if (util.isDeepStrictEqual(parsedPkg.value, copyPkg)) return;
+    writePkgJson(pkgPath, parsedPkg.value);
   };
 
   const getDependencyPackageJson = createGetDependencyPackageJson({
@@ -358,7 +365,8 @@ export function createCheckPackage({
       }
     },
 
-    pkg,
+    parsedPkg,
+    pkg: parsedPkg.value as SetRequired<PackageJson, "name">,
     pkgDirname,
     pkgPathName,
     isPkgLibrary,
@@ -375,8 +383,7 @@ export function createCheckPackage({
             onlyWarnsFor,
           );
           await checkExactVersions(
-            pkg,
-            pkgPathName,
+            parsedPkg,
             !allowRangeVersionsInDependencies
               ? ["dependencies", "devDependencies", "resolutions"]
               : ["devDependencies", "resolutions"],
@@ -393,7 +400,7 @@ export function createCheckPackage({
     },
 
     checkResolutionsVersionsMatch() {
-      checkResolutionsVersionsMatch(pkg, pkgPathName, {
+      checkResolutionsVersionsMatch(parsedPkg, {
         tryToAutoFix,
       });
       return this;
@@ -406,7 +413,7 @@ export function createCheckPackage({
             "checkExactDevVersions.onlyWarnsFor",
             onlyWarnsFor,
           );
-          await checkExactVersions(pkg, pkgPathName, ["devDependencies"], {
+          await checkExactVersions(parsedPkg, ["devDependencies"], {
             onlyWarnsForCheck,
             tryToAutoFix,
             getDependencyPackageJson,
@@ -420,7 +427,7 @@ export function createCheckPackage({
       type = "dependencies",
       moveToSuggestion = "devDependencies",
     ) {
-      checkNoDependencies(pkg, pkgPathName, type, moveToSuggestion);
+      checkNoDependencies(parsedPkg, type, moveToSuggestion);
       return this;
     },
 
@@ -445,8 +452,7 @@ export function createCheckPackage({
                 );
           checkDirectPeerDependencies(
             isPkgLibrary,
-            pkg,
-            pkgPathName,
+            parsedPkg,
             getDependencyPackageJson,
             missingOnlyWarnsForCheck,
             invalidOnlyWarnsForCheck,
@@ -463,8 +469,7 @@ export function createCheckPackage({
       jobs.push(
         new Job(this.checkDirectDuplicateDependencies.name, () => {
           checkDirectDuplicateDependencies(
-            pkg,
-            pkgPathName,
+            parsedPkg,
             isPkgLibrary,
             "dependencies",
             getDependencyPackageJson,
@@ -479,8 +484,7 @@ export function createCheckPackage({
       checkMessage: CheckResolutionMessage = (depKey, message) => undefined,
     ) {
       checkResolutionsHasExplanation(
-        pkg,
-        pkgPathName,
+        parsedPkg,
         checkMessage,
         getDependencyPackageJson,
       );
@@ -574,8 +578,7 @@ export function createCheckPackage({
           const depPkg = getDependencyPackageJson(depName);
           if (resolutions) {
             checkIdenticalVersionsThanDependency(
-              pkg,
-              pkgPathName,
+              parsedPkg,
               "resolutions",
               resolutions,
               depPkg,
@@ -584,8 +587,7 @@ export function createCheckPackage({
           }
           if (dependencies) {
             checkIdenticalVersionsThanDependency(
-              pkg,
-              pkgPathName,
+              parsedPkg,
               "dependencies",
               dependencies,
               depPkg,
@@ -594,8 +596,7 @@ export function createCheckPackage({
           }
           if (devDependencies) {
             checkIdenticalVersionsThanDependency(
-              pkg,
-              pkgPathName,
+              parsedPkg,
               "devDependencies",
               devDependencies,
               depPkg,
@@ -616,8 +617,7 @@ export function createCheckPackage({
           const depPkg = getDependencyPackageJson(depName);
           if (resolutions) {
             checkIdenticalVersionsThanDependency(
-              pkg,
-              pkgPathName,
+              parsedPkg,
               "resolutions",
               resolutions,
               depPkg,
@@ -626,8 +626,7 @@ export function createCheckPackage({
           }
           if (dependencies) {
             checkIdenticalVersionsThanDependency(
-              pkg,
-              pkgPathName,
+              parsedPkg,
               "dependencies",
               dependencies,
               depPkg,
@@ -636,8 +635,7 @@ export function createCheckPackage({
           }
           if (devDependencies) {
             checkIdenticalVersionsThanDependency(
-              pkg,
-              pkgPathName,
+              parsedPkg,
               "devDependencies",
               devDependencies,
               depPkg,
@@ -653,8 +651,7 @@ export function createCheckPackage({
       Object.entries(dependencies).forEach(
         ([dependencyType, dependenciesRanges]) => {
           checkSatisfiesVersions(
-            pkg,
-            pkgPathName,
+            parsedPkg,
             dependencyType as DependencyTypes,
             dependenciesRanges,
           );
@@ -672,8 +669,7 @@ export function createCheckPackage({
           const depPkg = getDependencyPackageJson(depName);
           if (resolutions) {
             checkSatisfiesVersionsFromDependency(
-              pkg,
-              pkgPathName,
+              parsedPkg,
               "resolutions",
               resolutions,
               depPkg,
@@ -683,8 +679,7 @@ export function createCheckPackage({
           }
           if (dependencies) {
             checkSatisfiesVersionsFromDependency(
-              pkg,
-              pkgPathName,
+              parsedPkg,
               "dependencies",
               dependencies,
               depPkg,
@@ -694,8 +689,7 @@ export function createCheckPackage({
           }
           if (devDependencies) {
             checkSatisfiesVersionsFromDependency(
-              pkg,
-              pkgPathName,
+              parsedPkg,
               "devDependencies",
               devDependencies,
               depPkg,
@@ -719,8 +713,7 @@ export function createCheckPackage({
             const depPkg = getDependencyPackageJson(depName);
             if (resolutions) {
               checkSatisfiesVersionsFromDependency(
-                pkg,
-                pkgPathName,
+                parsedPkg,
                 "resolutions",
                 resolutions,
                 depPkg,
@@ -730,8 +723,7 @@ export function createCheckPackage({
             }
             if (dependencies) {
               checkSatisfiesVersionsFromDependency(
-                pkg,
-                pkgPathName,
+                parsedPkg,
                 "dependencies",
                 dependencies,
                 depPkg,
@@ -741,8 +733,7 @@ export function createCheckPackage({
             }
             if (devDependencies) {
               checkSatisfiesVersionsFromDependency(
-                pkg,
-                pkgPathName,
+                parsedPkg,
                 "devDependencies",
                 devDependencies,
                 depPkg,
@@ -758,18 +749,13 @@ export function createCheckPackage({
 
     checkIdenticalVersions({ resolutions, dependencies, devDependencies }) {
       if (resolutions) {
-        checkIdenticalVersions(pkg, pkgPathName, "resolutions", resolutions);
+        checkIdenticalVersions(parsedPkg, "resolutions", resolutions);
       }
       if (dependencies) {
-        checkIdenticalVersions(pkg, pkgPathName, "dependencies", dependencies);
+        checkIdenticalVersions(parsedPkg, "dependencies", dependencies);
       }
       if (devDependencies) {
-        checkIdenticalVersions(
-          pkg,
-          pkgPathName,
-          "devDependencies",
-          devDependencies,
-        );
+        checkIdenticalVersions(parsedPkg, "devDependencies", devDependencies);
       }
       return this;
     },
@@ -789,9 +775,9 @@ export function createCheckPackage({
             ]);
 
             if (dependencies) {
-              checkSatisfiesVersionsFromDependency(
+              checkSatisfiesVersionsBetweenDependencies(
+                depName2,
                 depPkg2,
-                pkgPathName,
                 "dependencies",
                 dependencies,
                 depPkg1,
@@ -800,9 +786,9 @@ export function createCheckPackage({
               );
             }
             if (devDependencies) {
-              checkSatisfiesVersionsFromDependency(
+              checkSatisfiesVersionsBetweenDependencies(
+                depName2,
                 depPkg2,
-                pkgPathName,
                 "devDependencies",
                 devDependencies,
                 depPkg1,
@@ -833,13 +819,9 @@ export function createCheckPackage({
     checkMinRangeDependenciesSatisfiesDevDependencies() {
       jobs.push(
         new Job(this.checkSatisfiesVersionsInDependency.name, () => {
-          checkMinRangeSatisfies(
-            pkgPathName,
-            pkg,
-            "dependencies",
-            "devDependencies",
-            { tryToAutoFix },
-          );
+          checkMinRangeSatisfies(parsedPkg, "dependencies", "devDependencies", {
+            tryToAutoFix,
+          });
         }),
       );
       return this;
@@ -849,11 +831,12 @@ export function createCheckPackage({
       jobs.push(
         new Job(this.checkSatisfiesVersionsInDependency.name, () => {
           checkMinRangeSatisfies(
-            pkgPathName,
-            pkg,
+            parsedPkg,
             "peerDependencies",
             "dependencies",
-            { tryToAutoFix },
+            {
+              tryToAutoFix,
+            },
           );
         }),
       );

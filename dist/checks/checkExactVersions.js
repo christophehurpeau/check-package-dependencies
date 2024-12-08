@@ -6,14 +6,16 @@ const isVersionRange = (version) => version.startsWith("^") ||
     version.startsWith(">") ||
     version.startsWith("<");
 // eslint-disable-next-line @typescript-eslint/require-await
-export async function checkExactVersions(pkg, pkgPathName, types, { getDependencyPackageJson, onlyWarnsForCheck, internalExactVersionsIgnore, tryToAutoFix = false, customCreateReportError = createReportError, }) {
-    const reportError = customCreateReportError("Exact versions", pkgPathName);
+export async function checkExactVersions(pkg, types, { getDependencyPackageJson, onlyWarnsForCheck, internalExactVersionsIgnore, tryToAutoFix = false, customCreateReportError = createReportError, }) {
+    const reportError = customCreateReportError("Exact versions", pkg.path);
     for (const type of types) {
         const pkgDependencies = pkg[type];
         if (!pkgDependencies)
             continue;
-        for (const [dependencyName, versionValue] of Object.entries(pkgDependencies)) {
-            const version = getRealVersion(versionValue);
+        for (const [dependencyName, dependencyValue] of Object.entries(pkgDependencies)) {
+            if (!dependencyValue)
+                continue;
+            const version = getRealVersion(dependencyValue.value);
             if (isVersionRange(version)) {
                 if (internalExactVersionsIgnore?.includes(dependencyName)) {
                     continue;
@@ -29,11 +31,11 @@ export async function checkExactVersions(pkg, pkgPathName, types, { getDependenc
                     }
                     if (!resolvedDep?.version) {
                         reportError({
-                            title: "Unexpected range dependency",
-                            info: `expecting "${version}" to be exact${tryToAutoFix
+                            errorMessage: "Unexpected range dependency",
+                            errorDetails: `expecting "${version}" to be exact${tryToAutoFix
                                 ? `, autofix failed to resolve "${dependencyName}"`
                                 : ""}`,
-                            dependency: { name: dependencyName, origin: type },
+                            dependency: dependencyValue,
                             onlyWarns: shouldOnlyWarn,
                         });
                     }
@@ -41,22 +43,22 @@ export async function checkExactVersions(pkg, pkgPathName, types, { getDependenc
                         includePrerelease: true,
                     })) {
                         reportError({
-                            title: "Unexpected range dependency",
-                            info: `expecting "${version}" to be exact${tryToAutoFix
+                            errorMessage: "Unexpected range dependency",
+                            errorDetails: `expecting "${version}" to be exact${tryToAutoFix
                                 ? `, autofix failed as resolved version "${resolvedDep.version}" doesn't satisfy "${version}"`
                                 : ""}`,
-                            dependency: { name: dependencyName, origin: type },
+                            dependency: dependencyValue,
                             onlyWarns: shouldOnlyWarn,
                         });
                     }
                     else if (tryToAutoFix) {
-                        pkgDependencies[dependencyName] = resolvedDep.version;
+                        dependencyValue.changeValue(resolvedDep.version);
                     }
                     else {
                         reportError({
-                            title: "Unexpected range dependency",
-                            info: `expecting "${version}" to be exact "${resolvedDep.version}"`,
-                            dependency: { name: dependencyName, origin: type },
+                            errorMessage: "Unexpected range dependency",
+                            errorDetails: `expecting "${version}" to be exact "${resolvedDep.version}"`,
+                            dependency: dependencyValue,
                             onlyWarns: shouldOnlyWarn,
                             autoFixable: true,
                         });
@@ -73,9 +75,9 @@ export async function checkExactVersions(pkg, pkgPathName, types, { getDependenc
                         }
                     }
                     reportError({
-                        title: "Unexpected range dependency",
-                        info: `expecting "${version}" to be exact "${exactVersion}"`,
-                        dependency: { name: dependencyName, origin: type },
+                        errorMessage: "Unexpected range dependency",
+                        errorDetails: `expecting "${version}" to be exact "${exactVersion}"`,
+                        dependency: dependencyValue,
                         onlyWarns: shouldOnlyWarn,
                     });
                 }
