@@ -161,10 +161,11 @@ export function readAndParsePkgJson(packagePath: string): ParsedPackageJson {
 export function internalLoadPackageJsonFromNodeModules(
   pkgDepName: string,
   pkgDirname: string,
-): PackageJson {
+): [path: string, pkg: PackageJson] {
   const packageUrl = importResolve(
     `${pkgDepName}/package.json`,
     `file://${pkgDirname}/package.json`,
   );
-  return readPkgJson(fileURLToPath(packageUrl));
+  const packagePath = fileURLToPath(packageUrl);
+  return [packagePath, readPkgJson(packagePath)];
 }

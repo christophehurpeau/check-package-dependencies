@@ -5,13 +5,14 @@ export function createGetDependencyPackageJson({ pkgDirname, nodeModulesPackageP
         if (existing)
             return existing;
         let pkg;
+        let packagePath;
         if (pkgDepName.startsWith(".")) {
-            const packagePath = `${pkgDirname}/${pkgDepName}/package.json`;
+            packagePath = `${pkgDirname}/${pkgDepName}/package.json`;
             pkg = internalReadPkgJson(packagePath);
         }
         else {
             try {
-                pkg = internalCustomLoadPackageJsonFromNodeModules(pkgDepName, pkgDirname);
+                [packagePath, pkg] = internalCustomLoadPackageJsonFromNodeModules(pkgDepName, pkgDirname);
             }
             catch (error) {
                 if (!(error instanceof Error))
@@ -23,6 +24,7 @@ export function createGetDependencyPackageJson({ pkgDirname, nodeModulesPackageP
                 const match = / in (.*[/\\]package\.json)\s+imported from/.exec(error.message);
                 if (match) {
                     const [, matchPackageJson] = match;
+                    packagePath = matchPackageJson;
                     pkg = internalReadPkgJson(matchPackageJson);
                 }
                 else {
@@ -30,8 +32,8 @@ export function createGetDependencyPackageJson({ pkgDirname, nodeModulesPackageP
                 }
             }
         }
-        nodeModulesPackagePathCache.set(pkgDepName, pkg);
-        return pkg;
+        nodeModulesPackagePathCache.set(pkgDepName, [pkg, packagePath]);
+        return [pkg, packagePath];
     };
 }
 //# sourceMappingURL=createGetDependencyPackageJson.js.map

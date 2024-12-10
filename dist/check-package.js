@@ -189,7 +189,7 @@ export function createCheckPackage({ packageDirectoryPath = ".", internalWorkspa
         },
         checkIdenticalVersionsThanDependency(depName, { resolutions, dependencies, devDependencies }) {
             jobs.push(new Job(this.checkIdenticalVersionsThanDependency.name, () => {
-                const depPkg = getDependencyPackageJson(depName);
+                const [depPkg] = getDependencyPackageJson(depName);
                 if (resolutions) {
                     checkIdenticalVersionsThanDependency(parsedPkg, "resolutions", resolutions, depPkg, depPkg.dependencies);
                 }
@@ -204,7 +204,7 @@ export function createCheckPackage({ packageDirectoryPath = ".", internalWorkspa
         },
         checkIdenticalVersionsThanDevDependencyOfDependency(depName, { resolutions, dependencies, devDependencies }) {
             jobs.push(new Job(this.checkSatisfiesVersionsFromDependency.name, () => {
-                const depPkg = getDependencyPackageJson(depName);
+                const [depPkg] = getDependencyPackageJson(depName);
                 if (resolutions) {
                     checkIdenticalVersionsThanDependency(parsedPkg, "resolutions", resolutions, depPkg, depPkg.devDependencies);
                 }
@@ -225,7 +225,7 @@ export function createCheckPackage({ packageDirectoryPath = ".", internalWorkspa
         },
         checkSatisfiesVersionsFromDependency(depName, { resolutions, dependencies, devDependencies }) {
             jobs.push(new Job(this.checkSatisfiesVersionsFromDependency.name, () => {
-                const depPkg = getDependencyPackageJson(depName);
+                const [depPkg] = getDependencyPackageJson(depName);
                 if (resolutions) {
                     checkSatisfiesVersionsFromDependency(parsedPkg, "resolutions", resolutions, depPkg, "dependencies", { tryToAutoFix, shouldHaveExactVersions });
                 }
@@ -240,7 +240,7 @@ export function createCheckPackage({ packageDirectoryPath = ".", internalWorkspa
         },
         checkSatisfiesVersionsInDevDependenciesOfDependency(depName, { resolutions, dependencies, devDependencies }) {
             jobs.push(new Job(this.checkSatisfiesVersionsInDevDependenciesOfDependency.name, () => {
-                const depPkg = getDependencyPackageJson(depName);
+                const [depPkg] = getDependencyPackageJson(depName);
                 if (resolutions) {
                     checkSatisfiesVersionsFromDependency(parsedPkg, "resolutions", resolutions, depPkg, "devDependencies", { tryToAutoFix, shouldHaveExactVersions });
                 }
@@ -265,24 +265,36 @@ export function createCheckPackage({ packageDirectoryPath = ".", internalWorkspa
             }
             return this;
         },
-        checkSatisfiesVersionsBetweenDependencies(depName1, depName2, { dependencies, devDependencies }) {
+        checkSatisfiesVersionsBetweenDependencies(config) {
             jobs.push(new Job(this.checkSatisfiesVersionsBetweenDependencies.name, async () => {
-                const [depPkg1, depPkg2] = await Promise.all([
-                    getDependencyPackageJson(depName1),
-                    getDependencyPackageJson(depName2),
+                const depNamesLvl1 = Object.keys(config);
+                const depNamesLvl2 = Object.values(config).flatMap((depConfig) => [
+                    ...Object.keys(depConfig.dependencies || {}),
+                    ...Object.keys(depConfig.devDependencies || {}),
                 ]);
-                if (dependencies) {
-                    checkSatisfiesVersionsBetweenDependencies(depName2, depPkg2, "dependencies", dependencies, depPkg1, "dependencies", { tryToAutoFix, shouldHaveExactVersions });
-                }
-                if (devDependencies) {
-                    checkSatisfiesVersionsBetweenDependencies(depName2, depPkg2, "devDependencies", devDependencies, depPkg1, "dependencies", { tryToAutoFix, shouldHaveExactVersions });
-                }
+                const uniqueDepNames = [
+                    ...new Set([...depNamesLvl1, ...depNamesLvl2]),
+                ];
+                const depPkgsByName = new Map(await Promise.all(uniqueDepNames.map((depName) => [depName, getDependencyPackageJson(depName)])));
+                Object.entries(config).forEach(([depName1, depConfig1]) => {
+                    const [depPkg1, depPkgPath1] = depPkgsByName.get(depName1);
+                    ["dependencies", "devDependencies"].forEach((dep1Type) => {
+                        Object.entries(depConfig1[dep1Type] || {}).forEach(([depName2, depConfig2]) => {
+                            if (!depConfig2)
+                                return;
+                            const [depPkg2] = depPkgsByName.get(depName2);
+                            ["dependencies", "devDependencies"].forEach((dep2Type) => {
+                                checkSatisfiesVersionsBetweenDependencies(depPkgPath1, depPkg1, dep1Type, depConfig2[dep2Type] || [], depPkg2, dep2Type, { shouldHaveExactVersions });
+                            });
+                        });
+                    });
+                });
             }));
             return this;
         },
         checkSatisfiesVersionsInDependency(depName, dependenciesRanges) {
             jobs.push(new Job(this.checkSatisfiesVersionsInDependency.name, () => {
-                const depPkg = getDependencyPackageJson(depName);
+                const [depPkg] = getDependencyPackageJson(depName);
                 checkSatisfiesVersionsInDependency(pkgPathName, depPkg, dependenciesRanges);
             }));
             return this;

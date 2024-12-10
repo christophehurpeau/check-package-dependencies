@@ -24,7 +24,7 @@ export async function checkExactVersions(pkg, types, { getDependencyPackageJson,
                 if (!shouldOnlyWarn && getDependencyPackageJson) {
                     let resolvedDep;
                     try {
-                        resolvedDep = getDependencyPackageJson(dependencyName);
+                        [resolvedDep] = getDependencyPackageJson(dependencyName);
                     }
                     catch {
                         resolvedDep = null;

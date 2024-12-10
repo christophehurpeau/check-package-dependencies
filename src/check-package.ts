@@ -252,13 +252,25 @@ export interface CheckPackageApi {
   }) => CheckPackageApi;
 
   checkSatisfiesVersionsBetweenDependencies: (
-    depName1: string,
-    depName2: string,
-    dependencies: {
-      resolutions?: string[];
-      dependencies?: string[];
-      devDependencies?: string[];
-    },
+    config: Record<
+      string, // depName1
+      {
+        dependencies?: Record<
+          string, // depName2
+          {
+            dependencies?: string[];
+            devDependencies?: string[];
+          }
+        >;
+        devDependencies?: Record<
+          string, // depName2
+          {
+            dependencies?: string[];
+            devDependencies?: string[];
+          }
+        >;
+      }
+    >,
   ) => CheckPackageApi;
 
   /**
@@ -575,7 +587,7 @@ export function createCheckPackage({
     ) {
       jobs.push(
         new Job(this.checkIdenticalVersionsThanDependency.name, () => {
-          const depPkg = getDependencyPackageJson(depName);
+          const [depPkg] = getDependencyPackageJson(depName);
           if (resolutions) {
             checkIdenticalVersionsThanDependency(
               parsedPkg,
@@ -614,7 +626,7 @@ export function createCheckPackage({
     ) {
       jobs.push(
         new Job(this.checkSatisfiesVersionsFromDependency.name, () => {
-          const depPkg = getDependencyPackageJson(depName);
+          const [depPkg] = getDependencyPackageJson(depName);
           if (resolutions) {
             checkIdenticalVersionsThanDependency(
               parsedPkg,
@@ -666,7 +678,7 @@ export function createCheckPackage({
     ) {
       jobs.push(
         new Job(this.checkSatisfiesVersionsFromDependency.name, () => {
-          const depPkg = getDependencyPackageJson(depName);
+          const [depPkg] = getDependencyPackageJson(depName);
           if (resolutions) {
             checkSatisfiesVersionsFromDependency(
               parsedPkg,
@@ -710,7 +722,7 @@ export function createCheckPackage({
         new Job(
           this.checkSatisfiesVersionsInDevDependenciesOfDependency.name,
           () => {
-            const depPkg = getDependencyPackageJson(depName);
+            const [depPkg] = getDependencyPackageJson(depName);
             if (resolutions) {
               checkSatisfiesVersionsFromDependency(
                 parsedPkg,
@@ -760,42 +772,57 @@ export function createCheckPackage({
       return this;
     },
 
-    checkSatisfiesVersionsBetweenDependencies(
-      depName1,
-      depName2,
-      { dependencies, devDependencies },
-    ) {
+    checkSatisfiesVersionsBetweenDependencies(config) {
       jobs.push(
         new Job(
           this.checkSatisfiesVersionsBetweenDependencies.name,
           async () => {
-            const [depPkg1, depPkg2] = await Promise.all([
-              getDependencyPackageJson(depName1),
-              getDependencyPackageJson(depName2),
+            const depNamesLvl1 = Object.keys(config);
+            const depNamesLvl2 = Object.values(config).flatMap((depConfig) => [
+              ...Object.keys(depConfig.dependencies || {}),
+              ...Object.keys(depConfig.devDependencies || {}),
             ]);
+            const uniqueDepNames = [
+              ...new Set([...depNamesLvl1, ...depNamesLvl2]),
+            ];
+            const depPkgsByName = new Map<
+              string,
+              ReturnType<typeof getDependencyPackageJson>
+            >(
+              await Promise.all(
+                uniqueDepNames.map(
+                  (depName) =>
+                    [depName, getDependencyPackageJson(depName)] as const,
+                ),
+              ),
+            );
 
-            if (dependencies) {
-              checkSatisfiesVersionsBetweenDependencies(
-                depName2,
-                depPkg2,
-                "dependencies",
-                dependencies,
-                depPkg1,
-                "dependencies",
-                { tryToAutoFix, shouldHaveExactVersions },
+            Object.entries(config).forEach(([depName1, depConfig1]) => {
+              const [depPkg1, depPkgPath1] = depPkgsByName.get(depName1)!;
+              (["dependencies", "devDependencies"] as const).forEach(
+                (dep1Type) => {
+                  Object.entries(depConfig1[dep1Type] || {}).forEach(
+                    ([depName2, depConfig2]) => {
+                      if (!depConfig2) return;
+                      const [depPkg2] = depPkgsByName.get(depName2)!;
+                      (["dependencies", "devDependencies"] as const).forEach(
+                        (dep2Type) => {
+                          checkSatisfiesVersionsBetweenDependencies(
+                            depPkgPath1,
+                            depPkg1,
+                            dep1Type,
+                            depConfig2[dep2Type] || [],
+                            depPkg2,
+                            dep2Type,
+                            { shouldHaveExactVersions },
+                          );
+                        },
+                      );
+                    },
+                  );
+                },
               );
-            }
-            if (devDependencies) {
-              checkSatisfiesVersionsBetweenDependencies(
-                depName2,
-                depPkg2,
-                "devDependencies",
-                devDependencies,
-                depPkg1,
-                "dependencies",
-                { tryToAutoFix, shouldHaveExactVersions },
-              );
-            }
+            });
           },
         ),
       );
@@ -805,7 +832,7 @@ export function createCheckPackage({
     checkSatisfiesVersionsInDependency(depName, dependenciesRanges) {
       jobs.push(
         new Job(this.checkSatisfiesVersionsInDependency.name, () => {
-          const depPkg = getDependencyPackageJson(depName);
+          const [depPkg] = getDependencyPackageJson(depName);
           checkSatisfiesVersionsInDependency(
             pkgPathName,
             depPkg,

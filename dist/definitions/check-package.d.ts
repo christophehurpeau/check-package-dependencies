@@ -161,11 +161,19 @@ export interface CheckPackageApi {
         dependencies?: Record<string, string[]>;
         devDependencies?: Record<string, string[]>;
     }) => CheckPackageApi;
-    checkSatisfiesVersionsBetweenDependencies: (depName1: string, depName2: string, dependencies: {
-        resolutions?: string[];
-        dependencies?: string[];
-        devDependencies?: string[];
-    }) => CheckPackageApi;
+    checkSatisfiesVersionsBetweenDependencies: (config: Record<string, // depName1
+    {
+        dependencies?: Record<string, // depName2
+        {
+            dependencies?: string[];
+            devDependencies?: string[];
+        }>;
+        devDependencies?: Record<string, // depName2
+        {
+            dependencies?: string[];
+            devDependencies?: string[];
+        }>;
+    }>) => CheckPackageApi;
     /**
      * Check versions in a dependency
      * Also useable to check if a dependency is not present

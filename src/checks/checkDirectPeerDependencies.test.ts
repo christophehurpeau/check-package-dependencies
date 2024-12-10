@@ -20,10 +20,13 @@ describe("checkDirectPeerDependencies", () => {
 
   it("should report error when peer dependency is missing", () => {
     const getDependencyPackageJsonMock = mock.fn<GetDependencyPackageJson>();
-    getDependencyPackageJsonMock.mock.mockImplementationOnce(() => ({
-      name: "some-lib-using-rollup",
-      peerDependencies: { rollup: "^1.0.0" },
-    }));
+    getDependencyPackageJsonMock.mock.mockImplementationOnce(() => [
+      {
+        name: "some-lib-using-rollup",
+        peerDependencies: { rollup: "^1.0.0" },
+      },
+      "",
+    ]);
 
     checkDirectPeerDependencies(
       false,
@@ -50,16 +53,22 @@ describe("checkDirectPeerDependencies", () => {
   it("should not report error when peer dependency is in devDependencies", () => {
     const getDependencyPackageJsonMock = mock.fn<GetDependencyPackageJson>();
     getDependencyPackageJsonMock.mock.mockImplementationOnce(
-      () => ({
-        name: "rollup",
-      }),
+      () => [
+        {
+          name: "rollup",
+        },
+        "",
+      ],
       0,
     );
     getDependencyPackageJsonMock.mock.mockImplementationOnce(
-      () => ({
-        name: "some-lib-using-rollup",
-        peerDependencies: { rollup: "^1.0.0" },
-      }),
+      () => [
+        {
+          name: "some-lib-using-rollup",
+          peerDependencies: { rollup: "^1.0.0" },
+        },
+        "",
+      ],
       1,
     );
 
@@ -80,16 +89,22 @@ describe("checkDirectPeerDependencies", () => {
   it("should not report error when peer dependency value is *", () => {
     const getDependencyPackageJsonMock = mock.fn<GetDependencyPackageJson>();
     getDependencyPackageJsonMock.mock.mockImplementationOnce(
-      () => ({
-        name: "rollup",
-      }),
+      () => [
+        {
+          name: "rollup",
+        },
+        "",
+      ],
       0,
     );
     getDependencyPackageJsonMock.mock.mockImplementationOnce(
-      () => ({
-        name: "some-lib-using-rollup",
-        peerDependencies: { rollup: "*" },
-      }),
+      () => [
+        {
+          name: "some-lib-using-rollup",
+          peerDependencies: { rollup: "*" },
+        },
+        "",
+      ],
       1,
     );
     checkDirectPeerDependencies(
@@ -109,16 +124,22 @@ describe("checkDirectPeerDependencies", () => {
   it("should not report error when dev dependency value is a beta", () => {
     const getDependencyPackageJsonMock = mock.fn<GetDependencyPackageJson>();
     getDependencyPackageJsonMock.mock.mockImplementationOnce(
-      () => ({
-        name: "rollup",
-      }),
+      () => [
+        {
+          name: "rollup",
+        },
+        "",
+      ],
       0,
     );
     getDependencyPackageJsonMock.mock.mockImplementationOnce(
-      () => ({
-        name: "some-lib-using-rollup",
-        peerDependencies: { rollup: "*" },
-      }),
+      () => [
+        {
+          name: "some-lib-using-rollup",
+          peerDependencies: { rollup: "*" },
+        },
+        "",
+      ],
       1,
     );
 
@@ -142,16 +163,22 @@ describe("checkDirectPeerDependencies", () => {
   it("should not report error when dev dependency and peerDependency value are a beta", () => {
     const getDependencyPackageJsonMock = mock.fn<GetDependencyPackageJson>();
     getDependencyPackageJsonMock.mock.mockImplementationOnce(
-      () => ({
-        name: "rollup",
-      }),
+      () => [
+        {
+          name: "rollup",
+        },
+        "",
+      ],
       0,
     );
     getDependencyPackageJsonMock.mock.mockImplementationOnce(
-      () => ({
-        name: "some-lib-using-rollup",
-        peerDependencies: { rollup: "^1.0.0-beta.15" },
-      }),
+      () => [
+        {
+          name: "some-lib-using-rollup",
+          peerDependencies: { rollup: "^1.0.0-beta.15" },
+        },
+        "",
+      ],
       1,
     );
 
@@ -175,16 +202,22 @@ describe("checkDirectPeerDependencies", () => {
   it("should allow lib to have peer in both dependencies and peerDependencies", () => {
     const getDependencyPackageJsonMock = mock.fn<GetDependencyPackageJson>();
     getDependencyPackageJsonMock.mock.mockImplementationOnce(
-      () => ({
-        name: "rollup",
-      }),
+      () => [
+        {
+          name: "rollup",
+        },
+        "",
+      ],
       0,
     );
     getDependencyPackageJsonMock.mock.mockImplementationOnce(
-      () => ({
-        name: "some-lib-using-rollup",
-        peerDependencies: { rollup: "^1.0.0" },
-      }),
+      () => [
+        {
+          name: "some-lib-using-rollup",
+          peerDependencies: { rollup: "^1.0.0" },
+        },
+        "",
+      ],
       1,
     );
 
@@ -206,13 +239,16 @@ describe("checkDirectPeerDependencies", () => {
 
   it("should allow missing peer dependency when optional", () => {
     const getDependencyPackageJsonMock = mock.fn<GetDependencyPackageJson>();
-    getDependencyPackageJsonMock.mock.mockImplementationOnce(() => ({
-      name: "some-lib-using-rollup",
-      peerDependencies: { rollup: "^1.0.0" },
-      peerDependenciesMeta: {
-        rollup: { optional: true },
+    getDependencyPackageJsonMock.mock.mockImplementationOnce(() => [
+      {
+        name: "some-lib-using-rollup",
+        peerDependencies: { rollup: "^1.0.0" },
+        peerDependenciesMeta: {
+          rollup: { optional: true },
+        },
       },
-    }));
+      "",
+    ]);
 
     checkDirectPeerDependencies(
       false,
@@ -231,16 +267,22 @@ describe("checkDirectPeerDependencies", () => {
   it("should not report error when @types is in dev dependency of an app", () => {
     const getDependencyPackageJsonMock = mock.fn<GetDependencyPackageJson>();
     getDependencyPackageJsonMock.mock.mockImplementationOnce(
-      () => ({
-        name: "@types/a",
-      }),
+      () => [
+        {
+          name: "@types/a",
+        },
+        "",
+      ],
       0,
     );
     getDependencyPackageJsonMock.mock.mockImplementationOnce(
-      () => ({
-        name: "some-lib-using-types",
-        peerDependencies: { "@types/a": "^1.0.0" },
-      }),
+      () => [
+        {
+          name: "some-lib-using-types",
+          peerDependencies: { "@types/a": "^1.0.0" },
+        },
+        "",
+      ],
       1,
     );
 
@@ -266,16 +308,22 @@ describe("checkDirectPeerDependencies", () => {
   it("should not report error when @types is missing in dependencies/peerDependency of a library", () => {
     const getDependencyPackageJsonMock = mock.fn<GetDependencyPackageJson>();
     getDependencyPackageJsonMock.mock.mockImplementationOnce(
-      () => ({
-        name: "@types/a",
-      }),
+      () => [
+        {
+          name: "@types/a",
+        },
+        "",
+      ],
       0,
     );
     getDependencyPackageJsonMock.mock.mockImplementationOnce(
-      () => ({
-        name: "some-lib-using-types",
-        peerDependencies: { "@types/a": "^1.0.0" },
-      }),
+      () => [
+        {
+          name: "some-lib-using-types",
+          peerDependencies: { "@types/a": "^1.0.0" },
+        },
+        "",
+      ],
       1,
     );
 
@@ -308,17 +356,23 @@ describe("checkDirectPeerDependencies", () => {
   it("should report error even when peer dependency is provided by another dependency for libraries", () => {
     const getDependencyPackageJsonMock = mock.fn<GetDependencyPackageJson>();
     getDependencyPackageJsonMock.mock.mockImplementationOnce(
-      () => ({
-        name: "some-lib-providing-rollup",
-        dependencies: { rollup: "^1.0.0" },
-      }),
+      () => [
+        {
+          name: "some-lib-providing-rollup",
+          dependencies: { rollup: "^1.0.0" },
+        },
+        "",
+      ],
       0,
     );
     getDependencyPackageJsonMock.mock.mockImplementationOnce(
-      () => ({
-        name: "some-lib-using-rollup",
-        peerDependencies: { rollup: "^1.0.0" },
-      }),
+      () => [
+        {
+          name: "some-lib-using-rollup",
+          peerDependencies: { rollup: "^1.0.0" },
+        },
+        "",
+      ],
       1,
     );
 
@@ -349,17 +403,23 @@ describe("checkDirectPeerDependencies", () => {
   it("should not report error when peer dependency is provided by another dependency", () => {
     const getDependencyPackageJsonMock = mock.fn<GetDependencyPackageJson>();
     getDependencyPackageJsonMock.mock.mockImplementationOnce(
-      () => ({
-        name: "some-lib-providing-rollup",
-        dependencies: { rollup: "^1.0.0" },
-      }),
+      () => [
+        {
+          name: "some-lib-providing-rollup",
+          dependencies: { rollup: "^1.0.0" },
+        },
+        "",
+      ],
       0,
     );
     getDependencyPackageJsonMock.mock.mockImplementationOnce(
-      () => ({
-        name: "some-lib-using-rollup",
-        peerDependencies: { rollup: "^1.0.0" },
-      }),
+      () => [
+        {
+          name: "some-lib-using-rollup",
+          peerDependencies: { rollup: "^1.0.0" },
+        },
+        "",
+      ],
       1,
     );
 
@@ -383,24 +443,33 @@ describe("checkDirectPeerDependencies", () => {
   it("should report error when peer dependency is provided by multiple dependencies including non-satisfying range", () => {
     const getDependencyPackageJsonMock = mock.fn<GetDependencyPackageJson>();
     getDependencyPackageJsonMock.mock.mockImplementationOnce(
-      () => ({
-        name: "some-lib-using-rollup",
-        peerDependencies: { rollup: "^1.0.0" },
-      }),
+      () => [
+        {
+          name: "some-lib-using-rollup",
+          peerDependencies: { rollup: "^1.0.0" },
+        },
+        "",
+      ],
       0,
     );
     getDependencyPackageJsonMock.mock.mockImplementationOnce(
-      () => ({
-        name: "some-lib-providing-rollup-1",
-        dependencies: { rollup: "^1.0.0" },
-      }),
+      () => [
+        {
+          name: "some-lib-providing-rollup-1",
+          dependencies: { rollup: "^1.0.0" },
+        },
+        "",
+      ],
       1,
     );
     getDependencyPackageJsonMock.mock.mockImplementationOnce(
-      () => ({
-        name: "some-lib-providing-rollup-2",
-        dependencies: { rollup: "^2.0.0" },
-      }),
+      () => [
+        {
+          name: "some-lib-providing-rollup-2",
+          dependencies: { rollup: "^2.0.0" },
+        },
+        "",
+      ],
       2,
     );
 
@@ -439,10 +508,13 @@ describe("checkDirectPeerDependencies", () => {
 
   it("should not report error when peer dependency is marked as peer dependency", () => {
     const getDependencyPackageJsonMock = mock.fn<GetDependencyPackageJson>();
-    getDependencyPackageJsonMock.mock.mockImplementationOnce(() => ({
-      name: "some-lib-using-rollup",
-      peerDependencies: { rollup: "^1.0.0" },
-    }));
+    getDependencyPackageJsonMock.mock.mockImplementationOnce(() => [
+      {
+        name: "some-lib-using-rollup",
+        peerDependencies: { rollup: "^1.0.0" },
+      },
+      "",
+    ]);
 
     checkDirectPeerDependencies(
       true,
@@ -466,15 +538,18 @@ describe("checkDirectPeerDependencies", () => {
   it("should error when peer dependency is marked as peer dependency but has wrong version", () => {
     const getDependencyPackageJsonMock = mock.fn<GetDependencyPackageJson>();
     getDependencyPackageJsonMock.mock.mockImplementation(
-      (name): PackageJson =>
-        name === "rollup"
-          ? {
-              name: "rollup",
-            }
-          : {
-              name: "some-lib-using-rollup",
-              peerDependencies: { rollup: "^1.0.0" },
-            },
+      (name) =>
+        [
+          (name === "rollup"
+            ? {
+                name: "rollup",
+              }
+            : {
+                name: "some-lib-using-rollup",
+                peerDependencies: { rollup: "^1.0.0" },
+              }) as PackageJson,
+          "",
+        ] as const,
     );
 
     checkDirectPeerDependencies(
@@ -505,17 +580,17 @@ describe("checkDirectPeerDependencies", () => {
 
   it("should error when peer dependency is marked as peer dependency but has wrong dependency version", () => {
     const getDependencyPackageJsonMock = mock.fn<GetDependencyPackageJson>();
-    getDependencyPackageJsonMock.mock.mockImplementation(
-      (name): PackageJson =>
-        name === "react-native"
-          ? {
-              name: "react-native",
-              peerDependencies: { react: "18.2.0" },
-            }
-          : {
-              name: "react",
-            },
-    );
+    getDependencyPackageJsonMock.mock.mockImplementation((name) => [
+      (name === "react-native"
+        ? {
+            name: "react-native",
+            peerDependencies: { react: "18.2.0" },
+          }
+        : {
+            name: "react",
+          }) as PackageJson,
+      "",
+    ]);
 
     checkDirectPeerDependencies(
       false,
@@ -547,10 +622,13 @@ describe("checkDirectPeerDependencies", () => {
 
   it("should not report error when dependency is workspace:*", () => {
     const getDependencyPackageJsonMock = mock.fn<GetDependencyPackageJson>();
-    getDependencyPackageJsonMock.mock.mockImplementationOnce(() => ({
-      name: "alouette-icons",
-      peerDependencies: { "alouette-icons": "^1.0.0" },
-    }));
+    getDependencyPackageJsonMock.mock.mockImplementationOnce(() => [
+      {
+        name: "alouette-icons",
+        peerDependencies: { "alouette-icons": "^1.0.0" },
+      },
+      "",
+    ]);
 
     checkDirectPeerDependencies(
       false,

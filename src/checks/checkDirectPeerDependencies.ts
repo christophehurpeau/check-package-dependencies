@@ -62,7 +62,7 @@ export function checkDirectPeerDependencies(
     const dependencies = pkg[depType];
     if (!dependencies) return;
     for (const depName of getKeys(dependencies)) {
-      const depPkg = getDependencyPackageJson(depName);
+      const [depPkg] = getDependencyPackageJson(depName);
       allDepPkgs.push({
         name: depName,
         type: depType,

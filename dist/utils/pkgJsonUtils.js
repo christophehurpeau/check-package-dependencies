@@ -98,6 +98,7 @@ export function readAndParsePkgJson(packagePath) {
 /** @internal */
 export function internalLoadPackageJsonFromNodeModules(pkgDepName, pkgDirname) {
     const packageUrl = importResolve(`${pkgDepName}/package.json`, `file://${pkgDirname}/package.json`);
-    return readPkgJson(fileURLToPath(packageUrl));
+    const packagePath = fileURLToPath(packageUrl);
+    return [packagePath, readPkgJson(packagePath)];
 }
 //# sourceMappingURL=pkgJsonUtils.js.map

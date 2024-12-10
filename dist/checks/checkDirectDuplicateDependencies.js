@@ -15,7 +15,7 @@ export function checkDirectDuplicateDependencies(pkg, isPackageALibrary, depType
         if (!dependencies)
             return;
         for (const depName of getKeys(dependencies)) {
-            const depPkg = getDependencyPackageJson(depName);
+            const [depPkg] = getDependencyPackageJson(depName);
             checkDuplicateDependencies(reportError, pkg, isPackageALibrary, depType, searchIn, depPkg, onlyWarnsForCheck.createFor(depName));
         }
     });

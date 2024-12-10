@@ -200,10 +200,13 @@ describe("checkExactVersions", () => {
 
   it("should fix and remove range", async () => {
     const getDependencyPackageJsonMock = mock.fn<GetDependencyPackageJson>(
-      () => ({
-        name: "test1",
-        version: "1.0.1",
-      }),
+      () => [
+        {
+          name: "test1",
+          version: "1.0.1",
+        },
+        "",
+      ],
     );
     const pkg = parsePkgValue({
       name: "test",
@@ -256,7 +259,7 @@ describe("checkExactVersions", () => {
 
   it("should error if autofix failed because version doesn't match range", async () => {
     const getDependencyPackageJsonMock = mock.fn<GetDependencyPackageJson>(
-      () => ({ name: "test1", version: "2.0.0" }),
+      () => [{ name: "test1", version: "2.0.0" }, ""],
     );
     const pkg = parsePkgValue({
       name: "test",

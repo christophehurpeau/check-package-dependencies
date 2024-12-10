@@ -27,7 +27,7 @@ describe("createGetDependencyPackageJson", () => {
       internalReadPkgJson: readPkgJsonMock,
     });
 
-    const res = getDependencyPackageJson("test1");
+    const [res] = getDependencyPackageJson("test1");
 
     assert.equal(res, mockPkg);
     assert.equal(

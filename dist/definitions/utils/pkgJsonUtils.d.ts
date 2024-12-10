@@ -5,5 +5,5 @@ export declare function parsePkg(packageContent: string, packagePath: string): P
 export declare function parsePkgValue(pkg: unknown, packagePath?: string): ParsedPackageJson;
 export declare function readAndParsePkgJson(packagePath: string): ParsedPackageJson;
 /** @internal */
-export declare function internalLoadPackageJsonFromNodeModules(pkgDepName: string, pkgDirname: string): PackageJson;
+export declare function internalLoadPackageJsonFromNodeModules(pkgDepName: string, pkgDirname: string): [path: string, pkg: PackageJson];
 //# sourceMappingURL=pkgJsonUtils.d.ts.map

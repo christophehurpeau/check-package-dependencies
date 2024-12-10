@@ -18,7 +18,7 @@ describe("createGetDependencyPackageJson", () => {
             internalCustomLoadPackageJsonFromNodeModules: internalLoadPackageJsonFromNodeModulesMock,
             internalReadPkgJson: readPkgJsonMock,
         });
-        const res = getDependencyPackageJson("test1");
+        const [res] = getDependencyPackageJson("test1");
         assert.equal(res, mockPkg);
         assert.equal(internalLoadPackageJsonFromNodeModulesMock.mock.calls.length, 1);
         assert.deepEqual(internalLoadPackageJsonFromNodeModulesMock.mock.calls[0].arguments, ["test1", "test"]);

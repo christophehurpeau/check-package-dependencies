@@ -4,9 +4,13 @@ import {
   readPkgJson,
 } from "./pkgJsonUtils.ts";
 
-export type GetDependencyPackageJson = (pkgDepName: string) => PackageJson;
+type DependencyPackageJsonResult = [pkg: PackageJson, pkgPath: string];
 
-type NodeModulesPackagePathCache = Map<string, PackageJson>;
+export type GetDependencyPackageJson = (
+  pkgDepName: string,
+) => DependencyPackageJsonResult;
+
+type NodeModulesPackagePathCache = Map<string, DependencyPackageJsonResult>;
 
 interface CreateGetDependencyPackageJsonOptions {
   pkgDirname: string;
@@ -19,7 +23,7 @@ interface CreateGetDependencyPackageJsonOptions {
 
 export function createGetDependencyPackageJson({
   pkgDirname,
-  nodeModulesPackagePathCache = new Map<string, PackageJson>(),
+  nodeModulesPackagePathCache = new Map<string, DependencyPackageJsonResult>(),
   internalCustomLoadPackageJsonFromNodeModules = internalLoadPackageJsonFromNodeModules,
   internalReadPkgJson = readPkgJson,
 }: CreateGetDependencyPackageJsonOptions): GetDependencyPackageJson {
@@ -27,12 +31,13 @@ export function createGetDependencyPackageJson({
     const existing = nodeModulesPackagePathCache.get(pkgDepName);
     if (existing) return existing;
     let pkg: PackageJson;
+    let packagePath: string;
     if (pkgDepName.startsWith(".")) {
-      const packagePath = `${pkgDirname}/${pkgDepName}/package.json`;
+      packagePath = `${pkgDirname}/${pkgDepName}/package.json`;
       pkg = internalReadPkgJson(packagePath);
     } else {
       try {
-        pkg = internalCustomLoadPackageJsonFromNodeModules(
+        [packagePath, pkg] = internalCustomLoadPackageJsonFromNodeModules(
           pkgDepName,
           pkgDirname,
         );
@@ -52,13 +57,14 @@ export function createGetDependencyPackageJson({
 
         if (match) {
           const [, matchPackageJson] = match;
+          packagePath = matchPackageJson;
           pkg = internalReadPkgJson(matchPackageJson);
         } else {
           throw error;
         }
       }
     }
-    nodeModulesPackagePathCache.set(pkgDepName, pkg);
-    return pkg;
+    nodeModulesPackagePathCache.set(pkgDepName, [pkg, packagePath]);
+    return [pkg, packagePath];
   };
 }
