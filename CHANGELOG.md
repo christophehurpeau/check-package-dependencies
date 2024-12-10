@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [9.0.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v8.0.1...v9.0.0) (2024-12-10)
+
+### ⚠ BREAKING CHANGES
+
+* fix checkSatisfiesVersionsBetweenDependencies config and result
+
+### Bug Fixes
+
+* fix checkSatisfiesVersionsBetweenDependencies config and result ([f8ddc10](https://github.com/christophehurpeau/check-package-dependencies/commit/f8ddc10449fde1153abc3a52065e4ac16f38a2cf))
+
 ## [8.0.1](https://github.com/christophehurpeau/check-package-dependencies/compare/v8.0.0...v8.0.1) (2024-12-08)
 
 Note: no notable changes
