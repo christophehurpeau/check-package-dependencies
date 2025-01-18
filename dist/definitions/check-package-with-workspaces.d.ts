@@ -10,6 +10,8 @@ type OnlyWarnsForInMonorepoPackagesDependenciesCheckPackageRecommendedOption = R
 export interface CheckPackageWithWorkspacesRecommendedOptions {
     allowRangeVersionsInLibraries?: boolean;
     monorepoDirectDuplicateDependenciesOnlyWarnsFor?: OnlyWarnsForOptionalDependencyMapping;
+    monorepoDirectSubpackagePeerDependenciesMissingOnlyWarnsFor?: OnlyWarnsForOptionalDependencyMapping;
+    monorepoDirectSubpackagePeerDependenciesInvalidOnlyWarnsFor?: OnlyWarnsForOptionalDependencyMapping;
     onlyWarnsForInRootPackage?: OnlyWarnsForInPackageCheckPackageRecommendedOption;
     onlyWarnsForInMonorepoPackages?: OnlyWarnsForInMonorepoPackagesCheckPackageRecommendedOption;
     onlyWarnsForInRootDependencies?: OnlyWarnsForInDependenciesCheckPackageRecommendedOption;

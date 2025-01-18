@@ -2,7 +2,7 @@ import semver from "semver";
 import { reportNotWarnedForMapping } from "../reporting/cliErrorReporting.js";
 import { getKeys } from "../utils/object.js";
 import { checkPeerDependencies } from "./checkPeerDependencies.js";
-const regularDependencyTypes = [
+export const regularDependencyTypes = [
     "devDependencies",
     "dependencies",
     "optionalDependencies",

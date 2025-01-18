@@ -2,6 +2,7 @@ import fs, { constants } from "node:fs";
 import path from "node:path";
 import { createCheckPackage } from "./check-package.js";
 import { checkDuplicateDependencies } from "./checks/checkDuplicateDependencies.js";
+import { checkMonorepoDirectSubpackagePeerDependencies } from "./checks/checkMonorepoDirectSubpackagePeerDependencies.js";
 import { createCliReportError, displayMessages, reportNotWarnedForMapping, } from "./reporting/cliErrorReporting.js";
 import { createOnlyWarnsForMappingCheck } from "./utils/warnForUtils.js";
 export function createCheckPackageWithWorkspaces({ createReportError = createCliReportError, ...createCheckPackageOptions } = {}) {
@@ -53,7 +54,7 @@ export function createCheckPackageWithWorkspaces({ createReportError = createCli
             }
             displayMessages();
         },
-        checkRecommended({ allowRangeVersionsInLibraries = true, onlyWarnsForInRootPackage, onlyWarnsForInMonorepoPackages, onlyWarnsForInRootDependencies, onlyWarnsForInMonorepoPackagesDependencies = {}, monorepoDirectDuplicateDependenciesOnlyWarnsFor, checkResolutionMessage, } = {}) {
+        checkRecommended({ allowRangeVersionsInLibraries = true, onlyWarnsForInRootPackage, onlyWarnsForInMonorepoPackages, onlyWarnsForInRootDependencies, onlyWarnsForInMonorepoPackagesDependencies = {}, monorepoDirectDuplicateDependenciesOnlyWarnsFor, monorepoDirectSubpackagePeerDependenciesMissingOnlyWarnsFor, monorepoDirectSubpackagePeerDependenciesInvalidOnlyWarnsFor, checkResolutionMessage, } = {}) {
             checkPackage.checkNoDependencies();
             checkPackage.checkRecommended({
                 onlyWarnsForInPackage: onlyWarnsForInRootPackage,
@@ -61,6 +62,8 @@ export function createCheckPackageWithWorkspaces({ createReportError = createCli
                 checkResolutionMessage,
             });
             const monorepoDirectDuplicateDependenciesOnlyWarnsForCheck = createOnlyWarnsForMappingCheck("monorepoDirectDuplicateDependenciesOnlyWarnsFor", monorepoDirectDuplicateDependenciesOnlyWarnsFor);
+            const monorepoDirectSubpackagePeerDependenciesMissingOnlyWarnsForCheck = createOnlyWarnsForMappingCheck("monorepoDirectSubpackagePeerDependenciesMissingOnlyWarnsFor", monorepoDirectSubpackagePeerDependenciesMissingOnlyWarnsFor);
+            const monorepoDirectSubpackagePeerDependenciesInvalidOnlyWarnsForCheck = createOnlyWarnsForMappingCheck("monorepoDirectSubpackagePeerDependenciesInvalidOnlyWarnsFor", monorepoDirectSubpackagePeerDependenciesInvalidOnlyWarnsFor);
             const previousCheckedWorkspaces = new Map();
             checksWorkspaces.forEach((checkSubPackage, id) => {
                 checkSubPackage.checkRecommended({
@@ -81,6 +84,7 @@ export function createCheckPackageWithWorkspaces({ createReportError = createCli
                     checkResolutionMessage,
                 });
                 const reportMonorepoDDDError = createReportError("Monorepo Direct Duplicate Dependencies", checkSubPackage.pkgPathName);
+                const reportMonorepoDPDError = createReportError(`Monorepo Direct Peer Dependencies for dependencies of "${checkSubPackage.pkg.name}" (${checkSubPackage.pkgPathName})`, checkPackage.pkgPathName);
                 // Root
                 checkDuplicateDependencies(reportMonorepoDDDError, checkSubPackage.parsedPkg, checkSubPackage.isPkgLibrary, "devDependencies", ["dependencies", "devDependencies"], pkg, monorepoDirectDuplicateDependenciesOnlyWarnsForCheck.createFor(checkSubPackage.pkg.name));
                 // previous packages
@@ -89,6 +93,7 @@ export function createCheckPackageWithWorkspaces({ createReportError = createCli
                     checkDuplicateDependencies(reportMonorepoDDDError, checkSubPackage.parsedPkg, checkSubPackage.isPkgLibrary, "dependencies", ["dependencies", "devDependencies"], previousCheckSubPackage.pkg, monorepoDirectDuplicateDependenciesOnlyWarnsForCheck.createFor(checkSubPackage.pkg.name));
                     checkDuplicateDependencies(reportMonorepoDDDError, checkSubPackage.parsedPkg, checkSubPackage.isPkgLibrary, "peerDependencies", ["peerDependencies"], previousCheckSubPackage.pkg, monorepoDirectDuplicateDependenciesOnlyWarnsForCheck.createFor(checkSubPackage.pkg.name));
                 });
+                checkMonorepoDirectSubpackagePeerDependencies(reportMonorepoDPDError, checkSubPackage.isPkgLibrary, checkPackage.parsedPkg, checkSubPackage.parsedPkg, checkSubPackage.getDependencyPackageJson, monorepoDirectSubpackagePeerDependenciesMissingOnlyWarnsForCheck, monorepoDirectSubpackagePeerDependenciesInvalidOnlyWarnsForCheck);
                 previousCheckedWorkspaces.set(id, checkSubPackage);
             });
             reportNotWarnedForMapping(createReportError("Monorepo Direct Duplicate Dependencies", checkPackage.pkgPathName), monorepoDirectDuplicateDependenciesOnlyWarnsForCheck);

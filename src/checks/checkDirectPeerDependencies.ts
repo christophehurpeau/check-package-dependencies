@@ -12,7 +12,7 @@ import type {
 import type { OnlyWarnsForMappingCheck } from "../utils/warnForUtils.ts";
 import { checkPeerDependencies } from "./checkPeerDependencies.ts";
 
-const regularDependencyTypes: RegularDependencyTypes[] = [
+export const regularDependencyTypes: RegularDependencyTypes[] = [
   "devDependencies",
   "dependencies",
   "optionalDependencies",

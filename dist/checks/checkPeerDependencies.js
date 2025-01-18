@@ -48,10 +48,7 @@ export function checkPeerDependencies(reportError, pkg, type, allowedPeerIn, all
                     reportError({
                         errorMessage: "Invalid peer dependency version",
                         errorDetails: `"${version}" should satisfies "${range}" ${fromDependency(depPkg, type)}`,
-                        dependency: {
-                            name: peerDepName,
-                            fieldName: allowedPeerInExisting[index],
-                        },
+                        dependency: pkg[allowedPeerInExisting[index]][peerDepName],
                         onlyWarns: invalidOnlyWarnsForCheck.shouldWarnsFor(peerDepName),
                     });
                 }

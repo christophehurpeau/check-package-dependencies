@@ -35,6 +35,7 @@ function createPackageRule(ruleName, schema, checkFn) {
                                 reportError: (message) => {
                                     context.report({
                                         message: message.errorMessage,
+                                        // TODO improve this by using start+end
                                         loc: message.dependency?.line
                                             ? {
                                                 line: message.dependency.line,

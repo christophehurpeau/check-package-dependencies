@@ -574,7 +574,11 @@ describe("checkDirectPeerDependencies", () => {
       errorDetails:
         '"^2.0.0" should satisfies "^1.0.0" from "some-lib-using-rollup" in "devDependencies"',
       onlyWarns: false,
-      dependency: { name: "rollup", fieldName: "devDependencies" },
+      dependency: {
+        name: "rollup",
+        fieldName: "devDependencies",
+        value: "^2.0.0",
+      },
     });
   });
 
@@ -615,7 +619,11 @@ describe("checkDirectPeerDependencies", () => {
       errorMessage: "Invalid peer dependency version",
       errorDetails:
         '"18.3.0" should satisfies "18.2.0" from "react-native" in "dependencies"',
-      dependency: { name: "react", fieldName: "devDependencies" },
+      dependency: {
+        name: "react",
+        fieldName: "devDependencies",
+        value: "18.3.0",
+      },
       onlyWarns: false,
     });
   });

@@ -90,7 +90,7 @@ describe(checkMinRangeSatisfies.name, () => {
           dependencies: { test1: "1.1.0" },
           devDependencies: { test1: "1.0.0" },
         },
-        'Invalid "1.1.0"',
+        'Invalid "1.1.0" in "dependencies"',
         '"1.1.0" should satisfies "1.0.0" from "devDependencies"',
         {
           dependencies: { test1: "1.0.0" },
@@ -102,7 +102,7 @@ describe(checkMinRangeSatisfies.name, () => {
           dependencies: { test1: "^1.0.0" },
           devDependencies: { test1: "1.1.0" },
         },
-        'Invalid "^1.0.0"',
+        'Invalid "^1.0.0" in "dependencies"',
         '"^1.0.0" should satisfies "1.1.0" from "devDependencies"',
         {
           dependencies: { test1: "^1.1.0" },
@@ -114,7 +114,7 @@ describe(checkMinRangeSatisfies.name, () => {
           dependencies: { test1: "^1.1.0" },
           devDependencies: { test1: "1.0.0" },
         },
-        'Invalid "^1.1.0"',
+        'Invalid "^1.1.0" in "dependencies"',
         '"^1.1.0" should satisfies "1.0.0" from "devDependencies"',
         {
           dependencies: { test1: "^1.0.0" },
@@ -126,7 +126,7 @@ describe(checkMinRangeSatisfies.name, () => {
           dependencies: { test1: "~1.0.0" },
           devDependencies: { test1: "1.1.0" },
         },
-        'Invalid "~1.0.0"',
+        'Invalid "~1.0.0" in "dependencies"',
         '"~1.0.0" should satisfies "1.1.0" from "devDependencies"',
         {
           dependencies: { test1: "~1.1.0" },
@@ -138,7 +138,7 @@ describe(checkMinRangeSatisfies.name, () => {
           dependencies: { test1: "~1.1.0" },
           devDependencies: { test1: "1.0.0" },
         },
-        'Invalid "~1.1.0"',
+        'Invalid "~1.1.0" in "dependencies"',
         '"~1.1.0" should satisfies "1.0.0" from "devDependencies"',
         {
           dependencies: { test1: "~1.0.0" },
@@ -150,7 +150,7 @@ describe(checkMinRangeSatisfies.name, () => {
           dependencies: { test1: ">=1.0.0" },
           devDependencies: { test1: "1.1.0" },
         },
-        'Invalid ">=1.0.0"',
+        'Invalid ">=1.0.0" in "dependencies"',
         '">=1.0.0" should satisfies "1.1.0" from "devDependencies"',
         {
           dependencies: { test1: ">=1.1.0" },
@@ -162,7 +162,7 @@ describe(checkMinRangeSatisfies.name, () => {
           dependencies: { test1: ">=1.1.0" },
           devDependencies: { test1: "1.0.0" },
         },
-        'Invalid ">=1.1.0"',
+        'Invalid ">=1.1.0" in "dependencies"',
         '">=1.1.0" should satisfies "1.0.0" from "devDependencies"',
         {
           dependencies: { test1: ">=1.0.0" },

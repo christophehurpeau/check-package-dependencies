@@ -10,6 +10,7 @@ import type {
 } from "./check-package.ts";
 import { createCheckPackage } from "./check-package.ts";
 import { checkDuplicateDependencies } from "./checks/checkDuplicateDependencies.ts";
+import { checkMonorepoDirectSubpackagePeerDependencies } from "./checks/checkMonorepoDirectSubpackagePeerDependencies.ts";
 import type { CheckResolutionMessage } from "./checks/checkResolutionsHasExplanation.ts";
 import {
   createCliReportError,
@@ -36,6 +37,8 @@ type OnlyWarnsForInMonorepoPackagesDependenciesCheckPackageRecommendedOption =
 export interface CheckPackageWithWorkspacesRecommendedOptions {
   allowRangeVersionsInLibraries?: boolean;
   monorepoDirectDuplicateDependenciesOnlyWarnsFor?: OnlyWarnsForOptionalDependencyMapping;
+  monorepoDirectSubpackagePeerDependenciesMissingOnlyWarnsFor?: OnlyWarnsForOptionalDependencyMapping;
+  monorepoDirectSubpackagePeerDependenciesInvalidOnlyWarnsFor?: OnlyWarnsForOptionalDependencyMapping;
   onlyWarnsForInRootPackage?: OnlyWarnsForInPackageCheckPackageRecommendedOption;
   onlyWarnsForInMonorepoPackages?: OnlyWarnsForInMonorepoPackagesCheckPackageRecommendedOption;
   onlyWarnsForInRootDependencies?: OnlyWarnsForInDependenciesCheckPackageRecommendedOption;
@@ -140,6 +143,8 @@ export function createCheckPackageWithWorkspaces({
       onlyWarnsForInRootDependencies,
       onlyWarnsForInMonorepoPackagesDependencies = {},
       monorepoDirectDuplicateDependenciesOnlyWarnsFor,
+      monorepoDirectSubpackagePeerDependenciesMissingOnlyWarnsFor,
+      monorepoDirectSubpackagePeerDependenciesInvalidOnlyWarnsFor,
       checkResolutionMessage,
     } = {}) {
       checkPackage.checkNoDependencies();
@@ -153,6 +158,18 @@ export function createCheckPackageWithWorkspaces({
         createOnlyWarnsForMappingCheck(
           "monorepoDirectDuplicateDependenciesOnlyWarnsFor",
           monorepoDirectDuplicateDependenciesOnlyWarnsFor,
+        );
+
+      const monorepoDirectSubpackagePeerDependenciesMissingOnlyWarnsForCheck =
+        createOnlyWarnsForMappingCheck(
+          "monorepoDirectSubpackagePeerDependenciesMissingOnlyWarnsFor",
+          monorepoDirectSubpackagePeerDependenciesMissingOnlyWarnsFor,
+        );
+
+      const monorepoDirectSubpackagePeerDependenciesInvalidOnlyWarnsForCheck =
+        createOnlyWarnsForMappingCheck(
+          "monorepoDirectSubpackagePeerDependenciesInvalidOnlyWarnsFor",
+          monorepoDirectSubpackagePeerDependenciesInvalidOnlyWarnsFor,
         );
 
       const previousCheckedWorkspaces = new Map<string, CheckPackageApi>();
@@ -181,6 +198,11 @@ export function createCheckPackageWithWorkspaces({
           "Monorepo Direct Duplicate Dependencies",
           checkSubPackage.pkgPathName,
         );
+        const reportMonorepoDPDError = createReportError(
+          `Monorepo Direct Peer Dependencies for dependencies of "${checkSubPackage.pkg.name}" (${checkSubPackage.pkgPathName})`,
+          checkPackage.pkgPathName,
+        );
+
         // Root
         checkDuplicateDependencies(
           reportMonorepoDDDError,
@@ -229,6 +251,15 @@ export function createCheckPackageWithWorkspaces({
             ),
           );
         });
+        checkMonorepoDirectSubpackagePeerDependencies(
+          reportMonorepoDPDError,
+          checkSubPackage.isPkgLibrary,
+          checkPackage.parsedPkg,
+          checkSubPackage.parsedPkg,
+          checkSubPackage.getDependencyPackageJson,
+          monorepoDirectSubpackagePeerDependenciesMissingOnlyWarnsForCheck,
+          monorepoDirectSubpackagePeerDependenciesInvalidOnlyWarnsForCheck,
+        );
 
         previousCheckedWorkspaces.set(id, checkSubPackage);
       });
