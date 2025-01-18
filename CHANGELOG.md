@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [9.1.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v9.0.0...v9.1.0) (2025-01-18)
+
+### Features
+
+* experimental eslint plugin ([13a2482](https://github.com/christophehurpeau/check-package-dependencies/commit/13a2482e54c6f5b815a72dbdabcb8cffbda25d13))
+* look for direct peer dependencies of subpackage matching monorepo devdependencies ([7d88aa7](https://github.com/christophehurpeau/check-package-dependencies/commit/7d88aa72298df3430d12a3b913e4cde9c243fbb1))
+
 ## [9.0.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v8.0.1...v9.0.0) (2024-12-10)
 
 ### ⚠ BREAKING CHANGES
