@@ -1,8 +1,7 @@
 import semver from "semver";
-import { createReportError, inDependency } from "../utils/createReportError.js";
+import { inDependency } from "../reporting/cliErrorReporting.js";
 import { getEntries } from "../utils/object.js";
-export function checkSatisfiesVersionsInDependency(pkgPathName, depPkg, dependenciesRanges, { customCreateReportError = createReportError, } = {}) {
-    const reportError = customCreateReportError("Satisfies Versions In Dependency", pkgPathName);
+export function checkSatisfiesVersionsInDependency(reportError, depPkg, dependenciesRanges) {
     for (const [dependenciesType, dependenciesTypeRanges] of getEntries(dependenciesRanges)) {
         if (!dependenciesTypeRanges)
             return;

@@ -1,15 +1,13 @@
 import { describe, it } from "node:test";
-import { assertCreateReportErrorCall, assertDeepEqualIgnoringPrototypes, assertNoMessages, assertSingleMessage, createMockReportError, } from "../utils/createReportError.testUtils.js";
+import { assertDeepEqualIgnoringPrototypes, assertNoMessages, assertSingleMessage, createMockReportError, } from "../reporting/ReportError.testUtils.js";
 import { parsePkgValue } from "../utils/pkgJsonUtils.js";
 import { checkSatisfiesVersionsFromDependency } from "./checkSatisfiesVersionsFromDependency.js";
 describe(checkSatisfiesVersionsFromDependency.name, () => {
-    const { createReportError, messages } = createMockReportError();
+    const { mockReportError, messages } = createMockReportError();
     it("should return no error when no keys", () => {
-        checkSatisfiesVersionsFromDependency(parsePkgValue({ name: "test" }), "dependencies", [], { name: "depTest", dependencies: {} }, "dependencies", {
-            customCreateReportError: createReportError,
+        checkSatisfiesVersionsFromDependency(mockReportError, parsePkgValue({ name: "test" }), "dependencies", [], { name: "depTest", dependencies: {} }, "dependencies", {
             shouldHaveExactVersions: () => false,
         });
-        assertCreateReportErrorCall(createReportError, "Satisfies Versions From Dependency");
         assertNoMessages(messages);
     });
     describe("expect no error", () => {
@@ -42,14 +40,12 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
                         ? { [depTypeInPkg]: { [depName]: depValueInPkg } }
                         : {}),
                 });
-                checkSatisfiesVersionsFromDependency(parsedPkg, depTypeInPkg, [depName], {
+                checkSatisfiesVersionsFromDependency(mockReportError, parsedPkg, depTypeInPkg, [depName], {
                     name: "test-dep",
                     [depTypeInDep]: { [depName]: depValueInDep },
                 }, depTypeInDep, {
-                    customCreateReportError: createReportError,
                     shouldHaveExactVersions: () => false,
                 });
-                assertCreateReportErrorCall(createReportError, "Satisfies Versions From Dependency");
                 assertNoMessages(messages);
             });
         }
@@ -124,11 +120,10 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
             it(`should fix when ${description}`, () => {
                 const depTypeInPkg = "devDependencies";
                 const parsedPkg = parsePkgValue({ name: "test", ...pkgContent });
-                checkSatisfiesVersionsFromDependency(parsedPkg, depTypeInPkg, ["expectedDep"], {
+                checkSatisfiesVersionsFromDependency(mockReportError, parsedPkg, depTypeInPkg, ["expectedDep"], {
                     name: "test-dep",
                     [depTypeInPkg]: { expectedDep: depValue },
                 }, depTypeInPkg, {
-                    customCreateReportError: createReportError,
                     shouldHaveExactVersions: () => shouldHaveExactVersions,
                     tryToAutoFix: true,
                 });
@@ -188,14 +183,12 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
             it(`should error when ${depName} is ${description} in ${depTypeInDep}`, () => {
                 const depTypeInPkg = "devDependencies";
                 const parsedPkg = parsePkgValue({ ...pkgContent, name: "test" });
-                checkSatisfiesVersionsFromDependency(parsedPkg, depTypeInPkg, [depName], {
+                checkSatisfiesVersionsFromDependency(mockReportError, parsedPkg, depTypeInPkg, [depName], {
                     ...depPkgContent,
                     name: "test-dep",
                 }, depTypeInDep, {
-                    customCreateReportError: createReportError,
                     shouldHaveExactVersions: () => false,
                 });
-                assertCreateReportErrorCall(createReportError, "Satisfies Versions From Dependency");
                 assertSingleMessage(messages, {
                     errorMessage: errorTitle,
                     errorDetails: errorInfo,

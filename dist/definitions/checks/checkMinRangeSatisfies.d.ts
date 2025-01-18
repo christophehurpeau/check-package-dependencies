@@ -1,8 +1,7 @@
-import { createReportError } from "../utils/createReportError.ts";
+import type { ReportError } from "../reporting/ReportError.ts";
 import type { DependencyTypes, ParsedPackageJson } from "../utils/packageTypes.ts";
 export interface CheckMinRangeSatisfiesOptions {
-    customCreateReportError?: typeof createReportError;
     tryToAutoFix?: boolean;
 }
-export declare function checkMinRangeSatisfies(pkg: ParsedPackageJson, type1?: DependencyTypes, type2?: DependencyTypes, { tryToAutoFix, customCreateReportError, }?: CheckMinRangeSatisfiesOptions): void;
+export declare function checkMinRangeSatisfies(reportError: ReportError, pkg: ParsedPackageJson, type1?: DependencyTypes, type2?: DependencyTypes, { tryToAutoFix }?: CheckMinRangeSatisfiesOptions): void;
 //# sourceMappingURL=checkMinRangeSatisfies.d.ts.map

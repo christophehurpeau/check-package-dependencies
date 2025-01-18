@@ -13,8 +13,12 @@ export function readPkgJson(packagePath: string): PackageJson {
   return JSON.parse(readFileSync(packagePath, "utf8")) as PackageJson;
 }
 
+export function stringifyPkgJson(pkg: PackageJson): string {
+  return `${JSON.stringify(pkg, null, 2)}\n`;
+}
+
 export function writePkgJson(packagePath: string, pkg: PackageJson): void {
-  writeFileSync(packagePath, `${JSON.stringify(pkg, null, 2)}\n`);
+  writeFileSync(packagePath, stringifyPkgJson(pkg));
 }
 
 function getLocationFromOffset(

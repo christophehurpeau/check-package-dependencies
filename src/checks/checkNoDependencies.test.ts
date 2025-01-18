@@ -1,44 +1,38 @@
 import { describe, it } from "node:test";
 import {
-  assertCreateReportErrorCall,
   assertNoMessages,
   assertSingleMessage,
   createMockReportError,
-} from "../utils/createReportError.testUtils.ts";
+} from "../reporting/ReportError.testUtils.ts";
 import { parsePkgValue } from "../utils/pkgJsonUtils.ts";
 import { checkNoDependencies } from "./checkNoDependencies.ts";
 
 describe("checkNoDependencies", () => {
-  const { createReportError, messages } = createMockReportError();
+  const { mockReportError, messages } = createMockReportError();
 
   it('should return no error when no "dependencies" is present', () => {
     checkNoDependencies(
+      mockReportError,
       parsePkgValue({ name: "test", devDependencies: { test: "1.0.0" } }),
-      undefined,
-      undefined,
-      createReportError,
     );
     assertNoMessages(messages);
   });
 
   it('should return no error when no "devDependencies" is present', () => {
     checkNoDependencies(
+      mockReportError,
       parsePkgValue({ name: "test", dependencies: { test: "1.0.0" } }),
       "devDependencies",
-      undefined,
-      createReportError,
     );
     assertNoMessages(messages);
   });
 
   it('should return no error when "dependencies" is present', () => {
     checkNoDependencies(
+      mockReportError,
       parsePkgValue({ name: "test", dependencies: { test: "1.0.0" } }),
-      undefined,
-      undefined,
-      createReportError,
     );
-    assertCreateReportErrorCall(createReportError, "No dependencies");
+
     assertSingleMessage(messages, {
       errorMessage: "Unexpected dependencies",
       errorDetails: "you should move them in devDependencies",
@@ -48,12 +42,11 @@ describe("checkNoDependencies", () => {
 
   it('should return no error when "dependencies" is present and is in onlyWarnsFor', () => {
     checkNoDependencies(
+      mockReportError,
       parsePkgValue({ name: "test", dependencies: { test: "1.0.0" } }),
       "dependencies",
       "peerDependencies",
-      createReportError,
     );
-    assertCreateReportErrorCall(createReportError, "No dependencies");
     assertSingleMessage(messages, {
       errorMessage: "Unexpected dependencies",
       errorDetails: "you should move them in peerDependencies",

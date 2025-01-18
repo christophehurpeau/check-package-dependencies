@@ -12,10 +12,10 @@ import { createCheckPackage } from "./check-package.ts";
 import { checkDuplicateDependencies } from "./checks/checkDuplicateDependencies.ts";
 import type { CheckResolutionMessage } from "./checks/checkResolutionsHasExplanation.ts";
 import {
-  createReportError,
+  createCliReportError,
   displayMessages,
   reportNotWarnedForMapping,
-} from "./utils/createReportError.ts";
+} from "./reporting/cliErrorReporting.ts";
 import type { OnlyWarnsForOptionalDependencyMapping } from "./utils/warnForUtils.ts";
 import { createOnlyWarnsForMappingCheck } from "./utils/warnForUtils.ts";
 
@@ -67,10 +67,12 @@ interface CreateCheckPackageWithWorkspacesOptions
   isLibrary?: (pkg: PackageJson) => boolean;
 }
 
-export function createCheckPackageWithWorkspaces(
-  createCheckPackageOptions: CreateCheckPackageWithWorkspacesOptions = {},
-): CheckPackageWithWorkspacesApi {
+export function createCheckPackageWithWorkspaces({
+  createReportError = createCliReportError,
+  ...createCheckPackageOptions
+}: CreateCheckPackageWithWorkspacesOptions = {}): CheckPackageWithWorkspacesApi {
   const checkPackage = createCheckPackage({
+    createReportError,
     ...createCheckPackageOptions,
     isLibrary: false,
   });
@@ -107,6 +109,7 @@ export function createCheckPackageWithWorkspaces(
     workspacePackagesPaths.map((subPkgDirectoryPath) => {
       const checkPkg = createCheckPackage({
         ...createCheckPackageOptions,
+        createReportError,
         packageDirectoryPath: subPkgDirectoryPath,
         internalWorkspacePkgDirectoryPath:
           createCheckPackageOptions.packageDirectoryPath || ".",

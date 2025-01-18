@@ -15,9 +15,13 @@ import { checkSatisfiesVersions } from "./checks/checkSatisfiesVersions.ts";
 import { checkSatisfiesVersionsBetweenDependencies } from "./checks/checkSatisfiesVersionsBetweenDependencies.ts";
 import { checkSatisfiesVersionsFromDependency } from "./checks/checkSatisfiesVersionsFromDependency.ts";
 import { checkSatisfiesVersionsInDependency } from "./checks/checkSatisfiesVersionsInDependency.ts";
+import type { CreateReportError } from "./reporting/ReportError.ts";
+import {
+  createCliReportError,
+  displayMessages,
+} from "./reporting/cliErrorReporting.ts";
 import type { GetDependencyPackageJson } from "./utils/createGetDependencyPackageJson.ts";
 import { createGetDependencyPackageJson } from "./utils/createGetDependencyPackageJson.ts";
-import { displayMessages } from "./utils/createReportError.ts";
 import { getEntries } from "./utils/object.ts";
 import type {
   DependenciesRanges,
@@ -42,6 +46,8 @@ export interface CreateCheckPackageOptions {
   isLibrary?: boolean | ((pkg: PackageJson) => boolean);
   /** @internal */
   internalWorkspacePkgDirectoryPath?: string;
+  /** @internal */
+  createReportError?: CreateReportError;
 }
 
 export interface CheckDirectPeerDependenciesOptions {
@@ -97,6 +103,7 @@ export interface CheckPackageApiRunOptions {
 
 export interface CheckPackageApi {
   run: (options?: CheckPackageApiRunOptions) => Promise<void>;
+  runSync: (options?: CheckPackageApiRunOptions) => void;
 
   /** @internal */
   parsedPkg: ParsedPackageJson;
@@ -302,13 +309,14 @@ export function createCheckPackage({
   packageDirectoryPath = ".",
   internalWorkspacePkgDirectoryPath,
   isLibrary = false,
+  createReportError = createCliReportError,
 }: CreateCheckPackageOptions = {}): CheckPackageApi {
   const pkgDirname = path.resolve(packageDirectoryPath);
   const pkgPath = `${pkgDirname}/package.json`;
   const pkgPathName = `${packageDirectoryPath}/package.json`;
   const parsedPkg = readAndParsePkgJson(pkgPath);
   const copyPkg: PackageJson = JSON.parse(
-    JSON.stringify(parsedPkg),
+    JSON.stringify(parsedPkg.value),
   ) as PackageJson;
   const isPkgLibrary =
     typeof isLibrary === "function" ? isLibrary(parsedPkg.value) : isLibrary;
@@ -358,6 +366,13 @@ export function createCheckPackage({
         throw new Error(`${this.name} failed: ${(error as Error).message}`);
       }
     }
+
+    runSync(): void {
+      const result = this.fn();
+      if (result instanceof Promise) {
+        throw new TypeError(`${this.name} failed: Promise returned`);
+      }
+    }
   }
 
   const jobs: Job[] = [];
@@ -368,6 +383,18 @@ export function createCheckPackage({
       // TODO parallel
       for (const job of jobs) {
         await job.run();
+      }
+      if (tryToAutoFix) {
+        writePackageIfChanged();
+      }
+      if (!skipDisplayMessages) {
+        displayMessages();
+      }
+    },
+
+    runSync({ skipDisplayMessages = false }: CheckPackageApiRunOptions = {}) {
+      for (const job of jobs) {
+        job.runSync();
       }
       if (tryToAutoFix) {
         writePackageIfChanged();
@@ -389,12 +416,13 @@ export function createCheckPackage({
       allowRangeVersionsInDependencies = true,
     } = {}) {
       jobs.push(
-        new Job(this.checkExactVersions.name, async () => {
+        new Job(this.checkExactVersions.name, () => {
           const onlyWarnsForCheck = createOnlyWarnsForArrayCheck(
             "checkExactVersions.onlyWarnsFor",
             onlyWarnsFor,
           );
-          await checkExactVersions(
+          checkExactVersions(
+            createReportError("Exact versions", parsedPkg.path),
             parsedPkg,
             !allowRangeVersionsInDependencies
               ? ["dependencies", "devDependencies", "resolutions"]
@@ -412,7 +440,11 @@ export function createCheckPackage({
     },
 
     checkResolutionsVersionsMatch() {
-      checkResolutionsVersionsMatch(parsedPkg, {
+      const reportError = createReportError(
+        "Resolutions match other dependencies",
+        parsedPkg.path,
+      );
+      checkResolutionsVersionsMatch(reportError, parsedPkg, {
         tryToAutoFix,
       });
       return this;
@@ -420,16 +452,21 @@ export function createCheckPackage({
 
     checkExactDevVersions({ onlyWarnsFor } = {}) {
       jobs.push(
-        new Job(this.checkExactDevVersions.name, async () => {
+        new Job(this.checkExactDevVersions.name, () => {
           const onlyWarnsForCheck = createOnlyWarnsForArrayCheck(
             "checkExactDevVersions.onlyWarnsFor",
             onlyWarnsFor,
           );
-          await checkExactVersions(parsedPkg, ["devDependencies"], {
-            onlyWarnsForCheck,
-            tryToAutoFix,
-            getDependencyPackageJson,
-          });
+          checkExactVersions(
+            createReportError("Exact dev versions", parsedPkg.path),
+            parsedPkg,
+            ["devDependencies"],
+            {
+              onlyWarnsForCheck,
+              tryToAutoFix,
+              getDependencyPackageJson,
+            },
+          );
         }),
       );
       return this;
@@ -439,7 +476,8 @@ export function createCheckPackage({
       type = "dependencies",
       moveToSuggestion = "devDependencies",
     ) {
-      checkNoDependencies(parsedPkg, type, moveToSuggestion);
+      const reportError = createReportError("No dependencies", parsedPkg.path);
+      checkNoDependencies(reportError, parsedPkg, type, moveToSuggestion);
       return this;
     },
 
@@ -463,6 +501,7 @@ export function createCheckPackage({
                   invalidOnlyWarnsFor,
                 );
           checkDirectPeerDependencies(
+            createReportError("Peer Dependencies", parsedPkg.path),
             isPkgLibrary,
             parsedPkg,
             getDependencyPackageJson,
@@ -481,6 +520,7 @@ export function createCheckPackage({
       jobs.push(
         new Job(this.checkDirectDuplicateDependencies.name, () => {
           checkDirectDuplicateDependencies(
+            createReportError("Direct Duplicate Dependencies", parsedPkg.path),
             parsedPkg,
             isPkgLibrary,
             "dependencies",
@@ -495,7 +535,12 @@ export function createCheckPackage({
     checkResolutionsHasExplanation(
       checkMessage: CheckResolutionMessage = (depKey, message) => undefined,
     ) {
+      const reportError = createReportError(
+        "Resolutions has explanation",
+        parsedPkg.path,
+      );
       checkResolutionsHasExplanation(
+        reportError,
         parsedPkg,
         checkMessage,
         getDependencyPackageJson,
@@ -588,8 +633,13 @@ export function createCheckPackage({
       jobs.push(
         new Job(this.checkIdenticalVersionsThanDependency.name, () => {
           const [depPkg] = getDependencyPackageJson(depName);
+          const reportError = createReportError(
+            `Same Versions than ${depPkg.name || ""}`,
+            parsedPkg.path,
+          );
           if (resolutions) {
             checkIdenticalVersionsThanDependency(
+              reportError,
               parsedPkg,
               "resolutions",
               resolutions,
@@ -599,6 +649,7 @@ export function createCheckPackage({
           }
           if (dependencies) {
             checkIdenticalVersionsThanDependency(
+              reportError,
               parsedPkg,
               "dependencies",
               dependencies,
@@ -608,6 +659,7 @@ export function createCheckPackage({
           }
           if (devDependencies) {
             checkIdenticalVersionsThanDependency(
+              reportError,
               parsedPkg,
               "devDependencies",
               devDependencies,
@@ -627,8 +679,13 @@ export function createCheckPackage({
       jobs.push(
         new Job(this.checkSatisfiesVersionsFromDependency.name, () => {
           const [depPkg] = getDependencyPackageJson(depName);
+          const reportError = createReportError(
+            `Same Versions than ${depPkg.name || ""}`,
+            parsedPkg.path,
+          );
           if (resolutions) {
             checkIdenticalVersionsThanDependency(
+              reportError,
               parsedPkg,
               "resolutions",
               resolutions,
@@ -638,6 +695,7 @@ export function createCheckPackage({
           }
           if (dependencies) {
             checkIdenticalVersionsThanDependency(
+              reportError,
               parsedPkg,
               "dependencies",
               dependencies,
@@ -647,6 +705,7 @@ export function createCheckPackage({
           }
           if (devDependencies) {
             checkIdenticalVersionsThanDependency(
+              reportError,
               parsedPkg,
               "devDependencies",
               devDependencies,
@@ -660,9 +719,14 @@ export function createCheckPackage({
     },
 
     checkSatisfiesVersions(dependencies) {
+      const reportError = createReportError(
+        "Satisfies Versions",
+        parsedPkg.path,
+      );
       Object.entries(dependencies).forEach(
         ([dependencyType, dependenciesRanges]) => {
           checkSatisfiesVersions(
+            reportError,
             parsedPkg,
             dependencyType as DependencyTypes,
             dependenciesRanges,
@@ -678,9 +742,14 @@ export function createCheckPackage({
     ) {
       jobs.push(
         new Job(this.checkSatisfiesVersionsFromDependency.name, () => {
+          const reportError = createReportError(
+            "Satisfies Versions From Dependency",
+            parsedPkg.path,
+          );
           const [depPkg] = getDependencyPackageJson(depName);
           if (resolutions) {
             checkSatisfiesVersionsFromDependency(
+              reportError,
               parsedPkg,
               "resolutions",
               resolutions,
@@ -691,6 +760,7 @@ export function createCheckPackage({
           }
           if (dependencies) {
             checkSatisfiesVersionsFromDependency(
+              reportError,
               parsedPkg,
               "dependencies",
               dependencies,
@@ -701,6 +771,7 @@ export function createCheckPackage({
           }
           if (devDependencies) {
             checkSatisfiesVersionsFromDependency(
+              reportError,
               parsedPkg,
               "devDependencies",
               devDependencies,
@@ -722,9 +793,14 @@ export function createCheckPackage({
         new Job(
           this.checkSatisfiesVersionsInDevDependenciesOfDependency.name,
           () => {
+            const reportError = createReportError(
+              "Satisfies Versions In Dev Dependencies Of Dependency",
+              parsedPkg.path,
+            );
             const [depPkg] = getDependencyPackageJson(depName);
             if (resolutions) {
               checkSatisfiesVersionsFromDependency(
+                reportError,
                 parsedPkg,
                 "resolutions",
                 resolutions,
@@ -735,6 +811,7 @@ export function createCheckPackage({
             }
             if (dependencies) {
               checkSatisfiesVersionsFromDependency(
+                reportError,
                 parsedPkg,
                 "dependencies",
                 dependencies,
@@ -745,6 +822,7 @@ export function createCheckPackage({
             }
             if (devDependencies) {
               checkSatisfiesVersionsFromDependency(
+                reportError,
                 parsedPkg,
                 "devDependencies",
                 devDependencies,
@@ -760,14 +838,33 @@ export function createCheckPackage({
     },
 
     checkIdenticalVersions({ resolutions, dependencies, devDependencies }) {
+      const reportError = createReportError(
+        "Identical Versions",
+        parsedPkg.path,
+      );
       if (resolutions) {
-        checkIdenticalVersions(parsedPkg, "resolutions", resolutions);
+        checkIdenticalVersions(
+          reportError,
+          parsedPkg,
+          "resolutions",
+          resolutions,
+        );
       }
       if (dependencies) {
-        checkIdenticalVersions(parsedPkg, "dependencies", dependencies);
+        checkIdenticalVersions(
+          reportError,
+          parsedPkg,
+          "dependencies",
+          dependencies,
+        );
       }
       if (devDependencies) {
-        checkIdenticalVersions(parsedPkg, "devDependencies", devDependencies);
+        checkIdenticalVersions(
+          reportError,
+          parsedPkg,
+          "devDependencies",
+          devDependencies,
+        );
       }
       return this;
     },
@@ -807,8 +904,13 @@ export function createCheckPackage({
                       const [depPkg2] = depPkgsByName.get(depName2)!;
                       (["dependencies", "devDependencies"] as const).forEach(
                         (dep2Type) => {
-                          checkSatisfiesVersionsBetweenDependencies(
+                          const reportError = createReportError(
+                            "Satisfies Versions From Dependency",
                             depPkgPath1,
+                          );
+
+                          checkSatisfiesVersionsBetweenDependencies(
+                            reportError,
                             depPkg1,
                             dep1Type,
                             depConfig2[dep2Type] || [],
@@ -833,8 +935,12 @@ export function createCheckPackage({
       jobs.push(
         new Job(this.checkSatisfiesVersionsInDependency.name, () => {
           const [depPkg] = getDependencyPackageJson(depName);
+          const reportError = createReportError(
+            "Satisfies Versions In Dependency",
+            parsedPkg.path,
+          );
           checkSatisfiesVersionsInDependency(
-            pkgPathName,
+            reportError,
             depPkg,
             dependenciesRanges,
           );
@@ -846,9 +952,17 @@ export function createCheckPackage({
     checkMinRangeDependenciesSatisfiesDevDependencies() {
       jobs.push(
         new Job(this.checkSatisfiesVersionsInDependency.name, () => {
-          checkMinRangeSatisfies(parsedPkg, "dependencies", "devDependencies", {
-            tryToAutoFix,
-          });
+          const reportError = createReportError(
+            '"dependencies" minimum range satisfies "devDependencies"',
+            parsedPkg.path,
+          );
+          checkMinRangeSatisfies(
+            reportError,
+            parsedPkg,
+            "dependencies",
+            "devDependencies",
+            { tryToAutoFix },
+          );
         }),
       );
       return this;
@@ -857,7 +971,12 @@ export function createCheckPackage({
     checkMinRangePeerDependenciesSatisfiesDependencies() {
       jobs.push(
         new Job(this.checkSatisfiesVersionsInDependency.name, () => {
+          const reportError = createReportError(
+            '"peerDependencies" minimum range satisfies "dependencies"',
+            parsedPkg.path,
+          );
           checkMinRangeSatisfies(
+            reportError,
             parsedPkg,
             "peerDependencies",
             "dependencies",

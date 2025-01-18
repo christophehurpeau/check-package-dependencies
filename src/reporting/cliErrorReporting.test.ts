@@ -1,14 +1,14 @@
 import assert from "node:assert/strict";
 import { afterEach, beforeEach, describe, mock, test } from "node:test";
-import { createMockReportError } from "./createReportError.testUtils.ts";
+import { createOnlyWarnsForMappingCheck } from "../utils/warnForUtils.ts";
+import { createMockReportError } from "./ReportError.testUtils.ts";
 import {
-  createReportError,
+  createCliReportError,
   displayMessages,
   logMessage,
   reportNotWarnedForMapping,
   resetMessages,
-} from "./createReportError.ts";
-import { createOnlyWarnsForMappingCheck } from "./warnForUtils.ts";
+} from "./cliErrorReporting.ts";
 
 afterEach(() => {
   process.exitCode = 0;
@@ -124,7 +124,7 @@ describe("createReportError", () => {
   });
 
   test("it should store general message", () => {
-    const reportError = createReportError("Test Title", "test/path");
+    const reportError = createCliReportError("Test Title", "test/path");
     reportError({
       errorMessage: "Error message",
     });
@@ -141,7 +141,7 @@ describe("createReportError", () => {
   });
 
   test("it should store dependency message with location", () => {
-    const reportError = createReportError("test-rule", "test/path");
+    const reportError = createCliReportError("test-rule", "test/path");
     reportError({
       errorMessage: "Error message",
       dependency: {
@@ -164,7 +164,7 @@ describe("createReportError", () => {
   });
 
   test("it should handle dependency with type", () => {
-    const reportError = createReportError("test-rule", "test/path");
+    const reportError = createCliReportError("test-rule", "test/path");
     reportError({
       errorMessage: "Error message",
       dependency: {
@@ -185,7 +185,7 @@ describe("createReportError", () => {
   });
 
   test("it should set exit code for errors but not warnings", () => {
-    const reportError = createReportError("Test Title", "test/path");
+    const reportError = createCliReportError("Test Title", "test/path");
 
     process.exitCode = 0;
     reportError({
@@ -221,7 +221,7 @@ describe("displayMessages", () => {
   });
 
   test("it should display messages and conclusion with warnings", () => {
-    const reportError = createReportError("Test Title", "test/path");
+    const reportError = createCliReportError("Test Title", "test/path");
     reportError({
       errorMessage: "Warning",
       onlyWarns: true,
@@ -240,7 +240,7 @@ describe("displayMessages", () => {
   });
 
   test("it should display messages and conclusion with errors", () => {
-    const reportError = createReportError("Test Title", "test/path");
+    const reportError = createCliReportError("Test Title", "test/path");
     reportError({
       errorMessage: "Error",
     });
@@ -258,7 +258,7 @@ describe("displayMessages", () => {
   });
 
   test("it should display messages and conclusion with auto-fixable errors", () => {
-    const reportError = createReportError("Test Title", "test/path");
+    const reportError = createCliReportError("Test Title", "test/path");
     reportError({
       errorMessage: "Error",
       autoFixable: true,
@@ -284,7 +284,7 @@ describe("displayMessages", () => {
   });
 
   test("it should display messages and conclusion with both errors and warnings", () => {
-    const reportError = createReportError("Test Title", "test/path");
+    const reportError = createCliReportError("Test Title", "test/path");
     reportError({
       errorMessage: "Warning",
       onlyWarns: true,
@@ -309,7 +309,7 @@ describe("displayMessages", () => {
   });
 
   test("it should group multiple messages for same dependency", () => {
-    const reportError = createReportError("Test Title", "test/path");
+    const reportError = createCliReportError("Test Title", "test/path");
     reportError({
       errorMessage: "First Error",
       dependency: { name: "dep1" },
@@ -342,7 +342,7 @@ describe("displayMessages", () => {
   });
 
   test("it should handle dependency with origin", () => {
-    const reportError = createReportError("test-rule", "test/path");
+    const reportError = createCliReportError("test-rule", "test/path");
     reportError({
       errorMessage: "Error",
       dependency: {

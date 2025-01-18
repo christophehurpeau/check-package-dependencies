@@ -1,8 +1,6 @@
 import semver from "semver";
-import { createReportError } from "../utils/createReportError.js";
-export function checkResolutionsVersionsMatch(pkg, { tryToAutoFix, customCreateReportError = createReportError, } = {}) {
+export function checkResolutionsVersionsMatch(reportError, pkg, { tryToAutoFix } = {}) {
     const pkgResolutions = pkg.resolutions || {};
-    const reportError = customCreateReportError("Resolutions match other dependencies", pkg.path);
     Object.entries(pkgResolutions).forEach(([resolutionKey, resolutionValue]) => {
         let depName = resolutionKey;
         let resolutionDepVersion = resolutionValue?.value;

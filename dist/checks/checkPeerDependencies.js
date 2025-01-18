@@ -1,7 +1,7 @@
 import semver from "semver";
-import { fromDependency } from "../utils/createReportError.js";
+import { fromDependency } from "../reporting/cliErrorReporting.js";
 import { getRealVersion } from "../utils/semverUtils.js";
-export function checkPeerDependencies(pkg, reportError, type, allowedPeerIn, allowMissing, providedDependencies, depPkg, missingOnlyWarnsForCheck, invalidOnlyWarnsForCheck) {
+export function checkPeerDependencies(reportError, pkg, type, allowedPeerIn, allowMissing, providedDependencies, depPkg, missingOnlyWarnsForCheck, invalidOnlyWarnsForCheck) {
     const { peerDependencies, peerDependenciesMeta } = depPkg;
     if (!peerDependencies)
         return;

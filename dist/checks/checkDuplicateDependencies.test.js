@@ -1,5 +1,5 @@
 import { describe, it } from "node:test";
-import { assertNoMessages, assertSingleMessage, createMockReportError, } from "../utils/createReportError.testUtils.js";
+import { assertNoMessages, assertSingleMessage, createMockReportError, } from "../reporting/ReportError.testUtils.js";
 import { parsePkgValue } from "../utils/pkgJsonUtils.js";
 import { createOnlyWarnsForArrayCheck } from "../utils/warnForUtils.js";
 import { checkDuplicateDependencies } from "./checkDuplicateDependencies.js";

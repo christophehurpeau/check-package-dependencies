@@ -1,43 +1,35 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
-  assertCreateReportErrorCall,
   assertNoMessages,
   assertSeveralMessages,
   createMockReportError,
-} from "../utils/createReportError.testUtils.ts";
+} from "../reporting/ReportError.testUtils.ts";
 import { parsePkgValue } from "../utils/pkgJsonUtils.ts";
 import { checkResolutionsVersionsMatch } from "./checkResolutionsVersionsMatch.ts";
 
 describe("checkResolutionsVersionsMatch", () => {
-  const { createReportError, messages } = createMockReportError();
+  const { mockReportError, messages } = createMockReportError();
 
   it('should return no error when no "resolutions" is present', () => {
     checkResolutionsVersionsMatch(
+      mockReportError,
       parsePkgValue({ name: "test", devDependencies: { test: "1.0.0" } }),
-      { customCreateReportError: createReportError },
-    );
-    assertCreateReportErrorCall(
-      createReportError,
-      "Resolutions match other dependencies",
     );
     assertNoMessages(messages);
   });
 
   it('should return no error when "resolutions" has dependency not in other dependencies type', () => {
     checkResolutionsVersionsMatch(
+      mockReportError,
       parsePkgValue({ name: "test", resolutions: { test: "1.0.0" } }),
-      { customCreateReportError: createReportError },
-    );
-    assertCreateReportErrorCall(
-      createReportError,
-      "Resolutions match other dependencies",
     );
     assertNoMessages(messages);
   });
 
   it('should return no error when "resolutions" has dependency matching', () => {
     checkResolutionsVersionsMatch(
+      mockReportError,
       parsePkgValue({
         name: "test",
         resolutions: {
@@ -49,17 +41,13 @@ describe("checkResolutionsVersionsMatch", () => {
         devDependencies: { test1: "1.0.0", test4: "1.1.0" },
         dependencies: { test2: "1.0.0", test3: "^1.0.0" },
       }),
-      { customCreateReportError: createReportError },
-    );
-    assertCreateReportErrorCall(
-      createReportError,
-      "Resolutions match other dependencies",
     );
     assertNoMessages(messages);
   });
 
   it("should return error when multiple dependencies not matching", () => {
     checkResolutionsVersionsMatch(
+      mockReportError,
       parsePkgValue({
         name: "test",
         resolutions: {
@@ -71,11 +59,6 @@ describe("checkResolutionsVersionsMatch", () => {
         devDependencies: { test1: "1.1.0" },
         dependencies: { test2: "1.2.0", test3: "1.0.0", test4: "1.2.0" },
       }),
-      { customCreateReportError: createReportError },
-    );
-    assertCreateReportErrorCall(
-      createReportError,
-      "Resolutions match other dependencies",
     );
     assertSeveralMessages(messages, [
       {
@@ -128,14 +111,9 @@ describe("checkResolutionsVersionsMatch", () => {
       devDependencies: { test1: "1.1.0" },
       dependencies: { test2: "1.2.0" },
     });
-    checkResolutionsVersionsMatch(pkg, {
-      customCreateReportError: createReportError,
+    checkResolutionsVersionsMatch(mockReportError, pkg, {
       tryToAutoFix: true,
     });
-    assertCreateReportErrorCall(
-      createReportError,
-      "Resolutions match other dependencies",
-    );
     assertNoMessages(messages);
     assert.equal(pkg.value.devDependencies?.test1, "1.0.0");
     assert.equal(pkg.value.dependencies?.test2, "1.0.0");

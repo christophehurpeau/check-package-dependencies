@@ -1,11 +1,11 @@
 import { describe, it } from "node:test";
-import { assertCreateReportErrorCall, assertDeepEqualIgnoringPrototypes, assertNoMessages, assertSingleMessage, createMockReportError, } from "../utils/createReportError.testUtils.js";
+import { assertDeepEqualIgnoringPrototypes, assertNoMessages, assertSingleMessage, createMockReportError, } from "../reporting/ReportError.testUtils.js";
 import { parsePkgValue } from "../utils/pkgJsonUtils.js";
 import { checkMinRangeSatisfies } from "./checkMinRangeSatisfies.js";
 describe(checkMinRangeSatisfies.name, () => {
-    const { createReportError, messages } = createMockReportError();
+    const { mockReportError, messages } = createMockReportError();
     it("should return no error when no dependencies is set", () => {
-        checkMinRangeSatisfies(parsePkgValue({ name: "test" }));
+        checkMinRangeSatisfies(mockReportError, parsePkgValue({ name: "test" }));
         assertNoMessages(messages);
     });
     describe("expect no error", () => {
@@ -55,8 +55,7 @@ describe(checkMinRangeSatisfies.name, () => {
         ];
         for (const [description, pkgContent] of testCases) {
             it(`should have no error when ${description}`, () => {
-                checkMinRangeSatisfies(parsePkgValue({ name: "test", ...pkgContent }), "dependencies", "devDependencies", { customCreateReportError: createReportError });
-                assertCreateReportErrorCall(createReportError, '"dependencies" minimum range satisfies "devDependencies"');
+                checkMinRangeSatisfies(mockReportError, parsePkgValue({ name: "test", ...pkgContent }), "dependencies", "devDependencies");
                 assertNoMessages(messages);
             });
         }
@@ -150,8 +149,7 @@ describe(checkMinRangeSatisfies.name, () => {
         ];
         for (const [description, pkgContent, errorTitle, errorInfo, expectedFix,] of testCases) {
             it(`should error when ${description}`, () => {
-                checkMinRangeSatisfies(parsePkgValue({ name: "test", ...pkgContent }), "dependencies", "devDependencies", { customCreateReportError: createReportError });
-                assertCreateReportErrorCall(createReportError, '"dependencies" minimum range satisfies "devDependencies"');
+                checkMinRangeSatisfies(mockReportError, parsePkgValue({ name: "test", ...pkgContent }), "dependencies", "devDependencies");
                 assertSingleMessage(messages, {
                     errorMessage: errorTitle,
                     errorDetails: errorInfo,
@@ -165,9 +163,7 @@ describe(checkMinRangeSatisfies.name, () => {
                 if (expectedFix) {
                     const pkgValue = { name: "test", ...pkgContent };
                     const parsedPkg = parsePkgValue(pkgValue);
-                    checkMinRangeSatisfies(parsedPkg, "dependencies", "devDependencies", {
-                        tryToAutoFix: true,
-                    });
+                    checkMinRangeSatisfies(mockReportError, parsedPkg, "dependencies", "devDependencies", { tryToAutoFix: true });
                     assertDeepEqualIgnoringPrototypes(parsedPkg.value, {
                         ...pkgValue,
                         ...expectedFix,

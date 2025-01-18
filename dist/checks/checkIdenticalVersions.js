@@ -1,8 +1,6 @@
-import { createReportError } from "../utils/createReportError.js";
 import { getKeys } from "../utils/object.js";
-export function checkIdenticalVersions(pkg, type, deps, onlyWarnsForCheck, customCreateReportError = createReportError) {
+export function checkIdenticalVersions(reportError, pkg, type, deps, onlyWarnsForCheck) {
     const pkgDependencies = pkg[type] || {};
-    const reportError = customCreateReportError("Identical Versions", pkg.path);
     getKeys(deps).forEach((depKey) => {
         const version = pkgDependencies[depKey]?.value;
         if (!version) {

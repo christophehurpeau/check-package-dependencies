@@ -1,7 +1,6 @@
-import { createReportError, fromDependency, inDependency, } from "../utils/createReportError.js";
-export function checkIdenticalVersionsThanDependency(pkg, type, depKeys, depPkg, dependencies = {}, onlyWarnsForCheck, customCreateReportError = createReportError) {
+import { fromDependency, inDependency, } from "../reporting/cliErrorReporting.js";
+export function checkIdenticalVersionsThanDependency(reportError, pkg, type, depKeys, depPkg, dependencies = {}, onlyWarnsForCheck) {
     const pkgDependencies = pkg[type] || {};
-    const reportError = customCreateReportError(`Same Versions than ${depPkg.name || ""}`, pkg.path);
     depKeys.forEach((depKey) => {
         const version = dependencies[depKey];
         const depValue = pkgDependencies[depKey];

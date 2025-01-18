@@ -2,10 +2,11 @@ import fs, { constants } from "node:fs";
 import path from "node:path";
 import { createCheckPackage } from "./check-package.js";
 import { checkDuplicateDependencies } from "./checks/checkDuplicateDependencies.js";
-import { createReportError, displayMessages, reportNotWarnedForMapping, } from "./utils/createReportError.js";
+import { createCliReportError, displayMessages, reportNotWarnedForMapping, } from "./reporting/cliErrorReporting.js";
 import { createOnlyWarnsForMappingCheck } from "./utils/warnForUtils.js";
-export function createCheckPackageWithWorkspaces(createCheckPackageOptions = {}) {
+export function createCheckPackageWithWorkspaces({ createReportError = createCliReportError, ...createCheckPackageOptions } = {}) {
     const checkPackage = createCheckPackage({
+        createReportError,
         ...createCheckPackageOptions,
         isLibrary: false,
     });
@@ -33,6 +34,7 @@ export function createCheckPackageWithWorkspaces(createCheckPackageOptions = {})
     const checksWorkspaces = new Map(workspacePackagesPaths.map((subPkgDirectoryPath) => {
         const checkPkg = createCheckPackage({
             ...createCheckPackageOptions,
+            createReportError,
             packageDirectoryPath: subPkgDirectoryPath,
             internalWorkspacePkgDirectoryPath: createCheckPackageOptions.packageDirectoryPath || ".",
         });

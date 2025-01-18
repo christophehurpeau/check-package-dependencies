@@ -1,36 +1,25 @@
 /* eslint-disable no-console */
 
 import chalk from "chalk";
-import type { Except, PackageJson } from "type-fest";
-import { getEntries } from "./object.ts";
-import type { DependencyTypes, DependencyValue } from "./packageTypes.ts";
+import type { PackageJson } from "type-fest";
+import { getEntries } from "../utils/object.ts";
+import type { DependencyTypes } from "../utils/packageTypes.ts";
 import type {
   OnlyWarnsForCheck,
   OnlyWarnsForMappingCheck,
-} from "./warnForUtils.ts";
+} from "../utils/warnForUtils.ts";
+import type { ReportError, ReportErrorMessage } from "./ReportError.ts";
 
-export interface ReportErrorMessage {
-  ruleName: string;
-  errorMessage: string;
-  errorDetails?: string;
-  dependency?: Omit<Partial<DependencyValue>, "name"> &
-    Pick<DependencyValue, "name">;
-  onlyWarns?: boolean;
-  autoFixable?: boolean;
-}
-
-export type ReportError = (
-  message: Except<ReportErrorMessage, "ruleName">,
-) => void;
+type ReportErrorWithRuleName = ReportErrorMessage & { ruleName: string };
 
 interface ErrorGroup {
-  messages: ReportErrorMessage[];
+  messages: ReportErrorWithRuleName[];
 }
 
 const pathMessages = new Map<
   string,
   {
-    generalMessages: ReportErrorMessage[];
+    generalMessages: ReportErrorWithRuleName[];
     dependencyGroups: Map<string, ErrorGroup>;
   }
 >();
@@ -47,7 +36,7 @@ function formatErrorMessage({
   autoFixable,
   ruleName,
   dependency,
-}: ReportErrorMessage): string {
+}: ReportErrorWithRuleName): string {
   const location = dependency?.line
     ? `${dependency.line}:${dependency.column || 0}`
     : "0:0";
@@ -65,7 +54,7 @@ function formatErrorMessage({
   return `  ${location}  ${messageType}  ${dependencyInfo}${messageTitle}${details}  ${chalk.blue(ruleName)}${autoFixable ? chalk.gray(" (--fix)") : ""}`;
 }
 
-export function logMessage(message: ReportErrorMessage): void {
+export function logMessage(message: ReportErrorWithRuleName): void {
   if (message.onlyWarns) totalWarnings++;
   else totalErrors++;
   if (message.autoFixable) totalFixable++;
@@ -79,7 +68,7 @@ function displayMessagesForPath(
     generalMessages,
     dependencyGroups,
   }: {
-    generalMessages: ReportErrorMessage[];
+    generalMessages: ReportErrorWithRuleName[];
     dependencyGroups: Map<string, ErrorGroup>;
   },
 ): void {
@@ -142,13 +131,11 @@ export function displayMessages(): void {
   displayConclusion();
 }
 
-export function createReportError(
+export function createCliReportError(
   ruleName: string,
   pkgPathName: string,
 ): ReportError {
-  return function reportError(
-    message: Except<ReportErrorMessage, "ruleName">,
-  ): void {
+  return function reportError(message: ReportErrorMessage): void {
     let pathData = pathMessages.get(pkgPathName);
     if (!pathData) {
       pathData = {

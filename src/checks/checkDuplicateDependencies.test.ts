@@ -3,7 +3,7 @@ import {
   assertNoMessages,
   assertSingleMessage,
   createMockReportError,
-} from "../utils/createReportError.testUtils.ts";
+} from "../reporting/ReportError.testUtils.ts";
 import { parsePkgValue } from "../utils/pkgJsonUtils.ts";
 import { createOnlyWarnsForArrayCheck } from "../utils/warnForUtils.ts";
 import { checkDuplicateDependencies } from "./checkDuplicateDependencies.ts";

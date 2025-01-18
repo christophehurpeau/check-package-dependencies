@@ -1,25 +1,14 @@
 import semver from "semver";
-import { createReportError, inDependency } from "../utils/createReportError.ts";
+import type { ReportError } from "../reporting/ReportError.ts";
+import { inDependency } from "../reporting/cliErrorReporting.ts";
 import { getEntries } from "../utils/object.ts";
 import type { DependenciesRanges, PackageJson } from "../utils/packageTypes.ts";
 
-interface CheckSatisfiesVersionsInDependencyOptions {
-  customCreateReportError?: typeof createReportError;
-}
-
 export function checkSatisfiesVersionsInDependency(
-  pkgPathName: string,
+  reportError: ReportError,
   depPkg: PackageJson,
   dependenciesRanges: DependenciesRanges,
-  {
-    customCreateReportError = createReportError,
-  }: CheckSatisfiesVersionsInDependencyOptions = {},
 ): void {
-  const reportError = customCreateReportError(
-    "Satisfies Versions In Dependency",
-    pkgPathName,
-  );
-
   for (const [dependenciesType, dependenciesTypeRanges] of getEntries(
     dependenciesRanges,
   )) {

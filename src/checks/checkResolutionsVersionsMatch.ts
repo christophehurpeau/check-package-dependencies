@@ -1,25 +1,17 @@
 import semver from "semver";
-import { createReportError } from "../utils/createReportError.ts";
+import type { ReportError } from "../reporting/ReportError.ts";
 import type { ParsedPackageJson } from "../utils/packageTypes.ts";
 
 export interface CheckResolutionsVersionsMatchOptions {
   tryToAutoFix?: boolean;
-  customCreateReportError?: typeof createReportError;
 }
 
 export function checkResolutionsVersionsMatch(
+  reportError: ReportError,
   pkg: ParsedPackageJson,
-  {
-    tryToAutoFix,
-    customCreateReportError = createReportError,
-  }: CheckResolutionsVersionsMatchOptions = {},
+  { tryToAutoFix }: CheckResolutionsVersionsMatchOptions = {},
 ): void {
   const pkgResolutions = pkg.resolutions || {};
-  const reportError = customCreateReportError(
-    "Resolutions match other dependencies",
-    pkg.path,
-  );
-
   Object.entries(pkgResolutions).forEach(([resolutionKey, resolutionValue]) => {
     let depName = resolutionKey;
     let resolutionDepVersion = resolutionValue?.value;

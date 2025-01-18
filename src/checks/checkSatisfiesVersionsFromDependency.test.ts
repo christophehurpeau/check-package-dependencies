@@ -1,11 +1,10 @@
 import { describe, it } from "node:test";
 import {
-  assertCreateReportErrorCall,
   assertDeepEqualIgnoringPrototypes,
   assertNoMessages,
   assertSingleMessage,
   createMockReportError,
-} from "../utils/createReportError.testUtils.ts";
+} from "../reporting/ReportError.testUtils.ts";
 import type { PackageJson } from "../utils/packageTypes.ts";
 import { parsePkgValue } from "../utils/pkgJsonUtils.ts";
 import { checkSatisfiesVersionsFromDependency } from "./checkSatisfiesVersionsFromDependency.ts";
@@ -17,24 +16,21 @@ type DependencyTypes =
   | "resolutions";
 
 describe(checkSatisfiesVersionsFromDependency.name, () => {
-  const { createReportError, messages } = createMockReportError();
+  const { mockReportError, messages } = createMockReportError();
 
   it("should return no error when no keys", () => {
     checkSatisfiesVersionsFromDependency(
+      mockReportError,
       parsePkgValue({ name: "test" }),
       "dependencies",
       [],
       { name: "depTest", dependencies: {} },
       "dependencies",
       {
-        customCreateReportError: createReportError,
         shouldHaveExactVersions: () => false,
       },
     );
-    assertCreateReportErrorCall(
-      createReportError,
-      "Satisfies Versions From Dependency",
-    );
+
     assertNoMessages(messages);
   });
 
@@ -83,6 +79,7 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
         });
 
         checkSatisfiesVersionsFromDependency(
+          mockReportError,
           parsedPkg,
           depTypeInPkg,
           [depName],
@@ -92,13 +89,8 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
           },
           depTypeInDep as DependencyTypes,
           {
-            customCreateReportError: createReportError,
             shouldHaveExactVersions: () => false,
           },
-        );
-        assertCreateReportErrorCall(
-          createReportError,
-          "Satisfies Versions From Dependency",
         );
         assertNoMessages(messages);
       });
@@ -190,6 +182,7 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
         const parsedPkg = parsePkgValue({ name: "test", ...pkgContent });
 
         checkSatisfiesVersionsFromDependency(
+          mockReportError,
           parsedPkg,
           depTypeInPkg,
           ["expectedDep"],
@@ -199,7 +192,6 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
           },
           depTypeInPkg,
           {
-            customCreateReportError: createReportError,
             shouldHaveExactVersions: () => shouldHaveExactVersions,
             tryToAutoFix: true,
           },
@@ -285,6 +277,7 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
         const parsedPkg = parsePkgValue({ ...pkgContent, name: "test" });
 
         checkSatisfiesVersionsFromDependency(
+          mockReportError,
           parsedPkg,
           depTypeInPkg,
           [depName],
@@ -294,13 +287,8 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
           } as PackageJson,
           depTypeInDep as DependencyTypes,
           {
-            customCreateReportError: createReportError,
             shouldHaveExactVersions: () => false,
           },
-        );
-        assertCreateReportErrorCall(
-          createReportError,
-          "Satisfies Versions From Dependency",
         );
         assertSingleMessage(messages, {
           errorMessage: errorTitle,

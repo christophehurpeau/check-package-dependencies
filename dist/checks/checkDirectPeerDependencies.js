@@ -1,5 +1,5 @@
 import semver from "semver";
-import { createReportError, reportNotWarnedForMapping, } from "../utils/createReportError.js";
+import { reportNotWarnedForMapping } from "../reporting/cliErrorReporting.js";
 import { getKeys } from "../utils/object.js";
 import { checkPeerDependencies } from "./checkPeerDependencies.js";
 const regularDependencyTypes = [
@@ -22,8 +22,7 @@ const getAllowedPeerInFromType = (depPkgType, isLibrary) => {
         // no default
     }
 };
-export function checkDirectPeerDependencies(isLibrary, pkg, getDependencyPackageJson, missingOnlyWarnsForCheck, invalidOnlyWarnsForCheck, customCreateReportError = createReportError) {
-    const reportError = customCreateReportError("Peer Dependencies", pkg.path);
+export function checkDirectPeerDependencies(reportError, isLibrary, pkg, getDependencyPackageJson, missingOnlyWarnsForCheck, invalidOnlyWarnsForCheck) {
     const allDepPkgs = [];
     const allDirectDependenciesDependencies = [];
     regularDependencyTypes.forEach((depType) => {
@@ -47,7 +46,7 @@ export function checkDirectPeerDependencies(isLibrary, pkg, getDependencyPackage
     });
     for (const { name: depName, type: depType, pkg: depPkg, hasDirectMatchingPeerDependency, } of allDepPkgs) {
         if (depPkg.peerDependencies) {
-            checkPeerDependencies(pkg, reportError, depType, getAllowedPeerInFromType(depType, isLibrary), hasDirectMatchingPeerDependency, allDirectDependenciesDependencies, depPkg, missingOnlyWarnsForCheck.createFor(depName), invalidOnlyWarnsForCheck.createFor(depName));
+            checkPeerDependencies(reportError, pkg, depType, getAllowedPeerInFromType(depType, isLibrary), hasDirectMatchingPeerDependency, allDirectDependenciesDependencies, depPkg, missingOnlyWarnsForCheck.createFor(depName), invalidOnlyWarnsForCheck.createFor(depName));
         }
     }
     reportNotWarnedForMapping(reportError, missingOnlyWarnsForCheck);

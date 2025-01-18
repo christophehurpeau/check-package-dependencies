@@ -1,28 +1,26 @@
 import { describe, it } from "node:test";
-import { assertCreateReportErrorCall, assertNoMessages, assertSeveralMessages, assertSingleMessage, createMockReportError, } from "../utils/createReportError.testUtils.js";
+import { assertNoMessages, assertSeveralMessages, assertSingleMessage, createMockReportError, } from "../reporting/ReportError.testUtils.js";
 import { parsePkgValue } from "../utils/pkgJsonUtils.js";
 import { checkIdenticalVersions } from "./checkIdenticalVersions.js";
 describe("checkIdenticalVersions", () => {
-    const { createReportError, messages } = createMockReportError();
+    const { mockReportError, messages } = createMockReportError();
     describe("devDependencies in array", () => {
         it("should return no error when all versions are identical", () => {
-            checkIdenticalVersions(parsePkgValue({
+            checkIdenticalVersions(mockReportError, parsePkgValue({
                 name: "test",
                 devDependencies: { react: "1.0.0", "react-dom": "1.0.0" },
             }), "devDependencies", {
                 react: ["react-dom"],
-            }, undefined, createReportError);
-            assertCreateReportErrorCall(createReportError, "Identical Versions");
+            }, undefined);
             assertNoMessages(messages);
         });
         it("should return error when versions are not identical", () => {
-            checkIdenticalVersions(parsePkgValue({
+            checkIdenticalVersions(mockReportError, parsePkgValue({
                 name: "test",
                 devDependencies: { react: "1.0.0", "react-dom": "1.0.1" },
             }), "devDependencies", {
                 react: ["react-dom"],
-            }, undefined, createReportError);
-            assertCreateReportErrorCall(createReportError, "Identical Versions");
+            }, undefined);
             assertSingleMessage(messages, {
                 errorMessage: 'Invalid "react-dom"',
                 errorDetails: 'expecting "1.0.1" to be "1.0.0" identical to "react" in "devDependencies"',
@@ -37,7 +35,7 @@ describe("checkIdenticalVersions", () => {
     });
     describe("object with dependencies and devDependencies", () => {
         it("should return no error when all versions are identical", () => {
-            checkIdenticalVersions(parsePkgValue({
+            checkIdenticalVersions(mockReportError, parsePkgValue({
                 name: "test",
                 dependencies: { react: "1.0.0", "react-dom": "1.0.0" },
                 devDependencies: { "react-test-renderer": "1.0.0" },
@@ -46,12 +44,11 @@ describe("checkIdenticalVersions", () => {
                     dependencies: ["react-dom"],
                     devDependencies: ["react-test-renderer"],
                 },
-            }, undefined, createReportError);
-            assertCreateReportErrorCall(createReportError, "Identical Versions");
+            }, undefined);
             assertNoMessages(messages);
         });
         it("should return error when versions are not identical", () => {
-            checkIdenticalVersions(parsePkgValue({
+            checkIdenticalVersions(mockReportError, parsePkgValue({
                 name: "test",
                 dependencies: { react: "1.0.0", "react-dom": "1.0.1" },
                 devDependencies: { "react-test-renderer": "1.0.1" },
@@ -60,8 +57,7 @@ describe("checkIdenticalVersions", () => {
                     dependencies: ["react-dom"],
                     devDependencies: ["react-test-renderer"],
                 },
-            }, undefined, createReportError);
-            assertCreateReportErrorCall(createReportError, "Identical Versions");
+            }, undefined);
             assertSeveralMessages(messages, [
                 {
                     errorMessage: 'Invalid "react-dom"',

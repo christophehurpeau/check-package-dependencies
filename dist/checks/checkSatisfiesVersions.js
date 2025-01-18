@@ -1,8 +1,6 @@
 import semver from "semver";
-import { createReportError } from "../utils/createReportError.js";
-export function checkSatisfiesVersions(pkg, type, dependenciesRanges, onlyWarnsForCheck, { customCreateReportError = createReportError, } = {}) {
+export function checkSatisfiesVersions(reportError, pkg, type, dependenciesRanges, onlyWarnsForCheck) {
     const pkgDependencies = pkg[type] || {};
-    const reportError = customCreateReportError("Satisfies Versions", pkg.path);
     Object.entries(dependenciesRanges).forEach(([depKey, range]) => {
         const pkgRange = pkgDependencies[depKey];
         if (!pkgRange?.value) {

@@ -1,18 +1,18 @@
 import assert from "node:assert/strict";
 import { beforeEach, describe, it, mock } from "node:test";
-import type { GetDependencyPackageJson } from "../utils/createGetDependencyPackageJson.ts";
 import {
   assertNoMessages,
   assertSingleMessage,
   createMockReportError,
-} from "../utils/createReportError.testUtils.ts";
+} from "../reporting/ReportError.testUtils.ts";
+import type { GetDependencyPackageJson } from "../utils/createGetDependencyPackageJson.ts";
 import type { PackageJson } from "../utils/packageTypes.ts";
 import { parsePkgValue } from "../utils/pkgJsonUtils.ts";
 import { createOnlyWarnsForMappingCheck } from "../utils/warnForUtils.ts";
 import { checkDirectPeerDependencies } from "./checkDirectPeerDependencies.ts";
 
 describe("checkDirectPeerDependencies", () => {
-  const { createReportError, messages } = createMockReportError();
+  const { mockReportError, messages } = createMockReportError();
 
   beforeEach(() => {
     messages.length = 0;
@@ -29,6 +29,7 @@ describe("checkDirectPeerDependencies", () => {
     ]);
 
     checkDirectPeerDependencies(
+      mockReportError,
       false,
       parsePkgValue({
         name: "test",
@@ -37,7 +38,6 @@ describe("checkDirectPeerDependencies", () => {
       getDependencyPackageJsonMock,
       createOnlyWarnsForMappingCheck("test", []),
       createOnlyWarnsForMappingCheck("test", []),
-      createReportError,
     );
 
     assertSingleMessage(messages, {
@@ -73,6 +73,7 @@ describe("checkDirectPeerDependencies", () => {
     );
 
     checkDirectPeerDependencies(
+      mockReportError,
       false,
       parsePkgValue({
         name: "test",
@@ -81,7 +82,6 @@ describe("checkDirectPeerDependencies", () => {
       getDependencyPackageJsonMock,
       createOnlyWarnsForMappingCheck("test", []),
       createOnlyWarnsForMappingCheck("test", []),
-      createReportError,
     );
     assertNoMessages(messages);
   });
@@ -108,6 +108,7 @@ describe("checkDirectPeerDependencies", () => {
       1,
     );
     checkDirectPeerDependencies(
+      mockReportError,
       false,
       parsePkgValue({
         name: "test",
@@ -116,7 +117,6 @@ describe("checkDirectPeerDependencies", () => {
       getDependencyPackageJsonMock,
       createOnlyWarnsForMappingCheck("test", []),
       createOnlyWarnsForMappingCheck("test", []),
-      createReportError,
     );
     assertNoMessages(messages);
   });
@@ -144,6 +144,7 @@ describe("checkDirectPeerDependencies", () => {
     );
 
     checkDirectPeerDependencies(
+      mockReportError,
       false,
       parsePkgValue({
         name: "test",
@@ -155,7 +156,6 @@ describe("checkDirectPeerDependencies", () => {
       getDependencyPackageJsonMock,
       createOnlyWarnsForMappingCheck("test", []),
       createOnlyWarnsForMappingCheck("test", []),
-      createReportError,
     );
     assertNoMessages(messages);
   });
@@ -183,6 +183,7 @@ describe("checkDirectPeerDependencies", () => {
     );
 
     checkDirectPeerDependencies(
+      mockReportError,
       false,
       parsePkgValue({
         name: "test",
@@ -194,7 +195,6 @@ describe("checkDirectPeerDependencies", () => {
       getDependencyPackageJsonMock,
       createOnlyWarnsForMappingCheck("test", []),
       createOnlyWarnsForMappingCheck("test", []),
-      createReportError,
     );
     assertNoMessages(messages);
   });
@@ -222,6 +222,7 @@ describe("checkDirectPeerDependencies", () => {
     );
 
     checkDirectPeerDependencies(
+      mockReportError,
       true,
       parsePkgValue({
         name: "test",
@@ -232,7 +233,6 @@ describe("checkDirectPeerDependencies", () => {
       getDependencyPackageJsonMock,
       createOnlyWarnsForMappingCheck("test", []),
       createOnlyWarnsForMappingCheck("test", []),
-      createReportError,
     );
     assertNoMessages(messages);
   });
@@ -251,6 +251,7 @@ describe("checkDirectPeerDependencies", () => {
     ]);
 
     checkDirectPeerDependencies(
+      mockReportError,
       false,
       parsePkgValue({
         name: "test",
@@ -259,7 +260,6 @@ describe("checkDirectPeerDependencies", () => {
       getDependencyPackageJsonMock,
       createOnlyWarnsForMappingCheck("test", []),
       createOnlyWarnsForMappingCheck("test", []),
-      createReportError,
     );
     assertNoMessages(messages);
   });
@@ -287,6 +287,7 @@ describe("checkDirectPeerDependencies", () => {
     );
 
     checkDirectPeerDependencies(
+      mockReportError,
       false,
       parsePkgValue({
         name: "test",
@@ -300,7 +301,6 @@ describe("checkDirectPeerDependencies", () => {
       getDependencyPackageJsonMock,
       createOnlyWarnsForMappingCheck("test", []),
       createOnlyWarnsForMappingCheck("test", []),
-      createReportError,
     );
     assertNoMessages(messages);
   });
@@ -328,6 +328,7 @@ describe("checkDirectPeerDependencies", () => {
     );
 
     checkDirectPeerDependencies(
+      mockReportError,
       true,
       parsePkgValue({
         name: "test",
@@ -341,7 +342,6 @@ describe("checkDirectPeerDependencies", () => {
       getDependencyPackageJsonMock,
       createOnlyWarnsForMappingCheck("test", []),
       createOnlyWarnsForMappingCheck("test", []),
-      createReportError,
     );
     assertSingleMessage(messages, {
       errorMessage:
@@ -377,6 +377,7 @@ describe("checkDirectPeerDependencies", () => {
     );
 
     checkDirectPeerDependencies(
+      mockReportError,
       true,
       parsePkgValue({
         name: "test",
@@ -388,7 +389,6 @@ describe("checkDirectPeerDependencies", () => {
       getDependencyPackageJsonMock,
       createOnlyWarnsForMappingCheck("test", []),
       createOnlyWarnsForMappingCheck("test", []),
-      createReportError,
     );
     assertSingleMessage(messages, {
       errorMessage:
@@ -424,6 +424,7 @@ describe("checkDirectPeerDependencies", () => {
     );
 
     checkDirectPeerDependencies(
+      mockReportError,
       false,
       parsePkgValue({
         name: "test",
@@ -435,7 +436,6 @@ describe("checkDirectPeerDependencies", () => {
       getDependencyPackageJsonMock,
       createOnlyWarnsForMappingCheck("test", []),
       createOnlyWarnsForMappingCheck("test", []),
-      createReportError,
     );
     assertNoMessages(messages);
   });
@@ -474,6 +474,7 @@ describe("checkDirectPeerDependencies", () => {
     );
 
     checkDirectPeerDependencies(
+      mockReportError,
       false,
       parsePkgValue({
         name: "test",
@@ -486,7 +487,6 @@ describe("checkDirectPeerDependencies", () => {
       getDependencyPackageJsonMock,
       createOnlyWarnsForMappingCheck("test", []),
       createOnlyWarnsForMappingCheck("test", []),
-      createReportError,
     );
     assert.deepEqual(
       getDependencyPackageJsonMock.mock.calls.map((c) => c.arguments),
@@ -517,6 +517,7 @@ describe("checkDirectPeerDependencies", () => {
     ]);
 
     checkDirectPeerDependencies(
+      mockReportError,
       true,
       parsePkgValue({
         name: "test",
@@ -530,7 +531,6 @@ describe("checkDirectPeerDependencies", () => {
       getDependencyPackageJsonMock,
       createOnlyWarnsForMappingCheck("test", []),
       createOnlyWarnsForMappingCheck("test", []),
-      createReportError,
     );
     assertNoMessages(messages);
   });
@@ -553,6 +553,7 @@ describe("checkDirectPeerDependencies", () => {
     );
 
     checkDirectPeerDependencies(
+      mockReportError,
       false,
       parsePkgValue({
         name: "test",
@@ -567,7 +568,6 @@ describe("checkDirectPeerDependencies", () => {
       getDependencyPackageJsonMock,
       createOnlyWarnsForMappingCheck("test", []),
       createOnlyWarnsForMappingCheck("test", []),
-      createReportError,
     );
     assertSingleMessage(messages, {
       errorMessage: "Invalid peer dependency version",
@@ -593,6 +593,7 @@ describe("checkDirectPeerDependencies", () => {
     ]);
 
     checkDirectPeerDependencies(
+      mockReportError,
       false,
       parsePkgValue({
         name: "test",
@@ -609,7 +610,6 @@ describe("checkDirectPeerDependencies", () => {
       getDependencyPackageJsonMock,
       createOnlyWarnsForMappingCheck("test", []),
       createOnlyWarnsForMappingCheck("test", []),
-      createReportError,
     );
     assertSingleMessage(messages, {
       errorMessage: "Invalid peer dependency version",
@@ -631,6 +631,7 @@ describe("checkDirectPeerDependencies", () => {
     ]);
 
     checkDirectPeerDependencies(
+      mockReportError,
       false,
       parsePkgValue({
         name: "test",
@@ -644,7 +645,6 @@ describe("checkDirectPeerDependencies", () => {
       getDependencyPackageJsonMock,
       createOnlyWarnsForMappingCheck("test", []),
       createOnlyWarnsForMappingCheck("test", []),
-      createReportError,
     );
     assertNoMessages(messages);
   });

@@ -1,8 +1,7 @@
-import { createReportError } from "../utils/createReportError.ts";
+import type { ReportError } from "../reporting/ReportError.ts";
 import type { ParsedPackageJson } from "../utils/packageTypes.ts";
 export interface CheckResolutionsVersionsMatchOptions {
     tryToAutoFix?: boolean;
-    customCreateReportError?: typeof createReportError;
 }
-export declare function checkResolutionsVersionsMatch(pkg: ParsedPackageJson, { tryToAutoFix, customCreateReportError, }?: CheckResolutionsVersionsMatchOptions): void;
+export declare function checkResolutionsVersionsMatch(reportError: ReportError, pkg: ParsedPackageJson, { tryToAutoFix }?: CheckResolutionsVersionsMatchOptions): void;
 //# sourceMappingURL=checkResolutionsVersionsMatch.d.ts.map

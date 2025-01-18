@@ -1,26 +1,19 @@
 import semver from "semver";
-import { createReportError } from "../utils/createReportError.ts";
+import type { ReportError } from "../reporting/ReportError.ts";
 import type {
   DependencyTypes,
   ParsedPackageJson,
 } from "../utils/packageTypes.ts";
 import type { OnlyWarnsForCheck } from "../utils/warnForUtils.ts";
 
-export interface CheckSatisfiesVersionsOptions {
-  customCreateReportError?: typeof createReportError;
-}
-
 export function checkSatisfiesVersions(
+  reportError: ReportError,
   pkg: ParsedPackageJson,
   type: DependencyTypes,
   dependenciesRanges: Record<string, string>,
   onlyWarnsForCheck?: OnlyWarnsForCheck,
-  {
-    customCreateReportError = createReportError,
-  }: CheckSatisfiesVersionsOptions = {},
 ): void {
   const pkgDependencies = pkg[type] || {};
-  const reportError = customCreateReportError("Satisfies Versions", pkg.path);
 
   Object.entries(dependenciesRanges).forEach(([depKey, range]) => {
     const pkgRange = pkgDependencies[depKey];

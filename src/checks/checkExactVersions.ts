@@ -1,9 +1,7 @@
 import semver from "semver";
+import type { ReportError } from "../reporting/ReportError.ts";
+import { reportNotWarnedFor } from "../reporting/cliErrorReporting.ts";
 import type { GetDependencyPackageJson } from "../utils/createGetDependencyPackageJson.ts";
-import {
-  createReportError,
-  reportNotWarnedFor,
-} from "../utils/createReportError.ts";
 import type {
   DependencyTypes,
   ParsedPackageJson,
@@ -16,7 +14,6 @@ export interface CheckExactVersionsOptions {
   onlyWarnsForCheck: OnlyWarnsForCheck;
   internalExactVersionsIgnore?: OnlyWarnsFor;
   tryToAutoFix?: boolean;
-  customCreateReportError?: typeof createReportError;
 }
 
 const isVersionRange = (version: string): boolean =>
@@ -25,8 +22,8 @@ const isVersionRange = (version: string): boolean =>
   version.startsWith(">") ||
   version.startsWith("<");
 
-// eslint-disable-next-line @typescript-eslint/require-await
-export async function checkExactVersions(
+export function checkExactVersions(
+  reportError: ReportError,
   pkg: ParsedPackageJson,
   types: DependencyTypes[],
   {
@@ -34,11 +31,8 @@ export async function checkExactVersions(
     onlyWarnsForCheck,
     internalExactVersionsIgnore,
     tryToAutoFix = false,
-    customCreateReportError = createReportError,
   }: CheckExactVersionsOptions,
-): Promise<void> {
-  const reportError = customCreateReportError("Exact versions", pkg.path);
-
+): void {
   for (const type of types) {
     const pkgDependencies = pkg[type];
     if (!pkgDependencies) continue;

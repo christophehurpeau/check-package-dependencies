@@ -1,6 +1,6 @@
 import semver from "semver";
 import semverUtils from "semver-utils";
-import { createReportError } from "../utils/createReportError.ts";
+import type { ReportError } from "../reporting/ReportError.ts";
 import { getEntries } from "../utils/object.ts";
 import type {
   DependencyTypes,
@@ -8,18 +8,15 @@ import type {
 } from "../utils/packageTypes.ts";
 
 export interface CheckMinRangeSatisfiesOptions {
-  customCreateReportError?: typeof createReportError;
   tryToAutoFix?: boolean;
 }
 
 export function checkMinRangeSatisfies(
+  reportError: ReportError,
   pkg: ParsedPackageJson,
   type1: DependencyTypes = "dependencies",
   type2: DependencyTypes = "devDependencies",
-  {
-    tryToAutoFix = false,
-    customCreateReportError = createReportError,
-  }: CheckMinRangeSatisfiesOptions = {},
+  { tryToAutoFix = false }: CheckMinRangeSatisfiesOptions = {},
 ): void {
   const dependencies1 = pkg[type1];
   const dependencies2 = pkg[type2];
@@ -27,11 +24,6 @@ export function checkMinRangeSatisfies(
   if (!dependencies1 || !dependencies2) {
     return;
   }
-
-  const reportError = customCreateReportError(
-    `"${type1}" minimum range satisfies "${type2}"`,
-    pkg.path,
-  );
 
   for (const [depName, depRange1] of getEntries(dependencies1)) {
     if (!depRange1 || depRange1.value === "*") continue;
@@ -55,7 +47,7 @@ export function checkMinRangeSatisfies(
         );
       } else {
         reportError({
-          errorMessage: `Invalid "${depRange1.value}"`,
+          errorMessage: `Invalid "${depRange1.value}" in "${type1}"`,
           errorDetails: `"${depRange1.value}" should satisfies "${depRange2.value}" from "${type2}"`,
           dependency: depRange1,
           autoFixable: true,

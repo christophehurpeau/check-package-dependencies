@@ -27,6 +27,7 @@ jobs:
 
       - name: Checks
         run: yarn run checks
+        if: startsWith(matrix.node-version, '22.')
 
       - name: Build
         run: yarn run build

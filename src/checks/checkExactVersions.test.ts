@@ -1,14 +1,13 @@
 import assert from "node:assert/strict";
 import { describe, it, mock } from "node:test";
-import type { GetDependencyPackageJson } from "../utils/createGetDependencyPackageJson.ts";
 import {
-  assertCreateReportErrorCall,
   assertDeepEqualIgnoringPrototypes,
   assertNoMessages,
   assertSeveralMessages,
   assertSingleMessage,
   createMockReportError,
-} from "../utils/createReportError.testUtils.ts";
+} from "../reporting/ReportError.testUtils.ts";
+import type { GetDependencyPackageJson } from "../utils/createGetDependencyPackageJson.ts";
 import { parsePkgValue } from "../utils/pkgJsonUtils.ts";
 import { createOnlyWarnsForArrayCheck } from "../utils/warnForUtils.ts";
 import { checkExactVersions } from "./checkExactVersions.ts";
@@ -20,10 +19,11 @@ const emptyOnlyWarnsForCheck = createOnlyWarnsForArrayCheck(
 );
 
 describe("checkExactVersions", () => {
-  const { createReportError, messages } = createMockReportError();
+  const { mockReportError, messages } = createMockReportError();
 
-  it("should return no error when all versions are exact", async () => {
-    await checkExactVersions(
+  it("should return no error when all versions are exact", () => {
+    checkExactVersions(
+      mockReportError,
       parsePkgValue({
         name: "test",
         devDependencies: {
@@ -33,23 +33,20 @@ describe("checkExactVersions", () => {
       ["devDependencies"],
       {
         onlyWarnsForCheck: emptyOnlyWarnsForCheck,
-        customCreateReportError: createReportError,
       },
     );
-    assertCreateReportErrorCall(createReportError, "Exact versions");
     assertNoMessages(messages);
   });
 
-  it("should return an error when one version has a caret range", async () => {
-    await checkExactVersions(
+  it("should return an error when one version has a caret range", () => {
+    checkExactVersions(
+      mockReportError,
       parsePkgValue({ name: "test", devDependencies: { test: "^1.0.0" } }),
       ["devDependencies"],
       {
         onlyWarnsForCheck: emptyOnlyWarnsForCheck,
-        customCreateReportError: createReportError,
       },
     );
-    assertCreateReportErrorCall(createReportError, "Exact versions");
     assertSingleMessage(messages, {
       errorMessage: "Unexpected range dependency",
       errorDetails: 'expecting "^1.0.0" to be exact "1.0.0"',
@@ -63,8 +60,9 @@ describe("checkExactVersions", () => {
   });
 
   for (const comparator of ["<", "<=", ">", ">="]) {
-    it(`should return an error when one version has a comparator "${comparator}" range`, async () => {
-      await checkExactVersions(
+    it(`should return an error when one version has a comparator "${comparator}" range`, () => {
+      checkExactVersions(
+        mockReportError,
         parsePkgValue({
           name: "test",
           devDependencies: { test: `${comparator}1.0.0` },
@@ -72,10 +70,8 @@ describe("checkExactVersions", () => {
         ["devDependencies"],
         {
           onlyWarnsForCheck: emptyOnlyWarnsForCheck,
-          customCreateReportError: createReportError,
         },
       );
-      assertCreateReportErrorCall(createReportError, "Exact versions");
       assertSingleMessage(messages, {
         errorMessage: "Unexpected range dependency",
         errorDetails: `expecting "${comparator}1.0.0" to be exact "1.0.0"`,
@@ -89,8 +85,9 @@ describe("checkExactVersions", () => {
     });
   }
 
-  it("should return an warning when one version has a caret range and is in onlyWarnsFor", async () => {
-    await checkExactVersions(
+  it("should return an warning when one version has a caret range and is in onlyWarnsFor", () => {
+    checkExactVersions(
+      mockReportError,
       parsePkgValue({ name: "test", devDependencies: { test: "^1.0.0" } }),
       ["devDependencies"],
       {
@@ -98,10 +95,8 @@ describe("checkExactVersions", () => {
           onlyWarnsForConfigName,
           ["test"],
         ),
-        customCreateReportError: createReportError,
       },
     );
-    assertCreateReportErrorCall(createReportError, "Exact versions");
     assertSingleMessage(messages, {
       errorMessage: "Unexpected range dependency",
       errorDetails: 'expecting "^1.0.0" to be exact "1.0.0"',
@@ -114,16 +109,15 @@ describe("checkExactVersions", () => {
     });
   });
 
-  it("should return an error when one version has a tilde range", async () => {
-    await checkExactVersions(
+  it("should return an error when one version has a tilde range", () => {
+    checkExactVersions(
+      mockReportError,
       parsePkgValue({ name: "test", devDependencies: { test: "~1.0.0" } }),
       ["devDependencies"],
       {
         onlyWarnsForCheck: emptyOnlyWarnsForCheck,
-        customCreateReportError: createReportError,
       },
     );
-    assertCreateReportErrorCall(createReportError, "Exact versions");
     assertSingleMessage(messages, {
       errorMessage: "Unexpected range dependency",
       errorDetails: 'expecting "~1.0.0" to be exact "1.0.0"',
@@ -136,8 +130,9 @@ describe("checkExactVersions", () => {
     });
   });
 
-  it("should return multiple errors when multiple versions have range", async () => {
-    await checkExactVersions(
+  it("should return multiple errors when multiple versions have range", () => {
+    checkExactVersions(
+      mockReportError,
       parsePkgValue({
         name: "test",
         devDependencies: {
@@ -150,10 +145,8 @@ describe("checkExactVersions", () => {
       ["devDependencies"],
       {
         onlyWarnsForCheck: emptyOnlyWarnsForCheck,
-        customCreateReportError: createReportError,
       },
     );
-    assertCreateReportErrorCall(createReportError, "Exact versions");
     assertSeveralMessages(messages, [
       {
         errorMessage: "Unexpected range dependency",
@@ -198,7 +191,7 @@ describe("checkExactVersions", () => {
     ]);
   });
 
-  it("should fix and remove range", async () => {
+  it("should fix and remove range", () => {
     const getDependencyPackageJsonMock = mock.fn<GetDependencyPackageJson>(
       () => [
         {
@@ -212,13 +205,11 @@ describe("checkExactVersions", () => {
       name: "test",
       devDependencies: { test1: "~1.0.0" },
     });
-    await checkExactVersions(pkg, ["devDependencies"], {
+    checkExactVersions(mockReportError, pkg, ["devDependencies"], {
       onlyWarnsForCheck: emptyOnlyWarnsForCheck,
       tryToAutoFix: true,
       getDependencyPackageJson: getDependencyPackageJsonMock,
-      customCreateReportError: createReportError,
     });
-    assertCreateReportErrorCall(createReportError, "Exact versions");
     assertNoMessages(messages);
     assert.ok(getDependencyPackageJsonMock.mock.calls.length > 0);
     assertDeepEqualIgnoringPrototypes(pkg.value, {
@@ -227,7 +218,7 @@ describe("checkExactVersions", () => {
     });
   });
 
-  it("should error if autofix failed as package does not exists", async () => {
+  it("should error if autofix failed as package does not exists", () => {
     const getDependencyPackageJsonMock = mock.fn<GetDependencyPackageJson>(
       () => {
         throw new Error("Module not found");
@@ -237,13 +228,11 @@ describe("checkExactVersions", () => {
       name: "test",
       devDependencies: { test1: "~1.0.0" },
     });
-    await checkExactVersions(pkg, ["devDependencies"], {
+    checkExactVersions(mockReportError, pkg, ["devDependencies"], {
       onlyWarnsForCheck: emptyOnlyWarnsForCheck,
       tryToAutoFix: true,
       getDependencyPackageJson: getDependencyPackageJsonMock,
-      customCreateReportError: createReportError,
     });
-    assertCreateReportErrorCall(createReportError, "Exact versions");
     assertSingleMessage(messages, {
       errorMessage: "Unexpected range dependency",
       errorDetails:
@@ -257,7 +246,7 @@ describe("checkExactVersions", () => {
     });
   });
 
-  it("should error if autofix failed because version doesn't match range", async () => {
+  it("should error if autofix failed because version doesn't match range", () => {
     const getDependencyPackageJsonMock = mock.fn<GetDependencyPackageJson>(
       () => [{ name: "test1", version: "2.0.0" }, ""],
     );
@@ -265,13 +254,11 @@ describe("checkExactVersions", () => {
       name: "test",
       devDependencies: { test1: "~1.0.0" },
     });
-    await checkExactVersions(pkg, ["devDependencies"], {
+    checkExactVersions(mockReportError, pkg, ["devDependencies"], {
       onlyWarnsForCheck: emptyOnlyWarnsForCheck,
       tryToAutoFix: true,
       getDependencyPackageJson: getDependencyPackageJsonMock,
-      customCreateReportError: createReportError,
     });
-    assertCreateReportErrorCall(createReportError, "Exact versions");
     assertSingleMessage(messages, {
       errorMessage: "Unexpected range dependency",
       errorDetails:
@@ -285,8 +272,9 @@ describe("checkExactVersions", () => {
     });
   });
 
-  it("should support npm: prefix", async () => {
-    await checkExactVersions(
+  it("should support npm: prefix", () => {
+    checkExactVersions(
+      mockReportError,
       parsePkgValue({
         name: "test",
         devDependencies: {
@@ -296,10 +284,8 @@ describe("checkExactVersions", () => {
       ["devDependencies"],
       {
         onlyWarnsForCheck: emptyOnlyWarnsForCheck,
-        customCreateReportError: createReportError,
       },
     );
-    assertCreateReportErrorCall(createReportError, "Exact versions");
     assertSingleMessage(messages, {
       errorMessage: "Unexpected range dependency",
       errorDetails: 'expecting "^1.0.1" to be exact "1.0.1"',
@@ -312,8 +298,9 @@ describe("checkExactVersions", () => {
     });
   });
 
-  it("should warn when onlyWarnsFor is passed", async () => {
-    await checkExactVersions(
+  it("should warn when onlyWarnsFor is passed", () => {
+    checkExactVersions(
+      mockReportError,
       parsePkgValue({
         name: "test",
         devDependencies: { test1: "~1.0.0", test2: "~1.0.0" },
@@ -324,10 +311,8 @@ describe("checkExactVersions", () => {
           onlyWarnsForConfigName,
           ["test1"],
         ),
-        customCreateReportError: createReportError,
       },
     );
-    assertCreateReportErrorCall(createReportError, "Exact versions");
     assertSeveralMessages(messages, [
       {
         errorMessage: "Unexpected range dependency",
@@ -352,8 +337,9 @@ describe("checkExactVersions", () => {
     ]);
   });
 
-  it("should error when onlyWarnsFor is not fully used", async () => {
-    await checkExactVersions(
+  it("should error when onlyWarnsFor is not fully used", () => {
+    checkExactVersions(
+      mockReportError,
       parsePkgValue({ name: "test" }),
       ["devDependencies"],
       {
@@ -361,10 +347,8 @@ describe("checkExactVersions", () => {
           onlyWarnsForConfigName,
           ["testa"],
         ),
-        customCreateReportError: createReportError,
       },
     );
-    assertCreateReportErrorCall(createReportError, "Exact versions");
     assertSingleMessage(messages, {
       errorMessage: `Invalid config in "${onlyWarnsForConfigName}"`,
       errorDetails: 'no warning was raised for "testa"',

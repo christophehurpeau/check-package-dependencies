@@ -1,4 +1,4 @@
-import { createReportError } from "../utils/createReportError.ts";
+import type { ReportError } from "../reporting/ReportError.ts";
 import { getKeys } from "../utils/object.ts";
 import type {
   DependencyTypes,
@@ -7,14 +7,13 @@ import type {
 import type { OnlyWarnsForCheck } from "../utils/warnForUtils.ts";
 
 export function checkIdenticalVersions(
+  reportError: ReportError,
   pkg: ParsedPackageJson,
   type: DependencyTypes,
   deps: Record<string, Partial<Record<DependencyTypes, string[]>> | string[]>,
   onlyWarnsForCheck?: OnlyWarnsForCheck,
-  customCreateReportError = createReportError,
 ): void {
   const pkgDependencies = pkg[type] || {};
-  const reportError = customCreateReportError("Identical Versions", pkg.path);
 
   getKeys(deps).forEach((depKey) => {
     const version = pkgDependencies[depKey]?.value;

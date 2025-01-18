@@ -1,5 +1,5 @@
+import type { ReportError } from "../reporting/ReportError.ts";
 import type { GetDependencyPackageJson } from "../utils/createGetDependencyPackageJson.ts";
-import { createReportError } from "../utils/createReportError.ts";
 import type { ParsedPackageJson } from "../utils/packageTypes.ts";
 
 export type CheckResolutionMessage = (
@@ -11,18 +11,13 @@ export type CheckResolutionMessage = (
 ) => string | undefined;
 
 export function checkResolutionsHasExplanation(
+  reportError: ReportError,
   pkg: ParsedPackageJson,
   checkMessage: CheckResolutionMessage,
   getDependencyPackageJson: GetDependencyPackageJson,
-  customCreateReportError = createReportError,
 ): void {
   const pkgResolutions = pkg.resolutions || {};
   const pkgResolutionsExplained = pkg.resolutionsExplained || {};
-  const reportError = customCreateReportError(
-    "Resolutions has explanation",
-    pkg.path,
-  );
-
   Object.keys(pkgResolutions).forEach((depKey) => {
     if (!pkgResolutionsExplained[depKey]) {
       reportError({

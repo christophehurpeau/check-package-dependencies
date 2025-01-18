@@ -1,8 +1,6 @@
-import { createReportError } from "../utils/createReportError.js";
-export function checkResolutionsHasExplanation(pkg, checkMessage, getDependencyPackageJson, customCreateReportError = createReportError) {
+export function checkResolutionsHasExplanation(reportError, pkg, checkMessage, getDependencyPackageJson) {
     const pkgResolutions = pkg.resolutions || {};
     const pkgResolutionsExplained = pkg.resolutionsExplained || {};
-    const reportError = customCreateReportError("Resolutions has explanation", pkg.path);
     Object.keys(pkgResolutions).forEach((depKey) => {
         if (!pkgResolutionsExplained[depKey]) {
             reportError({

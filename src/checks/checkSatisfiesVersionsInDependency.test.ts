@@ -1,28 +1,17 @@
 import { describe, it } from "node:test";
 import {
-  assertCreateReportErrorCall,
   assertNoMessages,
   assertSingleMessage,
   createMockReportError,
-} from "../utils/createReportError.testUtils.ts";
+} from "../reporting/ReportError.testUtils.ts";
 import type { PackageJson } from "../utils/packageTypes.ts";
 import { checkSatisfiesVersionsInDependency } from "./checkSatisfiesVersionsInDependency.ts";
 
 describe(checkSatisfiesVersionsInDependency.name, () => {
-  const { createReportError, messages } = createMockReportError();
+  const { mockReportError, messages } = createMockReportError();
 
   it("should return no error when no ranges is set", () => {
-    checkSatisfiesVersionsInDependency(
-      "path",
-      { name: "test" },
-      {},
-      { customCreateReportError: createReportError },
-    );
-    assertCreateReportErrorCall(
-      createReportError,
-      "Satisfies Versions In Dependency",
-      "path",
-    );
+    checkSatisfiesVersionsInDependency(mockReportError, { name: "test" }, {});
     assertNoMessages(messages);
   });
 
@@ -97,15 +86,9 @@ describe(checkSatisfiesVersionsInDependency.name, () => {
     ] of testCases) {
       it(`should return no error when ${depName} in ${depType} is ${description}`, () => {
         checkSatisfiesVersionsInDependency(
-          "path",
+          mockReportError,
           { name: "test", ...pkgContent } as PackageJson,
           { [depType]: { [depName]: depValue } },
-          { customCreateReportError: createReportError },
-        );
-        assertCreateReportErrorCall(
-          createReportError,
-          "Satisfies Versions In Dependency",
-          "path",
         );
         assertNoMessages(messages);
       });
@@ -152,15 +135,9 @@ describe(checkSatisfiesVersionsInDependency.name, () => {
     ] of testCases) {
       it(`should error when ${depName} is not expected in ${depType}`, () => {
         checkSatisfiesVersionsInDependency(
-          "path",
+          mockReportError,
           { name: "test", ...pkgContent } as PackageJson,
           { [depType]: { [depName]: null } },
-          { customCreateReportError: createReportError },
-        );
-        assertCreateReportErrorCall(
-          createReportError,
-          "Satisfies Versions In Dependency",
-          "path",
         );
         assertSingleMessage(messages, {
           errorMessage: errorTitle,
@@ -230,15 +207,9 @@ describe(checkSatisfiesVersionsInDependency.name, () => {
     ] of testCases) {
       it(`should error when ${depName} is ${status} in ${depType}`, () => {
         checkSatisfiesVersionsInDependency(
-          "path",
+          mockReportError,
           { name: "test", ...pkgContent } as PackageJson,
           { [depType]: { [depName]: depRange } },
-          { customCreateReportError: createReportError },
-        );
-        assertCreateReportErrorCall(
-          createReportError,
-          "Satisfies Versions In Dependency",
-          "path",
         );
         assertSingleMessage(messages, {
           errorMessage: errorTitle,

@@ -1,8 +1,4 @@
-import { createReportError } from "../utils/createReportError.ts";
+import type { ReportError } from "../reporting/ReportError.ts";
 import type { DependenciesRanges, PackageJson } from "../utils/packageTypes.ts";
-interface CheckSatisfiesVersionsInDependencyOptions {
-    customCreateReportError?: typeof createReportError;
-}
-export declare function checkSatisfiesVersionsInDependency(pkgPathName: string, depPkg: PackageJson, dependenciesRanges: DependenciesRanges, { customCreateReportError, }?: CheckSatisfiesVersionsInDependencyOptions): void;
-export {};
+export declare function checkSatisfiesVersionsInDependency(reportError: ReportError, depPkg: PackageJson, dependenciesRanges: DependenciesRanges): void;
 //# sourceMappingURL=checkSatisfiesVersionsInDependency.d.ts.map

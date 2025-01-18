@@ -1,10 +1,9 @@
 import semver from "semver";
-import { createReportError, fromDependency, inDependency, } from "../utils/createReportError.js";
+import { fromDependency, inDependency, } from "../reporting/cliErrorReporting.js";
 import { changeOperator, getOperator } from "../utils/semverUtils.js";
-export function checkSatisfiesVersionsFromDependency(pkg, type, depKeys, depPkg, depType, { tryToAutoFix, shouldHaveExactVersions, onlyWarnsForCheck, customCreateReportError = createReportError, }) {
+export function checkSatisfiesVersionsFromDependency(reportError, pkg, type, depKeys, depPkg, depType, { tryToAutoFix, shouldHaveExactVersions, onlyWarnsForCheck, }) {
     const pkgDependencies = pkg[type] || {};
     const dependencies = depPkg[depType] || {};
-    const reportError = customCreateReportError("Satisfies Versions From Dependency", pkg.path);
     depKeys.forEach((depKey) => {
         const range = dependencies[depKey];
         if (!range) {

@@ -1,20 +1,16 @@
 import assert from "node:assert/strict";
 import { beforeEach, mock } from "node:test";
 import type { Mock } from "node:test";
-import type { Except } from "type-fest";
-import type { ReportError, ReportErrorMessage } from "./createReportError.ts";
+import type { ReportError, ReportErrorMessage } from "./ReportError.ts";
 
 export interface CollectedMessages {
   path: string;
   ruleName: string;
-  messages: Except<ReportErrorMessage, "ruleName">[];
+  messages: ReportErrorMessage[];
 }
 
 export interface MockReportErrorResult {
   mockReportError: Mock<ReportError>;
-  createReportError: Mock<
-    (ruleName: string, pkgPathName: string) => ReportError
-  >;
   messages: CollectedMessages[];
 }
 
@@ -37,17 +33,12 @@ export function createMockReportError(
     }
   });
 
-  const createReportError = mock.fn(
-    (_title: string, _pkgPathName: string) => reportError,
-  );
-
   beforeEach(() => {
     messages.length = 0;
     reportError.mock.resetCalls();
-    createReportError.mock.resetCalls();
   });
 
-  return { mockReportError: reportError, createReportError, messages };
+  return { mockReportError: reportError, messages };
 }
 
 export function assertNoMessages(messages: CollectedMessages[]): void {
@@ -56,7 +47,7 @@ export function assertNoMessages(messages: CollectedMessages[]): void {
 
 export function assertSingleMessage(
   messages: CollectedMessages[],
-  expected: Except<ReportErrorMessage, "ruleName">,
+  expected: ReportErrorMessage,
 ): void {
   assert.equal(messages.length, 1);
   assert.equal(messages[0].messages.length, 1);
@@ -78,7 +69,7 @@ export function assertSingleMessage(
 
 export function assertSeveralMessages(
   messages: CollectedMessages[],
-  expected: Except<ReportErrorMessage, "ruleName">[],
+  expected: ReportErrorMessage[],
 ): void {
   assert.equal(messages.length, 1);
   assert.deepEqual(
@@ -97,20 +88,6 @@ export function assertSeveralMessages(
           },
     ),
   );
-}
-
-export function assertCreateReportErrorCall(
-  createReportError: Mock<
-    (ruleName: string, pkgPathName: string) => ReportError
-  >,
-  expectedRuleName: string,
-  expectedPath = "unknown_path",
-): void {
-  assert.equal(createReportError.mock.calls.length, 1);
-  assert.deepEqual(createReportError.mock.calls[0].arguments, [
-    expectedRuleName,
-    expectedPath,
-  ]);
 }
 
 export function assertDeepEqualIgnoringPrototypes(

@@ -1,5 +1,5 @@
 import semver from "semver";
-import type { ReportError } from "../utils/createReportError.ts";
+import type { ReportError } from "../reporting/ReportError.ts";
 import type {
   DependencyTypes,
   PackageJson,

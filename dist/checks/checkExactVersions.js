@@ -1,13 +1,11 @@
 import semver from "semver";
-import { createReportError, reportNotWarnedFor, } from "../utils/createReportError.js";
+import { reportNotWarnedFor } from "../reporting/cliErrorReporting.js";
 import { getRealVersion } from "../utils/semverUtils.js";
 const isVersionRange = (version) => version.startsWith("^") ||
     version.startsWith("~") ||
     version.startsWith(">") ||
     version.startsWith("<");
-// eslint-disable-next-line @typescript-eslint/require-await
-export async function checkExactVersions(pkg, types, { getDependencyPackageJson, onlyWarnsForCheck, internalExactVersionsIgnore, tryToAutoFix = false, customCreateReportError = createReportError, }) {
-    const reportError = customCreateReportError("Exact versions", pkg.path);
+export function checkExactVersions(reportError, pkg, types, { getDependencyPackageJson, onlyWarnsForCheck, internalExactVersionsIgnore, tryToAutoFix = false, }) {
     for (const type of types) {
         const pkgDependencies = pkg[type];
         if (!pkgDependencies)

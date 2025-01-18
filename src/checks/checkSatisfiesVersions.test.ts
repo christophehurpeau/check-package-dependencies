@@ -1,37 +1,32 @@
 import { describe, it } from "node:test";
 import {
-  assertCreateReportErrorCall,
   assertNoMessages,
   assertSingleMessage,
   createMockReportError,
-} from "../utils/createReportError.testUtils.ts";
+} from "../reporting/ReportError.testUtils.ts";
 import { parsePkgValue } from "../utils/pkgJsonUtils.ts";
 import { checkSatisfiesVersions } from "./checkSatisfiesVersions.ts";
 
 describe("checkSatisfiesVersions", () => {
-  const { createReportError, messages } = createMockReportError();
+  const { mockReportError, messages } = createMockReportError();
 
   it("should return no error when range is satisfied", () => {
     checkSatisfiesVersions(
+      mockReportError,
       parsePkgValue({ name: "test", devDependencies: { test: "1.0.0" } }),
       "devDependencies",
       { test: "^1.0.0" },
-      undefined,
-      { customCreateReportError: createReportError },
     );
-    assertCreateReportErrorCall(createReportError, "Satisfies Versions");
     assertNoMessages(messages);
   });
 
   it("should return error when version not satisfied", () => {
     checkSatisfiesVersions(
+      mockReportError,
       parsePkgValue({ name: "test", devDependencies: { test: "1.0.0" } }),
       "devDependencies",
       { test: "^2.0.0" },
-      undefined,
-      { customCreateReportError: createReportError },
     );
-    assertCreateReportErrorCall(createReportError, "Satisfies Versions");
     assertSingleMessage(messages, {
       errorMessage: "Invalid",
       errorDetails: '"1.0.0" should satisfies "^2.0.0"',
@@ -46,13 +41,11 @@ describe("checkSatisfiesVersions", () => {
 
   it("should return error when dependency is missing", () => {
     checkSatisfiesVersions(
+      mockReportError,
       parsePkgValue({ name: "test", devDependencies: { test2: "1.0.0" } }),
       "devDependencies",
       { test: "^1.0.0" },
-      undefined,
-      { customCreateReportError: createReportError },
     );
-    assertCreateReportErrorCall(createReportError, "Satisfies Versions");
     assertSingleMessage(messages, {
       errorMessage: "Missing",
       errorDetails: 'should satisfies "^1.0.0"',

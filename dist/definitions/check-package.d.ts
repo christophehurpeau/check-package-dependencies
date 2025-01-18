@@ -1,5 +1,6 @@
 import type { SetRequired } from "type-fest";
 import type { CheckResolutionMessage } from "./checks/checkResolutionsHasExplanation.ts";
+import type { CreateReportError } from "./reporting/ReportError.ts";
 import type { GetDependencyPackageJson } from "./utils/createGetDependencyPackageJson.ts";
 import type { DependenciesRanges, DependencyName, DependencyTypes, PackageJson, ParsedPackageJson } from "./utils/packageTypes.ts";
 import type { OnlyWarnsFor, OnlyWarnsForOptionalDependencyMapping } from "./utils/warnForUtils.ts";
@@ -8,6 +9,8 @@ export interface CreateCheckPackageOptions {
     isLibrary?: boolean | ((pkg: PackageJson) => boolean);
     /** @internal */
     internalWorkspacePkgDirectoryPath?: string;
+    /** @internal */
+    createReportError?: CreateReportError;
 }
 export interface CheckDirectPeerDependenciesOptions {
     missingOnlyWarnsFor?: OnlyWarnsForOptionalDependencyMapping;
@@ -50,6 +53,7 @@ export interface CheckPackageApiRunOptions {
 }
 export interface CheckPackageApi {
     run: (options?: CheckPackageApiRunOptions) => Promise<void>;
+    runSync: (options?: CheckPackageApiRunOptions) => void;
     /** @internal */
     parsedPkg: ParsedPackageJson;
     /** @internal */
@@ -193,5 +197,5 @@ export interface CheckPackageApi {
     checkMinRangePeerDependenciesSatisfiesDependencies: () => CheckPackageApi;
 }
 export type ShouldHaveExactVersions = (depType: DependencyTypes) => boolean;
-export declare function createCheckPackage({ packageDirectoryPath, internalWorkspacePkgDirectoryPath, isLibrary, }?: CreateCheckPackageOptions): CheckPackageApi;
+export declare function createCheckPackage({ packageDirectoryPath, internalWorkspacePkgDirectoryPath, isLibrary, createReportError, }?: CreateCheckPackageOptions): CheckPackageApi;
 //# sourceMappingURL=check-package.d.ts.map

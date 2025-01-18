@@ -1,8 +1,6 @@
+import type { ReportError } from "../reporting/ReportError.ts";
+import { reportNotWarnedForMapping } from "../reporting/cliErrorReporting.ts";
 import type { GetDependencyPackageJson } from "../utils/createGetDependencyPackageJson.ts";
-import {
-  createReportError,
-  reportNotWarnedForMapping,
-} from "../utils/createReportError.ts";
 import { getKeys } from "../utils/object.ts";
 import type {
   DependencyTypes,
@@ -12,19 +10,13 @@ import type { OnlyWarnsForMappingCheck } from "../utils/warnForUtils.ts";
 import { checkDuplicateDependencies } from "./checkDuplicateDependencies.ts";
 
 export function checkDirectDuplicateDependencies(
+  reportError: ReportError,
   pkg: ParsedPackageJson,
   isPackageALibrary: boolean,
   depType: DependencyTypes,
   getDependencyPackageJson: GetDependencyPackageJson,
   onlyWarnsForCheck: OnlyWarnsForMappingCheck,
-  reportErrorNamePrefix = "",
-  customCreateReportError = createReportError,
 ): void {
-  const reportError = customCreateReportError(
-    `${reportErrorNamePrefix}Direct Duplicate Dependencies`,
-    pkg.path,
-  );
-
   const checks: {
     type: DependencyTypes;
     searchIn: DependencyTypes[];

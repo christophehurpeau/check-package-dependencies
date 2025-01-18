@@ -1,8 +1,7 @@
-import { createReportError, reportNotWarnedForMapping, } from "../utils/createReportError.js";
+import { reportNotWarnedForMapping } from "../reporting/cliErrorReporting.js";
 import { getKeys } from "../utils/object.js";
 import { checkDuplicateDependencies } from "./checkDuplicateDependencies.js";
-export function checkDirectDuplicateDependencies(pkg, isPackageALibrary, depType, getDependencyPackageJson, onlyWarnsForCheck, reportErrorNamePrefix = "", customCreateReportError = createReportError) {
-    const reportError = customCreateReportError(`${reportErrorNamePrefix}Direct Duplicate Dependencies`, pkg.path);
+export function checkDirectDuplicateDependencies(reportError, pkg, isPackageALibrary, depType, getDependencyPackageJson, onlyWarnsForCheck) {
     const checks = [
         {
             type: "devDependencies",

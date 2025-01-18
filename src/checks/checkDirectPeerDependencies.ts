@@ -1,9 +1,7 @@
 import semver from "semver";
+import type { ReportError } from "../reporting/ReportError.ts";
+import { reportNotWarnedForMapping } from "../reporting/cliErrorReporting.ts";
 import type { GetDependencyPackageJson } from "../utils/createGetDependencyPackageJson.ts";
-import {
-  createReportError,
-  reportNotWarnedForMapping,
-} from "../utils/createReportError.ts";
 import { getKeys } from "../utils/object.ts";
 import type {
   DependencyTypes,
@@ -41,15 +39,13 @@ const getAllowedPeerInFromType = (
 };
 
 export function checkDirectPeerDependencies(
+  reportError: ReportError,
   isLibrary: boolean,
   pkg: ParsedPackageJson,
   getDependencyPackageJson: GetDependencyPackageJson,
   missingOnlyWarnsForCheck: OnlyWarnsForMappingCheck,
   invalidOnlyWarnsForCheck: OnlyWarnsForMappingCheck,
-  customCreateReportError = createReportError,
 ): void {
-  const reportError = customCreateReportError("Peer Dependencies", pkg.path);
-
   const allDepPkgs: {
     name: string;
     type: RegularDependencyTypes;
@@ -91,8 +87,8 @@ export function checkDirectPeerDependencies(
   } of allDepPkgs) {
     if (depPkg.peerDependencies) {
       checkPeerDependencies(
-        pkg,
         reportError,
+        pkg,
         depType,
         getAllowedPeerInFromType(depType, isLibrary),
         hasDirectMatchingPeerDependency,

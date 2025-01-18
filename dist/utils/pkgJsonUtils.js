@@ -5,8 +5,11 @@ import { findNodeAtLocation, getNodeValue, parseTree } from "jsonc-parser";
 export function readPkgJson(packagePath) {
     return JSON.parse(readFileSync(packagePath, "utf8"));
 }
+export function stringifyPkgJson(pkg) {
+    return `${JSON.stringify(pkg, null, 2)}\n`;
+}
 export function writePkgJson(packagePath, pkg) {
-    writeFileSync(packagePath, `${JSON.stringify(pkg, null, 2)}\n`);
+    writeFileSync(packagePath, stringifyPkgJson(pkg));
 }
 function getLocationFromOffset(packageContent, offset) {
     if (offset < 0 || offset > packageContent.length) {

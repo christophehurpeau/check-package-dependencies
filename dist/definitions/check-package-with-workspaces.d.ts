@@ -26,6 +26,6 @@ export interface CheckPackageWithWorkspacesApi {
 interface CreateCheckPackageWithWorkspacesOptions extends Except<CreateCheckPackageOptions, "isLibrary"> {
     isLibrary?: (pkg: PackageJson) => boolean;
 }
-export declare function createCheckPackageWithWorkspaces(createCheckPackageOptions?: CreateCheckPackageWithWorkspacesOptions): CheckPackageWithWorkspacesApi;
+export declare function createCheckPackageWithWorkspaces({ createReportError, ...createCheckPackageOptions }?: CreateCheckPackageWithWorkspacesOptions): CheckPackageWithWorkspacesApi;
 export {};
 //# sourceMappingURL=check-package-with-workspaces.d.ts.map

@@ -1,10 +1,10 @@
 import semver from "semver";
 import type { ShouldHaveExactVersions } from "../check-package.ts";
+import type { ReportError } from "../reporting/ReportError.ts";
 import {
-  createReportError,
   fromDependency,
   inDependency,
-} from "../utils/createReportError.ts";
+} from "../reporting/cliErrorReporting.ts";
 import type { DependencyTypes, PackageJson } from "../utils/packageTypes.ts";
 import type { OnlyWarnsForCheck } from "../utils/warnForUtils.ts";
 
@@ -12,11 +12,10 @@ export interface CheckSatisfiesVersionsFromDependencyOptions {
   tryToAutoFix?: boolean;
   shouldHaveExactVersions: ShouldHaveExactVersions;
   onlyWarnsForCheck?: OnlyWarnsForCheck;
-  customCreateReportError?: typeof createReportError;
 }
 
 export function checkSatisfiesVersionsBetweenDependencies(
-  dep1PkgPath: string,
+  reportError: ReportError,
   dep1Pkg: PackageJson,
   dep1Type: DependencyTypes,
   depKeys: string[],
@@ -26,16 +25,10 @@ export function checkSatisfiesVersionsBetweenDependencies(
     tryToAutoFix,
     shouldHaveExactVersions,
     onlyWarnsForCheck,
-    customCreateReportError = createReportError,
   }: CheckSatisfiesVersionsFromDependencyOptions,
 ): void {
   const dep1Dependencies = dep1Pkg[dep1Type] || {};
   const dep2Dendencies = dep2Pkg[dep2Type] || {};
-
-  const reportError = customCreateReportError(
-    "Satisfies Versions From Dependency",
-    dep1PkgPath,
-  );
 
   depKeys.forEach((depKey) => {
     const dep1Range = dep1Dependencies[depKey];
