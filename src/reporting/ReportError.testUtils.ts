@@ -59,7 +59,9 @@ export function assertSingleMessage(
           ...expected,
           dependency: {
             changeValue: messages[0].messages[0]?.dependency?.changeValue,
+            toString: messages[0].messages[0]?.dependency?.toString,
             locations: messages[0].messages[0]?.dependency?.locations,
+            ranges: messages[0].messages[0]?.dependency?.ranges,
             ...expected.dependency,
           },
         },
@@ -80,7 +82,9 @@ export function assertSeveralMessages(
             ...e,
             dependency: {
               changeValue: messages[0].messages[i].dependency?.changeValue,
+              toString: messages[0].messages[i].dependency?.toString,
               locations: messages[0].messages[i].dependency?.locations,
+              ranges: messages[0].messages[i].dependency?.ranges,
               ...e.dependency,
             },
           },

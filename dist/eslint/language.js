@@ -10,7 +10,6 @@ export const PackageJSONLanguage = {
     visitorKeys: { Package: ["DependencyValue"], DependencyValue: [] },
     validateLanguageOptions(languageOptions) { },
     parse(file, context) {
-        console.log("parse");
         if (typeof file.body !== "string") {
             throw new TypeError("File body is not a string");
         }

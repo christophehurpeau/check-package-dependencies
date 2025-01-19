@@ -34,7 +34,13 @@ describe("parsePkg", () => {
         name: { start: { line: 5, column: 7 }, end: { line: 5, column: 13 } },
         value: { start: { line: 5, column: 15 }, end: { line: 5, column: 22 } },
       },
-      changeValue: parsedPkg.dependencies?.dep1?.changeValue,
+      ranges: {
+        all: [82, 97],
+        name: [82, 88],
+        value: [90, 97],
+      },
+      toString: parsedPkg.dependencies?.dep1.toString,
+      changeValue: parsedPkg.dependencies?.dep1.changeValue,
     });
   });
 
