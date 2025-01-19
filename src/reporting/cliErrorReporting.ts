@@ -35,7 +35,9 @@ function formatErrorMessage({
   errorDetails,
   errorTarget,
   onlyWarns,
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
   autoFixable,
+  fixTo,
   ruleName,
   dependency,
 }: ReportErrorWithRuleName): string {
@@ -54,13 +56,15 @@ function formatErrorMessage({
     ? chalk.yellow(errorMessage)
     : chalk.red(errorMessage);
 
-  return `  ${locationString}  ${messageType}  ${dependencyInfo}${messageTitle}${details}  ${chalk.blue(ruleName)}${autoFixable ? chalk.gray(" (--fix)") : ""}`;
+  const isFixable = autoFixable || fixTo;
+  return `  ${locationString}  ${messageType}  ${dependencyInfo}${messageTitle}${details}  ${chalk.blue(ruleName)}${isFixable ? chalk.gray(" (--fix)") : ""}`;
 }
 
 export function logMessage(message: ReportErrorWithRuleName): void {
   if (message.onlyWarns) totalWarnings++;
   else totalErrors++;
-  if (message.autoFixable) totalFixable++;
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
+  if (message.autoFixable || message.fixTo) totalFixable++;
 
   console.error(formatErrorMessage(message));
 }

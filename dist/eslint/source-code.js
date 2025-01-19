@@ -17,6 +17,18 @@ export class PackageJsonSourceCode extends TextSourceCodeBase {
                 phase: 1,
                 args: [],
             }),
+            ...this.ast.children.flatMap((child) => [
+                new VisitNodeStep({
+                    target: child,
+                    phase: 1,
+                    args: [],
+                }),
+                new VisitNodeStep({
+                    target: child,
+                    phase: 2,
+                    args: [],
+                }),
+            ]),
             new VisitNodeStep({
                 target: this.ast,
                 phase: 2,
@@ -25,8 +37,10 @@ export class PackageJsonSourceCode extends TextSourceCodeBase {
         ];
     }
     getText(node) {
-        if ("type" in node && node.type === "Package") {
-            return stringifyPkgJson(this.ast.parsedPkgJson.value);
+        if ("type" in node) {
+            if (node.type === "Package") {
+                return stringifyPkgJson(this.ast.parsedPkgJson.value);
+            }
         }
         throw new Error("Invalid node");
     }

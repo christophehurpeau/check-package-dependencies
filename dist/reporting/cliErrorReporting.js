@@ -7,7 +7,9 @@ let totalWarnings = 0;
 let totalErrors = 0;
 let totalFixable = 0;
 // eslint-disable-next-line complexity
-function formatErrorMessage({ errorMessage, errorDetails, errorTarget, onlyWarns, autoFixable, ruleName, dependency, }) {
+function formatErrorMessage({ errorMessage, errorDetails, errorTarget, onlyWarns, 
+// eslint-disable-next-line @typescript-eslint/no-deprecated
+autoFixable, fixTo, ruleName, dependency, }) {
     const location = dependency && getLocFromDependency(dependency, errorTarget);
     const locationString = location
         ? `${location.start.line}:${location.start.column || 0}`
@@ -20,14 +22,16 @@ function formatErrorMessage({ errorMessage, errorDetails, errorTarget, onlyWarns
     const messageTitle = onlyWarns
         ? chalk.yellow(errorMessage)
         : chalk.red(errorMessage);
-    return `  ${locationString}  ${messageType}  ${dependencyInfo}${messageTitle}${details}  ${chalk.blue(ruleName)}${autoFixable ? chalk.gray(" (--fix)") : ""}`;
+    const isFixable = autoFixable || fixTo;
+    return `  ${locationString}  ${messageType}  ${dependencyInfo}${messageTitle}${details}  ${chalk.blue(ruleName)}${isFixable ? chalk.gray(" (--fix)") : ""}`;
 }
 export function logMessage(message) {
     if (message.onlyWarns)
         totalWarnings++;
     else
         totalErrors++;
-    if (message.autoFixable)
+    // eslint-disable-next-line @typescript-eslint/no-deprecated
+    if (message.autoFixable || message.fixTo)
         totalFixable++;
     console.error(formatErrorMessage(message));
 }

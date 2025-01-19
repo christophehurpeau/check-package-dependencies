@@ -68,7 +68,7 @@ export function checkPeerDependencies(
       });
     } else {
       const versions = versionsIn.map(
-        (versionsInType) => pkg[versionsInType]![peerDepName]!,
+        (versionsInType) => pkg[versionsInType]![peerDepName],
       );
 
       versions.forEach(({ value: versionValue }, index) => {
@@ -88,7 +88,7 @@ export function checkPeerDependencies(
           reportError({
             errorMessage: "Invalid peer dependency version",
             errorDetails: `"${version}" should satisfies "${range}" ${fromDependency(depPkg, type)}`,
-            dependency: pkg[allowedPeerInExisting[index]]![peerDepName]!,
+            dependency: pkg[allowedPeerInExisting[index]]![peerDepName],
             onlyWarns: invalidOnlyWarnsForCheck.shouldWarnsFor(peerDepName),
           });
         }

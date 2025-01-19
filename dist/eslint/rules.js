@@ -1,7 +1,7 @@
-import { checkExactVersions } from "../checks/checkExactVersions.js";
+import { checkExactVersion } from "../checks/checkExactVersions.js";
 import { getLocFromDependency } from "../reporting/ReportError.js";
 import { createOnlyWarnsForArrayCheck } from "../utils/warnForUtils.js";
-function createPackageRule(ruleName, schema, checkFn) {
+function createPackageRule(ruleName, schema, { checkPackage, checkDependencyValue, }) {
     return {
         [ruleName]: {
             meta: {
@@ -12,6 +12,22 @@ function createPackageRule(ruleName, schema, checkFn) {
             create(context) {
                 const languageOptions = context.languageOptions;
                 const options = (context.options[0] ?? {});
+                const onlyWarnsForCheck = schema && "onlyWarnsFor" in schema
+                    ? createOnlyWarnsForArrayCheck(ruleName, options.onlyWarnsFor)
+                    : createOnlyWarnsForArrayCheck(ruleName, []);
+                const createReportError = (fix) => (details) => {
+                    const location = details.dependency &&
+                        getLocFromDependency(details.dependency, details.errorTarget);
+                    context.report({
+                        message: details.errorMessage,
+                        // TODO improve this by using start+end
+                        loc: location ?? { line: 1, column: 1 },
+                        // suggest: message.autoFixable ?
+                        fix: fix && details.fixTo && location
+                            ? (fixer) => fix(fixer, details)
+                            : undefined,
+                    });
+                };
                 return {
                     Package(node) {
                         // Only run on package.json files
@@ -22,31 +38,19 @@ function createPackageRule(ruleName, schema, checkFn) {
                             });
                         }
                         const { parsedPkgJson, getDependencyPackageJson } = node;
-                        const onlyWarnsForCheck = schema && "onlyWarnsFor" in schema
-                            ? createOnlyWarnsForArrayCheck(ruleName, options.onlyWarnsFor)
-                            : createOnlyWarnsForArrayCheck(ruleName, []);
                         try {
                             // const checkPackage = createCheckPackage();
-                            checkFn({
-                                pkg: parsedPkgJson,
-                                getDependencyPackageJson,
-                                languageOptions,
-                                ruleOptions: options,
-                                onlyWarnsForCheck,
-                                reportError: (details) => {
-                                    context.report({
-                                        message: details.errorMessage,
-                                        // TODO improve this by using start+end
-                                        loc: (details.dependency &&
-                                            getLocFromDependency(details.dependency, details.errorTarget)) ?? { line: 1, column: 1 },
-                                        // suggest: message.autoFixable ?
-                                        // fix(fixer) {
-                                        //   // TODO
-                                        //   return [];
-                                        // },
-                                    });
-                                },
-                            });
+                            if (checkPackage) {
+                                checkPackage({
+                                    node: parsedPkgJson,
+                                    pkg: parsedPkgJson,
+                                    getDependencyPackageJson,
+                                    languageOptions,
+                                    ruleOptions: options,
+                                    onlyWarnsForCheck,
+                                    reportError: createReportError(),
+                                });
+                            }
                             const notWarnedFor = onlyWarnsForCheck.getNotWarnedFor();
                             if (notWarnedFor.length > 0) {
                                 context.report({
@@ -62,6 +66,26 @@ function createPackageRule(ruleName, schema, checkFn) {
                             });
                         }
                     },
+                    DependencyValue: checkDependencyValue
+                        ? (node) => {
+                            const token = node;
+                            const { dependencyValue, parsedPkgJson, getDependencyPackageJson, } = token;
+                            if (!dependencyValue)
+                                return;
+                            checkDependencyValue({
+                                node: dependencyValue,
+                                pkg: parsedPkgJson,
+                                getDependencyPackageJson,
+                                languageOptions,
+                                ruleOptions: options,
+                                onlyWarnsForCheck,
+                                reportError: createReportError((fixer, details) => {
+                                    dependencyValue.changeValue(details.fixTo);
+                                    return fixer.replaceTextRange(token.range, dependencyValue.toString());
+                                }),
+                            });
+                        }
+                        : undefined,
                 };
             },
         },
@@ -75,13 +99,17 @@ const rules = {
             onlyWarnsFor: { type: "array", items: { type: "string" } },
         },
         additionalProperties: false,
-    }, ({ pkg, reportError, ruleOptions, getDependencyPackageJson, onlyWarnsForCheck, }) => {
-        checkExactVersions(reportError, pkg, ruleOptions.allowRangeVersionsInDependencies
-            ? ["dependencies", "devDependencies", "resolutions"]
-            : ["devDependencies", "resolutions"], {
-            getDependencyPackageJson,
-            onlyWarnsForCheck,
-        });
+    }, {
+        checkDependencyValue: ({ node, reportError, ruleOptions, getDependencyPackageJson, onlyWarnsForCheck, }) => {
+            if ((ruleOptions.allowRangeVersionsInDependencies
+                ? ["dependencies", "devDependencies", "resolutions"]
+                : ["devDependencies", "resolutions"]).includes(node.fieldName)) {
+                checkExactVersion(reportError, node, {
+                    getDependencyPackageJson,
+                    onlyWarnsForCheck,
+                });
+            }
+        },
     }),
     // "resolutions-versions-match": createPackageRule((api) => {
     //   api.checkResolutionsVersionsMatch();

@@ -50,16 +50,16 @@ function parseDependencyField(json, fieldName, packageContent, packageValue) {
     const dependencies = Object.fromEntries(fieldNode.children
         .filter((child) => child.type === "property")
         .map((propertyNode) => {
-        const dependencyNameNode = propertyNode.children[0];
-        const dependencyValueNode = propertyNode.children[1];
-        const dependencyName = getNodeValue(dependencyNameNode);
-        const versionValue = getNodeValue(dependencyValueNode);
+        const nameNode = propertyNode.children[0];
+        const valueNode = propertyNode.children[1];
+        const name = getNodeValue(nameNode);
+        const value = getNodeValue(valueNode);
         const startLocation = getLocationFromOffset(packageContent, propertyNode.offset);
-        const valueStartLocation = getLocationFromOffset(packageContent, dependencyValueNode.offset);
+        const valueStartLocation = getLocationFromOffset(packageContent, valueNode.offset);
         const parsedDependency = {
             fieldName,
-            name: dependencyName,
-            value: versionValue,
+            name,
+            value,
             locations: {
                 all: {
                     start: startLocation,
@@ -72,23 +72,31 @@ function parseDependencyField(json, fieldName, packageContent, packageValue) {
                     start: startLocation,
                     end: {
                         line: startLocation.line,
-                        column: startLocation.column + dependencyNameNode.length,
+                        column: startLocation.column + nameNode.length,
                     },
                 },
                 value: {
                     start: valueStartLocation,
                     end: {
                         line: valueStartLocation.line,
-                        column: valueStartLocation.column + dependencyValueNode.length,
+                        column: valueStartLocation.column + valueNode.length,
                     },
                 },
             },
+            ranges: {
+                all: [propertyNode.offset, valueNode.offset + valueNode.length],
+                name: [propertyNode.offset, nameNode.offset + nameNode.length],
+                value: [valueNode.offset, valueNode.offset + valueNode.length],
+            },
             changeValue(newValue) {
-                packageValue[fieldName][dependencyName] = newValue;
+                packageValue[fieldName][name] = newValue;
                 parsedDependency.value = newValue;
             },
+            toString() {
+                return `${JSON.stringify(parsedDependency.name)}: ${JSON.stringify(parsedDependency.value)}`;
+            },
         };
-        return [dependencyName, parsedDependency];
+        return [name, parsedDependency];
     }));
     return [fieldName, dependencies];
 }

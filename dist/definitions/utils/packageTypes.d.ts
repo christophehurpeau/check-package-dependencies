@@ -23,14 +23,20 @@ export interface DependencyValue {
         name: Location;
         value: Location;
     };
+    ranges: {
+        all: [number, number];
+        name: [number, number];
+        value: [number, number];
+    };
+    toString: () => string;
 }
 export type ParsedPackageJson = {
     readonly name: string;
     readonly path: string;
     readonly value: Readonly<PackageJson>;
-    readonly resolutionsExplained?: Readonly<Record<string, Readonly<DependencyValue> | undefined>>;
+    readonly resolutionsExplained?: Readonly<Record<string, Readonly<DependencyValue>>>;
     change: (type: DependencyTypes, dependencyName: string, newValue: string) => void;
-} & Readonly<Partial<Record<DependencyTypes, Record<string, Readonly<DependencyValue> | undefined> | undefined>>>;
+} & Readonly<Partial<Record<DependencyTypes, Record<string, Readonly<DependencyValue>> | undefined>>>;
 export type PackageJson = PackageJsonFromTypeFest & Partial<Record<DependencyTypes, Record<string, string>>> & {
     resolutionsExplained?: Record<string, string>;
 };

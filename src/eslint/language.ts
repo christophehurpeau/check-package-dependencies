@@ -9,7 +9,11 @@ import type {
 } from "@eslint/core";
 import type { GetDependencyPackageJson } from "../utils/createGetDependencyPackageJson.ts";
 import { createGetDependencyPackageJson } from "../utils/createGetDependencyPackageJson.ts";
-import type { ParsedPackageJson } from "../utils/packageTypes.ts";
+import type {
+  DependencyTypes,
+  DependencyValue,
+  ParsedPackageJson,
+} from "../utils/packageTypes.ts";
 import { parsePkg } from "../utils/pkgJsonUtils.ts";
 import { PackageJsonSourceCode } from "./source-code.ts";
 
@@ -18,6 +22,20 @@ export interface PackageJsonAst {
   parsedPkgJson: ParsedPackageJson;
   getDependencyPackageJson: GetDependencyPackageJson;
   loc: { line: number; column: number };
+  range: [number, number];
+  children: DependencyValueAst[];
+  value: string;
+}
+
+export interface DependencyValueAst {
+  type: "DependencyValue";
+  dependencyType: DependencyTypes;
+  parsedPkgJson: ParsedPackageJson;
+  getDependencyPackageJson: GetDependencyPackageJson;
+  dependencyValue: DependencyValue | undefined;
+  loc: { line: number; column: number };
+  range: [number, number];
+  value: string;
 }
 
 export const PackageJSONLanguage: Language = {
@@ -25,7 +43,7 @@ export const PackageJSONLanguage: Language = {
   lineStart: 1,
   columnStart: 1,
   nodeTypeKey: "type",
-  visitorKeys: { Package: [] },
+  visitorKeys: { Package: ["DependencyValue"], DependencyValue: [] },
 
   validateLanguageOptions(languageOptions: LanguageOptions): void {},
 
@@ -33,12 +51,12 @@ export const PackageJSONLanguage: Language = {
     file: File,
     context: LanguageContext<LanguageOptions>,
   ): ParseResult<PackageJsonAst> {
+    if (typeof file.body !== "string") {
+      throw new TypeError("File body is not a string");
+    }
+
     try {
-      const body =
-        typeof file.body === "string"
-          ? file.body
-          : new TextDecoder().decode(file.body);
-      const parsedPkgJson = parsePkg(body, file.path);
+      const parsedPkgJson = parsePkg(file.body, file.path);
       const getDependencyPackageJson = createGetDependencyPackageJson({
         pkgDirname: dirname(file.path),
       });
@@ -50,6 +68,32 @@ export const PackageJSONLanguage: Language = {
           parsedPkgJson,
           getDependencyPackageJson,
           loc: { line: 1, column: 1 },
+          value: file.body,
+          range: [0, file.body.length],
+          children: (
+            [
+              "dependencies",
+              "devDependencies",
+              "optionalDependencies",
+              "peerDependencies",
+              "resolutions",
+            ] as const
+          ).flatMap((dependencyType): DependencyValueAst[] => {
+            return Object.values(parsedPkgJson[dependencyType] ?? {}).map(
+              (dependencyValue) => {
+                return {
+                  type: "DependencyValue",
+                  dependencyType,
+                  parsedPkgJson,
+                  getDependencyPackageJson,
+                  dependencyValue,
+                  loc: dependencyValue.locations.all.start,
+                  range: dependencyValue.ranges.all,
+                  value: dependencyValue.toString(),
+                };
+              },
+            );
+          }),
         },
       };
     } catch (error) {
@@ -71,11 +115,12 @@ export const PackageJSONLanguage: Language = {
     parseResult: OkParseResult<PackageJsonAst>,
     context: LanguageContext<LanguageOptions>,
   ): PackageJsonSourceCode {
+    if (typeof file.body !== "string") {
+      throw new TypeError("File body is not a string");
+    }
+
     return new PackageJsonSourceCode({
-      text:
-        typeof file.body === "string"
-          ? file.body
-          : new TextDecoder().decode(file.body),
+      text: file.body,
       ast: parseResult.ast,
     });
   },

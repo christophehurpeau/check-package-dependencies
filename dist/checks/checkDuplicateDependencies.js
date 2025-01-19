@@ -13,7 +13,7 @@ export function checkDuplicateDependencies(reportError, pkg, isPkgLibrary, depTy
             versionsIn.includes("devDependencies")) {
             const depVersion = pkg.dependencies[depKey];
             const devDepVersion = pkg.devDependencies[depKey];
-            if (depVersion && depVersion.value === devDepVersion?.value) {
+            if (depVersion && depVersion.value === devDepVersion.value) {
                 reportError({
                     errorMessage: `Invalid "${depKey}" has same version in dependencies and devDependencies`,
                     errorDetails: "please place it only in dependencies or use range in dependencies",

@@ -1,1 +1,1 @@
-{"version":3,"file":"rules.d.ts","sourceRoot":"","sources":["../../../src/eslint/rules.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,IAAI,EAAE,MAAM,QAAQ,CAAC;AA8GnC,QAAA,MAAM,KAAK;;CA+CV,CAAC;AAEF,eAAe,KAAK,CAAC"}
+{"version":3,"file":"rules.d.ts","sourceRoot":"","sources":["../../../src/eslint/rules.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,IAAI,EAAE,MAAM,QAAQ,CAAC;AAyKnC,QAAA,MAAM,KAAK;;CAiDV,CAAC;AAEF,eAAe,KAAK,CAAC"}

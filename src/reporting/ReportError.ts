@@ -7,7 +7,9 @@ export interface ReportErrorDetails {
   dependency?: Omit<Partial<DependencyValue>, "name"> &
     Pick<DependencyValue, "name">;
   onlyWarns?: boolean;
+  /** @deprecated use fixTo instead */
   autoFixable?: boolean;
+  fixTo?: string;
 }
 
 export type ReportError = (details: ReportErrorDetails) => void;
