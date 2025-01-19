@@ -88,21 +88,47 @@ function parseDependencyField(
     fieldNode.children
       .filter((child) => child.type === "property")
       .map((propertyNode) => {
-        const dependencyName = getNodeValue(
-          propertyNode.children![0],
-        ) as string;
-        const versionValue = getNodeValue(propertyNode.children![1]) as string;
-        const location = getLocationFromOffset(
+        const dependencyNameNode = propertyNode.children![0];
+        const dependencyValueNode = propertyNode.children![1];
+
+        const dependencyName = getNodeValue(dependencyNameNode) as string;
+        const versionValue = getNodeValue(dependencyValueNode) as string;
+        const startLocation = getLocationFromOffset(
           packageContent,
           propertyNode.offset,
+        );
+        const valueStartLocation = getLocationFromOffset(
+          packageContent,
+          dependencyValueNode.offset,
         );
 
         const parsedDependency = {
           fieldName,
           name: dependencyName,
           value: versionValue,
-          line: location.line,
-          column: location.column,
+          locations: {
+            all: {
+              start: startLocation,
+              end: {
+                line: startLocation.line,
+                column: startLocation.column + propertyNode.length,
+              },
+            },
+            name: {
+              start: startLocation,
+              end: {
+                line: startLocation.line,
+                column: startLocation.column + dependencyNameNode.length,
+              },
+            },
+            value: {
+              start: valueStartLocation,
+              end: {
+                line: valueStartLocation.line,
+                column: valueStartLocation.column + dependencyValueNode.length,
+              },
+            },
+          },
           changeValue(newValue: string) {
             packageValue[fieldName]![dependencyName] = newValue;
             parsedDependency.value = newValue;

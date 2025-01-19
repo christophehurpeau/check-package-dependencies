@@ -57,12 +57,13 @@ export function checkExactVersions(
           }
           if (!resolvedDep?.version) {
             reportError({
-              errorMessage: "Unexpected range dependency",
+              errorMessage: "Unexpected range value",
               errorDetails: `expecting "${version}" to be exact${
                 tryToAutoFix
                   ? `, autofix failed to resolve "${dependencyName}"`
                   : ""
               }`,
+              errorTarget: "dependencyValue",
               dependency: dependencyValue,
               onlyWarns: shouldOnlyWarn,
             });
@@ -72,22 +73,24 @@ export function checkExactVersions(
             })
           ) {
             reportError({
-              errorMessage: "Unexpected range dependency",
+              errorMessage: "Unexpected range value",
               errorDetails: `expecting "${version}" to be exact${
                 tryToAutoFix
                   ? `, autofix failed as resolved version "${resolvedDep.version}" doesn't satisfy "${version}"`
                   : ""
               }`,
               dependency: dependencyValue,
+              errorTarget: "dependencyValue",
               onlyWarns: shouldOnlyWarn,
             });
           } else if (tryToAutoFix) {
             dependencyValue.changeValue(resolvedDep.version);
           } else {
             reportError({
-              errorMessage: "Unexpected range dependency",
+              errorMessage: "Unexpected range value",
               errorDetails: `expecting "${version}" to be exact "${resolvedDep.version}"`,
               dependency: dependencyValue,
+              errorTarget: "dependencyValue",
               onlyWarns: shouldOnlyWarn,
               autoFixable: true,
             });
@@ -102,8 +105,9 @@ export function checkExactVersions(
             }
           }
           reportError({
-            errorMessage: "Unexpected range dependency",
+            errorMessage: "Unexpected range value",
             errorDetails: `expecting "${version}" to be exact "${exactVersion}"`,
+            errorTarget: "dependencyValue",
             dependency: dependencyValue,
             onlyWarns: shouldOnlyWarn,
           });

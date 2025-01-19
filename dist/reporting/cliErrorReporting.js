@@ -1,14 +1,16 @@
 /* eslint-disable no-console */
 import chalk from "chalk";
 import { getEntries } from "../utils/object.js";
+import { getLocFromDependency } from "./ReportError.js";
 const pathMessages = new Map();
 let totalWarnings = 0;
 let totalErrors = 0;
 let totalFixable = 0;
 // eslint-disable-next-line complexity
-function formatErrorMessage({ errorMessage, errorDetails, onlyWarns, autoFixable, ruleName, dependency, }) {
-    const location = dependency?.line
-        ? `${dependency.line}:${dependency.column || 0}`
+function formatErrorMessage({ errorMessage, errorDetails, errorTarget, onlyWarns, autoFixable, ruleName, dependency, }) {
+    const location = dependency && getLocFromDependency(dependency, errorTarget);
+    const locationString = location
+        ? `${location.start.line}:${location.start.column || 0}`
         : "0:0";
     const messageType = onlyWarns ? chalk.yellow("warning") : chalk.red("error");
     const dependencyInfo = dependency
@@ -18,7 +20,7 @@ function formatErrorMessage({ errorMessage, errorDetails, onlyWarns, autoFixable
     const messageTitle = onlyWarns
         ? chalk.yellow(errorMessage)
         : chalk.red(errorMessage);
-    return `  ${location}  ${messageType}  ${dependencyInfo}${messageTitle}${details}  ${chalk.blue(ruleName)}${autoFixable ? chalk.gray(" (--fix)") : ""}`;
+    return `  ${locationString}  ${messageType}  ${dependencyInfo}${messageTitle}${details}  ${chalk.blue(ruleName)}${autoFixable ? chalk.gray(" (--fix)") : ""}`;
 }
 export function logMessage(message) {
     if (message.onlyWarns)

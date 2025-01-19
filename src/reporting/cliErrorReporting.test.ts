@@ -146,8 +146,20 @@ describe("createReportError", () => {
       errorMessage: "Error message",
       dependency: {
         name: "dep1",
-        line: 42,
-        column: 10,
+        locations: {
+          all: {
+            start: { line: 42, column: 10 },
+            end: { line: 42, column: 10 },
+          },
+          name: {
+            start: { line: 42, column: 10 },
+            end: { line: 42, column: 10 },
+          },
+          value: {
+            start: { line: 42, column: 10 },
+            end: { line: 42, column: 10 },
+          },
+        },
       },
     });
 
@@ -170,8 +182,17 @@ describe("createReportError", () => {
       dependency: {
         name: "dep1",
         fieldName: "dependencies",
-        line: 15,
-        column: 5,
+        locations: {
+          all: { start: { line: 15, column: 5 }, end: { line: 15, column: 5 } },
+          name: {
+            start: { line: 15, column: 5 },
+            end: { line: 15, column: 5 },
+          },
+          value: {
+            start: { line: 15, column: 5 },
+            end: { line: 15, column: 5 },
+          },
+        },
       },
     });
 
@@ -348,8 +369,17 @@ describe("displayMessages", () => {
       dependency: {
         name: "dep1",
         fieldName: "dependencies",
-        line: 15,
-        column: 5,
+        locations: {
+          all: { start: { line: 15, column: 5 }, end: { line: 15, column: 5 } },
+          name: {
+            start: { line: 15, column: 5 },
+            end: { line: 15, column: 5 },
+          },
+          value: {
+            start: { line: 15, column: 5 },
+            end: { line: 15, column: 5 },
+          },
+        },
       },
     });
 

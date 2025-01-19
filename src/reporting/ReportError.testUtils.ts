@@ -1,12 +1,12 @@
 import assert from "node:assert/strict";
 import { beforeEach, mock } from "node:test";
 import type { Mock } from "node:test";
-import type { ReportError, ReportErrorMessage } from "./ReportError.ts";
+import type { ReportError, ReportErrorDetails } from "./ReportError.ts";
 
 export interface CollectedMessages {
   path: string;
   ruleName: string;
-  messages: ReportErrorMessage[];
+  messages: ReportErrorDetails[];
 }
 
 export interface MockReportErrorResult {
@@ -47,7 +47,7 @@ export function assertNoMessages(messages: CollectedMessages[]): void {
 
 export function assertSingleMessage(
   messages: CollectedMessages[],
-  expected: ReportErrorMessage,
+  expected: ReportErrorDetails,
 ): void {
   assert.equal(messages.length, 1);
   assert.equal(messages[0].messages.length, 1);
@@ -59,8 +59,7 @@ export function assertSingleMessage(
           ...expected,
           dependency: {
             changeValue: messages[0].messages[0]?.dependency?.changeValue,
-            line: messages[0].messages[0]?.dependency?.line,
-            column: messages[0].messages[0]?.dependency?.column,
+            locations: messages[0].messages[0]?.dependency?.locations,
             ...expected.dependency,
           },
         },
@@ -69,7 +68,7 @@ export function assertSingleMessage(
 
 export function assertSeveralMessages(
   messages: CollectedMessages[],
-  expected: ReportErrorMessage[],
+  expected: ReportErrorDetails[],
 ): void {
   assert.equal(messages.length, 1);
   assert.deepEqual(
@@ -81,8 +80,7 @@ export function assertSeveralMessages(
             ...e,
             dependency: {
               changeValue: messages[0].messages[i].dependency?.changeValue,
-              line: messages[0].messages[i].dependency?.line,
-              column: messages[0].messages[i].dependency?.column,
+              locations: messages[0].messages[i].dependency?.locations,
               ...e.dependency,
             },
           },

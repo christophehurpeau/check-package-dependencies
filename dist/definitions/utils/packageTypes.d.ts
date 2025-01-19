@@ -3,13 +3,26 @@ export type RegularDependencyTypes = "dependencies" | "devDependencies" | "optio
 export type DependencyTypes = RegularDependencyTypes | "peerDependencies" | "resolutions";
 export type DependencyFieldTypes = DependencyTypes | "resolutionsExplained";
 export type DependencyName = string;
+export interface Location {
+    start: {
+        line: number;
+        column: number;
+    };
+    end: {
+        line: number;
+        column: number;
+    };
+}
 export interface DependencyValue {
     fieldName: DependencyFieldTypes;
     name: string;
     value: string;
     changeValue: (newValue: string) => void;
-    line: number;
-    column: number;
+    locations: {
+        all: Location;
+        name: Location;
+        value: Location;
+    };
 }
 export type ParsedPackageJson = {
     readonly name: string;

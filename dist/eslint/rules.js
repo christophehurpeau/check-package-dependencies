@@ -1,4 +1,5 @@
 import { checkExactVersions } from "../checks/checkExactVersions.js";
+import { getLocFromDependency } from "../reporting/ReportError.js";
 import { createOnlyWarnsForArrayCheck } from "../utils/warnForUtils.js";
 function createPackageRule(ruleName, schema, checkFn) {
     return {
@@ -32,16 +33,12 @@ function createPackageRule(ruleName, schema, checkFn) {
                                 languageOptions,
                                 ruleOptions: options,
                                 onlyWarnsForCheck,
-                                reportError: (message) => {
+                                reportError: (details) => {
                                     context.report({
-                                        message: message.errorMessage,
+                                        message: details.errorMessage,
                                         // TODO improve this by using start+end
-                                        loc: message.dependency?.line
-                                            ? {
-                                                line: message.dependency.line,
-                                                column: message.dependency.column ?? 1,
-                                            }
-                                            : { line: 1, column: 1 },
+                                        loc: (details.dependency &&
+                                            getLocFromDependency(details.dependency, details.errorTarget)) ?? { line: 1, column: 1 },
                                         // suggest: message.autoFixable ?
                                         // fix(fixer) {
                                         //   // TODO

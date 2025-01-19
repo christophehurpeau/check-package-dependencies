@@ -1,8 +1,8 @@
 import type { PackageJson } from "type-fest";
 import type { DependencyTypes } from "../utils/packageTypes.ts";
 import type { OnlyWarnsForCheck, OnlyWarnsForMappingCheck } from "../utils/warnForUtils.ts";
-import type { ReportError, ReportErrorMessage } from "./ReportError.ts";
-type ReportErrorWithRuleName = ReportErrorMessage & {
+import type { ReportError, ReportErrorDetails } from "./ReportError.ts";
+type ReportErrorWithRuleName = ReportErrorDetails & {
     ruleName: string;
 };
 export declare function logMessage(message: ReportErrorWithRuleName): void;

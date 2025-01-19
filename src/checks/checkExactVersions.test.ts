@@ -48,8 +48,9 @@ describe("checkExactVersions", () => {
       },
     );
     assertSingleMessage(messages, {
-      errorMessage: "Unexpected range dependency",
+      errorMessage: "Unexpected range value",
       errorDetails: 'expecting "^1.0.0" to be exact "1.0.0"',
+      errorTarget: "dependencyValue",
       dependency: {
         name: "test",
         fieldName: "devDependencies",
@@ -73,8 +74,9 @@ describe("checkExactVersions", () => {
         },
       );
       assertSingleMessage(messages, {
-        errorMessage: "Unexpected range dependency",
+        errorMessage: "Unexpected range value",
         errorDetails: `expecting "${comparator}1.0.0" to be exact "1.0.0"`,
+        errorTarget: "dependencyValue",
         dependency: {
           name: "test",
           fieldName: "devDependencies",
@@ -98,8 +100,9 @@ describe("checkExactVersions", () => {
       },
     );
     assertSingleMessage(messages, {
-      errorMessage: "Unexpected range dependency",
+      errorMessage: "Unexpected range value",
       errorDetails: 'expecting "^1.0.0" to be exact "1.0.0"',
+      errorTarget: "dependencyValue",
       dependency: {
         name: "test",
         fieldName: "devDependencies",
@@ -119,8 +122,9 @@ describe("checkExactVersions", () => {
       },
     );
     assertSingleMessage(messages, {
-      errorMessage: "Unexpected range dependency",
+      errorMessage: "Unexpected range value",
       errorDetails: 'expecting "~1.0.0" to be exact "1.0.0"',
+      errorTarget: "dependencyValue",
       dependency: {
         name: "test",
         fieldName: "devDependencies",
@@ -149,8 +153,9 @@ describe("checkExactVersions", () => {
     );
     assertSeveralMessages(messages, [
       {
-        errorMessage: "Unexpected range dependency",
+        errorMessage: "Unexpected range value",
         errorDetails: 'expecting "~1.0.0" to be exact "1.0.0"',
+        errorTarget: "dependencyValue",
         dependency: {
           name: "test1",
           fieldName: "devDependencies",
@@ -159,8 +164,9 @@ describe("checkExactVersions", () => {
         onlyWarns: false,
       },
       {
-        errorMessage: "Unexpected range dependency",
+        errorMessage: "Unexpected range value",
         errorDetails: 'expecting "~1.0.0" to be exact "1.0.0"',
+        errorTarget: "dependencyValue",
         dependency: {
           name: "test2",
           fieldName: "devDependencies",
@@ -169,8 +175,9 @@ describe("checkExactVersions", () => {
         onlyWarns: false,
       },
       {
-        errorMessage: "Unexpected range dependency",
+        errorMessage: "Unexpected range value",
         errorDetails: 'expecting "^18" to be exact "18.0.0"',
+        errorTarget: "dependencyValue",
         dependency: {
           name: "test3",
           fieldName: "devDependencies",
@@ -179,8 +186,9 @@ describe("checkExactVersions", () => {
         onlyWarns: false,
       },
       {
-        errorMessage: "Unexpected range dependency",
+        errorMessage: "Unexpected range value",
         errorDetails: 'expecting "^18.1" to be exact "18.1.0"',
+        errorTarget: "dependencyValue",
         dependency: {
           name: "test4",
           fieldName: "devDependencies",
@@ -234,9 +242,10 @@ describe("checkExactVersions", () => {
       getDependencyPackageJson: getDependencyPackageJsonMock,
     });
     assertSingleMessage(messages, {
-      errorMessage: "Unexpected range dependency",
+      errorMessage: "Unexpected range value",
       errorDetails:
         'expecting "~1.0.0" to be exact, autofix failed to resolve "test1"',
+      errorTarget: "dependencyValue",
       dependency: {
         name: "test1",
         fieldName: "devDependencies",
@@ -260,9 +269,10 @@ describe("checkExactVersions", () => {
       getDependencyPackageJson: getDependencyPackageJsonMock,
     });
     assertSingleMessage(messages, {
-      errorMessage: "Unexpected range dependency",
+      errorMessage: "Unexpected range value",
       errorDetails:
         'expecting "~1.0.0" to be exact, autofix failed as resolved version "2.0.0" doesn\'t satisfy "~1.0.0"',
+      errorTarget: "dependencyValue",
       dependency: {
         name: "test1",
         fieldName: "devDependencies",
@@ -287,8 +297,9 @@ describe("checkExactVersions", () => {
       },
     );
     assertSingleMessage(messages, {
-      errorMessage: "Unexpected range dependency",
+      errorMessage: "Unexpected range value",
       errorDetails: 'expecting "^1.0.1" to be exact "1.0.1"',
+      errorTarget: "dependencyValue",
       dependency: {
         name: "rollupv1",
         fieldName: "devDependencies",
@@ -315,8 +326,9 @@ describe("checkExactVersions", () => {
     );
     assertSeveralMessages(messages, [
       {
-        errorMessage: "Unexpected range dependency",
+        errorMessage: "Unexpected range value",
         errorDetails: 'expecting "~1.0.0" to be exact "1.0.0"',
+        errorTarget: "dependencyValue",
         dependency: {
           name: "test1",
           fieldName: "devDependencies",
@@ -325,8 +337,9 @@ describe("checkExactVersions", () => {
         onlyWarns: true,
       },
       {
-        errorMessage: "Unexpected range dependency",
+        errorMessage: "Unexpected range value",
         errorDetails: 'expecting "~1.0.0" to be exact "1.0.0"',
+        errorTarget: "dependencyValue",
         dependency: {
           name: "test2",
           fieldName: "devDependencies",

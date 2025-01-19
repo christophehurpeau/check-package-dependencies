@@ -8,9 +8,10 @@ import type {
   OnlyWarnsForCheck,
   OnlyWarnsForMappingCheck,
 } from "../utils/warnForUtils.ts";
-import type { ReportError, ReportErrorMessage } from "./ReportError.ts";
+import { getLocFromDependency } from "./ReportError.ts";
+import type { ReportError, ReportErrorDetails } from "./ReportError.ts";
 
-type ReportErrorWithRuleName = ReportErrorMessage & { ruleName: string };
+type ReportErrorWithRuleName = ReportErrorDetails & { ruleName: string };
 
 interface ErrorGroup {
   messages: ReportErrorWithRuleName[];
@@ -32,13 +33,15 @@ let totalFixable = 0;
 function formatErrorMessage({
   errorMessage,
   errorDetails,
+  errorTarget,
   onlyWarns,
   autoFixable,
   ruleName,
   dependency,
 }: ReportErrorWithRuleName): string {
-  const location = dependency?.line
-    ? `${dependency.line}:${dependency.column || 0}`
+  const location = dependency && getLocFromDependency(dependency, errorTarget);
+  const locationString = location
+    ? `${location.start.line}:${location.start.column || 0}`
     : "0:0";
   const messageType = onlyWarns ? chalk.yellow("warning") : chalk.red("error");
   const dependencyInfo = dependency
@@ -51,7 +54,7 @@ function formatErrorMessage({
     ? chalk.yellow(errorMessage)
     : chalk.red(errorMessage);
 
-  return `  ${location}  ${messageType}  ${dependencyInfo}${messageTitle}${details}  ${chalk.blue(ruleName)}${autoFixable ? chalk.gray(" (--fix)") : ""}`;
+  return `  ${locationString}  ${messageType}  ${dependencyInfo}${messageTitle}${details}  ${chalk.blue(ruleName)}${autoFixable ? chalk.gray(" (--fix)") : ""}`;
 }
 
 export function logMessage(message: ReportErrorWithRuleName): void {
@@ -135,7 +138,7 @@ export function createCliReportError(
   ruleName: string,
   pkgPathName: string,
 ): ReportError {
-  return function reportError(message: ReportErrorMessage): void {
+  return function reportError(message: ReportErrorDetails): void {
     let pathData = pathMessages.get(pkgPathName);
     if (!pathData) {
       pathData = {

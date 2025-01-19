@@ -33,8 +33,7 @@ export function assertSingleMessage(messages, expected) {
             ...expected,
             dependency: {
                 changeValue: messages[0].messages[0]?.dependency?.changeValue,
-                line: messages[0].messages[0]?.dependency?.line,
-                column: messages[0].messages[0]?.dependency?.column,
+                locations: messages[0].messages[0]?.dependency?.locations,
                 ...expected.dependency,
             },
         });
@@ -47,8 +46,7 @@ export function assertSeveralMessages(messages, expected) {
             ...e,
             dependency: {
                 changeValue: messages[0].messages[i].dependency?.changeValue,
-                line: messages[0].messages[i].dependency?.line,
-                column: messages[0].messages[i].dependency?.column,
+                locations: messages[0].messages[i].dependency?.locations,
                 ...e.dependency,
             },
         }));
