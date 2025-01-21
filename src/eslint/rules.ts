@@ -15,15 +15,13 @@ import type { OnlyWarnsFor, OnlyWarnsForCheck } from "../utils/warnForUtils.ts";
 import { createOnlyWarnsForArrayCheck } from "../utils/warnForUtils.ts";
 import type { DependencyValueAst, PackageJsonAst } from "./language.ts";
 
-interface CheckPackageDependenciesLanguageOptions {
-  isLibrary: boolean;
-}
+// interface CheckPackageDependenciesLanguageOptions {}
 
 type CheckFn<RuleOptions, Node> = (params: {
   node: Node;
   pkg: ParsedPackageJson;
   reportError: ReportError;
-  languageOptions: CheckPackageDependenciesLanguageOptions;
+  // languageOptions: CheckPackageDependenciesLanguageOptions;
   getDependencyPackageJson: GetDependencyPackageJson;
   ruleOptions: RuleOptions;
   onlyWarnsForCheck: OnlyWarnsForCheck;
@@ -49,8 +47,8 @@ function createPackageRule<RuleOptions extends { onlyWarnsFor?: OnlyWarnsFor }>(
       },
 
       create(context) {
-        const languageOptions =
-          context.languageOptions as CheckPackageDependenciesLanguageOptions;
+        // const languageOptions =
+        //   context.languageOptions as CheckPackageDependenciesLanguageOptions;
         const options = (context.options[0] ?? {}) as RuleOptions;
 
         const onlyWarnsForCheck =
@@ -106,7 +104,7 @@ function createPackageRule<RuleOptions extends { onlyWarnsFor?: OnlyWarnsFor }>(
                   node: parsedPkgJson,
                   pkg: parsedPkgJson,
                   getDependencyPackageJson,
-                  languageOptions,
+                  // languageOptions,
                   ruleOptions: options,
                   onlyWarnsForCheck,
                   reportError: createReportError(),
@@ -143,7 +141,7 @@ function createPackageRule<RuleOptions extends { onlyWarnsFor?: OnlyWarnsFor }>(
                   node: dependencyValue,
                   pkg: parsedPkgJson,
                   getDependencyPackageJson,
-                  languageOptions,
+                  // languageOptions,
                   ruleOptions: options,
                   onlyWarnsForCheck,
                   reportError: createReportError((fixer, details) => {
@@ -163,7 +161,9 @@ function createPackageRule<RuleOptions extends { onlyWarnsFor?: OnlyWarnsFor }>(
 }
 
 interface CheckExactVersionsOptions {
-  allowRangeVersionsInDependencies?: boolean;
+  dependencies?: boolean;
+  devDependencies?: boolean;
+  resolutions?: boolean;
   onlyWarnsFor?: OnlyWarnsFor;
 }
 
@@ -173,7 +173,9 @@ const rules = {
     {
       type: "object",
       properties: {
-        allowRangeVersionsInDependencies: { type: "boolean", default: false },
+        dependencies: { type: "boolean", default: true },
+        devDependencies: { type: "boolean", default: true },
+        resolutions: { type: "boolean", default: true },
         onlyWarnsFor: { type: "array", items: { type: "string" } },
       },
       additionalProperties: false,
@@ -187,10 +189,13 @@ const rules = {
         onlyWarnsForCheck,
       }) => {
         if (
-          (ruleOptions.allowRangeVersionsInDependencies
-            ? ["dependencies", "devDependencies", "resolutions"]
-            : ["devDependencies", "resolutions"]
-          ).includes(node.fieldName)
+          [
+            ruleOptions.dependencies && "dependencies",
+            ruleOptions.devDependencies && "devDependencies",
+            ruleOptions.resolutions && "resolutions",
+          ]
+            .filter(Boolean)
+            .includes(node.fieldName)
         ) {
           checkExactVersion(reportError, node, {
             getDependencyPackageJson,
@@ -200,22 +205,6 @@ const rules = {
       },
     },
   ),
-
-  // "resolutions-versions-match": createPackageRule((api) => {
-  //   api.checkResolutionsVersionsMatch();
-  // }),
-
-  // "direct-peer-dependencies": createPackageRule((api) => {
-  //   api.checkDirectPeerDependencies();
-  // }),
-
-  // "direct-duplicate-dependencies": createPackageRule((api) => {
-  //   api.checkDirectDuplicateDependencies();
-  // }),
-
-  // "resolutions-has-explanation": createPackageRule((api) => {
-  //   api.checkResolutionsHasExplanation();
-  // }),
 };
 
 export default rules;

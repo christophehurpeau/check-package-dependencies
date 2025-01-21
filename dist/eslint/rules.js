@@ -10,7 +10,8 @@ function createPackageRule(ruleName, schema, { checkPackage, checkDependencyValu
                 schema: schema ? [schema] : undefined,
             },
             create(context) {
-                const languageOptions = context.languageOptions;
+                // const languageOptions =
+                //   context.languageOptions as CheckPackageDependenciesLanguageOptions;
                 const options = (context.options[0] ?? {});
                 const onlyWarnsForCheck = schema && "onlyWarnsFor" in schema
                     ? createOnlyWarnsForArrayCheck(ruleName, options.onlyWarnsFor)
@@ -45,7 +46,7 @@ function createPackageRule(ruleName, schema, { checkPackage, checkDependencyValu
                                     node: parsedPkgJson,
                                     pkg: parsedPkgJson,
                                     getDependencyPackageJson,
-                                    languageOptions,
+                                    // languageOptions,
                                     ruleOptions: options,
                                     onlyWarnsForCheck,
                                     reportError: createReportError(),
@@ -76,7 +77,7 @@ function createPackageRule(ruleName, schema, { checkPackage, checkDependencyValu
                                 node: dependencyValue,
                                 pkg: parsedPkgJson,
                                 getDependencyPackageJson,
-                                languageOptions,
+                                // languageOptions,
                                 ruleOptions: options,
                                 onlyWarnsForCheck,
                                 reportError: createReportError((fixer, details) => {
@@ -95,15 +96,21 @@ const rules = {
     ...createPackageRule("exact-versions", {
         type: "object",
         properties: {
-            allowRangeVersionsInDependencies: { type: "boolean", default: false },
+            dependencies: { type: "boolean", default: true },
+            devDependencies: { type: "boolean", default: true },
+            resolutions: { type: "boolean", default: true },
             onlyWarnsFor: { type: "array", items: { type: "string" } },
         },
         additionalProperties: false,
     }, {
         checkDependencyValue: ({ node, reportError, ruleOptions, getDependencyPackageJson, onlyWarnsForCheck, }) => {
-            if ((ruleOptions.allowRangeVersionsInDependencies
-                ? ["dependencies", "devDependencies", "resolutions"]
-                : ["devDependencies", "resolutions"]).includes(node.fieldName)) {
+            if ([
+                ruleOptions.dependencies && "dependencies",
+                ruleOptions.devDependencies && "devDependencies",
+                ruleOptions.resolutions && "resolutions",
+            ]
+                .filter(Boolean)
+                .includes(node.fieldName)) {
                 checkExactVersion(reportError, node, {
                     getDependencyPackageJson,
                     onlyWarnsForCheck,
@@ -111,18 +118,6 @@ const rules = {
             }
         },
     }),
-    // "resolutions-versions-match": createPackageRule((api) => {
-    //   api.checkResolutionsVersionsMatch();
-    // }),
-    // "direct-peer-dependencies": createPackageRule((api) => {
-    //   api.checkDirectPeerDependencies();
-    // }),
-    // "direct-duplicate-dependencies": createPackageRule((api) => {
-    //   api.checkDirectDuplicateDependencies();
-    // }),
-    // "resolutions-has-explanation": createPackageRule((api) => {
-    //   api.checkResolutionsHasExplanation();
-    // }),
 };
 export default rules;
 //# sourceMappingURL=rules.js.map
