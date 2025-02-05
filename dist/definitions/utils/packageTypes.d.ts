@@ -36,7 +36,7 @@ export type ParsedPackageJson = {
     readonly value: Readonly<PackageJson>;
     readonly resolutionsExplained?: Readonly<Record<string, Readonly<DependencyValue>>>;
     change: (type: DependencyTypes, dependencyName: string, newValue: string) => void;
-} & Readonly<Partial<Record<DependencyTypes, Record<string, Readonly<DependencyValue>> | undefined>>>;
+} & Readonly<Partial<Record<DependencyTypes, Partial<Record<string, Readonly<DependencyValue>>>>>>;
 export type PackageJson = PackageJsonFromTypeFest & Partial<Record<DependencyTypes, Record<string, string>>> & {
     resolutionsExplained?: Record<string, string>;
 };

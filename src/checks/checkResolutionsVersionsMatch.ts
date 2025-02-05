@@ -68,7 +68,7 @@ export function checkResolutionsVersionsMatch(
 ): void {
   const pkgResolutions = pkg.resolutions || {};
   Object.values(pkgResolutions).forEach((resolutionValue) => {
-    checkResolutionVersionMatch(reportError, pkg, resolutionValue, {
+    checkResolutionVersionMatch(reportError, pkg, resolutionValue!, {
       tryToAutoFix,
     });
   });

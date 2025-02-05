@@ -7,4 +7,13 @@ export default [
     ignores: ["vite.config.ts"],
   },
   checkPackagePlugin.configs["recommended-library"],
+  {
+    files: ["package.json"],
+    rules: {
+      "check-package-dependencies/satisfies-versions": [
+        "error",
+        { devDependencies: { eslint: "*" } },
+      ],
+    },
+  },
 ];

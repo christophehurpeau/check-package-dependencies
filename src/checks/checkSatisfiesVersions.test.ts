@@ -47,7 +47,7 @@ describe("checkSatisfiesVersions", () => {
       { test: "^1.0.0" },
     );
     assertSingleMessage(messages, {
-      errorMessage: "Missing",
+      errorMessage: 'Missing "test" in "devDependencies"',
       errorDetails: 'should satisfies "^1.0.0"',
       dependency: { name: "test", fieldName: "devDependencies" },
       onlyWarns: undefined,

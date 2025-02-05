@@ -71,8 +71,8 @@ export function checkPeerDependencies(
         (versionsInType) => pkg[versionsInType]![peerDepName],
       );
 
-      versions.forEach(({ value: versionValue }, index) => {
-        const version = getRealVersion(versionValue);
+      versions.forEach((versionV, index) => {
+        const version = getRealVersion(versionV!.value);
 
         if (version === "*") {
           return;

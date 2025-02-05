@@ -52,10 +52,7 @@ export type ParsedPackageJson = {
   ) => void;
 } & Readonly<
   Partial<
-    Record<
-      DependencyTypes,
-      Record<string, Readonly<DependencyValue>> | undefined
-    >
+    Record<DependencyTypes, Partial<Record<string, Readonly<DependencyValue>>>>
   >
 >;
 

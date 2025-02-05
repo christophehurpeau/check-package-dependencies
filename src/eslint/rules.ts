@@ -1,6 +1,11 @@
 import type { Rule } from "eslint";
+import { regularDependencyTypes } from "../checks/checkDirectPeerDependencies.ts";
 import { checkExactVersion } from "../checks/checkExactVersions.ts";
 import { checkResolutionVersionMatch } from "../checks/checkResolutionsVersionsMatch.ts";
+import {
+  checkMissingSatisfiesVersions,
+  checkSatisfiesVersion,
+} from "../checks/checkSatisfiesVersions.ts";
 import { getLocFromDependency } from "../reporting/ReportError.ts";
 import type {
   ReportError,
@@ -10,6 +15,7 @@ import type { GetDependencyPackageJson } from "../utils/createGetDependencyPacka
 import type {
   DependencyValue,
   ParsedPackageJson,
+  RegularDependencyTypes,
 } from "../utils/packageTypes.ts";
 import type { OnlyWarnsFor, OnlyWarnsForCheck } from "../utils/warnForUtils.ts";
 import { createOnlyWarnsForArrayCheck } from "../utils/warnForUtils.ts";
@@ -220,6 +226,13 @@ interface CheckExactVersionsOptions {
   onlyWarnsFor?: OnlyWarnsFor;
 }
 
+interface CheckSatisfiesVersionsOptions {
+  dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
+  optionalDependencies?: Record<string, string>;
+  onlyWarnsFor?: OnlyWarnsFor;
+}
+
 const rules = {
   ...createPackageRule<CheckExactVersionsOptions>(
     "exact-versions",
@@ -269,6 +282,64 @@ const rules = {
       checkDependencyValue: ({ node, pkg, reportError }) => {
         if (node.fieldName === "resolutions") {
           checkResolutionVersionMatch(reportError, pkg, node);
+        }
+      },
+    },
+  ),
+  ...createPackageRule<CheckSatisfiesVersionsOptions>(
+    "satisfies-versions",
+    {
+      type: "object",
+      properties: {
+        dependencies: {
+          type: "object",
+          additionalProperties: { type: "string" },
+        },
+        devDependencies: {
+          type: "object",
+          additionalProperties: { type: "string" },
+        },
+        optionalDependencies: {
+          type: "object",
+          additionalProperties: { type: "string" },
+        },
+        onlyWarnsFor: { type: "array", items: { type: "string" } },
+      },
+      additionalProperties: false,
+    },
+    {
+      checkPackage: ({ pkg, reportError, ruleOptions, onlyWarnsForCheck }) => {
+        if (!ruleOptions.dependencies && !ruleOptions.devDependencies) {
+          throw new Error(
+            'Rule "check-package-dependencies/satisfies-versions" is enabled but no dependencies are configured to check',
+          );
+        }
+
+        regularDependencyTypes.forEach((type) => {
+          if (ruleOptions[type]) {
+            checkMissingSatisfiesVersions(
+              reportError,
+              pkg,
+              type,
+              ruleOptions[type],
+              onlyWarnsForCheck,
+            );
+          }
+        });
+      },
+      checkDependencyValue: ({
+        node,
+        reportError,
+        ruleOptions,
+        onlyWarnsForCheck,
+      }) => {
+        if (!(regularDependencyTypes as string[]).includes(node.fieldName)) {
+          return;
+        }
+        const fieldName = node.fieldName as RegularDependencyTypes;
+        if (ruleOptions[fieldName]?.[node.name]) {
+          const range = ruleOptions[fieldName][node.name];
+          checkSatisfiesVersion(reportError, node, range, onlyWarnsForCheck);
         }
       },
     },

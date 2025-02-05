@@ -65,7 +65,7 @@ export function checkDirectPeerDependencies(
         pkg: depPkg,
         hasDirectMatchingPeerDependency: pkg.peerDependencies?.[depName]
           ? semver.intersects(
-              dependencies[depName].value,
+              dependencies[depName]!.value,
               pkg.peerDependencies[depName].value,
             )
           : false,

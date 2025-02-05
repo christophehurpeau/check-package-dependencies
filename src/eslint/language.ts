@@ -87,9 +87,9 @@ export const PackageJSONLanguage: Language = {
                   parsedPkgJson,
                   getDependencyPackageJson,
                   dependencyValue,
-                  loc: dependencyValue.locations.all.start,
-                  range: dependencyValue.ranges.all,
-                  value: dependencyValue.toString(),
+                  loc: dependencyValue!.locations.all.start,
+                  range: dependencyValue!.ranges.all,
+                  value: dependencyValue!.toString(),
                 };
               },
             );
