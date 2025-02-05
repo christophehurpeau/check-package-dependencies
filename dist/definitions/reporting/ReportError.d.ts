@@ -5,9 +5,14 @@ export interface ReportErrorDetails {
     errorTarget?: "dependencyName" | "dependencyValue";
     dependency?: Omit<Partial<DependencyValue>, "name"> & Pick<DependencyValue, "name">;
     onlyWarns?: boolean;
-    /** @deprecated use fixTo instead */
+    /** @deprecated use fixTo or suggestTo instead */
     autoFixable?: boolean;
     fixTo?: string;
+    suggestions?: [
+        dependencyValue: Omit<Partial<DependencyValue>, "name"> & Pick<DependencyValue, "name">,
+        fixTo: string,
+        description: string
+    ][];
 }
 export type ReportError = (details: ReportErrorDetails) => void;
 export type CreateReportError = (ruleName: string, pkgPathName: string) => ReportError;

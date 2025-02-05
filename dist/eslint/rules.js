@@ -1,4 +1,5 @@
 import { checkExactVersion } from "../checks/checkExactVersions.js";
+import { checkResolutionVersionMatch } from "../checks/checkResolutionsVersionsMatch.js";
 import { getLocFromDependency } from "../reporting/ReportError.js";
 import { createOnlyWarnsForArrayCheck } from "../utils/warnForUtils.js";
 function createPackageRule(ruleName, schema, { checkPackage, checkDependencyValue, }) {
@@ -7,6 +8,7 @@ function createPackageRule(ruleName, schema, { checkPackage, checkDependencyValu
             meta: {
                 type: "problem",
                 fixable: "code",
+                hasSuggestions: true,
                 schema: schema ? [schema] : undefined,
             },
             create(context) {
@@ -19,13 +21,21 @@ function createPackageRule(ruleName, schema, { checkPackage, checkDependencyValu
                 const createReportError = (fix) => (details) => {
                     const location = details.dependency &&
                         getLocFromDependency(details.dependency, details.errorTarget);
+                    const fixTo = details.fixTo;
+                    const suggestions = details.suggestions;
                     context.report({
-                        message: details.errorMessage,
+                        message: details.errorMessage +
+                            (details.errorDetails ? `: ${details.errorDetails}` : ""),
                         // TODO improve this by using start+end
                         loc: location ?? { line: 1, column: 1 },
-                        // suggest: message.autoFixable ?
-                        fix: fix && details.fixTo && location
-                            ? (fixer) => fix(fixer, details)
+                        fix: fix && fixTo
+                            ? (fixer) => fix(fixer, details, fixTo)
+                            : undefined,
+                        suggest: fix && suggestions
+                            ? suggestions.map((suggestion) => ({
+                                desc: suggestion[2] || `Replace with ${suggestion[1]}`,
+                                fix: (fixer) => fix(fixer, { ...details, dependency: suggestion[0] }, suggestion[1]),
+                            }))
                             : undefined,
                     });
                 };
@@ -80,9 +90,33 @@ function createPackageRule(ruleName, schema, { checkPackage, checkDependencyValu
                                 // languageOptions,
                                 ruleOptions: options,
                                 onlyWarnsForCheck,
-                                reportError: createReportError((fixer, details) => {
-                                    dependencyValue.changeValue(details.fixTo);
-                                    return fixer.replaceTextRange(token.range, dependencyValue.toString());
+                                reportError: createReportError((fixer, details, fixTo) => {
+                                    const targetDependencyValue = details.dependency || dependencyValue;
+                                    if (details.errorTarget !== "dependencyValue") {
+                                        throw new Error(`Invalid or unsupported errorTarget: ${String(details.errorTarget)}`);
+                                    }
+                                    targetDependencyValue.changeValue?.(fixTo);
+                                    if (!targetDependencyValue.ranges) {
+                                        return null;
+                                    }
+                                    const getTargetRangeFromErrorTarget = (errorTarget) => {
+                                        switch (errorTarget) {
+                                            case "dependencyValue":
+                                                return targetDependencyValue.ranges?.value;
+                                            case "dependencyName":
+                                                return targetDependencyValue.ranges?.name;
+                                            case undefined:
+                                            default:
+                                                return targetDependencyValue.ranges?.all;
+                                        }
+                                    };
+                                    const targetRange = getTargetRangeFromErrorTarget(details.errorTarget);
+                                    if (!targetRange) {
+                                        return null;
+                                    }
+                                    return fixer.replaceTextRange(targetRange, !details.errorTarget
+                                        ? dependencyValue.toString()
+                                        : JSON.stringify(fixTo));
                                 }),
                             });
                         }
@@ -115,6 +149,17 @@ const rules = {
                     getDependencyPackageJson,
                     onlyWarnsForCheck,
                 });
+            }
+        },
+    }),
+    ...createPackageRule("resolutions-versions-match", {
+        type: "object",
+        properties: {},
+        additionalProperties: false,
+    }, {
+        checkDependencyValue: ({ node, pkg, reportError }) => {
+            if (node.fieldName === "resolutions") {
+                checkResolutionVersionMatch(reportError, pkg, node);
             }
         },
     }),

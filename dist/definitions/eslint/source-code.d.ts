@@ -1,4 +1,5 @@
 import { TextSourceCodeBase, VisitNodeStep } from "@eslint/plugin-kit";
+import type { Location } from "../utils/packageTypes.ts";
 import type { PackageJsonAst } from "./language.ts";
 export declare class PackageJsonSourceCode extends TextSourceCodeBase {
     text: string;
@@ -11,5 +12,6 @@ export declare class PackageJsonSourceCode extends TextSourceCodeBase {
     getAncestors(node: object): object[];
     traverse(): Iterable<VisitNodeStep>;
     getText(node: object): string;
+    getLoc(node: object): Location;
 }
 //# sourceMappingURL=source-code.d.ts.map

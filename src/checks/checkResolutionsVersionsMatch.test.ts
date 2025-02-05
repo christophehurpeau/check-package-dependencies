@@ -64,42 +64,122 @@ describe("checkResolutionsVersionsMatch", () => {
       {
         errorMessage: 'Invalid "1.1.0"',
         errorDetails: 'expecting "1.1.0" be "1.0.0" from resolutions',
+        errorTarget: "dependencyValue",
         dependency: {
           name: "test1",
           fieldName: "devDependencies",
           value: "1.1.0",
         },
-        autoFixable: true,
+        suggestions: [
+          [
+            {
+              fieldName: "resolutions",
+              name: "test1",
+              value: "1.0.0",
+            },
+            "1.1.0",
+            'Fix resolutions\'s value to "1.1.0"',
+          ],
+          [
+            {
+              fieldName: "devDependencies",
+              name: "test1",
+              value: "1.1.0",
+            },
+            "1.0.0",
+            'Fix this value to resolutions\'s value "1.0.0"',
+          ],
+        ],
       },
       {
         errorMessage: 'Invalid "1.2.0"',
         errorDetails: 'expecting "1.2.0" be "1.0.0" from resolutions',
+        errorTarget: "dependencyValue",
         dependency: {
           name: "test2",
           fieldName: "dependencies",
           value: "1.2.0",
         },
-        autoFixable: true,
+        suggestions: [
+          [
+            {
+              fieldName: "resolutions",
+              name: "test2",
+              value: "1.0.0",
+            },
+            "1.2.0",
+            'Fix resolutions\'s value to "1.2.0"',
+          ],
+          [
+            {
+              fieldName: "dependencies",
+              name: "test2",
+              value: "1.2.0",
+            },
+            "1.0.0",
+            'Fix this value to resolutions\'s value "1.0.0"',
+          ],
+        ],
       },
       {
         errorMessage: 'Invalid "1.0.0"',
         errorDetails: 'expecting "1.0.0" be "1.1.0" from resolutions',
+        errorTarget: "dependencyValue",
         dependency: {
           name: "test3",
           fieldName: "dependencies",
           value: "1.0.0",
         },
-        autoFixable: true,
+        suggestions: [
+          [
+            {
+              fieldName: "resolutions",
+              name: "test3@npm:1.1.0",
+              value: "patch:1.2.0",
+            },
+            "1.0.0",
+            'Fix resolutions\'s value to "1.0.0"',
+          ],
+          [
+            {
+              fieldName: "dependencies",
+              name: "test3",
+              value: "1.0.0",
+            },
+            "1.1.0",
+            'Fix this value to resolutions\'s value "1.1.0"',
+          ],
+        ],
       },
       {
         errorMessage: 'Invalid "1.2.0"',
         errorDetails: 'expecting "1.2.0" be "1.1.0" from resolutions',
+        errorTarget: "dependencyValue",
         dependency: {
           name: "test4",
           fieldName: "dependencies",
           value: "1.2.0",
         },
-        autoFixable: true,
+        suggestions: [
+          [
+            {
+              fieldName: "resolutions",
+              name: "test4@npm:1.1.0",
+              value: "patch:1.2.0",
+            },
+            "1.2.0",
+            'Fix resolutions\'s value to "1.2.0"',
+          ],
+          [
+            {
+              fieldName: "dependencies",
+              name: "test4",
+              value: "1.2.0",
+            },
+            "1.1.0",
+            'Fix this value to resolutions\'s value "1.1.0"',
+          ],
+        ],
       },
     ]);
   });

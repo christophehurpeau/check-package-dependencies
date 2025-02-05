@@ -44,5 +44,20 @@ export class PackageJsonSourceCode extends TextSourceCodeBase {
         }
         throw new Error("Invalid node");
     }
+    getLoc(node) {
+        if ("type" in node) {
+            if (node.type === "Package") {
+                return { start: { line: 1, column: 1 }, end: { line: 1, column: 1 } };
+            }
+            if (node.type === "DependencyValue") {
+                const dependencyValueAst = node;
+                const loc = dependencyValueAst.dependencyValue?.locations.all;
+                if (!loc)
+                    throw new Error("Invalid node");
+                return loc;
+            }
+        }
+        throw new Error("Invalid node");
+    }
 }
 //# sourceMappingURL=source-code.js.map

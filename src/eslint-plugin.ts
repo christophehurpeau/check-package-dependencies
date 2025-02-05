@@ -17,7 +17,7 @@ const checkPackagePlugin = {
       plugins: {},
       rules: {
         "check-package-dependencies/exact-versions": "error",
-        // "check-package-dependencies/resolutions-versions-match": "error",
+        "check-package-dependencies/resolutions-versions-match": "error",
         // "check-package-dependencies/direct-peer-dependencies": "error",
         // "check-package-dependencies/direct-duplicate-dependencies": "error",
         // "check-package-dependencies/resolutions-has-explanation": "error",
@@ -32,6 +32,7 @@ const checkPackagePlugin = {
           "error",
           { dependencies: false },
         ],
+        "check-package-dependencies/resolutions-versions-match": "error",
       },
     },
   },

@@ -1,6 +1,7 @@
 import { TextSourceCodeBase, VisitNodeStep } from "@eslint/plugin-kit";
+import type { Location } from "../utils/packageTypes.ts";
 import { stringifyPkgJson } from "../utils/pkgJsonUtils.ts";
-import type { PackageJsonAst } from "./language.ts";
+import type { DependencyValueAst, PackageJsonAst } from "./language.ts";
 
 export class PackageJsonSourceCode extends TextSourceCodeBase {
   declare text: string;
@@ -49,6 +50,21 @@ export class PackageJsonSourceCode extends TextSourceCodeBase {
     if ("type" in node) {
       if (node.type === "Package") {
         return stringifyPkgJson(this.ast.parsedPkgJson.value);
+      }
+    }
+    throw new Error("Invalid node");
+  }
+
+  override getLoc(node: object): Location {
+    if ("type" in node) {
+      if (node.type === "Package") {
+        return { start: { line: 1, column: 1 }, end: { line: 1, column: 1 } };
+      }
+      if (node.type === "DependencyValue") {
+        const dependencyValueAst = node as DependencyValueAst;
+        const loc = dependencyValueAst.dependencyValue?.locations.all;
+        if (!loc) throw new Error("Invalid node");
+        return loc;
       }
     }
     throw new Error("Invalid node");

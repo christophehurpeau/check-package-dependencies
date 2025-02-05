@@ -1,6 +1,6 @@
 import type { Rule } from "eslint";
-import type { SetRequired } from "type-fest";
 import { checkExactVersion } from "../checks/checkExactVersions.ts";
+import { checkResolutionVersionMatch } from "../checks/checkResolutionsVersionsMatch.ts";
 import { getLocFromDependency } from "../reporting/ReportError.ts";
 import type {
   ReportError,
@@ -43,6 +43,7 @@ function createPackageRule<RuleOptions extends { onlyWarnsFor?: OnlyWarnsFor }>(
       meta: {
         type: "problem",
         fixable: "code",
+        hasSuggestions: true,
         schema: schema ? [schema] : undefined,
       },
 
@@ -60,26 +61,40 @@ function createPackageRule<RuleOptions extends { onlyWarnsFor?: OnlyWarnsFor }>(
           (
             fix?: (
               fixer: Rule.RuleFixer,
-              details: SetRequired<ReportErrorDetails, "fixTo">,
+              details: ReportErrorDetails,
+              fixTo: string,
             ) => ReturnType<Rule.ReportFixer>,
           ): ReportError =>
           (details) => {
             const location =
               details.dependency &&
               getLocFromDependency(details.dependency, details.errorTarget);
+            const fixTo = details.fixTo;
+            const suggestions = details.suggestions;
+
             context.report({
-              message: details.errorMessage,
+              message:
+                details.errorMessage +
+                (details.errorDetails ? `: ${details.errorDetails}` : ""),
               // TODO improve this by using start+end
               loc: location ?? { line: 1, column: 1 },
-              // suggest: message.autoFixable ?
 
               fix:
-                fix && details.fixTo && location
-                  ? (fixer) =>
-                      fix(
-                        fixer,
-                        details as SetRequired<ReportErrorDetails, "fixTo">,
-                      )
+                fix && fixTo
+                  ? (fixer) => fix(fixer, details, fixTo)
+                  : undefined,
+
+              suggest:
+                fix && suggestions
+                  ? suggestions.map((suggestion) => ({
+                      desc: suggestion[2] || `Replace with ${suggestion[1]}`,
+                      fix: (fixer) =>
+                        fix(
+                          fixer,
+                          { ...details, dependency: suggestion[0] },
+                          suggestion[1],
+                        ),
+                    }))
                   : undefined,
             });
           };
@@ -144,11 +159,49 @@ function createPackageRule<RuleOptions extends { onlyWarnsFor?: OnlyWarnsFor }>(
                   // languageOptions,
                   ruleOptions: options,
                   onlyWarnsForCheck,
-                  reportError: createReportError((fixer, details) => {
-                    dependencyValue.changeValue(details.fixTo);
+                  reportError: createReportError((fixer, details, fixTo) => {
+                    const targetDependencyValue: Partial<DependencyValue> =
+                      details.dependency || dependencyValue;
+
+                    if (details.errorTarget !== "dependencyValue") {
+                      throw new Error(
+                        `Invalid or unsupported errorTarget: ${String(details.errorTarget)}`,
+                      );
+                    }
+
+                    targetDependencyValue.changeValue?.(fixTo);
+
+                    if (!targetDependencyValue.ranges) {
+                      return null;
+                    }
+
+                    const getTargetRangeFromErrorTarget = (
+                      errorTarget: ReportErrorDetails["errorTarget"],
+                    ): [number, number] | undefined => {
+                      switch (errorTarget) {
+                        case "dependencyValue":
+                          return targetDependencyValue.ranges?.value;
+                        case "dependencyName":
+                          return targetDependencyValue.ranges?.name;
+                        case undefined:
+                        default:
+                          return targetDependencyValue.ranges?.all;
+                      }
+                    };
+
+                    const targetRange = getTargetRangeFromErrorTarget(
+                      details.errorTarget,
+                    );
+
+                    if (!targetRange) {
+                      return null;
+                    }
+
                     return fixer.replaceTextRange(
-                      token.range,
-                      dependencyValue.toString(),
+                      targetRange,
+                      !details.errorTarget
+                        ? dependencyValue.toString()
+                        : JSON.stringify(fixTo),
                     );
                   }),
                 });
@@ -201,6 +254,21 @@ const rules = {
             getDependencyPackageJson,
             onlyWarnsForCheck,
           });
+        }
+      },
+    },
+  ),
+  ...createPackageRule<CheckExactVersionsOptions>(
+    "resolutions-versions-match",
+    {
+      type: "object",
+      properties: {},
+      additionalProperties: false,
+    },
+    {
+      checkDependencyValue: ({ node, pkg, reportError }) => {
+        if (node.fieldName === "resolutions") {
+          checkResolutionVersionMatch(reportError, pkg, node);
         }
       },
     },
