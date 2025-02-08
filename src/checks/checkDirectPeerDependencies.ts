@@ -1,6 +1,5 @@
 import semver from "semver";
 import type { ReportError } from "../reporting/ReportError.ts";
-import { reportNotWarnedForMapping } from "../reporting/cliErrorReporting.ts";
 import type { GetDependencyPackageJson } from "../utils/createGetDependencyPackageJson.ts";
 import { getKeys } from "../utils/object.ts";
 import type {
@@ -98,10 +97,5 @@ export function checkDirectPeerDependencies(
         invalidOnlyWarnsForCheck.createFor(depName),
       );
     }
-  }
-
-  reportNotWarnedForMapping(reportError, missingOnlyWarnsForCheck);
-  if (missingOnlyWarnsForCheck !== invalidOnlyWarnsForCheck) {
-    reportNotWarnedForMapping(reportError, invalidOnlyWarnsForCheck);
   }
 }

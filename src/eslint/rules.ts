@@ -1,5 +1,9 @@
+/* eslint-disable complexity */
 import type { Rule } from "eslint";
-import { regularDependencyTypes } from "../checks/checkDirectPeerDependencies.ts";
+import {
+  checkDirectPeerDependencies,
+  regularDependencyTypes,
+} from "../checks/checkDirectPeerDependencies.ts";
 import { checkExactVersion } from "../checks/checkExactVersions.ts";
 import { checkResolutionVersionMatch } from "../checks/checkResolutionsVersionsMatch.ts";
 import {
@@ -12,26 +16,37 @@ import type {
   ReportErrorDetails,
 } from "../reporting/ReportError.ts";
 import type { GetDependencyPackageJson } from "../utils/createGetDependencyPackageJson.ts";
+import { getEntries } from "../utils/object.ts";
 import type {
   DependencyValue,
   ParsedPackageJson,
   RegularDependencyTypes,
 } from "../utils/packageTypes.ts";
-import type { OnlyWarnsFor, OnlyWarnsForCheck } from "../utils/warnForUtils.ts";
-import { createOnlyWarnsForArrayCheck } from "../utils/warnForUtils.ts";
+import type {
+  OnlyWarnsFor,
+  OnlyWarnsForCheck,
+  OnlyWarnsForMappingCheck,
+} from "../utils/warnForUtils.ts";
+import {
+  createOnlyWarnsForArrayCheck,
+  createOnlyWarnsForMappingCheck,
+} from "../utils/warnForUtils.ts";
 import type { DependencyValueAst, PackageJsonAst } from "./language.ts";
 
 // interface CheckPackageDependenciesLanguageOptions {}
 
-type CheckFn<RuleOptions, Node> = (params: {
-  node: Node;
-  pkg: ParsedPackageJson;
-  reportError: ReportError;
-  // languageOptions: CheckPackageDependenciesLanguageOptions;
-  getDependencyPackageJson: GetDependencyPackageJson;
-  ruleOptions: RuleOptions;
-  onlyWarnsForCheck: OnlyWarnsForCheck;
-}) => void;
+type CheckFn<RuleOptions, Node, T = Record<never, never>> = (
+  params: T & {
+    node: Node;
+    pkg: ParsedPackageJson;
+    reportError: ReportError;
+    // languageOptions: CheckPackageDependenciesLanguageOptions;
+    getDependencyPackageJson: GetDependencyPackageJson;
+    ruleOptions: RuleOptions;
+    onlyWarnsForCheck: OnlyWarnsForCheck;
+    onlyWarnsForMappingCheck: OnlyWarnsForMappingCheck;
+  },
+) => void;
 
 function createPackageRule<RuleOptions extends { onlyWarnsFor?: OnlyWarnsFor }>(
   ruleName: string,
@@ -40,7 +55,16 @@ function createPackageRule<RuleOptions extends { onlyWarnsFor?: OnlyWarnsFor }>(
     checkPackage,
     checkDependencyValue,
   }: {
-    checkPackage?: CheckFn<RuleOptions, ParsedPackageJson>;
+    checkPackage?: CheckFn<
+      RuleOptions,
+      ParsedPackageJson,
+      {
+        checkOnlyWarnsForArray: (onlyWarnsForCheck: OnlyWarnsForCheck) => void;
+        checkOnlyWarnsForMapping: (
+          onlyWarnsForMappingCheck: OnlyWarnsForMappingCheck,
+        ) => void;
+      }
+    >;
     checkDependencyValue?: CheckFn<RuleOptions, DependencyValue>;
   },
 ): Record<string, Rule.RuleModule> {
@@ -58,10 +82,27 @@ function createPackageRule<RuleOptions extends { onlyWarnsFor?: OnlyWarnsFor }>(
         //   context.languageOptions as CheckPackageDependenciesLanguageOptions;
         const options = (context.options[0] ?? {}) as RuleOptions;
 
+        const schemaProperties =
+          schema && "properties" in schema ? schema.properties : undefined;
+
         const onlyWarnsForCheck =
-          schema && "onlyWarnsFor" in schema
-            ? createOnlyWarnsForArrayCheck(ruleName, options.onlyWarnsFor)
-            : createOnlyWarnsForArrayCheck(ruleName, []);
+          schemaProperties &&
+          "onlyWarnsFor" in schemaProperties &&
+          schemaProperties.onlyWarnsFor.type === "array" &&
+          Array.isArray(options.onlyWarnsFor)
+            ? createOnlyWarnsForArrayCheck("onlyWarnsFor", options.onlyWarnsFor)
+            : createOnlyWarnsForArrayCheck("onlyWarnsFor", []);
+
+        const onlyWarnsForMappingCheck =
+          schemaProperties &&
+          "onlyWarnsFor" in schemaProperties &&
+          schemaProperties.onlyWarnsFor.type === "object" &&
+          typeof options.onlyWarnsFor === "object"
+            ? createOnlyWarnsForMappingCheck(
+                "onlyWarnsFor",
+                options.onlyWarnsFor,
+              )
+            : createOnlyWarnsForMappingCheck("onlyWarnsFor", {});
 
         const createReportError =
           (
@@ -77,32 +118,38 @@ function createPackageRule<RuleOptions extends { onlyWarnsFor?: OnlyWarnsFor }>(
               getLocFromDependency(details.dependency, details.errorTarget);
             const fixTo = details.fixTo;
             const suggestions = details.suggestions;
+            const isWarn = details.onlyWarns;
+            const message =
+              details.errorMessage +
+              (details.errorDetails ? `: ${details.errorDetails}` : "");
+            if (isWarn) {
+              console.warn(`[warn] ${message} - ${ruleName}`);
+            } else {
+              context.report({
+                message,
 
-            context.report({
-              message:
-                details.errorMessage +
-                (details.errorDetails ? `: ${details.errorDetails}` : ""),
-              // TODO improve this by using start+end
-              loc: location ?? { line: 1, column: 1 },
+                // TODO improve this by using start+end
+                loc: location ?? { line: 1, column: 1 },
 
-              fix:
-                fix && fixTo
-                  ? (fixer) => fix(fixer, details, fixTo)
-                  : undefined,
+                fix:
+                  fix && fixTo
+                    ? (fixer) => fix(fixer, details, fixTo)
+                    : undefined,
 
-              suggest:
-                fix && suggestions
-                  ? suggestions.map((suggestion) => ({
-                      desc: suggestion[2] || `Replace with ${suggestion[1]}`,
-                      fix: (fixer) =>
-                        fix(
-                          fixer,
-                          { ...details, dependency: suggestion[0] },
-                          suggestion[1],
-                        ),
-                    }))
-                  : undefined,
-            });
+                suggest:
+                  fix && suggestions
+                    ? suggestions.map((suggestion) => ({
+                        desc: suggestion[2] || `Replace with ${suggestion[1]}`,
+                        fix: (fixer) =>
+                          fix(
+                            fixer,
+                            { ...details, dependency: suggestion[0] },
+                            suggestion[1],
+                          ),
+                      }))
+                    : undefined,
+              });
+            }
           };
 
         return {
@@ -114,6 +161,40 @@ function createPackageRule<RuleOptions extends { onlyWarnsFor?: OnlyWarnsFor }>(
                 loc: { line: 1, column: 1 },
               });
             }
+
+            const checkOnlyWarnsForArray = (
+              onlyWarnsForCheck: OnlyWarnsForCheck,
+            ): void => {
+              const notWarnedFor = onlyWarnsForCheck.getNotWarnedFor();
+
+              if (notWarnedFor.length > 0) {
+                context.report({
+                  message: `${onlyWarnsForMappingCheck.configName}: no warning was raised for ${notWarnedFor
+                    .map((depName) => `"${depName}"`)
+                    .join(
+                      ", ",
+                    )}. You should remove it or check if it is correct.`,
+                  loc: { line: 1, column: 1 },
+                });
+              }
+            };
+
+            const checkOnlyWarnsForMapping = (
+              onlyWarnsForMappingCheck: OnlyWarnsForMappingCheck,
+            ): void => {
+              const notWarnedForMapping =
+                onlyWarnsForMappingCheck.getNotWarnedFor();
+              getEntries(notWarnedForMapping).forEach(
+                ([depNameOrStar, notWarnedFor]) => {
+                  context.report({
+                    message: `${onlyWarnsForMappingCheck.configName}: no warning was raised for "${depNameOrStar}" > ${notWarnedFor
+                      .map((depName) => `"${depName}"`)
+                      .join(", ")}`,
+                    loc: { line: 1, column: 1 },
+                  });
+                },
+              );
+            };
 
             const { parsedPkgJson, getDependencyPackageJson } =
               node as PackageJsonAst;
@@ -128,17 +209,15 @@ function createPackageRule<RuleOptions extends { onlyWarnsFor?: OnlyWarnsFor }>(
                   // languageOptions,
                   ruleOptions: options,
                   onlyWarnsForCheck,
+                  onlyWarnsForMappingCheck,
+                  checkOnlyWarnsForArray,
+                  checkOnlyWarnsForMapping,
                   reportError: createReportError(),
                 });
               }
 
-              const notWarnedFor = onlyWarnsForCheck.getNotWarnedFor();
-              if (notWarnedFor.length > 0) {
-                context.report({
-                  message: `Eslint rule ${ruleName} configured warn for: ${notWarnedFor.join(", ")} but was not used. You should remove it or check if it is correct.`,
-                  loc: { line: 1, column: 1 },
-                });
-              }
+              checkOnlyWarnsForArray(onlyWarnsForCheck);
+              checkOnlyWarnsForMapping(onlyWarnsForMappingCheck);
             } catch (error: unknown) {
               context.report({
                 loc: { line: 1, column: 1 },
@@ -149,89 +228,111 @@ function createPackageRule<RuleOptions extends { onlyWarnsFor?: OnlyWarnsFor }>(
             }
           },
 
-          DependencyValue: checkDependencyValue
-            ? (node: any) => {
-                const token = node as DependencyValueAst;
-                const {
-                  dependencyValue,
-                  parsedPkgJson,
-                  getDependencyPackageJson,
-                } = token;
-                if (!dependencyValue) return;
-                checkDependencyValue({
-                  node: dependencyValue,
-                  pkg: parsedPkgJson,
-                  getDependencyPackageJson,
-                  // languageOptions,
-                  ruleOptions: options,
-                  onlyWarnsForCheck,
-                  reportError: createReportError((fixer, details, fixTo) => {
-                    const targetDependencyValue: Partial<DependencyValue> =
-                      details.dependency || dependencyValue;
+          ...(checkDependencyValue
+            ? {
+                DependencyValue(node: any) {
+                  const token = node as DependencyValueAst;
+                  const {
+                    dependencyValue,
+                    parsedPkgJson,
+                    getDependencyPackageJson,
+                  } = token;
+                  if (!dependencyValue) return;
+                  checkDependencyValue({
+                    node: dependencyValue,
+                    pkg: parsedPkgJson,
+                    getDependencyPackageJson,
+                    // languageOptions,
+                    ruleOptions: options,
+                    onlyWarnsForCheck,
+                    onlyWarnsForMappingCheck,
+                    reportError: createReportError((fixer, details, fixTo) => {
+                      const targetDependencyValue: Partial<DependencyValue> =
+                        details.dependency || dependencyValue;
 
-                    if (details.errorTarget !== "dependencyValue") {
-                      throw new Error(
-                        `Invalid or unsupported errorTarget: ${String(details.errorTarget)}`,
-                      );
-                    }
-
-                    targetDependencyValue.changeValue?.(fixTo);
-
-                    if (!targetDependencyValue.ranges) {
-                      return null;
-                    }
-
-                    const getTargetRangeFromErrorTarget = (
-                      errorTarget: ReportErrorDetails["errorTarget"],
-                    ): [number, number] | undefined => {
-                      switch (errorTarget) {
-                        case "dependencyValue":
-                          return targetDependencyValue.ranges?.value;
-                        case "dependencyName":
-                          return targetDependencyValue.ranges?.name;
-                        case undefined:
-                        default:
-                          return targetDependencyValue.ranges?.all;
+                      if (details.errorTarget !== "dependencyValue") {
+                        throw new Error(
+                          `Invalid or unsupported errorTarget: ${String(details.errorTarget)}`,
+                        );
                       }
-                    };
 
-                    const targetRange = getTargetRangeFromErrorTarget(
-                      details.errorTarget,
-                    );
+                      targetDependencyValue.changeValue?.(fixTo);
 
-                    if (!targetRange) {
-                      return null;
-                    }
+                      if (!targetDependencyValue.ranges) {
+                        return null;
+                      }
 
-                    return fixer.replaceTextRange(
-                      targetRange,
-                      !details.errorTarget
-                        ? dependencyValue.toString()
-                        : JSON.stringify(fixTo),
-                    );
-                  }),
-                });
+                      const getTargetRangeFromErrorTarget = (
+                        errorTarget: ReportErrorDetails["errorTarget"],
+                      ): [number, number] | undefined => {
+                        switch (errorTarget) {
+                          case "dependencyValue":
+                            return targetDependencyValue.ranges?.value;
+                          case "dependencyName":
+                            return targetDependencyValue.ranges?.name;
+                          case undefined:
+                          default:
+                            return targetDependencyValue.ranges?.all;
+                        }
+                      };
+
+                      const targetRange = getTargetRangeFromErrorTarget(
+                        details.errorTarget,
+                      );
+
+                      if (!targetRange) {
+                        return null;
+                      }
+
+                      return fixer.replaceTextRange(
+                        targetRange,
+                        !details.errorTarget
+                          ? dependencyValue.toString()
+                          : JSON.stringify(fixTo),
+                      );
+                    }),
+                  });
+                },
               }
-            : undefined,
+            : {}),
         };
       },
     } satisfies Rule.RuleModule,
   };
 }
 
-interface CheckExactVersionsOptions {
-  dependencies?: boolean;
-  devDependencies?: boolean;
-  resolutions?: boolean;
+interface BaseRuleOptions {
   onlyWarnsFor?: OnlyWarnsFor;
 }
 
-interface CheckSatisfiesVersionsOptions {
+interface CheckExactVersionsOptions extends BaseRuleOptions {
+  dependencies?: boolean;
+  devDependencies?: boolean;
+  resolutions?: boolean;
+}
+
+interface CheckSatisfiesVersionsOptions extends BaseRuleOptions {
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
   optionalDependencies?: Record<string, string>;
-  onlyWarnsFor?: OnlyWarnsFor;
 }
+
+interface CheckDirectPeerDependenciesOptions extends BaseRuleOptions {
+  isLibrary?: boolean;
+  onlyWarnsForMissing?: OnlyWarnsFor;
+  onlyWarnsForInvalid?: OnlyWarnsFor;
+}
+
+const onlyWarnsForArraySchema = {
+  type: "array",
+  items: { type: "string" },
+} as const;
+const onlyWarnsForMappingSchema = {
+  type: "object",
+  patternProperties: {
+    "^.*$": onlyWarnsForArraySchema,
+  },
+} as const;
 
 const rules = {
   ...createPackageRule<CheckExactVersionsOptions>(
@@ -242,7 +343,7 @@ const rules = {
         dependencies: { type: "boolean", default: true },
         devDependencies: { type: "boolean", default: true },
         resolutions: { type: "boolean", default: true },
-        onlyWarnsFor: { type: "array", items: { type: "string" } },
+        onlyWarnsFor: onlyWarnsForArraySchema,
       },
       additionalProperties: false,
     },
@@ -341,6 +442,44 @@ const rules = {
           const range = ruleOptions[fieldName][node.name];
           checkSatisfiesVersion(reportError, node, range, onlyWarnsForCheck);
         }
+      },
+    },
+  ),
+  ...createPackageRule<CheckDirectPeerDependenciesOptions>(
+    "direct-peer-dependencies",
+    {
+      type: "object",
+      properties: {
+        isLibrary: { type: "boolean" },
+        onlyWarnsFor: onlyWarnsForMappingSchema,
+        onlyWarnsForMissing: onlyWarnsForMappingSchema,
+      },
+      additionalProperties: false,
+    },
+    {
+      checkPackage: ({
+        pkg,
+        reportError,
+        ruleOptions,
+        getDependencyPackageJson,
+        onlyWarnsForMappingCheck: invalidOnlyWarnsForCheck,
+        checkOnlyWarnsForMapping,
+      }) => {
+        const missingOnlyWarnsForCheck = createOnlyWarnsForMappingCheck(
+          "onlyWarnsForMissing",
+          ruleOptions.onlyWarnsForMissing,
+        );
+
+        checkDirectPeerDependencies(
+          reportError,
+          ruleOptions.isLibrary ?? false,
+          pkg,
+          getDependencyPackageJson,
+          missingOnlyWarnsForCheck,
+          invalidOnlyWarnsForCheck,
+        );
+
+        checkOnlyWarnsForMapping(missingOnlyWarnsForCheck);
       },
     },
   ),

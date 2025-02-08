@@ -19,6 +19,7 @@ import type { CreateReportError } from "./reporting/ReportError.ts";
 import {
   createCliReportError,
   displayMessages,
+  reportNotWarnedForMapping,
 } from "./reporting/cliErrorReporting.ts";
 import type { GetDependencyPackageJson } from "./utils/createGetDependencyPackageJson.ts";
 import { createGetDependencyPackageJson } from "./utils/createGetDependencyPackageJson.ts";
@@ -500,14 +501,23 @@ export function createCheckPackage({
                   internalInvalidConfigName,
                   invalidOnlyWarnsFor,
                 );
+          const reportError = createReportError(
+            "Peer Dependencies",
+            parsedPkg.path,
+          );
           checkDirectPeerDependencies(
-            createReportError("Peer Dependencies", parsedPkg.path),
+            reportError,
             isPkgLibrary,
             parsedPkg,
             getDependencyPackageJson,
             missingOnlyWarnsForCheck,
             invalidOnlyWarnsForCheck,
           );
+
+          reportNotWarnedForMapping(reportError, missingOnlyWarnsForCheck);
+          if (missingOnlyWarnsForCheck !== invalidOnlyWarnsForCheck) {
+            reportNotWarnedForMapping(reportError, invalidOnlyWarnsForCheck);
+          }
         }),
       );
       return this;

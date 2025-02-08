@@ -13,6 +13,7 @@ declare const checkPackagePlugin: {
             rules: {
                 "check-package-dependencies/exact-versions": "error";
                 "check-package-dependencies/resolutions-versions-match": "error";
+                "check-package-dependencies/direct-peer-dependencies": "error";
             };
         };
         "recommended-library": {
@@ -24,6 +25,9 @@ declare const checkPackagePlugin: {
                     dependencies: boolean;
                 }];
                 "check-package-dependencies/resolutions-versions-match": "error";
+                "check-package-dependencies/direct-peer-dependencies": ["error", {
+                    isLibrary: boolean;
+                }];
             };
         };
     };

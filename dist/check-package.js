@@ -13,7 +13,7 @@ import { checkSatisfiesVersions } from "./checks/checkSatisfiesVersions.js";
 import { checkSatisfiesVersionsBetweenDependencies } from "./checks/checkSatisfiesVersionsBetweenDependencies.js";
 import { checkSatisfiesVersionsFromDependency } from "./checks/checkSatisfiesVersionsFromDependency.js";
 import { checkSatisfiesVersionsInDependency } from "./checks/checkSatisfiesVersionsInDependency.js";
-import { createCliReportError, displayMessages, } from "./reporting/cliErrorReporting.js";
+import { createCliReportError, displayMessages, reportNotWarnedForMapping, } from "./reporting/cliErrorReporting.js";
 import { createGetDependencyPackageJson } from "./utils/createGetDependencyPackageJson.js";
 import { getEntries } from "./utils/object.js";
 import { readAndParsePkgJson, writePkgJson } from "./utils/pkgJsonUtils.js";
@@ -145,7 +145,12 @@ export function createCheckPackage({ packageDirectoryPath = ".", internalWorkspa
                 const invalidOnlyWarnsForCheck = internalInvalidConfigName === internalMissingConfigName
                     ? missingOnlyWarnsForCheck
                     : createOnlyWarnsForMappingCheck(internalInvalidConfigName, invalidOnlyWarnsFor);
-                checkDirectPeerDependencies(createReportError("Peer Dependencies", parsedPkg.path), isPkgLibrary, parsedPkg, getDependencyPackageJson, missingOnlyWarnsForCheck, invalidOnlyWarnsForCheck);
+                const reportError = createReportError("Peer Dependencies", parsedPkg.path);
+                checkDirectPeerDependencies(reportError, isPkgLibrary, parsedPkg, getDependencyPackageJson, missingOnlyWarnsForCheck, invalidOnlyWarnsForCheck);
+                reportNotWarnedForMapping(reportError, missingOnlyWarnsForCheck);
+                if (missingOnlyWarnsForCheck !== invalidOnlyWarnsForCheck) {
+                    reportNotWarnedForMapping(reportError, invalidOnlyWarnsForCheck);
+                }
             }));
             return this;
         },

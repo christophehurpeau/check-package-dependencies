@@ -1,5 +1,4 @@
 import semver from "semver";
-import { reportNotWarnedForMapping } from "../reporting/cliErrorReporting.js";
 import { getKeys } from "../utils/object.js";
 import { checkPeerDependencies } from "./checkPeerDependencies.js";
 export const regularDependencyTypes = [
@@ -48,10 +47,6 @@ export function checkDirectPeerDependencies(reportError, isLibrary, pkg, getDepe
         if (depPkg.peerDependencies) {
             checkPeerDependencies(reportError, pkg, depType, getAllowedPeerInFromType(depType, isLibrary), hasDirectMatchingPeerDependency, allDirectDependenciesDependencies, depPkg, missingOnlyWarnsForCheck.createFor(depName), invalidOnlyWarnsForCheck.createFor(depName));
         }
-    }
-    reportNotWarnedForMapping(reportError, missingOnlyWarnsForCheck);
-    if (missingOnlyWarnsForCheck !== invalidOnlyWarnsForCheck) {
-        reportNotWarnedForMapping(reportError, invalidOnlyWarnsForCheck);
     }
 }
 //# sourceMappingURL=checkDirectPeerDependencies.js.map
