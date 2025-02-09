@@ -24,7 +24,7 @@ export function getOperator(range) {
     const parsedRange = parseRange(range);
     if (parsedRange.length !== 1)
         return null;
-    return parsedRange[0].operator || "";
+    return parsedRange[0]?.operator || "";
 }
 export function changeOperator(range, operator) {
     if (operator === null)
@@ -33,11 +33,13 @@ export function changeOperator(range, operator) {
     if (parsedRange.length !== 1)
         return null;
     const parsed = parsedRange[0];
+    if (!parsed)
+        return null;
     parsed.operator = operator === "" ? undefined : operator;
     return stringify(parsed);
 }
 export function isExactParsedRange(parsedRange) {
-    return parsedRange.length === 1 && parsedRange[0].operator === undefined;
+    return parsedRange.length === 1 && parsedRange[0]?.operator === undefined;
 }
 export function isExactRange(range) {
     return isExactParsedRange(parseRange(range));
@@ -48,7 +50,8 @@ export function getRealVersion(version) {
         if (!match)
             throw new Error(`Invalid version match: ${version}`);
         const [, realVersion] = match;
-        return realVersion;
+        if (realVersion)
+            return realVersion;
     }
     if (version.startsWith("workspace:")) {
         return version.slice("workspace:".length);

@@ -57,6 +57,7 @@ export function createGetDependencyPackageJson({
 
         if (match) {
           const [, matchPackageJson] = match;
+          if (!matchPackageJson) throw error;
           packagePath = matchPackageJson;
           pkg = internalReadPkgJson(matchPackageJson);
         } else {

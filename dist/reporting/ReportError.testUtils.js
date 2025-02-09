@@ -26,8 +26,8 @@ export function assertNoMessages(messages) {
 }
 export function assertSingleMessage(messages, expected) {
     assert.equal(messages.length, 1);
-    assert.equal(messages[0].messages.length, 1);
-    assert.deepEqual(messages[0].messages[0], !expected.dependency?.value
+    assert.equal(messages[0]?.messages.length, 1);
+    assert.deepEqual(messages[0]?.messages[0], !expected.dependency?.value
         ? expected
         : {
             ...expected,
@@ -43,7 +43,7 @@ export function assertSingleMessage(messages, expected) {
 export function assertSeveralMessages(messages, expected) {
     assert.equal(messages.length, 1);
     // this first assertion makes checks more readable
-    assert.deepEqual(messages[0].messages.map((m) => {
+    assert.deepEqual(messages[0]?.messages.map((m) => {
         if (!m.dependency?.value) {
             return m;
         }

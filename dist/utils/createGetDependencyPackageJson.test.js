@@ -21,9 +21,9 @@ describe("createGetDependencyPackageJson", () => {
         const [res] = getDependencyPackageJson("test1");
         assert.equal(res, mockPkg);
         assert.equal(internalLoadPackageJsonFromNodeModulesMock.mock.calls.length, 1);
-        assert.deepEqual(internalLoadPackageJsonFromNodeModulesMock.mock.calls[0].arguments, ["test1", "test"]);
+        assert.deepEqual(internalLoadPackageJsonFromNodeModulesMock.mock.calls[0]?.arguments, ["test1", "test"]);
         assert.equal(readPkgJsonMock.mock.calls.length, 1);
-        assert.deepEqual(readPkgJsonMock.mock.calls[0].arguments, [
+        assert.deepEqual(readPkgJsonMock.mock.calls[0]?.arguments, [
             "C:\\test\\check-package-dependencies\\node_modules\\test1\\package.json",
         ]);
     });

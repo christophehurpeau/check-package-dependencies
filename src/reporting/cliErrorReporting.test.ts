@@ -23,7 +23,7 @@ describe("logMessage", () => {
   test("it should display error with no info", () => {
     const errorFn = mock.method(console, "error", () => {});
     logMessage({ ruleName: "rule-test", errorMessage: "test" });
-    assert.deepEqual(errorFn.mock.calls[0].arguments, [
+    assert.deepEqual(errorFn.mock.calls[0]?.arguments, [
       "  0:0  \u001B[31merror\u001B[39m  \u001B[31mtest\u001B[39m  \u001B[34mrule-test\u001B[39m",
     ]);
   });
@@ -35,7 +35,7 @@ describe("logMessage", () => {
       errorMessage: "test",
       errorDetails: "info",
     });
-    assert.deepEqual(errorFn.mock.calls[0].arguments, [
+    assert.deepEqual(errorFn.mock.calls[0]?.arguments, [
       "  0:0  \u001B[31merror\u001B[39m  \u001B[31mtest\u001B[39m: info  \u001B[34mrule-test\u001B[39m",
     ]);
   });
@@ -47,7 +47,7 @@ describe("logMessage", () => {
       errorMessage: "test",
       onlyWarns: true,
     });
-    assert.deepEqual(errorFn.mock.calls[0].arguments, [
+    assert.deepEqual(errorFn.mock.calls[0]?.arguments, [
       "  0:0  \u001B[33mwarning\u001B[39m  \u001B[33mtest\u001B[39m  \u001B[34mrule-test\u001B[39m",
     ]);
   });
@@ -60,7 +60,7 @@ describe("logMessage", () => {
       errorDetails: "info",
       onlyWarns: true,
     });
-    assert.deepEqual(errorFn.mock.calls[0].arguments, [
+    assert.deepEqual(errorFn.mock.calls[0]?.arguments, [
       "  0:0  \u001B[33mwarning\u001B[39m  \u001B[33mtest\u001B[39m: info  \u001B[34mrule-test\u001B[39m",
     ]);
   });
@@ -86,7 +86,7 @@ describe("reportNotWarnedForMapping", () => {
     ]);
     reportNotWarnedForMapping(mockReportError, onlyWarnsForMappingCheck);
     assert.equal(mockReportError.mock.calls.length, 1);
-    assert.deepEqual(mockReportError.mock.calls[0].arguments[0], {
+    assert.deepEqual(mockReportError.mock.calls[0]?.arguments[0], {
       errorMessage: 'Invalid config in "test"',
       errorDetails: 'no warning was raised for "dep1"',
     });
@@ -98,7 +98,7 @@ describe("reportNotWarnedForMapping", () => {
     });
     reportNotWarnedForMapping(mockReportError, onlyWarnsForMappingCheck);
     assert.equal(mockReportError.mock.calls.length, 1);
-    assert.deepEqual(mockReportError.mock.calls[0].arguments[0], {
+    assert.deepEqual(mockReportError.mock.calls[0]?.arguments[0], {
       errorMessage: 'Invalid config in "test"',
       errorDetails: 'no warning was raised for "dep1"',
     });
@@ -110,7 +110,7 @@ describe("reportNotWarnedForMapping", () => {
     });
     reportNotWarnedForMapping(mockReportError, onlyWarnsForMappingCheck);
     assert.equal(mockReportError.mock.calls.length, 1);
-    assert.deepEqual(mockReportError.mock.calls[0].arguments[0], {
+    assert.deepEqual(mockReportError.mock.calls[0]?.arguments[0], {
       errorMessage: 'Invalid config in "test"',
       errorDetails: 'no warning was raised for "dep1"',
     });
@@ -132,10 +132,10 @@ describe("createReportError", () => {
     const errorFn = mock.method(console, "error", () => {});
     displayMessages();
 
-    assert.deepEqual(errorFn.mock.calls[0].arguments, [
+    assert.deepEqual(errorFn.mock.calls[0]?.arguments, [
       "\u001B[4mtest/path\u001B[24m",
     ]);
-    assert.deepEqual(errorFn.mock.calls[1].arguments, [
+    assert.deepEqual(errorFn.mock.calls[1]?.arguments, [
       "  0:0  \u001B[31merror\u001B[39m  \u001B[31mError message\u001B[39m  \u001B[34mTest Title\u001B[39m",
     ]);
   });
@@ -167,10 +167,10 @@ describe("createReportError", () => {
     displayMessages();
 
     assert.equal(errorFn.mock.calls.length, 3);
-    assert.deepEqual(errorFn.mock.calls[0].arguments, [
+    assert.deepEqual(errorFn.mock.calls[0]?.arguments, [
       "\u001B[4mtest/path\u001B[24m",
     ]);
-    assert.deepEqual(errorFn.mock.calls[1].arguments, [
+    assert.deepEqual(errorFn.mock.calls[1]?.arguments, [
       "  42:10  \u001B[31merror\u001B[39m  \u001B[90mdep1 \u001B[39m\u001B[31mError message\u001B[39m  \u001B[34mtest-rule\u001B[39m",
     ]);
   });
@@ -200,7 +200,7 @@ describe("createReportError", () => {
     displayMessages();
 
     assert.equal(errorFn.mock.calls.length, 3);
-    assert.deepEqual(errorFn.mock.calls[1].arguments, [
+    assert.deepEqual(errorFn.mock.calls[1]?.arguments, [
       "  15:5  \u001B[31merror\u001B[39m  \u001B[90mdependencies > dep1 \u001B[39m\u001B[31mError message\u001B[39m  \u001B[34mtest-rule\u001B[39m",
     ]);
   });
@@ -236,7 +236,7 @@ describe("displayMessages", () => {
 
     assert.equal(errorFn.mock.calls.length, 0);
     assert.equal(logFn.mock.calls.length, 1);
-    assert.deepEqual(logFn.mock.calls[0].arguments, [
+    assert.deepEqual(logFn.mock.calls[0]?.arguments, [
       "\u001B[32m\u001B[39m\n\u001B[32m✨ No problems found\u001B[39m",
     ]);
   });
@@ -255,7 +255,7 @@ describe("displayMessages", () => {
 
     assert.equal(errorFn.mock.calls.length, 3);
     assert.equal(logFn.mock.calls.length, 1);
-    assert.deepEqual(logFn.mock.calls[0].arguments, [
+    assert.deepEqual(logFn.mock.calls[0]?.arguments, [
       "\n✖ Found \u001B[33m1 warning\u001B[39m",
     ]);
   });
@@ -273,7 +273,7 @@ describe("displayMessages", () => {
 
     assert.equal(errorFn.mock.calls.length, 3);
     assert.equal(logFn.mock.calls.length, 1);
-    assert.deepEqual(logFn.mock.calls[0].arguments, [
+    assert.deepEqual(logFn.mock.calls[0]?.arguments, [
       "\n✖ Found \u001B[31m1 error\u001B[39m",
     ]);
   });
@@ -321,10 +321,10 @@ describe("displayMessages", () => {
 
     assert.equal(errorFn.mock.calls.length, 4);
     assert.equal(logFn.mock.calls.length, 1);
-    assert.deepEqual(errorFn.mock.calls[0].arguments, [
+    assert.deepEqual(errorFn.mock.calls[0]?.arguments, [
       "\u001B[4mtest/path\u001B[24m",
     ]);
-    assert.deepEqual(errorFn.mock.calls[1].arguments, [
+    assert.deepEqual(errorFn.mock.calls[1]?.arguments, [
       "  0:0  \u001B[33mwarning\u001B[39m  \u001B[33mWarning\u001B[39m  \u001B[34mTest Title\u001B[39m",
     ]);
   });
@@ -347,17 +347,17 @@ describe("displayMessages", () => {
 
     assert.equal(logFn.mock.calls.length, 1);
     assert.equal(errorFn.mock.calls.length, 4);
-    assert.deepEqual(errorFn.mock.calls[0].arguments, [
+    assert.deepEqual(errorFn.mock.calls[0]?.arguments, [
       "\u001B[4mtest/path\u001B[24m",
     ]);
-    assert.deepEqual(errorFn.mock.calls[1].arguments, [
+    assert.deepEqual(errorFn.mock.calls[1]?.arguments, [
       "  0:0  \u001B[31merror\u001B[39m  \u001B[90mdep1 \u001B[39m\u001B[31mFirst Error\u001B[39m  \u001B[34mTest Title\u001B[39m",
     ]);
-    assert.deepEqual(errorFn.mock.calls[2].arguments, [
+    assert.deepEqual(errorFn.mock.calls[2]?.arguments, [
       "  0:0  \u001B[31merror\u001B[39m  \u001B[90mdep1 \u001B[39m\u001B[31mSecond Error\u001B[39m  \u001B[34mTest Title\u001B[39m",
     ]);
-    assert.deepEqual(errorFn.mock.calls[3].arguments, []);
-    assert.deepEqual(logFn.mock.calls[0].arguments, [
+    assert.deepEqual(errorFn.mock.calls[3]?.arguments, []);
+    assert.deepEqual(logFn.mock.calls[0]?.arguments, [
       "\n✖ Found \u001B[31m2 errors\u001B[39m",
     ]);
   });
@@ -391,7 +391,7 @@ describe("displayMessages", () => {
     assert.equal(logFn.mock.calls.length, 1);
     assert.equal(errorFn.mock.calls.length, 3);
 
-    assert.deepEqual(logFn.mock.calls[0].arguments, [
+    assert.deepEqual(logFn.mock.calls[0]?.arguments, [
       "\n✖ Found \u001B[31m1 error\u001B[39m",
     ]);
 

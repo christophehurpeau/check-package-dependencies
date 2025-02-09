@@ -50,9 +50,9 @@ export function assertSingleMessage(
   expected: ReportErrorDetails,
 ): void {
   assert.equal(messages.length, 1);
-  assert.equal(messages[0].messages.length, 1);
+  assert.equal(messages[0]?.messages.length, 1);
   assert.deepEqual(
-    messages[0].messages[0],
+    messages[0]?.messages[0],
     !expected.dependency?.value
       ? expected
       : {
@@ -76,7 +76,7 @@ export function assertSeveralMessages(
 
   // this first assertion makes checks more readable
   assert.deepEqual(
-    messages[0].messages.map((m) => {
+    messages[0]?.messages.map((m) => {
       if (!m.dependency?.value) {
         return m;
       }

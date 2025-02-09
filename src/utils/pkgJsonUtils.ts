@@ -88,8 +88,8 @@ function parseDependencyField(
     fieldNode.children
       .filter((child) => child.type === "property")
       .map((propertyNode) => {
-        const nameNode = propertyNode.children![0];
-        const valueNode = propertyNode.children![1];
+        const nameNode = propertyNode.children![0]!;
+        const valueNode = propertyNode.children![1]!;
 
         const name = getNodeValue(nameNode) as string;
         const value = getNodeValue(valueNode) as string;

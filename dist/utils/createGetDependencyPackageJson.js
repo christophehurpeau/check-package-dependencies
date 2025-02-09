@@ -24,6 +24,8 @@ export function createGetDependencyPackageJson({ pkgDirname, nodeModulesPackageP
                 const match = / in (.*[/\\]package\.json)\s+imported from/.exec(error.message);
                 if (match) {
                     const [, matchPackageJson] = match;
+                    if (!matchPackageJson)
+                        throw error;
                     packagePath = matchPackageJson;
                     pkg = internalReadPkgJson(matchPackageJson);
                 }

@@ -16,8 +16,9 @@ export function checkResolutionVersionMatch(
   if (!resolutionDepVersion) return;
   if (resolutionDepVersion.startsWith("patch:")) {
     const matchResolutionInKey = /^(.+)@npm:(.+)$/.exec(depName);
-    if (matchResolutionInKey) {
-      [, depName, resolutionDepVersion] = matchResolutionInKey;
+    if (matchResolutionInKey?.[1] && matchResolutionInKey[2]) {
+      depName = matchResolutionInKey[1];
+      resolutionDepVersion = matchResolutionInKey[2];
     }
   }
   (["dependencies", "devDependencies"] as const).forEach((depType) => {

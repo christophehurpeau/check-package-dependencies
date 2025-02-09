@@ -440,6 +440,11 @@ const rules = {
         const fieldName = node.fieldName as RegularDependencyTypes;
         if (ruleOptions[fieldName]?.[node.name]) {
           const range = ruleOptions[fieldName][node.name];
+          if (!range) {
+            throw new Error(
+              `Range is undefined for ${node.name} in ${node.fieldName}`,
+            );
+          }
           checkSatisfiesVersion(reportError, node, range, onlyWarnsForCheck);
         }
       },

@@ -35,11 +35,11 @@ export const createOnlyWarnsForMappingCheck = (configName, onlyWarnsFor) => {
                     },
                     shouldWarnsFor(dependencyName) {
                         if (onlyWarnsFor["*"]?.includes(dependencyName)) {
-                            notWarnedFor["*"].delete(dependencyName);
+                            notWarnedFor["*"]?.delete(dependencyName);
                             return true;
                         }
                         if (onlyWarnsFor[dependencyNameLevel1]?.includes(dependencyName)) {
-                            notWarnedFor[dependencyNameLevel1].delete(dependencyName);
+                            notWarnedFor[dependencyNameLevel1]?.delete(dependencyName);
                             return true;
                         }
                         return false;

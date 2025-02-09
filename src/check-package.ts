@@ -64,7 +64,7 @@ export interface CheckDirectDuplicateDependenciesOptions {
 }
 
 export interface OnlyWarnsForInPackageCheckPackageRecommendedOption {
-  exactVersions: OnlyWarnsFor;
+  exactVersions?: OnlyWarnsFor;
 }
 
 export interface OnlyWarnsForInDependencyCheckPackageRecommendedOption {

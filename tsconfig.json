@@ -9,6 +9,7 @@
     "outDir": "dist",
     "declarationDir": "dist/definitions",
     "noEmitOnError": true,
+    "noUncheckedIndexedAccess": true,
     "declaration": true,
     "declarationMap": true,
     "emitDeclarationOnly": false

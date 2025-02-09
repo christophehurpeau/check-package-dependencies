@@ -23,7 +23,7 @@ export interface CheckDirectDuplicateDependenciesOptions {
     internalConfigName?: string;
 }
 export interface OnlyWarnsForInPackageCheckPackageRecommendedOption {
-    exactVersions: OnlyWarnsFor;
+    exactVersions?: OnlyWarnsFor;
 }
 export interface OnlyWarnsForInDependencyCheckPackageRecommendedOption {
     duplicateDirectDependency: OnlyWarnsFor;

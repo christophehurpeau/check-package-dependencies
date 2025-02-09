@@ -67,7 +67,7 @@ export function checkDuplicateDependencies(reportError, pkg, isPkgLibrary, depTy
                     errorMessage: "Invalid duplicate dependency",
                     errorDetails: `"${versions[0].value}" should satisfies "${depRange}" from ${depPkg.name || ""} in ${depType}`,
                     onlyWarns: onlyWarnsForCheck.shouldWarnsFor(depKey),
-                    dependency: pkg[versionInType][depKey],
+                    dependency: versionInType ? pkg[versionInType][depKey] : undefined,
                 });
             });
         }

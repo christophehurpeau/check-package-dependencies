@@ -27,7 +27,7 @@ function stringify(semver: SemVer): string {
 export function getOperator(range: string): string | null {
   const parsedRange = parseRange(range);
   if (parsedRange.length !== 1) return null;
-  return parsedRange[0].operator || "";
+  return parsedRange[0]?.operator || "";
 }
 
 export function changeOperator(
@@ -38,6 +38,7 @@ export function changeOperator(
   const parsedRange = parseRange(range);
   if (parsedRange.length !== 1) return null;
   const parsed = parsedRange[0];
+  if (!parsed) return null;
   parsed.operator = operator === "" ? undefined : operator;
   return stringify(parsed);
 }
@@ -45,7 +46,7 @@ export function changeOperator(
 export function isExactParsedRange(
   parsedRange: ReturnType<typeof semverUtils.parseRange>,
 ): boolean {
-  return parsedRange.length === 1 && parsedRange[0].operator === undefined;
+  return parsedRange.length === 1 && parsedRange[0]?.operator === undefined;
 }
 
 export function isExactRange(range: string): boolean {
@@ -57,7 +58,7 @@ export function getRealVersion(version: string): string {
     const match = /^npm:[^@]+@(.*)$/.exec(version);
     if (!match) throw new Error(`Invalid version match: ${version}`);
     const [, realVersion] = match;
-    return realVersion;
+    if (realVersion) return realVersion;
   }
   if (version.startsWith("workspace:")) {
     return version.slice("workspace:".length);

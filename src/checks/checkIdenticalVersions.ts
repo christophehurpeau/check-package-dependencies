@@ -30,6 +30,10 @@ export function checkIdenticalVersions(
       ? { [type]: depConfigArrayOrObject }
       : depConfigArrayOrObject;
 
+    if (!depConfig) {
+      throw new Error(`depConfig is undefined for ${depKey}`);
+    }
+
     getKeys(depConfig).forEach((depKeyType) => {
       const pkgDependenciesType = pkg[depKeyType] || {};
       depConfig[depKeyType]?.forEach((depKeyIdentical) => {
