@@ -46,7 +46,10 @@ function createPackageRule(ruleName, schema, { checkPackage, checkDependencyValu
                         context.report({
                             message,
                             // TODO improve this by using start+end
-                            loc: location ?? { line: 1, column: 1 },
+                            loc: location ?? {
+                                start: { line: 1, column: 1 },
+                                end: { line: 1, column: 1 },
+                            },
                             fix: fix && fixTo
                                 ? (fixer) => fix(fixer, details, fixTo)
                                 : undefined,
@@ -65,7 +68,10 @@ function createPackageRule(ruleName, schema, { checkPackage, checkDependencyValu
                         if (!context.filename.endsWith("/package.json")) {
                             context.report({
                                 message: "This rule is only applicable to package.json files",
-                                loc: { line: 1, column: 1 },
+                                loc: {
+                                    start: { line: 1, column: 1 },
+                                    end: { line: 1, column: 1 },
+                                },
                             });
                         }
                         const checkOnlyWarnsForArray = (onlyWarnsForCheck) => {
@@ -75,7 +81,10 @@ function createPackageRule(ruleName, schema, { checkPackage, checkDependencyValu
                                     message: `${onlyWarnsForMappingCheck.configName}: no warning was raised for ${notWarnedFor
                                         .map((depName) => `"${depName}"`)
                                         .join(", ")}. You should remove it or check if it is correct.`,
-                                    loc: { line: 1, column: 1 },
+                                    loc: {
+                                        start: { line: 1, column: 1 },
+                                        end: { line: 1, column: 1 },
+                                    },
                                 });
                             }
                         };
@@ -86,7 +95,10 @@ function createPackageRule(ruleName, schema, { checkPackage, checkDependencyValu
                                     message: `${onlyWarnsForMappingCheck.configName}: no warning was raised for "${depNameOrStar}" > ${notWarnedFor
                                         .map((depName) => `"${depName}"`)
                                         .join(", ")}`,
-                                    loc: { line: 1, column: 1 },
+                                    loc: {
+                                        start: { line: 1, column: 1 },
+                                        end: { line: 1, column: 1 },
+                                    },
                                 });
                             });
                         };
@@ -112,7 +124,10 @@ function createPackageRule(ruleName, schema, { checkPackage, checkDependencyValu
                         }
                         catch (error) {
                             context.report({
-                                loc: { line: 1, column: 1 },
+                                loc: {
+                                    start: { line: 1, column: 1 },
+                                    end: { line: 1, column: 1 },
+                                },
                                 message: `Failed to check package dependencies: ${error instanceof Error ? error.message : String(error)}`,
                             });
                         }

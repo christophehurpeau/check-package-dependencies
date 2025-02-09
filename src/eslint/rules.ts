@@ -129,7 +129,10 @@ function createPackageRule<RuleOptions extends { onlyWarnsFor?: OnlyWarnsFor }>(
                 message,
 
                 // TODO improve this by using start+end
-                loc: location ?? { line: 1, column: 1 },
+                loc: location ?? {
+                  start: { line: 1, column: 1 },
+                  end: { line: 1, column: 1 },
+                },
 
                 fix:
                   fix && fixTo
@@ -158,7 +161,10 @@ function createPackageRule<RuleOptions extends { onlyWarnsFor?: OnlyWarnsFor }>(
             if (!context.filename.endsWith("/package.json")) {
               context.report({
                 message: "This rule is only applicable to package.json files",
-                loc: { line: 1, column: 1 },
+                loc: {
+                  start: { line: 1, column: 1 },
+                  end: { line: 1, column: 1 },
+                },
               });
             }
 
@@ -174,7 +180,10 @@ function createPackageRule<RuleOptions extends { onlyWarnsFor?: OnlyWarnsFor }>(
                     .join(
                       ", ",
                     )}. You should remove it or check if it is correct.`,
-                  loc: { line: 1, column: 1 },
+                  loc: {
+                    start: { line: 1, column: 1 },
+                    end: { line: 1, column: 1 },
+                  },
                 });
               }
             };
@@ -190,7 +199,10 @@ function createPackageRule<RuleOptions extends { onlyWarnsFor?: OnlyWarnsFor }>(
                     message: `${onlyWarnsForMappingCheck.configName}: no warning was raised for "${depNameOrStar}" > ${notWarnedFor
                       .map((depName) => `"${depName}"`)
                       .join(", ")}`,
-                    loc: { line: 1, column: 1 },
+                    loc: {
+                      start: { line: 1, column: 1 },
+                      end: { line: 1, column: 1 },
+                    },
                   });
                 },
               );
@@ -220,7 +232,10 @@ function createPackageRule<RuleOptions extends { onlyWarnsFor?: OnlyWarnsFor }>(
               checkOnlyWarnsForMapping(onlyWarnsForMappingCheck);
             } catch (error: unknown) {
               context.report({
-                loc: { line: 1, column: 1 },
+                loc: {
+                  start: { line: 1, column: 1 },
+                  end: { line: 1, column: 1 },
+                },
                 message: `Failed to check package dependencies: ${
                   error instanceof Error ? error.message : String(error)
                 }`,
