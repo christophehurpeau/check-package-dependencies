@@ -47,7 +47,7 @@ function formatErrorMessage({
     : "0:0";
   const messageType = onlyWarns ? chalk.yellow("warning") : chalk.red("error");
   const dependencyInfo = dependency
-    ? chalk.gray(
+    ? chalk.dim(
         `${dependency.fieldName ? `${dependency.fieldName} > ` : ""}${dependency.name} `,
       )
     : "";

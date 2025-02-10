@@ -171,7 +171,7 @@ describe("createReportError", () => {
       "\u001B[4mtest/path\u001B[24m",
     ]);
     assert.deepEqual(errorFn.mock.calls[1]?.arguments, [
-      "  42:10  \u001B[31merror\u001B[39m  \u001B[90mdep1 \u001B[39m\u001B[31mError message\u001B[39m  \u001B[34mtest-rule\u001B[39m",
+      "  42:10  \u001B[31merror\u001B[39m  \u001B[2mdep1 \u001B[22m\u001B[31mError message\u001B[39m  \u001B[34mtest-rule\u001B[39m",
     ]);
   });
 
@@ -201,7 +201,7 @@ describe("createReportError", () => {
 
     assert.equal(errorFn.mock.calls.length, 3);
     assert.deepEqual(errorFn.mock.calls[1]?.arguments, [
-      "  15:5  \u001B[31merror\u001B[39m  \u001B[90mdependencies > dep1 \u001B[39m\u001B[31mError message\u001B[39m  \u001B[34mtest-rule\u001B[39m",
+      "  15:5  \u001B[31merror\u001B[39m  \u001B[2mdependencies > dep1 \u001B[22m\u001B[31mError message\u001B[39m  \u001B[34mtest-rule\u001B[39m",
     ]);
   });
 
@@ -351,10 +351,10 @@ describe("displayMessages", () => {
       "\u001B[4mtest/path\u001B[24m",
     ]);
     assert.deepEqual(errorFn.mock.calls[1]?.arguments, [
-      "  0:0  \u001B[31merror\u001B[39m  \u001B[90mdep1 \u001B[39m\u001B[31mFirst Error\u001B[39m  \u001B[34mTest Title\u001B[39m",
+      "  0:0  \u001B[31merror\u001B[39m  \u001B[2mdep1 \u001B[22m\u001B[31mFirst Error\u001B[39m  \u001B[34mTest Title\u001B[39m",
     ]);
     assert.deepEqual(errorFn.mock.calls[2]?.arguments, [
-      "  0:0  \u001B[31merror\u001B[39m  \u001B[90mdep1 \u001B[39m\u001B[31mSecond Error\u001B[39m  \u001B[34mTest Title\u001B[39m",
+      "  0:0  \u001B[31merror\u001B[39m  \u001B[2mdep1 \u001B[22m\u001B[31mSecond Error\u001B[39m  \u001B[34mTest Title\u001B[39m",
     ]);
     assert.deepEqual(errorFn.mock.calls[3]?.arguments, []);
     assert.deepEqual(logFn.mock.calls[0]?.arguments, [
@@ -400,7 +400,7 @@ describe("displayMessages", () => {
       [
         ["\u001B[4mtest/path\u001B[24m"],
         [
-          "  15:5  \u001B[31merror\u001B[39m  \u001B[90mdependencies > dep1 \u001B[39m\u001B[31mError\u001B[39m  \u001B[34mtest-rule\u001B[39m",
+          "  15:5  \u001B[31merror\u001B[39m  \u001B[2mdependencies > dep1 \u001B[22m\u001B[31mError\u001B[39m  \u001B[34mtest-rule\u001B[39m",
         ],
         [],
       ],

@@ -16,7 +16,7 @@ autoFixable, fixTo, ruleName, dependency, }) {
         : "0:0";
     const messageType = onlyWarns ? chalk.yellow("warning") : chalk.red("error");
     const dependencyInfo = dependency
-        ? chalk.gray(`${dependency.fieldName ? `${dependency.fieldName} > ` : ""}${dependency.name} `)
+        ? chalk.dim(`${dependency.fieldName ? `${dependency.fieldName} > ` : ""}${dependency.name} `)
         : "";
     const details = errorDetails ? `: ${errorDetails}` : "";
     const messageTitle = onlyWarns
