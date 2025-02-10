@@ -9,7 +9,7 @@ import type {
 } from "../utils/packageTypes.ts";
 import type { OnlyWarnsForMappingCheck } from "../utils/warnForUtils.ts";
 import { regularDependencyTypes } from "./checkDirectPeerDependencies.ts";
-import { checkPeerDependencies } from "./checkPeerDependencies.ts";
+import { checkSatisfiesPeerDependency } from "./checkPeerDependencies.ts";
 
 export function checkMonorepoDirectSubpackagePeerDependencies(
   reportError: ReportError,
@@ -40,17 +40,23 @@ export function checkMonorepoDirectSubpackagePeerDependencies(
 
   for (const { name: depName, type: depType, pkg: depPkg } of allDepPkgs) {
     if (depPkg.peerDependencies) {
-      checkPeerDependencies(
-        reportError,
-        monorepoPkg,
-        depType,
-        ["devDependencies"],
-        true, // we only check those that are defined in monorepo pkg, to make sure if there were missing in subpackage, that we don't have several versions of them.
-        [], // this is only used if allowMissing is not true
-        depPkg,
-        missingOnlyWarnsForCheck.createFor(depName),
-        invalidOnlyWarnsForCheck.createFor(depName),
-      );
+      for (const [peerDepName, range] of Object.entries(
+        depPkg.peerDependencies,
+      )) {
+        if (subpackagePkg.devDependencies?.[peerDepName]) {
+          continue; // skip as already checked in checkDirectPeerDependencies for the subpackage itself.
+        }
+        checkSatisfiesPeerDependency(
+          reportError,
+          monorepoPkg,
+          depType,
+          ["devDependencies"],
+          peerDepName,
+          range,
+          depPkg,
+          invalidOnlyWarnsForCheck.createFor(depName),
+        );
+      }
     }
   }
 

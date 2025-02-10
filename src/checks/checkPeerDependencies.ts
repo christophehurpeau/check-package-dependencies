@@ -9,6 +9,49 @@ import type {
 import { getRealVersion } from "../utils/semverUtils.ts";
 import type { OnlyWarnsForCheck } from "../utils/warnForUtils.ts";
 
+export function checkSatisfiesPeerDependency(
+  reportError: ReportError,
+  pkg: ParsedPackageJson,
+  type: DependencyTypes,
+  allowedPeerIn: DependencyTypes[],
+  peerDepName: string,
+  range: string,
+  depPkg: PackageJson,
+  invalidOnlyWarnsForCheck: OnlyWarnsForCheck,
+): void {
+  const versions = allowedPeerIn.map(
+    (versionsInType) => pkg[versionsInType]?.[peerDepName],
+  );
+
+  versions.forEach((versionV, index) => {
+    if (!versionV) {
+      return;
+    }
+    const version = getRealVersion(versionV.value);
+
+    if (version === "*") {
+      return;
+    }
+
+    const minVersionOfVersion = semver.minVersion(version);
+    if (
+      !minVersionOfVersion ||
+      !semver.satisfies(minVersionOfVersion, range, {
+        includePrerelease: true,
+      })
+    ) {
+      reportError({
+        errorMessage: "Invalid peer dependency version",
+        errorDetails: `"${version}" should satisfies "${range}" ${fromDependency(depPkg, type)}`,
+        dependency: allowedPeerIn[index]
+          ? (pkg[allowedPeerIn[index]]?.[peerDepName] ?? undefined)
+          : undefined,
+        onlyWarns: invalidOnlyWarnsForCheck.shouldWarnsFor(peerDepName),
+      });
+    }
+  });
+}
+
 export function checkPeerDependencies(
   reportError: ReportError,
   pkg: ParsedPackageJson,
@@ -67,34 +110,16 @@ export function checkPeerDependencies(
         onlyWarns: missingOnlyWarnsForCheck.shouldWarnsFor(peerDepName),
       });
     } else {
-      const versions = versionsIn.map(
-        (versionsInType) => pkg[versionsInType]![peerDepName],
+      checkSatisfiesPeerDependency(
+        reportError,
+        pkg,
+        type,
+        allowedPeerInExisting,
+        peerDepName,
+        range,
+        depPkg,
+        invalidOnlyWarnsForCheck,
       );
-
-      versions.forEach((versionV, index) => {
-        const version = getRealVersion(versionV!.value);
-
-        if (version === "*") {
-          return;
-        }
-
-        const minVersionOfVersion = semver.minVersion(version);
-        if (
-          !minVersionOfVersion ||
-          !semver.satisfies(minVersionOfVersion, range, {
-            includePrerelease: true,
-          })
-        ) {
-          reportError({
-            errorMessage: "Invalid peer dependency version",
-            errorDetails: `"${version}" should satisfies "${range}" ${fromDependency(depPkg, type)}`,
-            dependency: allowedPeerInExisting[index]
-              ? (pkg[allowedPeerInExisting[index]]?.[peerDepName] ?? undefined)
-              : undefined,
-            onlyWarns: invalidOnlyWarnsForCheck.shouldWarnsFor(peerDepName),
-          });
-        }
-      });
     }
   }
 }
