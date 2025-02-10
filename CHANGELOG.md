@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [9.2.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v9.1.0...v9.2.0) (2025-02-10)
+
+### Features
+
+* add eslint rule satisfies-versions ([7906b49](https://github.com/christophehurpeau/check-package-dependencies/commit/7906b49a6ef7fc945b93e5f093239656bd12838e))
+* better locations for eslint plugin ([db7d1d0](https://github.com/christophehurpeau/check-package-dependencies/commit/db7d1d0efccc24d92064025ff4b2aea6ce05bb52))
+* eslint fixer ([316a46e](https://github.com/christophehurpeau/check-package-dependencies/commit/316a46ef38d15705db4cb904fa857bf41a8a7c8a))
+* eslint fixer ([7164e32](https://github.com/christophehurpeau/check-package-dependencies/commit/7164e32a19fa506927163fb3450a19aa9a3adca1))
+* eslint rule resolutions-versions-match ([db8cb7f](https://github.com/christophehurpeau/check-package-dependencies/commit/db8cb7fa1fdc9a2382aafbc1b482ea61e10663ce))
+* remove languageOptions and prefer rule config ([c686de8](https://github.com/christophehurpeau/check-package-dependencies/commit/c686de8df1296012a169bc910343fc18518cfd74))
+* rule direct-peer-dependencies ([13d19a5](https://github.com/christophehurpeau/check-package-dependencies/commit/13d19a5169b7f5687ea0728d1ad46220c20ed3ef))
+
+### Bug Fixes
+
+* dont check peerdep in workspace if was already checked in subpackage ([cce70d6](https://github.com/christophehurpeau/check-package-dependencies/commit/cce70d6da9133bf0ed38a7f8ed01d792fc7630db))
+* enable noUncheckedIndexedAccess ([35a364b](https://github.com/christophehurpeau/check-package-dependencies/commit/35a364bbfa76e612e6ca8bb74a8e91a4b1451a42))
+* use chalk.dim instead of chalk.gray ([0077a0f](https://github.com/christophehurpeau/check-package-dependencies/commit/0077a0f1f7ba1d9b986a7a87f5d55b2e4c3d54f4))
+
 ## [9.1.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v9.0.0...v9.1.0) (2025-01-18)
 
 ### Features
