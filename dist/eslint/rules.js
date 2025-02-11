@@ -1,4 +1,5 @@
 import { checkDirectPeerDependencies, regularDependencyTypes, } from "../checks/checkDirectPeerDependencies.js";
+import { checkDuplicateDependencies } from "../checks/checkDuplicateDependencies.js";
 import { checkExactVersion } from "../checks/checkExactVersions.js";
 import { checkResolutionVersionMatch } from "../checks/checkResolutionsVersionsMatch.js";
 import { checkMissingSatisfiesVersions, checkSatisfiesVersion, } from "../checks/checkSatisfiesVersions.js";
@@ -18,6 +19,8 @@ function createPackageRule(ruleName, schema, { checkPackage, checkDependencyValu
                 // const languageOptions =
                 //   context.languageOptions as CheckPackageDependenciesLanguageOptions;
                 const options = (context.options[0] ?? {});
+                const settings = (context.settings["check-package-dependencies"] ??
+                    {});
                 const schemaProperties = schema && "properties" in schema ? schema.properties : undefined;
                 const onlyWarnsForCheck = schemaProperties &&
                     "onlyWarnsFor" in schemaProperties &&
@@ -37,7 +40,11 @@ function createPackageRule(ruleName, schema, { checkPackage, checkDependencyValu
                     const fixTo = details.fixTo;
                     const suggestions = details.suggestions;
                     const isWarn = details.onlyWarns;
-                    const message = details.errorMessage +
+                    const dependencyInfo = details.dependency
+                        ? `${details.dependency.fieldName ? `${details.dependency.fieldName} > ` : ""}${details.dependency.name}: `
+                        : "";
+                    const message = dependencyInfo +
+                        details.errorMessage +
                         (details.errorDetails ? `: ${details.errorDetails}` : "");
                     if (isWarn) {
                         console.warn(`[warn] ${message} - ${ruleName}`);
@@ -62,6 +69,34 @@ function createPackageRule(ruleName, schema, { checkPackage, checkDependencyValu
                         });
                     }
                 };
+                const checkOnlyWarnsForArray = (onlyWarnsForCheck) => {
+                    const notWarnedFor = onlyWarnsForCheck.getNotWarnedFor();
+                    if (notWarnedFor.length > 0) {
+                        context.report({
+                            message: `${onlyWarnsForMappingCheck.configName}: no warning was raised for ${notWarnedFor
+                                .map((depName) => `"${depName}"`)
+                                .join(", ")}. You should remove it or check if it is correct.`,
+                            loc: {
+                                start: { line: 1, column: 1 },
+                                end: { line: 1, column: 1 },
+                            },
+                        });
+                    }
+                };
+                const checkOnlyWarnsForMapping = (onlyWarnsForMappingCheck) => {
+                    const notWarnedForMapping = onlyWarnsForMappingCheck.getNotWarnedFor();
+                    getEntries(notWarnedForMapping).forEach(([depNameOrStar, notWarnedFor]) => {
+                        context.report({
+                            message: `${onlyWarnsForMappingCheck.configName}: no warning was raised for "${depNameOrStar}" > ${notWarnedFor
+                                .map((depName) => `"${depName}"`)
+                                .join(", ")}`,
+                            loc: {
+                                start: { line: 1, column: 1 },
+                                end: { line: 1, column: 1 },
+                            },
+                        });
+                    });
+                };
                 return {
                     Package(node) {
                         // Only run on package.json files
@@ -74,34 +109,6 @@ function createPackageRule(ruleName, schema, { checkPackage, checkDependencyValu
                                 },
                             });
                         }
-                        const checkOnlyWarnsForArray = (onlyWarnsForCheck) => {
-                            const notWarnedFor = onlyWarnsForCheck.getNotWarnedFor();
-                            if (notWarnedFor.length > 0) {
-                                context.report({
-                                    message: `${onlyWarnsForMappingCheck.configName}: no warning was raised for ${notWarnedFor
-                                        .map((depName) => `"${depName}"`)
-                                        .join(", ")}. You should remove it or check if it is correct.`,
-                                    loc: {
-                                        start: { line: 1, column: 1 },
-                                        end: { line: 1, column: 1 },
-                                    },
-                                });
-                            }
-                        };
-                        const checkOnlyWarnsForMapping = (onlyWarnsForMappingCheck) => {
-                            const notWarnedForMapping = onlyWarnsForMappingCheck.getNotWarnedFor();
-                            getEntries(notWarnedForMapping).forEach(([depNameOrStar, notWarnedFor]) => {
-                                context.report({
-                                    message: `${onlyWarnsForMappingCheck.configName}: no warning was raised for "${depNameOrStar}" > ${notWarnedFor
-                                        .map((depName) => `"${depName}"`)
-                                        .join(", ")}`,
-                                    loc: {
-                                        start: { line: 1, column: 1 },
-                                        end: { line: 1, column: 1 },
-                                    },
-                                });
-                            });
-                        };
                         const { parsedPkgJson, getDependencyPackageJson } = node;
                         try {
                             // const checkPackage = createCheckPackage();
@@ -111,6 +118,7 @@ function createPackageRule(ruleName, schema, { checkPackage, checkDependencyValu
                                     pkg: parsedPkgJson,
                                     getDependencyPackageJson,
                                     // languageOptions,
+                                    settings,
                                     ruleOptions: options,
                                     onlyWarnsForCheck,
                                     onlyWarnsForMappingCheck,
@@ -119,6 +127,19 @@ function createPackageRule(ruleName, schema, { checkPackage, checkDependencyValu
                                     reportError: createReportError(),
                                 });
                             }
+                        }
+                        catch (error) {
+                            context.report({
+                                loc: {
+                                    start: { line: 1, column: 1 },
+                                    end: { line: 1, column: 1 },
+                                },
+                                message: `Failed to check package dependencies: ${error instanceof Error ? error.message : String(error)}`,
+                            });
+                        }
+                    },
+                    "Package:exit"() {
+                        try {
                             checkOnlyWarnsForArray(onlyWarnsForCheck);
                             checkOnlyWarnsForMapping(onlyWarnsForMappingCheck);
                         }
@@ -144,6 +165,7 @@ function createPackageRule(ruleName, schema, { checkPackage, checkDependencyValu
                                     pkg: parsedPkgJson,
                                     getDependencyPackageJson,
                                     // languageOptions,
+                                    settings,
                                     ruleOptions: options,
                                     onlyWarnsForCheck,
                                     onlyWarnsForMappingCheck,
@@ -277,16 +299,38 @@ const rules = {
     ...createPackageRule("direct-peer-dependencies", {
         type: "object",
         properties: {
-            isLibrary: { type: "boolean" },
             onlyWarnsFor: onlyWarnsForMappingSchema,
             onlyWarnsForMissing: onlyWarnsForMappingSchema,
         },
         additionalProperties: false,
     }, {
-        checkPackage: ({ pkg, reportError, ruleOptions, getDependencyPackageJson, onlyWarnsForMappingCheck: invalidOnlyWarnsForCheck, checkOnlyWarnsForMapping, }) => {
+        checkPackage: ({ pkg, reportError, settings, ruleOptions, getDependencyPackageJson, onlyWarnsForMappingCheck: invalidOnlyWarnsForCheck, checkOnlyWarnsForMapping, }) => {
             const missingOnlyWarnsForCheck = createOnlyWarnsForMappingCheck("onlyWarnsForMissing", ruleOptions.onlyWarnsForMissing);
-            checkDirectPeerDependencies(reportError, ruleOptions.isLibrary ?? false, pkg, getDependencyPackageJson, missingOnlyWarnsForCheck, invalidOnlyWarnsForCheck);
+            checkDirectPeerDependencies(reportError, settings.isLibrary ?? false, pkg, getDependencyPackageJson, missingOnlyWarnsForCheck, invalidOnlyWarnsForCheck);
             checkOnlyWarnsForMapping(missingOnlyWarnsForCheck);
+        },
+    }),
+    ...createPackageRule("direct-duplicate-dependencies", {
+        type: "object",
+        properties: {
+            onlyWarnsFor: onlyWarnsForMappingSchema,
+        },
+        additionalProperties: false,
+    }, {
+        checkDependencyValue: ({ node, pkg, reportError, settings, ruleOptions, getDependencyPackageJson, onlyWarnsForMappingCheck, }) => {
+            const searchInByDependencyType = {
+                devDependencies: ["devDependencies", "dependencies"],
+                dependencies: ["devDependencies", "dependencies"],
+            };
+            if (node.fieldName === "resolutionsExplained") {
+                return;
+            }
+            const searchIn = searchInByDependencyType[node.fieldName];
+            if (!searchIn) {
+                return;
+            }
+            const [depPkg] = getDependencyPackageJson(node.name);
+            checkDuplicateDependencies(reportError, pkg, settings.isLibrary ?? false, "dependencies", searchIn, depPkg, onlyWarnsForMappingCheck.createFor(node.name));
         },
     }),
 };

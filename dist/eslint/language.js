@@ -7,7 +7,10 @@ export const PackageJSONLanguage = {
     lineStart: 1,
     columnStart: 1,
     nodeTypeKey: "type",
-    visitorKeys: { Package: ["DependencyValue"], DependencyValue: [] },
+    visitorKeys: {
+        Package: ["DependencyValue"],
+        DependencyValue: [],
+    },
     validateLanguageOptions(languageOptions) { },
     parse(file, context) {
         if (typeof file.body !== "string") {

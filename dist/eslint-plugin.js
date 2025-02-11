@@ -17,7 +17,7 @@ const checkPackagePlugin = {
                 "check-package-dependencies/exact-versions": "error",
                 "check-package-dependencies/resolutions-versions-match": "error",
                 "check-package-dependencies/direct-peer-dependencies": "error",
-                // "check-package-dependencies/direct-duplicate-dependencies": "error",
+                "check-package-dependencies/direct-duplicate-dependencies": "error",
                 // "check-package-dependencies/resolutions-has-explanation": "error",
             },
         },
@@ -25,16 +25,19 @@ const checkPackagePlugin = {
             files: ["package.json"],
             language: "check-package-dependencies/package-json",
             plugins: {},
+            settings: {
+                "check-package-dependencies": {
+                    isLibrary: true,
+                },
+            },
             rules: {
                 "check-package-dependencies/exact-versions": [
                     "error",
                     { dependencies: false },
                 ],
                 "check-package-dependencies/resolutions-versions-match": "error",
-                "check-package-dependencies/direct-peer-dependencies": [
-                    "error",
-                    { isLibrary: true },
-                ],
+                "check-package-dependencies/direct-peer-dependencies": "error",
+                "check-package-dependencies/direct-duplicate-dependencies": "error",
             },
         },
     },

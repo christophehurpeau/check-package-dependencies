@@ -9,10 +9,23 @@ export default [
   checkPackagePlugin.configs["recommended-library"],
   {
     files: ["package.json"],
+    settings: {
+      "check-package-dependencies": {
+        isLibrary: true,
+      },
+    },
     rules: {
       "check-package-dependencies/satisfies-versions": [
         "error",
         { devDependencies: { eslint: "*" } },
+      ],
+      "check-package-dependencies/direct-duplicate-dependencies": [
+        "error",
+        {
+          onlyWarnsFor: {
+            eslint: ["chalk"],
+          },
+        },
       ],
     },
   },

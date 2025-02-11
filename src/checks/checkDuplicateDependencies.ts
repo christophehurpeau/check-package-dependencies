@@ -59,10 +59,8 @@ export function checkDuplicateDependencies(
 
       versions.forEach((version, index) => {
         if (!version) return;
-        if (!version) return;
-        if (!version) return;
-        if (!version) return;
         const versionValue = version.value;
+        if (depRange === "latest") return;
         if (versionValue.startsWith("file:") || depRange.startsWith("file:")) {
           return;
         }

@@ -14,20 +14,25 @@ declare const checkPackagePlugin: {
                 "check-package-dependencies/exact-versions": "error";
                 "check-package-dependencies/resolutions-versions-match": "error";
                 "check-package-dependencies/direct-peer-dependencies": "error";
+                "check-package-dependencies/direct-duplicate-dependencies": "error";
             };
         };
         "recommended-library": {
             files: string[];
             language: string;
             plugins: {};
+            settings: {
+                "check-package-dependencies": {
+                    isLibrary: boolean;
+                };
+            };
             rules: {
                 "check-package-dependencies/exact-versions": ["error", {
                     dependencies: boolean;
                 }];
                 "check-package-dependencies/resolutions-versions-match": "error";
-                "check-package-dependencies/direct-peer-dependencies": ["error", {
-                    isLibrary: boolean;
-                }];
+                "check-package-dependencies/direct-peer-dependencies": "error";
+                "check-package-dependencies/direct-duplicate-dependencies": "error";
             };
         };
     };

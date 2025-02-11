@@ -207,4 +207,26 @@ describe("checkDuplicateDependencies", () => {
       },
     });
   });
+
+  it("should not report error when dependency's value is latest", () => {
+    checkDuplicateDependencies(
+      mockReportError,
+      parsePkgValue({
+        name: "test",
+        devDependencies: {
+          rollup: "1.0.0",
+          "some-lib-using-rollup": "1.0.0",
+        },
+      }),
+      true,
+      "dependencies",
+      ["devDependencies"],
+      {
+        name: "some-lib-using-rollup",
+        dependencies: { rollup: "latest" },
+      },
+      createOnlyWarnsForArrayCheck("test", []),
+    );
+    assertNoMessages(messages);
+  });
 });
