@@ -1,6 +1,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
-import { resolve as importResolve } from "import-meta-resolve";
+// @ts-expect-error -- missing type
+// eslint-disable-next-line n/no-unsupported-features/node-builtins
+import { findPackageJSON } from "node:module";
 import type { ParseError } from "jsonc-parser";
 import { findNodeAtLocation, getNodeValue, parseTree } from "jsonc-parser";
 import type {
@@ -8,6 +9,11 @@ import type {
   PackageJson,
   ParsedPackageJson,
 } from "./packageTypes.ts";
+
+if (typeof findPackageJSON !== "function") {
+  // eslint-disable-next-line unicorn/prefer-type-error
+  throw new Error("check-package-dependencies requires node >= 22.14.0");
+}
 
 export function readPkgJson(packagePath: string): PackageJson {
   return JSON.parse(readFileSync(packagePath, "utf8")) as PackageJson;
@@ -200,10 +206,11 @@ export function internalLoadPackageJsonFromNodeModules(
   pkgDepName: string,
   pkgDirname: string,
 ): [path: string, pkg: PackageJson] {
-  const packageUrl = importResolve(
-    `${pkgDepName}/package.json`,
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+  const packagePath: string = findPackageJSON(
+    pkgDepName,
     `file://${pkgDirname}/package.json`,
   );
-  const packagePath = fileURLToPath(packageUrl);
+
   return [packagePath, readPkgJson(packagePath)];
 }

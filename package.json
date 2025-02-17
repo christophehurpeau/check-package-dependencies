@@ -14,7 +14,7 @@
   "type": "module",
   "packageManager": "yarn@4.6.0",
   "engines": {
-    "node": ">=22.11.0"
+    "node": ">=22.14.0"
   },
   "sideEffects": false,
   "bin": "./bin/check-package-dependencies.mjs",
@@ -82,7 +82,6 @@
   "dependencies": {
     "@eslint/plugin-kit": "^0.2.5",
     "chalk": "^5.4.1",
-    "import-meta-resolve": "^4.1.0",
     "jsonc-parser": "^3.3.1",
     "semver": "^7.7.1",
     "semver-utils": "^1.1.4",

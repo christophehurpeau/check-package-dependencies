@@ -1,7 +1,12 @@
 import { readFileSync, writeFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
-import { resolve as importResolve } from "import-meta-resolve";
+// @ts-expect-error -- missing type
+// eslint-disable-next-line n/no-unsupported-features/node-builtins
+import { findPackageJSON } from "node:module";
 import { findNodeAtLocation, getNodeValue, parseTree } from "jsonc-parser";
+if (typeof findPackageJSON !== "function") {
+    // eslint-disable-next-line unicorn/prefer-type-error
+    throw new Error("check-package-dependencies requires node >= 22.14.0");
+}
 export function readPkgJson(packagePath) {
     return JSON.parse(readFileSync(packagePath, "utf8"));
 }
@@ -132,8 +137,8 @@ export function readAndParsePkgJson(packagePath) {
 }
 /** @internal */
 export function internalLoadPackageJsonFromNodeModules(pkgDepName, pkgDirname) {
-    const packageUrl = importResolve(`${pkgDepName}/package.json`, `file://${pkgDirname}/package.json`);
-    const packagePath = fileURLToPath(packageUrl);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+    const packagePath = findPackageJSON(pkgDepName, `file://${pkgDirname}/package.json`);
     return [packagePath, readPkgJson(packagePath)];
 }
 //# sourceMappingURL=pkgJsonUtils.js.map
