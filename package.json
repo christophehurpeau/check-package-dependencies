@@ -85,12 +85,12 @@
     "semver": "^7.7.1",
     "semver-utils": "^1.1.4",
     "tslib": "^2.8.1",
-    "type-fest": "^4.34.0"
+    "type-fest": "^4.35.0"
   },
   "devDependencies": {
     "@pob/commitlint-config": "9.1.0",
-    "@pob/eslint-config": "59.6.0",
-    "@pob/eslint-config-typescript": "59.6.0",
+    "@pob/eslint-config": "59.7.0",
+    "@pob/eslint-config-typescript": "59.7.0",
     "@pob/root": "16.4.0",
     "@types/node": "22.13.4",
     "@types/semver": "7.5.8",
