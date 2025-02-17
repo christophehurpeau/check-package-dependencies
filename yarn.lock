@@ -58,7 +58,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@commitlint/config-conventional@npm:^19.6.0":
+"@commitlint/config-conventional@npm:^19.7.1":
   version: 19.7.1
   resolution: "@commitlint/config-conventional@npm:19.7.1"
   dependencies:
@@ -521,28 +521,28 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@octokit/core@npm:^6.1.3":
-  version: 6.1.3
-  resolution: "@octokit/core@npm:6.1.3"
+"@octokit/core@npm:^6.1.4":
+  version: 6.1.4
+  resolution: "@octokit/core@npm:6.1.4"
   dependencies:
     "@octokit/auth-token": "npm:^5.0.0"
     "@octokit/graphql": "npm:^8.1.2"
-    "@octokit/request": "npm:^9.1.4"
-    "@octokit/request-error": "npm:^6.1.6"
+    "@octokit/request": "npm:^9.2.1"
+    "@octokit/request-error": "npm:^6.1.7"
     "@octokit/types": "npm:^13.6.2"
     before-after-hook: "npm:^3.0.2"
     universal-user-agent: "npm:^7.0.0"
-  checksum: 10c0/d02506dfb2771b18d0ee620b92deb75f0458cbf92b975b04c9ad3e50b06813d4c98a598bf1a1cae5757d31166c52a1ef55c30b17f2359f30309731e264ea20d0
+  checksum: 10c0/bcb05e83c54f686ae55bd3793e63a1832f83cbe804586b52c61b0e18942609dcc209af501720de6f2c87dc575047645b074f4cd5822d461e892058ea9654aebc
   languageName: node
   linkType: hard
 
-"@octokit/endpoint@npm:^10.0.0":
-  version: 10.1.1
-  resolution: "@octokit/endpoint@npm:10.1.1"
+"@octokit/endpoint@npm:^10.1.3":
+  version: 10.1.3
+  resolution: "@octokit/endpoint@npm:10.1.3"
   dependencies:
-    "@octokit/types": "npm:^13.0.0"
+    "@octokit/types": "npm:^13.6.2"
     universal-user-agent: "npm:^7.0.2"
-  checksum: 10c0/946517241b33db075e7b3fd8abc6952b9e32be312197d07d415dbefb35b93d26afd508f64315111de7cabc2638d4790a9b0b366cf6cc201de5ec6997c7944c8b
+  checksum: 10c0/096956534efee1f683b4749673c2d1673c6fbe5362b9cce553f9f4b956feaf59bde816594de72f4352f749b862d0b15bc0e2fa7fb0e198deb1fe637b5f4a8bc7
   languageName: node
   linkType: hard
 
@@ -564,14 +564,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@octokit/plugin-paginate-rest@npm:^11.4.0":
-  version: 11.4.0
-  resolution: "@octokit/plugin-paginate-rest@npm:11.4.0"
+"@octokit/plugin-paginate-rest@npm:^11.4.2":
+  version: 11.4.2
+  resolution: "@octokit/plugin-paginate-rest@npm:11.4.2"
   dependencies:
     "@octokit/types": "npm:^13.7.0"
   peerDependencies:
     "@octokit/core": ">=6"
-  checksum: 10c0/b211f2491ddb941dfe6ae0b8fa752c617c74a1bb3086a9e2e23e77430682d30863ed8ccc6180dd12d4f6f0e0c7af4489863dd63804e2cc9f3fab12c1f04f8dd2
+  checksum: 10c0/e2da83bb8ddec64e4a2e752483aee929618bef6ade312c20cb2e510c5bf532ced4ff25115e9a71843eb04ba7f770ec5afc7ae0b8d43e227e0f795a7f554d92fd
   languageName: node
   linkType: hard
 
@@ -595,41 +595,41 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@octokit/request-error@npm:^6.0.1, @octokit/request-error@npm:^6.1.6":
-  version: 6.1.6
-  resolution: "@octokit/request-error@npm:6.1.6"
+"@octokit/request-error@npm:^6.1.7":
+  version: 6.1.7
+  resolution: "@octokit/request-error@npm:6.1.7"
   dependencies:
     "@octokit/types": "npm:^13.6.2"
-  checksum: 10c0/cbbed77ddd1d40a1bed36224667c2fac4c20ce375a78d4648745ad1fedc8c2b1d01343b5908979d5b6557736245637eb58efc65d0cd1ef047ea6be74b46c47d2
+  checksum: 10c0/24bd6f98b1d7b2d4062de34777b4195d3cc4dc40c3187a0321dd588291ec5e13b5760765aacdef3a73796a529d3dec0bfb820780be6ef526a3e774d13566b5b0
   languageName: node
   linkType: hard
 
-"@octokit/request@npm:^9.1.4":
-  version: 9.2.0
-  resolution: "@octokit/request@npm:9.2.0"
+"@octokit/request@npm:^9.1.4, @octokit/request@npm:^9.2.1":
+  version: 9.2.2
+  resolution: "@octokit/request@npm:9.2.2"
   dependencies:
-    "@octokit/endpoint": "npm:^10.0.0"
-    "@octokit/request-error": "npm:^6.0.1"
+    "@octokit/endpoint": "npm:^10.1.3"
+    "@octokit/request-error": "npm:^6.1.7"
     "@octokit/types": "npm:^13.6.2"
     fast-content-type-parse: "npm:^2.0.0"
     universal-user-agent: "npm:^7.0.2"
-  checksum: 10c0/025bcb0a1abf1290d5131919e5c7db9cee3df3a271524efd43ac6b9a66abb00d5893fa25ad11cb0546bd3f80096a58dca99fa7b6a06c23c9811bc644d3eb6fa2
+  checksum: 10c0/14cb523c17ed619c63e52025af9fdc67357b63d113905ec0ccb47badd20926e6f37a17a0620d3a906823b496e3b7efb29ed1e2af658cde5daf3ed3f88b421973
   languageName: node
   linkType: hard
 
-"@octokit/rest@npm:21.1.0":
-  version: 21.1.0
-  resolution: "@octokit/rest@npm:21.1.0"
+"@octokit/rest@npm:21.1.1":
+  version: 21.1.1
+  resolution: "@octokit/rest@npm:21.1.1"
   dependencies:
-    "@octokit/core": "npm:^6.1.3"
-    "@octokit/plugin-paginate-rest": "npm:^11.4.0"
+    "@octokit/core": "npm:^6.1.4"
+    "@octokit/plugin-paginate-rest": "npm:^11.4.2"
     "@octokit/plugin-request-log": "npm:^5.3.1"
     "@octokit/plugin-rest-endpoint-methods": "npm:^13.3.0"
-  checksum: 10c0/98d00f5be3e7ccee9486738664650e37be6251face1afc17e4733795a4b986645f33f64602aabf98dbde4c710d1448fb9ea7dfaf0f99824f37deb326aa2a224b
+  checksum: 10c0/59e4fe55942e6f94ff6924934418fbfdee516f6df00889f9417add037c2163b45079a600b6c43449bc824641c9f1b9ac6fe9d3b52a5a1ed3e5e12de697171b78
   languageName: node
   linkType: hard
 
-"@octokit/types@npm:^13.0.0, @octokit/types@npm:^13.6.2, @octokit/types@npm:^13.7.0, @octokit/types@npm:^13.8.0":
+"@octokit/types@npm:^13.6.2, @octokit/types@npm:^13.7.0, @octokit/types@npm:^13.8.0":
   version: 13.8.0
   resolution: "@octokit/types@npm:13.8.0"
   dependencies:
@@ -645,12 +645,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pob/commitlint-config@npm:9.1.0":
-  version: 9.1.0
-  resolution: "@pob/commitlint-config@npm:9.1.0"
+"@pob/commitlint-config@npm:9.1.1":
+  version: 9.1.1
+  resolution: "@pob/commitlint-config@npm:9.1.1"
   dependencies:
-    "@commitlint/config-conventional": "npm:^19.6.0"
-  checksum: 10c0/8b7b23f74f2a5752a3a0f7a2021956db90f3a3b20a4ea9df61be5d252a0e11ef0b5e04fb22d3b1bc1ffb444505baae0c6b54bad4cda96cf76b67b1639f78ee4e
+    "@commitlint/config-conventional": "npm:^19.7.1"
+  checksum: 10c0/51b0bac9a414e009477ad9f0cb7e58d43af72b57a71ca63644616d0bf967d676dd68e32f91d5920c8a27badfab9aa0a482fbc01410570a8879873b53b282e604
   languageName: node
   linkType: hard
 
@@ -729,9 +729,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pob/root@npm:16.4.0":
-  version: 16.4.0
-  resolution: "@pob/root@npm:16.4.0"
+"@pob/root@npm:16.5.0":
+  version: 16.5.0
+  resolution: "@pob/root@npm:16.5.0"
   dependencies:
     "@commitlint/cli": "npm:19.7.1"
     "@pob/pretty-eslint-config": "npm:9.0.0"
@@ -741,12 +741,12 @@ __metadata:
     husky: "npm:~9.1.7"
     json5: "npm:^2.2.3"
     lint-staged: "npm:15.4.3"
-    pob-dependencies: "npm:17.5.0"
-    prettier: "npm:3.5.0"
+    pob-dependencies: "npm:17.5.1"
+    prettier: "npm:3.5.1"
     repository-check-dirty: "npm:10.0.0"
     semver: "npm:^7.3.7"
     which-pm-runs: "npm:1.1.0"
-    yarn-version: "npm:6.3.0"
+    yarn-version: "npm:6.4.0"
   bin:
     commitlint: ./bin/commitlint.js
     pob-root-lint-staged: ./bin/pob-root-lint-staged.js
@@ -757,7 +757,7 @@ __metadata:
     pretty-pkg: ./bin/pretty-pkg.js
     repository-check-dirty: ./bin/repository-check-dirty.js
     yarn-version: ./bin/yarn-version.js
-  checksum: 10c0/88b9d269d6c8f5def52252eac7cd041f002a1a0d40f742c559df02af12071c6c2f7eacecd3a928ae58c99eeeae4979fb885a523faa363cd476e11169e9b74f68
+  checksum: 10c0/57e564a712a72c761e5cb189a94ed6d1f7363cf7b6f55e6ead074dffc81174760948df5a1b42185797a780bf1299432de2b152d03fed4a826a1429549992dd2b
   languageName: node
   linkType: hard
 
@@ -1368,10 +1368,10 @@ __metadata:
   resolution: "check-package-dependencies@workspace:."
   dependencies:
     "@eslint/plugin-kit": "npm:^0.2.5"
-    "@pob/commitlint-config": "npm:9.1.0"
+    "@pob/commitlint-config": "npm:9.1.1"
     "@pob/eslint-config": "npm:59.7.0"
     "@pob/eslint-config-typescript": "npm:59.7.0"
-    "@pob/root": "npm:16.4.0"
+    "@pob/root": "npm:16.5.0"
     "@types/node": "npm:22.13.4"
     "@types/semver": "npm:7.5.8"
     "@types/semver-utils": "npm:1.1.3"
@@ -1592,14 +1592,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"conventional-commits-parser@npm:6.0.0, conventional-commits-parser@npm:^6.0.0":
-  version: 6.0.0
-  resolution: "conventional-commits-parser@npm:6.0.0"
+"conventional-commits-parser@npm:6.1.0, conventional-commits-parser@npm:^6.0.0":
+  version: 6.1.0
+  resolution: "conventional-commits-parser@npm:6.1.0"
   dependencies:
     meow: "npm:^13.0.0"
   bin:
     conventional-commits-parser: dist/cli/index.js
-  checksum: 10c0/9482e0819709b703fc826398bee09da7ac244f0361257a32fc280b14fb5be5636859391eadbe40ba3863c913f37b3c20c0626dea22f0202e70ee1ee65f75b1d9
+  checksum: 10c0/df68b04a9b52908c47b2aa7fe07c21d295998729e075ef9f949f3ca18245ea031e59c42ace730563163c99db4dc3ce9062e26d9a7234dd7403074acd74605b2e
   languageName: node
   linkType: hard
 
@@ -4128,10 +4128,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pob-dependencies@npm:17.5.0":
-  version: 17.5.0
-  resolution: "pob-dependencies@npm:17.5.0"
-  checksum: 10c0/8be51b14a792236da57a5d788ae3e5a590b79b2e9b639cb6a57208d6f770f642379b74231af2c9b383016b6f3d4ecac6c4dea7abf826a1cc963d2eab602581ad
+"pob-dependencies@npm:17.5.1":
+  version: 17.5.1
+  resolution: "pob-dependencies@npm:17.5.1"
+  checksum: 10c0/016c2933aac01fd2ea11cce7112dd1312bde3f87468f3f95aff9272bb41114ecc5a668fa478602db1593fd430f0dac7699e177a5f1f2bb7c81869a0e937f0ab3
   languageName: node
   linkType: hard
 
@@ -4149,12 +4149,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:3.5.0, prettier@npm:^3.2.5":
-  version: 3.5.0
-  resolution: "prettier@npm:3.5.0"
+"prettier@npm:3.5.1, prettier@npm:^3.2.5":
+  version: 3.5.1
+  resolution: "prettier@npm:3.5.1"
   bin:
     prettier: bin/prettier.cjs
-  checksum: 10c0/6c355d74c377f5622953229d92477e8b9779162e848db90fd7e06c431deb73585d31fafc4516cf5868917825b97b9ec7c87c8d8b8e03ccd9fc9c0b7699d1a650
+  checksum: 10c0/9f6f810eae455d6e4213845151a484a2338f2e0d6a8b84ee8e13a83af8a2421ef6c1e31e61e4b135671fb57b9541f6624648880cc2061ac803e243ac898c0123
   languageName: node
   linkType: hard
 
@@ -5251,13 +5251,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yarn-version@npm:6.3.0":
-  version: 6.3.0
-  resolution: "yarn-version@npm:6.3.0"
+"yarn-version@npm:6.4.0":
+  version: 6.4.0
+  resolution: "yarn-version@npm:6.4.0"
   dependencies:
     "@conventional-changelog/git-client": "npm:1.0.1"
     "@npmcli/map-workspaces": "npm:4.0.2"
-    "@octokit/rest": "npm:21.1.0"
+    "@octokit/rest": "npm:21.1.1"
     "@pob/pretty-pkg": "npm:12.0.0"
     commander: "npm:12.1.0"
     conventional-changelog-conventionalcommits: "npm:8.0.0"
@@ -5265,13 +5265,13 @@ __metadata:
     conventional-changelog-preset-loader: "npm:5.0.0"
     conventional-changelog-writer: "npm:8.0.0"
     conventional-commits-filter: "npm:5.0.0"
-    conventional-commits-parser: "npm:6.0.0"
+    conventional-commits-parser: "npm:6.1.0"
     nightingale: "npm:15.0.0"
     nightingale-console: "npm:15.0.0"
     semver: "npm:7.7.1"
   bin:
     yarn-version: ./dist/index-node.mjs
-  checksum: 10c0/d74a73aaed4976b24825ab881ade67db5ccc5bdf599297f5afddd8cf40b45c97bcf0e7c8294a0176a2981bf0eaed36bd5267396a04d75404f70791c5f06c8b47
+  checksum: 10c0/ee0a44f8279134001df8fcc756ce880fa969c84fc81ce31508192f392fa05a8dfa191d93297b9be0f7c3da5e92382adbafb521c07691f0272146ff04f489cb56
   languageName: node
   linkType: hard
 
