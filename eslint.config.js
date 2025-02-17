@@ -22,9 +22,7 @@ export default [
       "check-package-dependencies/direct-duplicate-dependencies": [
         "error",
         {
-          onlyWarnsFor: {
-            eslint: ["chalk"],
-          },
+          onlyWarnsFor: {},
         },
       ],
     },

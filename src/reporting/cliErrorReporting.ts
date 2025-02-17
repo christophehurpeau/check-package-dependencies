@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 
-import chalk from "chalk";
+import { styleText } from "node:util";
 import type { PackageJson } from "type-fest";
 import { getEntries } from "../utils/object.ts";
 import type { DependencyTypes } from "../utils/packageTypes.ts";
@@ -45,19 +45,22 @@ function formatErrorMessage({
   const locationString = location
     ? `${location.start.line}:${location.start.column || 0}`
     : "0:0";
-  const messageType = onlyWarns ? chalk.yellow("warning") : chalk.red("error");
+  const messageType = onlyWarns
+    ? styleText("yellow", "warning")
+    : styleText("red", "error");
   const dependencyInfo = dependency
-    ? chalk.dim(
+    ? styleText(
+        "dim",
         `${dependency.fieldName ? `${dependency.fieldName} > ` : ""}${dependency.name} `,
       )
     : "";
   const details = errorDetails ? `: ${errorDetails}` : "";
   const messageTitle = onlyWarns
-    ? chalk.yellow(errorMessage)
-    : chalk.red(errorMessage);
+    ? styleText("yellow", errorMessage)
+    : styleText("red", errorMessage);
 
   const isFixable = autoFixable || fixTo;
-  return `  ${locationString}  ${messageType}  ${dependencyInfo}${messageTitle}${details}  ${chalk.blue(ruleName)}${isFixable ? chalk.gray(" (--fix)") : ""}`;
+  return `  ${locationString}  ${messageType}  ${dependencyInfo}${messageTitle}${details}  ${styleText("blue", ruleName)}${isFixable ? styleText("dim", " (--fix)") : ""}`;
 }
 
 export function logMessage(message: ReportErrorWithRuleName): void {
@@ -79,7 +82,7 @@ function displayMessagesForPath(
     dependencyGroups: Map<string, ErrorGroup>;
   },
 ): void {
-  console.error(chalk.underline(path));
+  console.error(styleText("underline", path));
 
   // Display general messages first
   if (generalMessages.length > 0) {
@@ -100,19 +103,23 @@ function displayMessagesForPath(
 
 function displayConclusion(): void {
   if (!totalWarnings && !totalErrors) {
-    console.log(chalk.green("\n✨ No problems found"));
+    console.log(styleText("green", "\n✨ No problems found"));
     return;
   }
 
   const problems = [];
   if (totalErrors) {
     problems.push(
-      chalk.red(`${totalErrors} ${totalErrors === 1 ? "error" : "errors"}`),
+      styleText(
+        "red",
+        `${totalErrors} ${totalErrors === 1 ? "error" : "errors"}`,
+      ),
     );
   }
   if (totalWarnings) {
     problems.push(
-      chalk.yellow(
+      styleText(
+        "yellow",
         `${totalWarnings} ${totalWarnings === 1 ? "warning" : "warnings"}`,
       ),
     );
@@ -122,7 +129,8 @@ function displayConclusion(): void {
 
   if (totalFixable) {
     console.log(
-      chalk.gray(
+      styleText(
+        "dim",
         `\n${totalFixable} ${totalFixable === 1 ? "issue" : "issues"} fixable with the --fix option`,
       ),
     );

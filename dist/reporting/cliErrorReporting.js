@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import chalk from "chalk";
+import { styleText } from "node:util";
 import { getEntries } from "../utils/object.js";
 import { getLocFromDependency } from "./ReportError.js";
 const pathMessages = new Map();
@@ -14,16 +14,18 @@ autoFixable, fixTo, ruleName, dependency, }) {
     const locationString = location
         ? `${location.start.line}:${location.start.column || 0}`
         : "0:0";
-    const messageType = onlyWarns ? chalk.yellow("warning") : chalk.red("error");
+    const messageType = onlyWarns
+        ? styleText("yellow", "warning")
+        : styleText("red", "error");
     const dependencyInfo = dependency
-        ? chalk.dim(`${dependency.fieldName ? `${dependency.fieldName} > ` : ""}${dependency.name} `)
+        ? styleText("dim", `${dependency.fieldName ? `${dependency.fieldName} > ` : ""}${dependency.name} `)
         : "";
     const details = errorDetails ? `: ${errorDetails}` : "";
     const messageTitle = onlyWarns
-        ? chalk.yellow(errorMessage)
-        : chalk.red(errorMessage);
+        ? styleText("yellow", errorMessage)
+        : styleText("red", errorMessage);
     const isFixable = autoFixable || fixTo;
-    return `  ${locationString}  ${messageType}  ${dependencyInfo}${messageTitle}${details}  ${chalk.blue(ruleName)}${isFixable ? chalk.gray(" (--fix)") : ""}`;
+    return `  ${locationString}  ${messageType}  ${dependencyInfo}${messageTitle}${details}  ${styleText("blue", ruleName)}${isFixable ? styleText("dim", " (--fix)") : ""}`;
 }
 export function logMessage(message) {
     if (message.onlyWarns)
@@ -36,7 +38,7 @@ export function logMessage(message) {
     console.error(formatErrorMessage(message));
 }
 function displayMessagesForPath(path, { generalMessages, dependencyGroups, }) {
-    console.error(chalk.underline(path));
+    console.error(styleText("underline", path));
     // Display general messages first
     if (generalMessages.length > 0) {
         for (const message of generalMessages) {
@@ -53,19 +55,19 @@ function displayMessagesForPath(path, { generalMessages, dependencyGroups, }) {
 }
 function displayConclusion() {
     if (!totalWarnings && !totalErrors) {
-        console.log(chalk.green("\n✨ No problems found"));
+        console.log(styleText("green", "\n✨ No problems found"));
         return;
     }
     const problems = [];
     if (totalErrors) {
-        problems.push(chalk.red(`${totalErrors} ${totalErrors === 1 ? "error" : "errors"}`));
+        problems.push(styleText("red", `${totalErrors} ${totalErrors === 1 ? "error" : "errors"}`));
     }
     if (totalWarnings) {
-        problems.push(chalk.yellow(`${totalWarnings} ${totalWarnings === 1 ? "warning" : "warnings"}`));
+        problems.push(styleText("yellow", `${totalWarnings} ${totalWarnings === 1 ? "warning" : "warnings"}`));
     }
     console.log(`\n✖ Found ${problems.join(" and ")}`);
     if (totalFixable) {
-        console.log(chalk.gray(`\n${totalFixable} ${totalFixable === 1 ? "issue" : "issues"} fixable with the --fix option`));
+        console.log(styleText("dim", `\n${totalFixable} ${totalFixable === 1 ? "issue" : "issues"} fixable with the --fix option`));
     }
 }
 export function displayMessages() {

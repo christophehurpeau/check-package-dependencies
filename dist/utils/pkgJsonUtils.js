@@ -1,5 +1,4 @@
 import { readFileSync, writeFileSync } from "node:fs";
-// @ts-expect-error -- missing type
 // eslint-disable-next-line n/no-unsupported-features/node-builtins
 import { findPackageJSON } from "node:module";
 import { findNodeAtLocation, getNodeValue, parseTree } from "jsonc-parser";
@@ -137,8 +136,10 @@ export function readAndParsePkgJson(packagePath) {
 }
 /** @internal */
 export function internalLoadPackageJsonFromNodeModules(pkgDepName, pkgDirname) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
     const packagePath = findPackageJSON(pkgDepName, `file://${pkgDirname}/package.json`);
+    if (!packagePath) {
+        throw new Error(`Package ${pkgDepName} not found in ${pkgDirname}`);
+    }
     return [packagePath, readPkgJson(packagePath)];
 }
 //# sourceMappingURL=pkgJsonUtils.js.map

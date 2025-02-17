@@ -237,7 +237,7 @@ describe("displayMessages", () => {
     assert.equal(errorFn.mock.calls.length, 0);
     assert.equal(logFn.mock.calls.length, 1);
     assert.deepEqual(logFn.mock.calls[0]?.arguments, [
-      "\u001B[32m\u001B[39m\n\u001B[32m✨ No problems found\u001B[39m",
+      "\u001B[32m\n✨ No problems found\u001B[39m",
     ]);
   });
 
@@ -297,9 +297,7 @@ describe("displayMessages", () => {
       logFn.mock.calls.map((call) => call.arguments),
       [
         ["\n✖ Found \u001B[31m1 error\u001B[39m"],
-        [
-          "\u001B[90m\u001B[39m\n\u001B[90m1 issue fixable with the --fix option\u001B[39m",
-        ],
+        ["\u001B[2m\n1 issue fixable with the --fix option\u001B[22m"],
       ],
     );
   });
