@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [10.0.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v9.2.0...v10.0.0) (2025-02-17)
+
+### ⚠ BREAKING CHANGES
+
+* requires node >= 22.14
+
+### Features
+
+* eslint rule direct-duplicate-dependencies ([e4bf5a9](https://github.com/christophehurpeau/check-package-dependencies/commit/e4bf5a94922bfe7d6a8cf60b681ba56cdae75d12))
+* use node findPackageJSON ([49d7239](https://github.com/christophehurpeau/check-package-dependencies/commit/49d72399459e4089d790c4d5f953dd726ecfac97))
+
 ## [9.2.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v9.1.0...v9.2.0) (2025-02-10)
 
 ### Features
