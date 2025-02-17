@@ -2,7 +2,7 @@
   "extends": "./tsconfig.json",
 
   "typedocOptions": {
-    "entryPoints": ["src/index.ts"],
+    "entryPoints": ["src/index.ts", "src/eslint-plugin.ts"],
     "exclude": ["src/**/*.test.ts", "src/**/__tests__/**"],
     "readme": "README.md",
     "out": "docs",
