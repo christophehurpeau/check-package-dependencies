@@ -4,8 +4,43 @@ import type { ReportError } from "../reporting/ReportError.ts";
 import { getEntries } from "../utils/object.ts";
 import type {
   DependencyTypes,
+  DependencyValue,
   ParsedPackageJson,
 } from "../utils/packageTypes.ts";
+
+export function checkDependencyMinRangeSatisfies(
+  reportError: ReportError,
+  dependencyValue: DependencyValue,
+  pkg: ParsedPackageJson,
+  dependencyType2: DependencyTypes,
+): void {
+  if (!pkg[dependencyType2]) return;
+  if (!dependencyValue || dependencyValue.value === "*") return;
+
+  const depRange2 = pkg[dependencyType2][dependencyValue.name];
+  if (!depRange2) return;
+
+  const minDepRange1 =
+    semver.minVersion(dependencyValue.value)?.version || dependencyValue.value;
+
+  if (
+    !semver.satisfies(minDepRange1, depRange2.value, {
+      includePrerelease: true,
+    })
+  ) {
+    const depRange1Parsed = semverUtils.parseRange(dependencyValue.value);
+    reportError({
+      errorMessage: `Invalid "${dependencyValue.value}" in "${dependencyValue.fieldName}"`,
+      errorDetails: `"${dependencyValue.value}" should satisfies "${depRange2.value}" from "${dependencyType2}"`,
+      dependency: dependencyValue,
+      autoFixable: true,
+      errorTarget: "dependencyValue",
+      fixTo:
+        (depRange1Parsed[0]?.operator || "") +
+        (semver.minVersion(depRange2.value)?.version || depRange2.value),
+    });
+  }
+}
 
 export interface CheckMinRangeSatisfiesOptions {
   tryToAutoFix?: boolean;

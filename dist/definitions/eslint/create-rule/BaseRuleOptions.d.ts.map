@@ -1,0 +1,1 @@
+{"version":3,"file":"BaseRuleOptions.d.ts","sourceRoot":"","sources":["../../../../src/eslint/create-rule/BaseRuleOptions.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,YAAY,EAAE,MAAM,6BAA6B,CAAC;AAEhE,MAAM,WAAW,eAAe;IAC9B,YAAY,CAAC,EAAE,YAAY,CAAC;CAC7B"}

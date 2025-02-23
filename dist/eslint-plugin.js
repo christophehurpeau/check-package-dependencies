@@ -10,7 +10,7 @@ const checkPackagePlugin = {
     },
     configs: {
         recommended: {
-            files: ["package.json"],
+            files: ["**/package.json"],
             language: "check-package-dependencies/package-json",
             plugins: {},
             rules: {
@@ -18,11 +18,12 @@ const checkPackagePlugin = {
                 "check-package-dependencies/resolutions-versions-match": "error",
                 "check-package-dependencies/direct-peer-dependencies": "error",
                 "check-package-dependencies/direct-duplicate-dependencies": "error",
-                // "check-package-dependencies/resolutions-has-explanation": "error",
+                "check-package-dependencies/resolutions-has-explanation": "error",
+                "check-package-dependencies/root-workspace-should-not-have-dependencies": "error",
             },
         },
         "recommended-library": {
-            files: ["package.json"],
+            files: ["**/package.json"],
             language: "check-package-dependencies/package-json",
             plugins: {},
             settings: {
@@ -38,6 +39,10 @@ const checkPackagePlugin = {
                 "check-package-dependencies/resolutions-versions-match": "error",
                 "check-package-dependencies/direct-peer-dependencies": "error",
                 "check-package-dependencies/direct-duplicate-dependencies": "error",
+                "check-package-dependencies/resolutions-has-explanation": "error",
+                "check-package-dependencies/min-range-dependencies-satisfies-dev-dependencies": "error",
+                "check-package-dependencies/min-range-peer-dependencies-satisfies-dependencies": "error",
+                "check-package-dependencies/root-workspace-should-not-have-dependencies": "error",
             },
         },
     },

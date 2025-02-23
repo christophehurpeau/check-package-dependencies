@@ -1,0 +1,2 @@
+export declare const minRangePeerDependenciesSatisfiesDependenciesRule: Record<string, import("eslint").Rule.RuleModule>;
+//# sourceMappingURL=min-range-peer-dependencies-satisfies-dependencies.d.ts.map

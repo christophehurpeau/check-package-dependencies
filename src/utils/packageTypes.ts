@@ -8,7 +8,8 @@ export type RegularDependencyTypes =
 export type DependencyTypes =
   | RegularDependencyTypes
   | "peerDependencies"
-  | "resolutions";
+  | "resolutions"
+  | "resolutionsExplained";
 
 export type DependencyFieldTypes = DependencyTypes | "resolutionsExplained";
 

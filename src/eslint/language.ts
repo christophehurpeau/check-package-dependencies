@@ -80,6 +80,7 @@ export const PackageJSONLanguage: Language = {
               "optionalDependencies",
               "peerDependencies",
               "resolutions",
+              "resolutionsExplained",
             ] as const
           ).flatMap((dependencyType): DependencyValueAst[] => {
             return Object.values(parsedPkgJson[dependencyType] ?? {}).map(

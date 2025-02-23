@@ -1,6 +1,6 @@
 import type { PackageJson as PackageJsonFromTypeFest } from "type-fest";
 export type RegularDependencyTypes = "dependencies" | "devDependencies" | "optionalDependencies";
-export type DependencyTypes = RegularDependencyTypes | "peerDependencies" | "resolutions";
+export type DependencyTypes = RegularDependencyTypes | "peerDependencies" | "resolutions" | "resolutionsExplained";
 export type DependencyFieldTypes = DependencyTypes | "resolutionsExplained";
 export type DependencyName = string;
 export interface Location {
