@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [10.1.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v10.0.0...v10.1.0) (2025-02-24)
+
+### Features
+
+* add more rules ([08668b3](https://github.com/christophehurpeau/check-package-dependencies/commit/08668b3be2c33f92f742fcd63568005233f2f8d9))
+
 ## [10.0.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v9.2.0...v10.0.0) (2025-02-17)
 
 ### ⚠ BREAKING CHANGES
