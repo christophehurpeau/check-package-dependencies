@@ -92,7 +92,7 @@
     "@pob/eslint-config": "59.7.0",
     "@pob/eslint-config-typescript": "59.7.0",
     "@pob/root": "16.7.0",
-    "@types/node": "22.13.4",
+    "@types/node": "22.13.9",
     "@types/semver": "7.5.8",
     "@types/semver-utils": "1.1.3",
     "eslint": "9.20.1",
