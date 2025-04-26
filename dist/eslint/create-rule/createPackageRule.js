@@ -1,5 +1,9 @@
+/* eslint-disable complexity */
+import fs, { constants } from "node:fs";
+import path from "node:path";
 import { getLocFromDependency } from "../../reporting/ReportError.js";
 import { getEntries } from "../../utils/object.js";
+import { parsePkg } from "../../utils/pkgJsonUtils.js";
 import { createOnlyWarnsForArrayCheck, createOnlyWarnsForMappingCheck, } from "../../utils/warnForUtils.js";
 export const onlyWarnsForArraySchema = {
     type: "array",
@@ -115,6 +119,41 @@ export function createPackageRule(ruleName, schema, { checkPackage, checkDepende
                             });
                         }
                         const { parsedPkgJson, getDependencyPackageJson } = node;
+                        const loadWorkspacePackageJsons = () => {
+                            const workspacePackagesPaths = [];
+                            const pkgWorkspaces = parsedPkgJson.value.workspaces &&
+                                !Array.isArray(parsedPkgJson.value.workspaces)
+                                ? parsedPkgJson.value.workspaces.packages
+                                : parsedPkgJson.value.workspaces;
+                            if (!pkgWorkspaces) {
+                                throw new Error("Tried to load workspaces package.json but no workspaces found");
+                            }
+                            const dirname = path.dirname(parsedPkgJson.path);
+                            // eslint-disable-next-line n/no-unsupported-features/node-builtins
+                            const match = fs.globSync(pkgWorkspaces, { cwd: dirname });
+                            for (const pathMatch of match) {
+                                const subPkgPath = path.relative(process.cwd(), pathMatch);
+                                const pkgPath = path.join(subPkgPath, "package.json");
+                                try {
+                                    fs.accessSync(pkgPath, constants.R_OK);
+                                }
+                                catch {
+                                    console.log(`Ignored potential directory, no package.json found: ${pathMatch}`);
+                                    continue;
+                                }
+                                workspacePackagesPaths.push(pkgPath);
+                            }
+                            return workspacePackagesPaths.map((path) => {
+                                try {
+                                    const body = fs.readFileSync(path, "utf8");
+                                    const parsedPkgJson = parsePkg(body, path);
+                                    return parsedPkgJson;
+                                }
+                                catch (error) {
+                                    throw new Error(`Failed to read workspace package.json "${path}": ${String(error)}`);
+                                }
+                            });
+                        };
                         try {
                             // const checkPackage = createCheckPackage();
                             if (checkPackage) {
@@ -122,6 +161,7 @@ export function createPackageRule(ruleName, schema, { checkPackage, checkDepende
                                     node: parsedPkgJson,
                                     pkg: parsedPkgJson,
                                     getDependencyPackageJson,
+                                    loadWorkspacePackageJsons,
                                     // languageOptions,
                                     settings,
                                     ruleOptions: options,

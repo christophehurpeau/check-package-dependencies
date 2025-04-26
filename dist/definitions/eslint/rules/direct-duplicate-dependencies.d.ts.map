@@ -1,1 +1,1 @@
-{"version":3,"file":"direct-duplicate-dependencies.d.ts","sourceRoot":"","sources":["../../../../src/eslint/rules/direct-duplicate-dependencies.ts"],"names":[],"mappings":"AAaA,eAAO,MAAM,+BAA+B,kDAgDzC,CAAC"}
+{"version":3,"file":"direct-duplicate-dependencies.d.ts","sourceRoot":"","sources":["../../../../src/eslint/rules/direct-duplicate-dependencies.ts"],"names":[],"mappings":"AAmBA,eAAO,MAAM,+BAA+B,kDAyCzC,CAAC"}

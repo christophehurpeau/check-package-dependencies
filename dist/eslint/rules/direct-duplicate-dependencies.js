@@ -1,5 +1,9 @@
 import { checkDuplicateDependencies } from "../../checks/checkDuplicateDependencies.js";
 import { createPackageRule, onlyWarnsForMappingSchema, } from "../create-rule/createPackageRule.js";
+const duplicatesSearchInByDependencyType = {
+    devDependencies: ["devDependencies", "dependencies"],
+    dependencies: ["devDependencies", "dependencies"],
+};
 export const directDuplicateDependenciesRule = createPackageRule("direct-duplicate-dependencies", {
     type: "object",
     properties: {
@@ -8,14 +12,10 @@ export const directDuplicateDependenciesRule = createPackageRule("direct-duplica
     additionalProperties: false,
 }, {
     checkDependencyValue: ({ node, pkg, reportError, settings, ruleOptions, getDependencyPackageJson, onlyWarnsForMappingCheck, }) => {
-        const searchInByDependencyType = {
-            devDependencies: ["devDependencies", "dependencies"],
-            dependencies: ["devDependencies", "dependencies"],
-        };
         if (node.fieldName === "resolutionsExplained") {
             return;
         }
-        const searchIn = searchInByDependencyType[node.fieldName];
+        const searchIn = duplicatesSearchInByDependencyType[node.fieldName];
         if (!searchIn) {
             return;
         }

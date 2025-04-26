@@ -9,6 +9,12 @@ import {
   onlyWarnsForMappingSchema,
 } from "../create-rule/createPackageRule.ts";
 
+const duplicatesSearchInByDependencyType: Partial<
+  Record<DependencyFieldTypes, DependencyTypes[]>
+> = {
+  devDependencies: ["devDependencies", "dependencies"],
+  dependencies: ["devDependencies", "dependencies"],
+};
 type CheckDirectPeerDependenciesOptions = BaseRuleOptions;
 
 export const directDuplicateDependenciesRule =
@@ -31,18 +37,11 @@ export const directDuplicateDependenciesRule =
         getDependencyPackageJson,
         onlyWarnsForMappingCheck,
       }) => {
-        const searchInByDependencyType: Partial<
-          Record<DependencyFieldTypes, DependencyTypes[]>
-        > = {
-          devDependencies: ["devDependencies", "dependencies"],
-          dependencies: ["devDependencies", "dependencies"],
-        };
-
         if (node.fieldName === "resolutionsExplained") {
           return;
         }
 
-        const searchIn = searchInByDependencyType[node.fieldName];
+        const searchIn = duplicatesSearchInByDependencyType[node.fieldName];
         if (!searchIn) {
           return;
         }
