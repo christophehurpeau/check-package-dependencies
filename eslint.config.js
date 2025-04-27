@@ -19,12 +19,6 @@ export default [
         "error",
         { devDependencies: { eslint: "*" } },
       ],
-      "check-package-dependencies/direct-duplicate-dependencies": [
-        "error",
-        {
-          onlyWarnsFor: {},
-        },
-      ],
     },
   },
 ];
