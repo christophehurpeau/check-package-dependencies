@@ -23,6 +23,7 @@ const checkPackagePlugin = {
         "check-package-dependencies/resolutions-has-explanation": "error",
         "check-package-dependencies/root-workspace-should-not-have-dependencies":
           "error",
+        "check-package-dependencies/workspace-dependencies": "error",
       },
     },
     "recommended-library": {
@@ -49,6 +50,7 @@ const checkPackagePlugin = {
           "error",
         "check-package-dependencies/root-workspace-should-not-have-dependencies":
           "error",
+        "check-package-dependencies/workspace-dependencies": "error",
       },
     },
   },

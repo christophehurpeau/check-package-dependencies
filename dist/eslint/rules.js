@@ -7,6 +7,7 @@ import { resolutionsHasExplanationRule } from "./rules/resolutions-has-explanati
 import { resolutionsVersionsMatchRule } from "./rules/resolutions-versions-match.js";
 import { rootWorkspaceShouldNotHaveDependenciesRule } from "./rules/root-workspace-should-not-have-dependencies.js";
 import { satisfiesVersionsRule } from "./rules/satisfies-version.js";
+import { workspaceDependenciesRule } from "./rules/workspace-dependencies.js";
 const rules = {
     ...directPeerDependenciesRule,
     ...directDuplicateDependenciesRule,
@@ -17,6 +18,7 @@ const rules = {
     ...satisfiesVersionsRule,
     ...resolutionsHasExplanationRule,
     ...rootWorkspaceShouldNotHaveDependenciesRule,
+    ...workspaceDependenciesRule,
 };
 export default rules;
 //# sourceMappingURL=rules.js.map

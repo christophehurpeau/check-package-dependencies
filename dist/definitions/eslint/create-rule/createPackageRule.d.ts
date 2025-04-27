@@ -37,6 +37,7 @@ export declare function createPackageRule<RuleOptions extends {
     onlyWarnsFor?: OnlyWarnsFor;
 }>(ruleName: string, schema: NonNullable<NonNullable<Rule.RuleModule["meta"]>["schema"]>, { checkPackage, checkDependencyValue, }: {
     checkPackage?: CheckFn<RuleOptions, ParsedPackageJson, {
+        loadWorkspacePackageJsons: () => ParsedPackageJson[];
         checkOnlyWarnsForArray: (onlyWarnsForCheck: OnlyWarnsForCheck) => void;
         checkOnlyWarnsForMapping: (onlyWarnsForMappingCheck: OnlyWarnsForMappingCheck) => void;
     }>;

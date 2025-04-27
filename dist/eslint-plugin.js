@@ -20,6 +20,7 @@ const checkPackagePlugin = {
                 "check-package-dependencies/direct-duplicate-dependencies": "error",
                 "check-package-dependencies/resolutions-has-explanation": "error",
                 "check-package-dependencies/root-workspace-should-not-have-dependencies": "error",
+                "check-package-dependencies/workspace-dependencies": "error",
             },
         },
         "recommended-library": {
@@ -43,6 +44,7 @@ const checkPackagePlugin = {
                 "check-package-dependencies/min-range-dependencies-satisfies-dev-dependencies": "error",
                 "check-package-dependencies/min-range-peer-dependencies-satisfies-dependencies": "error",
                 "check-package-dependencies/root-workspace-should-not-have-dependencies": "error",
+                "check-package-dependencies/workspace-dependencies": "error",
             },
         },
     },
