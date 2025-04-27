@@ -50,6 +50,7 @@
     "lint:eslint": "eslint --quiet .",
     "lint:prettier": "pob-root-prettier --check .",
     "lint:prettier:fix": "pob-root-prettier --write .",
+    "postinstall": "pob-root-postinstall",
     "postpack": "pinst --enable",
     "prepack": "pinst --disable",
     "test": "node --disable-warning=ExperimentalWarning --experimental-strip-types --import ./src/test-setup.ts --test src/**/*.test.ts",
@@ -57,8 +58,7 @@
     "test:coverage:json": "npx c8 --reporter=json --all --src ./src node --disable-warning=ExperimentalWarning --experimental-strip-types --import ./src/test-setup.ts --test src/**/*.test.ts",
     "test:coverage:lcov": "POB_VITEST_COVERAGE=lcovvitest run --coverage",
     "test:watch": "node --disable-warning=ExperimentalWarning --experimental-strip-types --import ./src/test-setup.ts --test src/**/*.test.ts",
-    "watch": "yarn clean:build && rollup --config rollup.config.mjs --watch",
-    "postinstall": "pob-root-postinstall"
+    "watch": "yarn clean:build && rollup --config rollup.config.mjs --watch"
   },
   "commitlint": {
     "extends": [
@@ -91,9 +91,9 @@
   },
   "devDependencies": {
     "@pob/commitlint-config": "9.1.2",
-    "@pob/eslint-config": "59.8.0",
-    "@pob/eslint-config-typescript": "59.8.0",
-    "@pob/root": "16.9.0",
+    "@pob/eslint-config": "59.8.1",
+    "@pob/eslint-config-typescript": "59.8.1",
+    "@pob/root": "17.0.0",
     "@types/node": "22.14.1",
     "@types/semver": "7.5.8",
     "@types/semver-utils": "1.1.3",
