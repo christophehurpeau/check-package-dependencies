@@ -91,8 +91,8 @@
   },
   "devDependencies": {
     "@pob/commitlint-config": "9.1.4",
-    "@pob/eslint-config": "59.8.1",
-    "@pob/eslint-config-typescript": "59.8.1",
+    "@pob/eslint-config": "60.0.0",
+    "@pob/eslint-config-typescript": "60.0.0",
     "@pob/root": "17.1.0",
     "@types/node": "22.15.2",
     "@types/semver": "7.7.0",
