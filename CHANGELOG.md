@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [10.2.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v10.1.0...v10.2.0) (2025-04-27)
+
+### Features
+
+* add not great rule workspace-dependencies ([227d744](https://github.com/christophehurpeau/check-package-dependencies/commit/227d744c54ebb0a78580f338d944f0c1767fa1af))
+
 ## [10.1.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v10.0.0...v10.1.0) (2025-02-24)
 
 ### Features
