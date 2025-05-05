@@ -82,7 +82,7 @@
   },
   "prettier": "@pob/root/prettier-config",
   "dependencies": {
-    "@eslint/plugin-kit": "^0.2.7",
+    "@eslint/plugin-kit": "^0.3.0",
     "jsonc-parser": "^3.3.1",
     "semver": "^7.7.1",
     "semver-utils": "^1.1.4",
