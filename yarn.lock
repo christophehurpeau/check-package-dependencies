@@ -880,12 +880,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:22.15.7, @types/node@npm:>=18.0.0":
-  version: 22.15.7
-  resolution: "@types/node@npm:22.15.7"
+"@types/node@npm:*, @types/node@npm:22.15.9, @types/node@npm:>=18.0.0":
+  version: 22.15.9
+  resolution: "@types/node@npm:22.15.9"
   dependencies:
     undici-types: "npm:~6.21.0"
-  checksum: 10c0/b9bd092f6262b077c234d89cbbabf088c747284b4066e428f7b9689ba2245b7ff16ca038794b74f32d85b462dff60fc73cfe5edb30a34235000db0f55e57bda2
+  checksum: 10c0/f294ba23e441b4f919394d0e4c80f3f33e858e6f1db0561317148da2db3d3c67809fd1a38de481328933b0d5c6174db40cb6ab65f12b2cf3309df7f07a8e46f6
   languageName: node
   linkType: hard
 
@@ -1507,7 +1507,7 @@ __metadata:
     "@pob/eslint-config": "npm:60.0.0"
     "@pob/eslint-config-typescript": "npm:60.0.0"
     "@pob/root": "npm:18.0.2"
-    "@types/node": "npm:22.15.7"
+    "@types/node": "npm:22.15.9"
     "@types/semver": "npm:7.7.0"
     "@types/semver-utils": "npm:1.1.3"
     eslint: "npm:9.26.0"
