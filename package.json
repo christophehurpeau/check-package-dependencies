@@ -100,7 +100,7 @@
     "eslint": "9.26.0",
     "pinst": "3.0.0",
     "semver": "7.7.1",
-    "typedoc": "0.28.4",
+    "typedoc": "0.28.5",
     "typescript": "5.8.3"
   }
 }
