@@ -1469,7 +1469,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "check-package-dependencies@workspace:."
   dependencies:
-    "@eslint/plugin-kit": "npm:^0.2.7"
+    "@eslint/plugin-kit": "npm:^0.3.1"
     "@pob/commitlint-config": "npm:9.1.4"
     "@pob/eslint-config": "npm:60.1.0"
     "@pob/eslint-config-typescript": "npm:60.1.0"
