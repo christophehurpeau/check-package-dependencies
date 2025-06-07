@@ -8,7 +8,7 @@ export function checkSatisfiesPeerDependency(reportError, pkg, type, allowedPeer
             return;
         }
         const version = getRealVersion(versionV.value);
-        if (version === "*") {
+        if (version === "*" || version.startsWith("patch:")) {
             return;
         }
         const minVersionOfVersion = semver.minVersion(version);

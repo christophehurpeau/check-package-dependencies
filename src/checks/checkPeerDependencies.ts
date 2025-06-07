@@ -29,7 +29,7 @@ export function checkSatisfiesPeerDependency(
     }
     const version = getRealVersion(versionV.value);
 
-    if (version === "*") {
+    if (version === "*" || version.startsWith("patch:")) {
       return;
     }
 

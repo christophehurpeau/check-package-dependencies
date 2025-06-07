@@ -72,6 +72,14 @@ export function checkDuplicateDependencies(
           return;
         }
 
+        // https://yarnpkg.com/features/patching
+        if (
+          versionValue.startsWith("patch:") ||
+          depRange.startsWith("patch:")
+        ) {
+          return;
+        }
+
         if (
           semver.satisfies(versionValue, depRange, {
             includePrerelease: true,
