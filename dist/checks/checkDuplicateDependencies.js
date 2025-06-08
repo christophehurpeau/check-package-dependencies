@@ -64,11 +64,14 @@ export function checkDuplicateDependencies(reportError, pkg, isPkgLibrary, depTy
                     return;
                 }
                 const versionInType = versionsIn[index];
+                const dependency = versionInType
+                    ? pkg[versionInType][depKey]
+                    : undefined;
                 reportError({
-                    errorMessage: "Invalid duplicate dependency",
+                    errorMessage: `Invalid duplicate dependency${dependency ? "" : `"${depKey}"`}`,
                     errorDetails: `"${versions[0].value}" should satisfies "${depRange}" from ${depPkg.name || ""} in ${depType}`,
                     onlyWarns: onlyWarnsForCheck.shouldWarnsFor(depKey),
-                    dependency: versionInType ? pkg[versionInType][depKey] : undefined,
+                    dependency,
                 });
             });
         }
