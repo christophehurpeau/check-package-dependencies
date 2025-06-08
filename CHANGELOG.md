@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [10.3.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v10.2.1...v10.3.0) (2025-06-08)
+
+### Features
+
+* skip patch ([451bf78](https://github.com/christophehurpeau/check-package-dependencies/commit/451bf787130835724dff692a547dfd3c895411e2))
+
 ## [10.2.1](https://github.com/christophehurpeau/check-package-dependencies/compare/v10.2.0...v10.2.1) (2025-06-03)
 
 Note: no notable changes
