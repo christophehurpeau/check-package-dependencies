@@ -11,6 +11,7 @@ if (checkPackage.pkg.workspaces) {
   checkPackageWithWorkspaces.checkRecommended({
     isLibrary: () => true,
   });
+  await checkPackageWithWorkspaces.run();
 } else {
   checkPackage.checkRecommended();
 }
