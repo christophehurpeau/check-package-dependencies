@@ -58,13 +58,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@commitlint/config-conventional@npm:^19.8.0":
-  version: 19.8.0
-  resolution: "@commitlint/config-conventional@npm:19.8.0"
+"@commitlint/config-conventional@npm:^19.8.1":
+  version: 19.8.1
+  resolution: "@commitlint/config-conventional@npm:19.8.1"
   dependencies:
-    "@commitlint/types": "npm:^19.8.0"
+    "@commitlint/types": "npm:^19.8.1"
     conventional-changelog-conventionalcommits: "npm:^7.0.2"
-  checksum: 10c0/c0e2ad4ee8b793ad08ce8f0fd242d8111c71c81eba53b652431b7852e02d3eef0a383e234b7574429f5d1876b712a915921f6ff61fdaccdf708cbbaf3fa1f2f0
+  checksum: 10c0/654786e1acd64756e5c88838c19d9eb5d5ee7a6f314af65585dc18cc4002990e971614e7c69f49e5489be9430671aa5b39af005a2160c5a4f26391258d38febf
   languageName: node
   linkType: hard
 
@@ -222,7 +222,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@commitlint/types@npm:^19.8.0, @commitlint/types@npm:^19.8.1":
+"@commitlint/types@npm:^19.8.1":
   version: 19.8.1
   resolution: "@commitlint/types@npm:19.8.1"
   dependencies:
@@ -673,12 +673,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pob/commitlint-config@npm:9.1.4":
-  version: 9.1.4
-  resolution: "@pob/commitlint-config@npm:9.1.4"
+"@pob/commitlint-config@npm:9.2.0":
+  version: 9.2.0
+  resolution: "@pob/commitlint-config@npm:9.2.0"
   dependencies:
-    "@commitlint/config-conventional": "npm:^19.8.0"
-  checksum: 10c0/008502a739b3a59b82c6b830325efb589483a57af9b3b584f4e700e5ef2a8762e75533081066fe347ef91ba2ad58abd7654f7c54e70fe2ea3191c9c13f80b2be
+    "@commitlint/config-conventional": "npm:^19.8.1"
+  checksum: 10c0/2743e5751930dd2fa9cdfefaf72ea4f554884183e42425297c6bd8d6fd3ec267cb93532f761552c924c5c35eaef46140decac06e295e7a44515d021f991f4381
   languageName: node
   linkType: hard
 
@@ -1479,7 +1479,7 @@ __metadata:
   resolution: "check-package-dependencies@workspace:."
   dependencies:
     "@eslint/plugin-kit": "npm:^0.3.1"
-    "@pob/commitlint-config": "npm:9.1.4"
+    "@pob/commitlint-config": "npm:9.2.0"
     "@pob/eslint-config": "npm:60.1.0"
     "@pob/eslint-config-typescript": "npm:60.1.0"
     "@pob/root": "npm:18.2.0"
