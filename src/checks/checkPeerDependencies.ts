@@ -58,7 +58,11 @@ export function checkPeerDependencies(
   type: DependencyTypes,
   allowedPeerIn: DependencyTypes[],
   allowMissing: boolean,
-  providedDependencies: [string, string][],
+  providedDependencies: [
+    depName: string,
+    depVersion: string,
+    depPkgName: string,
+  ][],
   depPkg: PackageJson,
   missingOnlyWarnsForCheck: OnlyWarnsForCheck,
   invalidOnlyWarnsForCheck: OnlyWarnsForCheck,
@@ -96,6 +100,15 @@ export function checkPeerDependencies(
             semver.intersects(range, depRange),
           )
         ) {
+          if (process.env.REPORT_PROVIDED_PEER_DEPENDENCIES) {
+            reportError({
+              errorMessage: `Missing "${peerDepName}" peer dependency ${fromDependency(depPkg, type)}`,
+              errorDetails: `but it is provided by ${providedDependenciesForDepName.map(([depName, depRange, depPkgName]) => depPkgName).join(", ")}`,
+              dependency: { name: peerDepName },
+              onlyWarns:
+                process.env.REPORT_PROVIDED_PEER_DEPENDENCIES === "warn",
+            });
+          }
           continue;
         }
 

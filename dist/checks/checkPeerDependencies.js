@@ -47,6 +47,14 @@ export function checkPeerDependencies(reportError, pkg, type, allowedPeerIn, all
             const providedDependenciesForDepName = providedDependencies.filter(([depName]) => depName === peerDepName);
             if (providedDependenciesForDepName.length > 0) {
                 if (providedDependenciesForDepName.every(([, depRange]) => semver.intersects(range, depRange))) {
+                    if (process.env.REPORT_PROVIDED_PEER_DEPENDENCIES) {
+                        reportError({
+                            errorMessage: `Missing "${peerDepName}" peer dependency ${fromDependency(depPkg, type)}`,
+                            errorDetails: `but it is provided by ${providedDependenciesForDepName.map(([depName, depRange, depPkgName]) => depPkgName).join(", ")}`,
+                            dependency: { name: peerDepName },
+                            onlyWarns: process.env.REPORT_PROVIDED_PEER_DEPENDENCIES === "warn",
+                        });
+                    }
                     continue;
                 }
                 additionalDetails +=

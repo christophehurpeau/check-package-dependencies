@@ -39,7 +39,7 @@ export function checkDirectPeerDependencies(reportError, isLibrary, pkg, getDepe
                     : false,
             });
             if (depPkg.dependencies && !isLibrary) {
-                allDirectDependenciesDependencies.push(...Object.entries(depPkg.dependencies));
+                allDirectDependenciesDependencies.push(...Object.entries(depPkg.dependencies).map(([depName, depVersion]) => [depName, depVersion, depPkg.name || ""]));
             }
         }
     });

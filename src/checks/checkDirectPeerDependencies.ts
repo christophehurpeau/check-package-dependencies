@@ -51,7 +51,11 @@ export function checkDirectPeerDependencies(
     pkg: PackageJson;
     hasDirectMatchingPeerDependency: boolean;
   }[] = [];
-  const allDirectDependenciesDependencies: [string, string][] = [];
+  const allDirectDependenciesDependencies: [
+    depName: string,
+    depVersion: string,
+    depPkgName: string,
+  ][] = [];
 
   regularDependencyTypes.forEach((depType) => {
     const dependencies = pkg[depType];
@@ -72,7 +76,9 @@ export function checkDirectPeerDependencies(
 
       if (depPkg.dependencies && !isLibrary) {
         allDirectDependenciesDependencies.push(
-          ...Object.entries(depPkg.dependencies),
+          ...Object.entries(depPkg.dependencies).map<[string, string, string]>(
+            ([depName, depVersion]) => [depName, depVersion, depPkg.name || ""],
+          ),
         );
       }
     }
