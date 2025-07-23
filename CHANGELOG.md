@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [10.4.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v10.3.0...v10.4.0) (2025-07-23)
+
+### Features
+
+* add REPORT_PROVIDED_PEER_DEPENDENCIES ([c95eb2d](https://github.com/christophehurpeau/check-package-dependencies/commit/c95eb2d3d670fda64564338f6067746d57d3f376))
+
+### Bug Fixes
+
+* add name of duplicate dependency ([d0dcf13](https://github.com/christophehurpeau/check-package-dependencies/commit/d0dcf130b88957474c6609cc99bef1be13bf0150))
+* use run() in cli ([be565ed](https://github.com/christophehurpeau/check-package-dependencies/commit/be565ed68020623b3d6bb90131fb45cf4d36a4e1))
+
 ## [10.3.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v10.2.1...v10.3.0) (2025-06-08)
 
 ### Features
