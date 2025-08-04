@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [10.4.1](https://github.com/christophehurpeau/check-package-dependencies/compare/v10.4.0...v10.4.1) (2025-08-04)
+
+### Bug Fixes
+
+* support loose range ([73b0781](https://github.com/christophehurpeau/check-package-dependencies/commit/73b078104476876dd0a7dcb2723dccac0a6c9d1f))
+
 ## [10.4.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v10.3.0...v10.4.0) (2025-07-23)
 
 ### Features
