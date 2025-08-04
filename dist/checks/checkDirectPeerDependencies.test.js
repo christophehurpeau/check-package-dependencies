@@ -409,7 +409,7 @@ describe("checkDirectPeerDependencies", () => {
         const getDependencyPackageJsonMock = mock.fn();
         getDependencyPackageJsonMock.mock.mockImplementationOnce(() => [
             {
-                name: "alouette-icons",
+                name: "lib-using-alouette-icons",
                 peerDependencies: { "alouette-icons": "^1.0.0" },
             },
             "",
@@ -421,6 +421,26 @@ describe("checkDirectPeerDependencies", () => {
             },
             peerDependencies: {
                 "lib-using-alouette-icons": "*",
+            },
+        }), getDependencyPackageJsonMock, createOnlyWarnsForMappingCheck("test", []), createOnlyWarnsForMappingCheck("test", []));
+        assertNoMessages(messages);
+    });
+    it("should not report error when peer dependency is a range with invalid comparator if not used with loose", () => {
+        const getDependencyPackageJsonMock = mock.fn();
+        getDependencyPackageJsonMock.mock.mockImplementationOnce(() => [
+            {
+                name: "lib-using-alouette-icons",
+                peerDependencies: { "alouette-icons": ">=3.16.0 || >=4.0.0-" },
+            },
+            "",
+        ]);
+        checkDirectPeerDependencies(mockReportError, false, parsePkgValue({
+            name: "test",
+            devDependencies: {
+                "alouette-icons": "3.17.0",
+            },
+            peerDependencies: {
+                "lib-using-alouette-icons": "1.0.0",
             },
         }), getDependencyPackageJsonMock, createOnlyWarnsForMappingCheck("test", []), createOnlyWarnsForMappingCheck("test", []));
         assertNoMessages(messages);

@@ -38,6 +38,7 @@ export function checkSatisfiesPeerDependency(
       !minVersionOfVersion ||
       !semver.satisfies(minVersionOfVersion, range, {
         includePrerelease: true,
+        loose: true,
       })
     ) {
       reportError({

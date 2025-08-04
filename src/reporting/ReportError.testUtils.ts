@@ -42,7 +42,7 @@ export function createMockReportError(
 }
 
 export function assertNoMessages(messages: CollectedMessages[]): void {
-  assert.equal(messages.length, 0);
+  assert.deepStrictEqual(messages, []);
 }
 
 export function assertSingleMessage(
@@ -52,7 +52,7 @@ export function assertSingleMessage(
   assert.equal(messages.length, 1);
   assert.equal(messages[0]?.messages.length, 1);
   assert.deepEqual(
-    messages[0]?.messages[0],
+    messages[0].messages[0],
     !expected.dependency?.value
       ? expected
       : {

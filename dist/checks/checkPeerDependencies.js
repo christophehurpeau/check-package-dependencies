@@ -15,6 +15,7 @@ export function checkSatisfiesPeerDependency(reportError, pkg, type, allowedPeer
         if (!minVersionOfVersion ||
             !semver.satisfies(minVersionOfVersion, range, {
                 includePrerelease: true,
+                loose: true,
             })) {
             reportError({
                 errorMessage: "Invalid peer dependency version",

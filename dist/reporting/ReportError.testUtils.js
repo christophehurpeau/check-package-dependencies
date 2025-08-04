@@ -22,12 +22,12 @@ export function createMockReportError(path = "test/path", ruleName = "Test Rule 
     return { mockReportError: reportError, messages };
 }
 export function assertNoMessages(messages) {
-    assert.equal(messages.length, 0);
+    assert.deepStrictEqual(messages, []);
 }
 export function assertSingleMessage(messages, expected) {
     assert.equal(messages.length, 1);
     assert.equal(messages[0]?.messages.length, 1);
-    assert.deepEqual(messages[0]?.messages[0], !expected.dependency?.value
+    assert.deepEqual(messages[0].messages[0], !expected.dependency?.value
         ? expected
         : {
             ...expected,
