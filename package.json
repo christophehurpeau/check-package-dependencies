@@ -93,7 +93,7 @@
     "@pob/commitlint-config": "10.0.0",
     "@pob/eslint-config": "60.1.0",
     "@pob/eslint-config-typescript": "60.1.0",
-    "@pob/root": "18.2.0",
+    "@pob/root": "19.1.0",
     "@types/node": "24.0.8",
     "@types/semver": "7.7.1",
     "@types/semver-utils": "1.1.3",
