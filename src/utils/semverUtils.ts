@@ -55,7 +55,7 @@ export function isExactRange(range: string): boolean {
 
 export function getRealVersion(version: string): string {
   if (version.startsWith("npm:")) {
-    const match = /^npm:[^@]+@(.*)$/.exec(version);
+    const match = /^npm:@?[^@]+@(.*)$/.exec(version);
     if (!match) throw new Error(`Invalid version match: ${version}`);
     const [, realVersion] = match;
     if (realVersion) return realVersion;
