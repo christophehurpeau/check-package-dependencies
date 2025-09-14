@@ -93,7 +93,10 @@ export function createCheckPackageWithWorkspaces({
   const workspacePackagesPaths: string[] = [];
 
   // eslint-disable-next-line n/no-unsupported-features/node-builtins
-  const match = fs.globSync(pkgWorkspaces, { cwd: pkgDirname });
+  const match = fs.globSync(pkgWorkspaces, {
+    cwd: pkgDirname,
+    exclude: ["**/node_modules"],
+  });
   for (const pathMatch of match) {
     try {
       fs.accessSync(path.join(pathMatch, "package.json"), constants.R_OK);
