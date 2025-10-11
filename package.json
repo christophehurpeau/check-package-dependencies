@@ -100,6 +100,6 @@
     "eslint": "9.36.0",
     "pinst": "3.0.0",
     "typedoc": "0.28.14",
-    "typescript": "5.9.2"
+    "typescript": "5.9.3"
   }
 }
