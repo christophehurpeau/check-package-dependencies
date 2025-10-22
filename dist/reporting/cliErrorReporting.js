@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+// eslint-disable-next-line n/no-unsupported-features/node-builtins
 import { styleText } from "node:util";
 import { getEntries } from "../utils/object.js";
 import { getLocFromDependency } from "./ReportError.js";
@@ -6,7 +7,6 @@ const pathMessages = new Map();
 let totalWarnings = 0;
 let totalErrors = 0;
 let totalFixable = 0;
-// eslint-disable-next-line complexity
 function formatErrorMessage({ errorMessage, errorDetails, errorTarget, onlyWarns, 
 // eslint-disable-next-line @typescript-eslint/no-deprecated
 autoFixable, fixTo, ruleName, dependency, }) {

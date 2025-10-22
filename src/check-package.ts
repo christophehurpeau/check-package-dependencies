@@ -881,62 +881,57 @@ export function createCheckPackage({
 
     checkSatisfiesVersionsBetweenDependencies(config) {
       jobs.push(
-        new Job(
-          this.checkSatisfiesVersionsBetweenDependencies.name,
-          async () => {
-            const depNamesLvl1 = Object.keys(config);
-            const depNamesLvl2 = Object.values(config).flatMap((depConfig) => [
-              ...Object.keys(depConfig.dependencies || {}),
-              ...Object.keys(depConfig.devDependencies || {}),
-            ]);
-            const uniqueDepNames = [
-              ...new Set([...depNamesLvl1, ...depNamesLvl2]),
-            ];
-            const depPkgsByName = new Map<
-              string,
-              ReturnType<typeof getDependencyPackageJson>
-            >(
-              await Promise.all(
-                uniqueDepNames.map(
-                  (depName) =>
-                    [depName, getDependencyPackageJson(depName)] as const,
-                ),
-              ),
+        new Job(this.checkSatisfiesVersionsBetweenDependencies.name, () => {
+          const depNamesLvl1 = Object.keys(config);
+          const depNamesLvl2 = Object.values(config).flatMap((depConfig) => [
+            ...Object.keys(depConfig.dependencies || {}),
+            ...Object.keys(depConfig.devDependencies || {}),
+          ]);
+          const uniqueDepNames = [
+            ...new Set([...depNamesLvl1, ...depNamesLvl2]),
+          ];
+          const depPkgsByName = new Map<
+            string,
+            ReturnType<typeof getDependencyPackageJson>
+          >(
+            uniqueDepNames.map(
+              (depName) =>
+                [depName, getDependencyPackageJson(depName)] as const,
+            ),
+          );
+
+          Object.entries(config).forEach(([depName1, depConfig1]) => {
+            const [depPkg1, depPkgPath1] = depPkgsByName.get(depName1)!;
+            (["dependencies", "devDependencies"] as const).forEach(
+              (dep1Type) => {
+                Object.entries(depConfig1[dep1Type] || {}).forEach(
+                  ([depName2, depConfig2]) => {
+                    if (!depConfig2) return;
+                    const [depPkg2] = depPkgsByName.get(depName2)!;
+                    (["dependencies", "devDependencies"] as const).forEach(
+                      (dep2Type) => {
+                        const reportError = createReportError(
+                          "Satisfies Versions From Dependency",
+                          depPkgPath1,
+                        );
+
+                        checkSatisfiesVersionsBetweenDependencies(
+                          reportError,
+                          depPkg1,
+                          dep1Type,
+                          depConfig2[dep2Type] || [],
+                          depPkg2,
+                          dep2Type,
+                          { shouldHaveExactVersions },
+                        );
+                      },
+                    );
+                  },
+                );
+              },
             );
-
-            Object.entries(config).forEach(([depName1, depConfig1]) => {
-              const [depPkg1, depPkgPath1] = depPkgsByName.get(depName1)!;
-              (["dependencies", "devDependencies"] as const).forEach(
-                (dep1Type) => {
-                  Object.entries(depConfig1[dep1Type] || {}).forEach(
-                    ([depName2, depConfig2]) => {
-                      if (!depConfig2) return;
-                      const [depPkg2] = depPkgsByName.get(depName2)!;
-                      (["dependencies", "devDependencies"] as const).forEach(
-                        (dep2Type) => {
-                          const reportError = createReportError(
-                            "Satisfies Versions From Dependency",
-                            depPkgPath1,
-                          );
-
-                          checkSatisfiesVersionsBetweenDependencies(
-                            reportError,
-                            depPkg1,
-                            dep1Type,
-                            depConfig2[dep2Type] || [],
-                            depPkg2,
-                            dep2Type,
-                            { shouldHaveExactVersions },
-                          );
-                        },
-                      );
-                    },
-                  );
-                },
-              );
-            });
-          },
-        ),
+          });
+        }),
       );
       return this;
     },

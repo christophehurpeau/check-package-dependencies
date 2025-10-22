@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 
+// eslint-disable-next-line n/no-unsupported-features/node-builtins
 import { styleText } from "node:util";
 import type { PackageJson } from "type-fest";
 import { getEntries } from "../utils/object.ts";
@@ -29,7 +30,6 @@ let totalWarnings = 0;
 let totalErrors = 0;
 let totalFixable = 0;
 
-// eslint-disable-next-line complexity
 function formatErrorMessage({
   errorMessage,
   errorDetails,

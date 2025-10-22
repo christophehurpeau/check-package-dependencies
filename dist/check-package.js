@@ -297,7 +297,7 @@ export function createCheckPackage({ packageDirectoryPath = ".", internalWorkspa
             return this;
         },
         checkSatisfiesVersionsBetweenDependencies(config) {
-            jobs.push(new Job(this.checkSatisfiesVersionsBetweenDependencies.name, async () => {
+            jobs.push(new Job(this.checkSatisfiesVersionsBetweenDependencies.name, () => {
                 const depNamesLvl1 = Object.keys(config);
                 const depNamesLvl2 = Object.values(config).flatMap((depConfig) => [
                     ...Object.keys(depConfig.dependencies || {}),
@@ -306,7 +306,7 @@ export function createCheckPackage({ packageDirectoryPath = ".", internalWorkspa
                 const uniqueDepNames = [
                     ...new Set([...depNamesLvl1, ...depNamesLvl2]),
                 ];
-                const depPkgsByName = new Map(await Promise.all(uniqueDepNames.map((depName) => [depName, getDependencyPackageJson(depName)])));
+                const depPkgsByName = new Map(uniqueDepNames.map((depName) => [depName, getDependencyPackageJson(depName)]));
                 Object.entries(config).forEach(([depName1, depConfig1]) => {
                     const [depPkg1, depPkgPath1] = depPkgsByName.get(depName1);
                     ["dependencies", "devDependencies"].forEach((dep1Type) => {
