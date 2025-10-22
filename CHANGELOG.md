@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [10.5.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v10.4.1...v10.5.0) (2025-10-22)
+
+### Features
+
+* **deps:** update dependencies ([a1a5f09](https://github.com/christophehurpeau/check-package-dependencies/commit/a1a5f09aa482376a70bf08f28d326b67122048af))
+* exclude node_modules ([e3096b8](https://github.com/christophehurpeau/check-package-dependencies/commit/e3096b876bd31321c8a1e629ed0d5425f9f90853))
+* support npm: with scope ([9ce52e0](https://github.com/christophehurpeau/check-package-dependencies/commit/9ce52e00a54e5f3d565f50d36317172290e2f4c0))
+
+### Bug Fixes
+
+* enhance getRealVersion to support npm versions with optional scope ([ba05eee](https://github.com/christophehurpeau/check-package-dependencies/commit/ba05eee34284b4b8b0ed29d046d0b6ff038d23c8))
+* exclude node_modules ([487b665](https://github.com/christophehurpeau/check-package-dependencies/commit/487b6650d2a6315f8d68aad71f866fada208c8d7))
+
 ## [10.4.1](https://github.com/christophehurpeau/check-package-dependencies/compare/v10.4.0...v10.4.1) (2025-08-04)
 
 ### Bug Fixes
