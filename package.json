@@ -14,7 +14,7 @@
   "type": "module",
   "packageManager": "yarn@4.10.3",
   "engines": {
-    "node": ">=22.14.0"
+    "node": ">=22.21.1"
   },
   "sideEffects": false,
   "bin": "./bin/check-package-dependencies.mjs",
