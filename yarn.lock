@@ -570,10 +570,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pob/commitlint-config@npm:11.0.0":
-  version: 11.0.0
-  resolution: "@pob/commitlint-config@npm:11.0.0"
-  checksum: 10c0/faf7ecd28a39053fa8194288445022fbf5b2760754bb3dc48545cd1fe1b714b88924da425970e3113124e926247bd746e2925f78d5b000a70726d84ee01fc095
+"@pob/commitlint-config@npm:11.0.1":
+  version: 11.0.1
+  resolution: "@pob/commitlint-config@npm:11.0.1"
+  checksum: 10c0/2d5cd6fda77e94503396a733b93ea960d65567be3a5f4ea9d4b0198b39211c1ea0005fd09c6fd13975c2fb4ea127665d29ba9392f08adf9f5aeb6dc5568ee64f
   languageName: node
   linkType: hard
 
@@ -1451,7 +1451,7 @@ __metadata:
   resolution: "check-package-dependencies@workspace:."
   dependencies:
     "@eslint/plugin-kit": "npm:^0.4.0"
-    "@pob/commitlint-config": "npm:11.0.0"
+    "@pob/commitlint-config": "npm:11.0.1"
     "@pob/eslint-config": "npm:62.0.0"
     "@pob/eslint-config-typescript": "npm:62.0.0"
     "@pob/root": "npm:19.4.0"
