@@ -128,7 +128,6 @@ export function createPackageRule(ruleName, schema, { checkPackage, checkDepende
                                 throw new Error("Tried to load workspaces package.json but no workspaces found");
                             }
                             const dirname = path.dirname(parsedPkgJson.path);
-                            // eslint-disable-next-line n/no-unsupported-features/node-builtins
                             const match = fs.globSync(pkgWorkspaces, { cwd: dirname });
                             for (const pathMatch of match) {
                                 const subPkgPath = path.relative(process.cwd(), pathMatch);

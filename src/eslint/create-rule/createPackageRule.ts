@@ -242,7 +242,6 @@ export function createPackageRule<
 
               const dirname = path.dirname(parsedPkgJson.path);
 
-              // eslint-disable-next-line n/no-unsupported-features/node-builtins
               const match = fs.globSync(pkgWorkspaces, { cwd: dirname });
               for (const pathMatch of match) {
                 const subPkgPath = path.relative(process.cwd(), pathMatch);

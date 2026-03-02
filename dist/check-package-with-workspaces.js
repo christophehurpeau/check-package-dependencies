@@ -19,7 +19,6 @@ export function createCheckPackageWithWorkspaces({ createReportError = createCli
         throw new Error('Package is missing "workspaces"');
     }
     const workspacePackagesPaths = [];
-    // eslint-disable-next-line n/no-unsupported-features/node-builtins
     const match = fs.globSync(pkgWorkspaces, {
         cwd: pkgDirname,
         exclude: ["**/node_modules"],

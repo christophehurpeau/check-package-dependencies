@@ -20,8 +20,7 @@ import {
 import type { OnlyWarnsForOptionalDependencyMapping } from "./utils/warnForUtils.ts";
 import { createOnlyWarnsForMappingCheck } from "./utils/warnForUtils.ts";
 
-interface OnlyWarnsForInMonorepoPackageCheckPackageRecommendedOption
-  extends OnlyWarnsForInPackageCheckPackageRecommendedOption {
+interface OnlyWarnsForInMonorepoPackageCheckPackageRecommendedOption extends OnlyWarnsForInPackageCheckPackageRecommendedOption {
   duplicateDirectDependency: OnlyWarnsForInDependencyCheckPackageRecommendedOption["duplicateDirectDependency"];
 }
 
@@ -65,8 +64,10 @@ export interface CheckPackageWithWorkspacesApi {
   ) => CheckPackageWithWorkspacesApi;
 }
 
-interface CreateCheckPackageWithWorkspacesOptions
-  extends Except<CreateCheckPackageOptions, "isLibrary"> {
+interface CreateCheckPackageWithWorkspacesOptions extends Except<
+  CreateCheckPackageOptions,
+  "isLibrary"
+> {
   isLibrary?: (pkg: PackageJson) => boolean;
 }
 
@@ -92,7 +93,6 @@ export function createCheckPackageWithWorkspaces({
 
   const workspacePackagesPaths: string[] = [];
 
-  // eslint-disable-next-line n/no-unsupported-features/node-builtins
   const match = fs.globSync(pkgWorkspaces, {
     cwd: pkgDirname,
     exclude: ["**/node_modules"],
