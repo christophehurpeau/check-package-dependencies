@@ -18,20 +18,20 @@
   },
   "sideEffects": false,
   "bin": "./bin/check-package-dependencies.mjs",
-  "main": "./dist/index.js",
+  "main": "./dist/index-node.mjs",
   "types": "./dist/definitions/index.d.ts",
   "exports": {
     "./package.json": "./package.json",
     ".": {
       "types": "./dist/definitions/index.d.ts",
       "node": {
-        "import": "./dist/index.js"
+        "import": "./dist/index-node.mjs"
       }
     },
     "./eslint-plugin": {
       "types": "./dist/definitions/eslint-plugin.d.ts",
       "node": {
-        "import": "./dist/eslint-plugin.js"
+        "import": "./dist/eslint-plugin-node.mjs"
       }
     }
   },
@@ -41,9 +41,11 @@
     "bin"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "yarn clean:build && rollup --config rollup.config.mjs && yarn run build:definitions",
+    "build:definitions": "tsc -p tsconfig.json",
     "checks": "node scripts/check-package.js",
     "clean": "yarn clean:build",
+    "clean:build": "pob-esbuild-clean-out dist",
     "generate:api": "typedoc --tsconfig tsconfig.doc.json",
     "generate:test-coverage": "rm -Rf docs/coverage/ ; NODE_ENV=production BABEL_ENV=test jest --coverage --coverageReporters=pob-lcov-reporter --coverageDirectory=docs/coverage/",
     "lint": "yarn run lint:prettier && tsc && yarn run lint:eslint",
@@ -53,10 +55,10 @@
     "postinstall": "pob-root-postinstall",
     "postpack": "pinst --enable",
     "prepack": "pinst --disable",
-    "test": "TZ=UTC node  --import ./src/test-setup.ts --test src/**/*.test.ts",
-    "test:coverage": "TZ=UTC npx c8 --all --src ./src node  --import ./src/test-setup.ts --test src/**/*.test.ts",
-    "test:coverage:json": "TZ=UTC npx c8 --reporter=json --all --src ./src node  --import ./src/test-setup.ts --test src/**/*.test.ts",
-    "test:watch": "TZ=UTC node  --import ./src/test-setup.ts --test src/**/*.test.ts",
+    "test": "TZ=UTC node --import ./src/test-setup.ts --test src/**/*.test.ts",
+    "test:coverage": "TZ=UTC npx c8 --all --src ./src node --import ./src/test-setup.ts --test src/**/*.test.ts",
+    "test:coverage:json": "TZ=UTC npx c8 --reporter=json --all --src ./src node --import ./src/test-setup.ts --test src/**/*.test.ts",
+    "test:watch": "TZ=UTC node --import ./src/test-setup.ts --test src/**/*.test.ts",
     "watch": "yarn clean:build && rollup --config rollup.config.mjs --watch"
   },
   "commitlint": {
@@ -65,7 +67,7 @@
     ]
   },
   "pob": {
-    "bundler": "tsc",
+    "bundler": "rollup-esbuild",
     "entries": [
       "index",
       "eslint-plugin"
@@ -93,11 +95,11 @@
     "jsonc-parser": "^3.3.1",
     "semver": "^7.7.4",
     "semver-utils": "^1.1.4",
-    "tslib": "^2.8.1",
     "type-fest": "^4.37.0 || ^5.1.0"
   },
   "devDependencies": {
     "@pob/eslint-config": "65.2.0",
+    "@pob/rollup-esbuild": "8.1.0",
     "@pob/root": "22.1.0",
     "@types/node": "24.10.4",
     "@types/semver": "7.7.1",

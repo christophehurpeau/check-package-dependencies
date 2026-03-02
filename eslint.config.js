@@ -1,5 +1,5 @@
 import pobConfig from "@pob/eslint-config";
-import checkPackagePlugin from "./dist/eslint-plugin.js";
+import checkPackagePlugin from "./dist/eslint-plugin-node.mjs";
 
 export default [
   ...pobConfig(import.meta.url).configs.node,
