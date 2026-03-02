@@ -212,7 +212,7 @@ export interface CheckPackageApi {
    * Check that your package.json dependencies specifically satisfies the range set in another dependencies
    * @example
    * ```
-   * .checkSatisfiesVersionsFromDependency('@pob/eslint-config-typescript', {
+   * .checkSatisfiesVersionsFromDependency('@pob/eslint-config', {
    *   devDependencies: [
    *     '@typescript-eslint/eslint-plugin',
    *     '@typescript-eslint/parser',
@@ -364,7 +364,9 @@ export function createCheckPackage({
       try {
         await this.fn();
       } catch (error) {
-        throw new Error(`${this.name} failed: ${(error as Error).message}`);
+        throw new Error(`${this.name} failed: ${(error as Error).message}`, {
+          cause: error,
+        });
       }
     }
 

@@ -1,4 +1,3 @@
-/* eslint-disable complexity */
 import fs, { constants } from "node:fs";
 import path from "node:path";
 import type { Rule } from "eslint";
@@ -269,6 +268,7 @@ export function createPackageRule<
                 } catch (error: unknown) {
                   throw new Error(
                     `Failed to read workspace package.json "${path}": ${String(error)}`,
+                    { cause: error },
                   );
                 }
               });

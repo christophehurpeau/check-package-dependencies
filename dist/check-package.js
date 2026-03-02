@@ -60,7 +60,9 @@ export function createCheckPackage({ packageDirectoryPath = ".", internalWorkspa
                 await this.fn();
             }
             catch (error) {
-                throw new Error(`${this.name} failed: ${error.message}`);
+                throw new Error(`${this.name} failed: ${error.message}`, {
+                    cause: error,
+                });
             }
         }
         runSync() {

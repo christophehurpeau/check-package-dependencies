@@ -34,7 +34,7 @@ export function checkDuplicateDependencies(
       const depVersion = pkg.dependencies![depKey];
       const devDepVersion = pkg.devDependencies![depKey];
 
-      if (depVersion && depVersion.value === devDepVersion!.value) {
+      if (depVersion?.value === devDepVersion!.value) {
         reportError({
           errorMessage: `Invalid "${depKey}" has same version in dependencies and devDependencies`,
           errorDetails:

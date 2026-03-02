@@ -93,7 +93,7 @@ await createCheckPackage(/* '.' */)
     devDependencies: ["@babel/core"],
   })
   // Check that your package.json dependencies specifically satisfies the range set in another dependencies
-  .checkSatisfiesVersionsFromDependency("@pob/eslint-config-typescript", {
+  .checkSatisfiesVersionsFromDependency("@pob/eslint-config", {
     devDependencies: [
       "@typescript-eslint/eslint-plugin",
       "@typescript-eslint/parser",

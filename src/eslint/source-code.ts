@@ -24,24 +24,24 @@ export class PackageJsonSourceCode extends TextSourceCodeBase {
       new VisitNodeStep({
         target: this.ast,
         phase: 1,
-        args: [],
+        args: [this.ast],
       }),
       ...this.ast.children.flatMap((child) => [
         new VisitNodeStep({
           target: child,
           phase: 1,
-          args: [],
+          args: [child],
         }),
         new VisitNodeStep({
           target: child,
           phase: 2,
-          args: [],
+          args: [child],
         }),
       ]),
       new VisitNodeStep({
         target: this.ast,
         phase: 2,
-        args: [],
+        args: [this.ast],
       }),
     ];
   }

@@ -1,8 +1,8 @@
-import pobTypescriptConfig from "@pob/eslint-config-typescript";
+import pobConfig from "@pob/eslint-config";
 import checkPackagePlugin from "./dist/eslint-plugin.js";
 
 export default [
-  ...pobTypescriptConfig(import.meta.url).configs.node,
+  ...pobConfig(import.meta.url).configs.node,
   {
     ignores: ["vite.config.ts"],
   },

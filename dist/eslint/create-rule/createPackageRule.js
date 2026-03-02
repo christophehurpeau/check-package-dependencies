@@ -1,4 +1,3 @@
-/* eslint-disable complexity */
 import fs, { constants } from "node:fs";
 import path from "node:path";
 import { getLocFromDependency } from "../../reporting/ReportError.js";
@@ -150,7 +149,7 @@ export function createPackageRule(ruleName, schema, { checkPackage, checkDepende
                                     return parsedPkgJson;
                                 }
                                 catch (error) {
-                                    throw new Error(`Failed to read workspace package.json "${path}": ${String(error)}`);
+                                    throw new Error(`Failed to read workspace package.json "${path}": ${String(error)}`, { cause: error });
                                 }
                             });
                         };
