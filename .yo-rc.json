@@ -6,7 +6,6 @@
     "lib": {
       "documentation": true,
       "testing": {
-        "ci": true,
         "codecov": true,
         "runner": "node"
       }
@@ -14,7 +13,8 @@
     "project": {
       "type": "lib",
       "packageManager": "yarn",
-      "yarnNodeLinker": "node-modules"
+      "yarnNodeLinker": "node-modules",
+      "ci": true
     }
   }
 }

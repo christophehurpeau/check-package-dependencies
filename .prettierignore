@@ -1,5 +1,5 @@
 CHANGELOG.md
-/.yarnrc.yml
 /docs
+/.yarnrc.yml
 /.yarn/**/*
 /dist

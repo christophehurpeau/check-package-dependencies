@@ -12,9 +12,9 @@
   "repository": "https://github.com/christophehurpeau/check-package-dependencies.git",
   "homepage": "https://github.com/christophehurpeau/check-package-dependencies",
   "type": "module",
-  "packageManager": "yarn@4.11.0",
+  "packageManager": "yarn@4.12.0",
   "engines": {
-    "node": ">=22.14.0"
+    "node": ">=22.18.0"
   },
   "sideEffects": false,
   "bin": "./bin/check-package-dependencies.mjs",
@@ -53,16 +53,15 @@
     "postinstall": "pob-root-postinstall",
     "postpack": "pinst --enable",
     "prepack": "pinst --disable",
-    "test": "TZ=UTC node --disable-warning=ExperimentalWarning --experimental-strip-types --import ./src/test-setup.ts --test src/**/*.test.ts",
-    "test:coverage": "TZ=UTC npx c8 --all --src ./src node --disable-warning=ExperimentalWarning --experimental-strip-types --import ./src/test-setup.ts --test src/**/*.test.ts",
-    "test:coverage:json": "TZ=UTC npx c8 --reporter=json --all --src ./src node --disable-warning=ExperimentalWarning --experimental-strip-types --import ./src/test-setup.ts --test src/**/*.test.ts",
-    "test:coverage:lcov": "POB_VITEST_COVERAGE=lcovvitest run --coverage",
-    "test:watch": "TZ=UTC node --disable-warning=ExperimentalWarning --experimental-strip-types --import ./src/test-setup.ts --test src/**/*.test.ts",
+    "test": "TZ=UTC node  --import ./src/test-setup.ts --test src/**/*.test.ts",
+    "test:coverage": "TZ=UTC npx c8 --all --src ./src node  --import ./src/test-setup.ts --test src/**/*.test.ts",
+    "test:coverage:json": "TZ=UTC npx c8 --reporter=json --all --src ./src node  --import ./src/test-setup.ts --test src/**/*.test.ts",
+    "test:watch": "TZ=UTC node  --import ./src/test-setup.ts --test src/**/*.test.ts",
     "watch": "yarn clean:build && rollup --config rollup.config.mjs --watch"
   },
   "commitlint": {
     "extends": [
-      "@pob/commitlint-config"
+      "@pob/root/commitlint-config"
     ]
   },
   "pob": {
@@ -98,9 +97,8 @@
     "type-fest": "^4.37.0 || ^5.1.0"
   },
   "devDependencies": {
-    "@pob/commitlint-config": "11.0.1",
     "@pob/eslint-config": "65.2.0",
-    "@pob/root": "19.4.0",
+    "@pob/root": "22.1.0",
     "@types/node": "24.10.4",
     "@types/semver": "7.7.1",
     "@types/semver-utils": "1.1.3",
