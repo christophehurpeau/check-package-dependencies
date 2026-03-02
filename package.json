@@ -82,7 +82,7 @@
   },
   "prettier": "@pob/root/prettier-config",
   "peerDependencies": {
-    "eslint": "^10.0.0"
+    "eslint": "^10.0.2"
   },
   "peerDependenciesMeta": {
     "eslint": {
