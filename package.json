@@ -100,7 +100,7 @@
   "devDependencies": {
     "@pob/commitlint-config": "11.0.1",
     "@pob/eslint-config": "65.2.0",
-    "@pob/root": "19.4.0",
+    "@pob/root": "22.1.0",
     "@types/node": "24.10.4",
     "@types/semver": "7.7.1",
     "@types/semver-utils": "1.1.3",
