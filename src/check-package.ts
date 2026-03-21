@@ -68,9 +68,9 @@ export interface OnlyWarnsForInPackageCheckPackageRecommendedOption {
 }
 
 export interface OnlyWarnsForInDependencyCheckPackageRecommendedOption {
-  duplicateDirectDependency: OnlyWarnsFor;
-  missingPeerDependency: OnlyWarnsFor;
-  invalidPeerDependencyVersion: OnlyWarnsFor;
+  duplicateDirectDependency?: OnlyWarnsFor;
+  missingPeerDependency?: OnlyWarnsFor;
+  invalidPeerDependencyVersion?: OnlyWarnsFor;
 }
 
 export type OnlyWarnsForInDependenciesCheckPackageRecommendedOption = Record<
