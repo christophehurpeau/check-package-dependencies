@@ -99,7 +99,7 @@
   },
   "devDependencies": {
     "@pob/eslint-config": "65.2.0",
-    "@pob/rollup-esbuild": "8.1.1",
+    "@pob/rollup-esbuild": "8.1.2",
     "@pob/root": "22.1.0",
     "@types/node": "24.10.4",
     "@types/semver": "7.7.1",
