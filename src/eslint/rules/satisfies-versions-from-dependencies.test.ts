@@ -33,7 +33,7 @@ describe("satisfies-versions-from-dependencies", () => {
     const results = await eslint.lintFiles([
       path.join(
         process.cwd(),
-        "fixtures/invalid-versions-between-dependencies/package.json",
+        "fixtures/invalid-versions-from-dependencies/package.json",
       ),
     ]);
 
@@ -46,8 +46,8 @@ describe("satisfies-versions-from-dependencies", () => {
         severity: 2,
         column: 5,
         endColumn: 35,
-        endLine: 5,
-        line: 5,
+        endLine: 6,
+        line: 6,
         message:
           'dependencies > @eslint/plugin-kit: Invalid: "^0.5.0" should satisfies "^0.4.0"',
       },

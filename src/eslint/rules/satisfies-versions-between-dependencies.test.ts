@@ -50,20 +50,8 @@ describe("satisfies-versions-between-dependencies", () => {
           'Version not satisfied between dependencies for dependency "@eslint/core": "^0.16.0" from "eslint" dependencies should satisfies "^1.0.1" from "@eslint/plugin-kit" dependencies',
         line: 1,
         column: 1,
-        nodeType: null,
         endLine: 1,
         endColumn: 1,
-      },
-      {
-        ruleId: "check-package-dependencies/direct-duplicate-dependencies",
-        severity: 2,
-        message:
-          'dependencies > @eslint/plugin-kit: Invalid duplicate dependency: "^0.5.0" should satisfies "^0.4.0" from eslint in dependencies',
-        line: 5,
-        column: 5,
-        nodeType: null,
-        endLine: 5,
-        endColumn: 35,
       },
     ]);
   });
