@@ -1,0 +1,9 @@
+{
+  "name": "fixtures-invalid-versions-between-dependencies",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "@types/eslint": "9.6.1",
+    "eslint": "9.38.0"
+  }
+}

@@ -6,6 +6,11 @@ declare const checkPackagePlugin: {
         [x: string]: import("eslint").Rule.RuleModule;
     };
     configs: {
+        base: {
+            files: string[];
+            language: string;
+            plugins: {};
+        };
         recommended: {
             files: string[];
             language: string;

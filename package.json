@@ -12,7 +12,7 @@
   "repository": "https://github.com/christophehurpeau/check-package-dependencies.git",
   "homepage": "https://github.com/christophehurpeau/check-package-dependencies",
   "type": "module",
-  "packageManager": "yarn@4.12.0",
+  "packageManager": "yarn@4.13.0",
   "engines": {
     "node": ">=22.18.0"
   },
@@ -50,6 +50,7 @@
     "generate:test-coverage": "rm -Rf docs/coverage/ ; NODE_ENV=production BABEL_ENV=test jest --coverage --coverageReporters=pob-lcov-reporter --coverageDirectory=docs/coverage/",
     "lint": "yarn run lint:prettier && tsc && yarn run lint:eslint",
     "lint:eslint": "eslint --quiet .",
+    "lint:eslint:package.json": "eslint --quiet package.json",
     "lint:prettier": "pob-root-prettier --check .",
     "lint:prettier:fix": "pob-root-prettier --write .",
     "postinstall": "pob-root-postinstall",
@@ -91,7 +92,7 @@
     }
   },
   "dependencies": {
-    "@eslint/plugin-kit": "^0.6.0",
+    "@eslint/plugin-kit": "^0.6.1",
     "jsonc-parser": "^3.3.1",
     "semver": "^7.7.4",
     "semver-utils": "^1.1.4",

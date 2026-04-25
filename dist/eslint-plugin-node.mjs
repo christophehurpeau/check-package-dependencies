@@ -1261,11 +1261,12 @@ const rootWorkspaceShouldNotHaveDependenciesRule = createPackageRule(
   }
 );
 
+function isVersionSatisfiesRange(version, range) {
+  const minVersionOfVersion = semver.minVersion(version);
+  return !!minVersionOfVersion && semver.satisfies(minVersionOfVersion, range, { includePrerelease: true });
+}
 function checkSatisfiesVersion(reportError, dependencyValue, range, onlyWarnsForCheck) {
-  const minVersionOfVersion = semver.minVersion(dependencyValue.value);
-  if (!minVersionOfVersion || !semver.satisfies(minVersionOfVersion, range, {
-    includePrerelease: true
-  })) {
+  if (!isVersionSatisfiesRange(dependencyValue.value, range)) {
     const maxSatisfying = semver.maxSatisfying(
       [dependencyValue.value, range],
       range,
@@ -1284,15 +1285,22 @@ function checkSatisfiesVersion(reportError, dependencyValue, range, onlyWarnsFor
     });
   }
 }
-function checkMissingSatisfiesVersions(reportError, pkg, type, dependenciesRanges, onlyWarnsForCheck) {
-  const pkgDependencies = pkg.value[type];
+function checkMissingSatisfiesVersions(reportError, pkg, acceptedTypes, dependenciesRanges, onlyWarnsForCheck) {
+  const types = Array.isArray(acceptedTypes) ? acceptedTypes : [acceptedTypes];
   Object.entries(dependenciesRanges).forEach(([name, range]) => {
-    const pkgDependency = pkgDependencies?.[name];
-    if (!pkgDependency) {
+    let found = false;
+    for (const type of types) {
+      const pkgDependency = pkg.value[type]?.[name];
+      if (pkgDependency) {
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
       reportError({
-        errorMessage: `Missing "${name}" in "${type}"`,
+        errorMessage: `Missing "${name}" in "${types.join('" or "')}"`,
         errorDetails: `should satisfies "${range}"`,
-        dependency: { name, fieldName: type },
+        dependency: types.length === 1 ? { name, fieldName: types[0] } : { name },
         onlyWarns: onlyWarnsForCheck?.shouldWarnsFor(name)
       });
     }
@@ -1358,6 +1366,220 @@ const satisfiesVersionsRule = createPackageRule(
         }
         checkSatisfiesVersion(reportError, node, range, onlyWarnsForCheck);
       }
+    }
+  }
+);
+
+const satisfiesVersionsBetweenDependenciesRule = createPackageRule(
+  "satisfies-versions-between-dependencies",
+  {
+    type: "object",
+    properties: {
+      dependencies: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            name: { type: "string" },
+            from: {
+              oneOf: [
+                { type: "string" },
+                {
+                  type: "object",
+                  properties: {
+                    name: { type: "string" },
+                    in: { type: "string" }
+                  },
+                  required: ["name"],
+                  additionalProperties: false
+                }
+              ]
+            },
+            to: {
+              oneOf: [
+                { type: "string" },
+                {
+                  type: "object",
+                  properties: {
+                    name: { type: "string" },
+                    in: { type: "string" }
+                  },
+                  required: ["name"],
+                  additionalProperties: false
+                }
+              ]
+            }
+          },
+          required: ["name", "from", "to"],
+          additionalProperties: false
+        },
+        additionalProperties: false
+      },
+      required: ["dependencies"]
+    },
+    additionalProperties: false
+  },
+  {
+    checkPackage: ({
+      pkg,
+      reportError,
+      ruleOptions,
+      getDependencyPackageJson,
+      onlyWarnsForCheck
+    }) => {
+      ruleOptions.dependencies.forEach(({ from }) => {
+        checkMissingSatisfiesVersions(
+          reportError,
+          pkg,
+          regularDependencyTypes,
+          {
+            [typeof from === "string" ? from : from.name]: "*"
+          },
+          onlyWarnsForCheck
+        );
+      });
+    },
+    checkDependencyValue: ({
+      node,
+      reportError,
+      ruleOptions,
+      onlyWarnsForCheck,
+      getDependencyPackageJson
+    }) => {
+      if (!regularDependencyTypes.includes(node.fieldName)) {
+        return;
+      }
+      ruleOptions.dependencies.forEach(({ name, from, to }) => {
+        const [fromDepName, fromDepIn] = typeof from === "string" ? [from, "dependencies"] : [from.name, from.in ?? "dependencies"];
+        if (fromDepName === node.name) {
+          const [fromDepPkg] = getDependencyPackageJson(fromDepName);
+          const fromDepRange = fromDepPkg[fromDepIn]?.[name];
+          if (!fromDepRange) {
+            throw new Error(
+              `Dependency "${fromDepName}" has no dependency "${name}" in "${fromDepIn}".`
+            );
+          }
+          const [toDepName, toDepIn] = typeof to === "string" ? [to, "dependencies"] : [to.name, to.in ?? "dependencies"];
+          const [toDepPkg] = getDependencyPackageJson(toDepName);
+          const toDepRange = toDepPkg[toDepIn]?.[name];
+          if (!toDepRange) {
+            throw new Error(
+              `Dependency "${toDepName}" has no dependency "${name}" in "${toDepIn}".`
+            );
+          }
+          if (!isVersionSatisfiesRange(fromDepRange, toDepRange)) {
+            reportError({
+              errorMessage: `Version not satisfied between dependencies for dependency "${name}"`,
+              errorDetails: `"${fromDepRange}" from "${fromDepName}" ${fromDepIn} should satisfies "${toDepRange}" from "${toDepName}" ${toDepIn}`,
+              onlyWarns: onlyWarnsForCheck.shouldWarnsFor(node.name)
+            });
+          }
+        }
+      });
+    }
+  }
+);
+
+const satisfiesVersionsFromDependenciesRule = createPackageRule(
+  "satisfies-versions-from-dependencies",
+  {
+    type: "object",
+    properties: {
+      dependencies: {
+        type: "object",
+        patternProperties: {
+          ".*": {
+            type: "object",
+            properties: {
+              dependencies: {
+                type: "array",
+                items: { type: "string" },
+                optional: true
+              },
+              devDependencies: {
+                type: "array",
+                items: { type: "string" },
+                optional: true
+              },
+              optionalDependencies: {
+                type: "array",
+                items: { type: "string" },
+                optional: true
+              }
+            },
+            additionalProperties: false
+          }
+        },
+        additionalProperties: false
+      }
+    },
+    required: ["dependencies"],
+    additionalProperties: false
+  },
+  {
+    checkPackage: ({
+      pkg,
+      reportError,
+      ruleOptions,
+      getDependencyPackageJson,
+      onlyWarnsForCheck
+    }) => {
+      if (!ruleOptions.dependencies) {
+        throw new Error(
+          'Rule "check-package-dependencies/satisfies-versions-from-dependencies" is enabled but no dependencies are configured to check'
+        );
+      }
+      Object.entries(ruleOptions.dependencies).forEach(
+        ([depName, values]) => {
+          const [depPkg] = getDependencyPackageJson(depName);
+          regularDependencyTypes.forEach((type) => {
+            if (values[type]) {
+              const dependenciesRanges = Object.fromEntries(
+                values[type].map((v) => {
+                  const range = depPkg.dependencies?.[v];
+                  if (!range) {
+                    throw new Error(
+                      `Dependency ${depName} has no dependency ${v} in ${type}`
+                    );
+                  }
+                  return [v, range];
+                })
+              );
+              checkMissingSatisfiesVersions(
+                reportError,
+                pkg,
+                type,
+                dependenciesRanges,
+                onlyWarnsForCheck
+              );
+            }
+          });
+        }
+      );
+    },
+    checkDependencyValue: ({
+      node,
+      reportError,
+      ruleOptions,
+      onlyWarnsForCheck,
+      getDependencyPackageJson
+    }) => {
+      if (!regularDependencyTypes.includes(node.fieldName)) {
+        return;
+      }
+      const fieldName = node.fieldName;
+      getEntries(ruleOptions.dependencies).forEach(([depName, values]) => {
+        if (values[fieldName]?.includes(node.name)) {
+          const [depPkg] = getDependencyPackageJson(depName);
+          const range = depPkg.dependencies?.[node.name];
+          if (!range) {
+            throw new Error(
+              `Dependency "${depName}" has no dependency "${fieldName}"`
+            );
+          }
+          checkSatisfiesVersion(reportError, node, range, onlyWarnsForCheck);
+        }
+      });
     }
   }
 );
@@ -1483,6 +1705,8 @@ const rules = {
   ...satisfiesVersionsRule,
   ...resolutionsHasExplanationRule,
   ...rootWorkspaceShouldNotHaveDependenciesRule,
+  ...satisfiesVersionsFromDependenciesRule,
+  ...satisfiesVersionsBetweenDependenciesRule,
   ...workspaceDependenciesRule
 };
 
@@ -1495,6 +1719,11 @@ const checkPackagePlugin = {
     ...rules
   },
   configs: {
+    base: {
+      files: ["**/package.json"],
+      language: "check-package-dependencies/package-json",
+      plugins: {}
+    },
     recommended: {
       files: ["**/package.json"],
       language: "check-package-dependencies/package-json",
@@ -1534,6 +1763,9 @@ const checkPackagePlugin = {
       }
     }
   }
+};
+checkPackagePlugin.configs.base.plugins = {
+  "check-package-dependencies": checkPackagePlugin
 };
 checkPackagePlugin.configs.recommended.plugins = {
   "check-package-dependencies": checkPackagePlugin

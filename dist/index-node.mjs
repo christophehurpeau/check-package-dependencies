@@ -747,11 +747,12 @@ function checkResolutionsVersionsMatch(reportError, pkg, { tryToAutoFix } = {}) 
   });
 }
 
+function isVersionSatisfiesRange(version, range) {
+  const minVersionOfVersion = semver.minVersion(version);
+  return !!minVersionOfVersion && semver.satisfies(minVersionOfVersion, range, { includePrerelease: true });
+}
 function checkSatisfiesVersion(reportError, dependencyValue, range, onlyWarnsForCheck) {
-  const minVersionOfVersion = semver.minVersion(dependencyValue.value);
-  if (!minVersionOfVersion || !semver.satisfies(minVersionOfVersion, range, {
-    includePrerelease: true
-  })) {
+  if (!isVersionSatisfiesRange(dependencyValue.value, range)) {
     const maxSatisfying = semver.maxSatisfying(
       [dependencyValue.value, range],
       range,
@@ -770,15 +771,22 @@ function checkSatisfiesVersion(reportError, dependencyValue, range, onlyWarnsFor
     });
   }
 }
-function checkMissingSatisfiesVersions(reportError, pkg, type, dependenciesRanges, onlyWarnsForCheck) {
-  const pkgDependencies = pkg.value[type];
+function checkMissingSatisfiesVersions(reportError, pkg, acceptedTypes, dependenciesRanges, onlyWarnsForCheck) {
+  const types = Array.isArray(acceptedTypes) ? acceptedTypes : [acceptedTypes];
   Object.entries(dependenciesRanges).forEach(([name, range]) => {
-    const pkgDependency = pkgDependencies?.[name];
-    if (!pkgDependency) {
+    let found = false;
+    for (const type of types) {
+      const pkgDependency = pkg.value[type]?.[name];
+      if (pkgDependency) {
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
       reportError({
-        errorMessage: `Missing "${name}" in "${type}"`,
+        errorMessage: `Missing "${name}" in "${types.join('" or "')}"`,
         errorDetails: `should satisfies "${range}"`,
-        dependency: { name, fieldName: type },
+        dependency: types.length === 1 ? { name, fieldName: types[0] } : { name },
         onlyWarns: onlyWarnsForCheck?.shouldWarnsFor(name)
       });
     }

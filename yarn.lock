@@ -1741,7 +1741,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "check-package-dependencies@workspace:."
   dependencies:
-    "@eslint/plugin-kit": "npm:^0.6.0"
+    "@eslint/plugin-kit": "npm:^0.6.1"
     "@pob/eslint-config": "npm:65.3.0"
     "@pob/rollup-esbuild": "npm:8.1.2"
     "@pob/root": "npm:22.3.0"

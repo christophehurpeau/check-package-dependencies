@@ -7,19 +7,24 @@ import type {
 } from "../utils/packageTypes.ts";
 import type { OnlyWarnsForCheck } from "../utils/warnForUtils.ts";
 
+export function isVersionSatisfiesRange(
+  version: string,
+  range: string,
+): boolean {
+  const minVersionOfVersion = semver.minVersion(version);
+  return (
+    !!minVersionOfVersion &&
+    semver.satisfies(minVersionOfVersion, range, { includePrerelease: true })
+  );
+}
+
 export function checkSatisfiesVersion(
   reportError: ReportError,
   dependencyValue: DependencyValue,
   range: string,
   onlyWarnsForCheck?: OnlyWarnsForCheck,
 ): void {
-  const minVersionOfVersion = semver.minVersion(dependencyValue.value);
-  if (
-    !minVersionOfVersion ||
-    !semver.satisfies(minVersionOfVersion, range, {
-      includePrerelease: true,
-    })
-  ) {
+  if (!isVersionSatisfiesRange(dependencyValue.value, range)) {
     const maxSatisfying = semver.maxSatisfying(
       [dependencyValue.value, range],
       range,
@@ -43,18 +48,28 @@ export function checkSatisfiesVersion(
 export function checkMissingSatisfiesVersions(
   reportError: ReportError,
   pkg: ParsedPackageJson,
-  type: DependencyTypes,
+  acceptedTypes: DependencyTypes | DependencyTypes[],
   dependenciesRanges: Record<string, string>,
   onlyWarnsForCheck?: OnlyWarnsForCheck,
 ): void {
-  const pkgDependencies = pkg.value[type];
+  const types = Array.isArray(acceptedTypes) ? acceptedTypes : [acceptedTypes];
+
   Object.entries(dependenciesRanges).forEach(([name, range]) => {
-    const pkgDependency = pkgDependencies?.[name];
-    if (!pkgDependency) {
+    let found = false;
+    for (const type of types) {
+      const pkgDependency = pkg.value[type]?.[name];
+      if (pkgDependency) {
+        found = true;
+        break;
+      }
+    }
+
+    if (!found) {
       reportError({
-        errorMessage: `Missing "${name}" in "${type}"`,
+        errorMessage: `Missing "${name}" in "${types.join('" or "')}"`,
         errorDetails: `should satisfies "${range}"`,
-        dependency: { name, fieldName: type },
+        dependency:
+          types.length === 1 ? { name, fieldName: types[0] } : { name },
         onlyWarns: onlyWarnsForCheck?.shouldWarnsFor(name),
       });
     }

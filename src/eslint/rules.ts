@@ -7,6 +7,8 @@ import { resolutionsHasExplanationRule } from "./rules/resolutions-has-explanati
 import { resolutionsVersionsMatchRule } from "./rules/resolutions-versions-match.ts";
 import { rootWorkspaceShouldNotHaveDependenciesRule } from "./rules/root-workspace-should-not-have-dependencies.ts";
 import { satisfiesVersionsRule } from "./rules/satisfies-version.ts";
+import { satisfiesVersionsBetweenDependenciesRule } from "./rules/satisfies-versions-between-dependencies.ts";
+import { satisfiesVersionsFromDependenciesRule } from "./rules/satisfies-versions-from-dependencies.ts";
 import { workspaceDependenciesRule } from "./rules/workspace-dependencies.ts";
 
 const rules = {
@@ -19,6 +21,8 @@ const rules = {
   ...satisfiesVersionsRule,
   ...resolutionsHasExplanationRule,
   ...rootWorkspaceShouldNotHaveDependenciesRule,
+  ...satisfiesVersionsFromDependenciesRule,
+  ...satisfiesVersionsBetweenDependenciesRule,
   ...workspaceDependenciesRule,
 };
 

@@ -11,6 +11,11 @@ const checkPackagePlugin = {
     ...packageRules,
   },
   configs: {
+    base: {
+      files: ["**/package.json"],
+      language: "check-package-dependencies/package-json",
+      plugins: {},
+    },
     recommended: {
       files: ["**/package.json"],
       language: "check-package-dependencies/package-json",
@@ -55,6 +60,10 @@ const checkPackagePlugin = {
     },
   },
 } satisfies ESLint.Plugin;
+
+checkPackagePlugin.configs.base.plugins = {
+  "check-package-dependencies": checkPackagePlugin,
+};
 
 checkPackagePlugin.configs.recommended.plugins = {
   "check-package-dependencies": checkPackagePlugin,
