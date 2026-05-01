@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [11.0.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v10.5.0...v11.0.0) (2026-05-01)
+
+### ⚠ BREAKING CHANGES
+
+* update to eslint 10
+
+### Features
+
+* add satisfies-versions-from-dependencies and satisfies-versions-between-dependencies in eslint rules
+* update to eslint 10
+
+### Bug Fixes
+
+* **deps:** update dependency semver to ^7.7.3 ([#817](https://github.com/christophehurpeau/check-package-dependencies/issues/817))
+* **deps:** update dependency semver to ^7.7.4 ([#839](https://github.com/christophehurpeau/check-package-dependencies/issues/839))
+* less strict semver dep
+* make dependency warning options optional
+
 ## [10.5.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v10.4.1...v10.5.0) (2025-10-22)
 
 ### Features
