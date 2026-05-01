@@ -49,7 +49,7 @@ describe("satisfies-versions-from-dependencies", () => {
         endLine: 6,
         line: 6,
         message:
-          'dependencies > @eslint/plugin-kit: Invalid: "^0.5.0" should satisfies "^0.4.0"',
+          'dependencies > @eslint/plugin-kit: Invalid: "^0.5.0" should satisfies "^0.6.1"',
       },
     ]);
   });
