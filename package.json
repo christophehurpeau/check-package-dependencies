@@ -53,7 +53,7 @@
     "lint:eslint:package.json": "eslint --quiet package.json",
     "lint:prettier": "pob-root-prettier --check .",
     "lint:prettier:fix": "pob-root-prettier --write .",
-    "postinstall": "pob-root-postinstall",
+    "postinstall": "pob-root-postinstall && yarn ./fixtures/invalid-versions-between-dependencies install && yarn ./fixtures/invalid-versions-from-dependencies install",
     "postpack": "pinst --enable",
     "prepack": "pinst --disable",
     "test": "TZ=UTC node --import ./src/test-setup.ts --test src/**/*.test.ts",
