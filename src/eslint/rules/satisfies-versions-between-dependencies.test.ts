@@ -1,7 +1,17 @@
 import { deepEqual } from "node:assert/strict";
+import { execSync } from "node:child_process";
 import path from "node:path";
-import { describe, it } from "node:test";
+import { before, describe, it } from "node:test";
 import eslintPlugin from "../../eslint-plugin.ts";
+
+before(() => {
+  execSync("yarn install --frozen-lockfile", {
+    cwd: path.join(
+      process.cwd(),
+      "fixtures/invalid-versions-between-dependencies",
+    ),
+  });
+});
 
 describe("satisfies-versions-between-dependencies", () => {
   it("should report when versions do not satisfy between dependencies", async () => {
@@ -9,6 +19,10 @@ describe("satisfies-versions-between-dependencies", () => {
 
     const { ESLint } = await import("eslint");
     const eslint = new ESLint({
+      cwd: path.join(
+        process.cwd(),
+        "fixtures/invalid-versions-between-dependencies",
+      ),
       ignore: false,
       plugins: {
         "check-package-dependencies-test": eslintPlugin,
