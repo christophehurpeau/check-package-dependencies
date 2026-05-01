@@ -1712,7 +1712,6 @@ const rules = {
 
 const checkPackagePlugin = {
   languages: {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     "package-json": PackageJSONLanguage
   },
   rules: {

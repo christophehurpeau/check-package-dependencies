@@ -1,6 +1,11 @@
 declare const checkPackagePlugin: {
     languages: {
-        "package-json": any;
+        "package-json": import("@eslint/core").Language<{
+            LangOptions: import("@eslint/core").LanguageOptions;
+            Code: import("@eslint/core").SourceCode;
+            RootNode: unknown;
+            Node: unknown;
+        }>;
     };
     rules: {
         [x: string]: import("eslint").Rule.RuleModule;

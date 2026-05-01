@@ -4,8 +4,7 @@ import packageRules from "./eslint/rules.ts";
 
 const checkPackagePlugin = {
   languages: {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    "package-json": PackageJSONLanguage as any,
+    "package-json": PackageJSONLanguage,
   },
   rules: {
     ...packageRules,
