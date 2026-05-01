@@ -99,7 +99,7 @@
     "type-fest": "^4.37.0 || ^5.1.0"
   },
   "devDependencies": {
-    "@pob/eslint-config": "65.4.1",
+    "@pob/eslint-config": "65.4.3",
     "@pob/rollup-esbuild": "8.3.0",
     "@pob/root": "23.2.0",
     "@types/node": "24.10.4",
