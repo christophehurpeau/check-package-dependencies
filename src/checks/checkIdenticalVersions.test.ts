@@ -52,6 +52,7 @@ describe("checkIdenticalVersions", () => {
           value: "1.0.1",
         },
         onlyWarns: undefined,
+        fixTo: "1.0.0",
       });
     });
   });
@@ -105,6 +106,7 @@ describe("checkIdenticalVersions", () => {
             value: "1.0.1",
           },
           onlyWarns: undefined,
+          fixTo: "1.0.0",
         },
         {
           errorMessage: 'Invalid "react-test-renderer"',
@@ -116,6 +118,7 @@ describe("checkIdenticalVersions", () => {
             value: "1.0.1",
           },
           onlyWarns: undefined,
+          fixTo: "1.0.0",
         },
       ]);
     });

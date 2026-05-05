@@ -55,6 +55,7 @@ export function checkIdenticalVersions(
             errorDetails: `expecting "${value}" to be "${version}" identical to "${depKey}" in "${type}"`,
             dependency: depValue,
             onlyWarns: onlyWarnsForCheck?.shouldWarnsFor(depKey),
+            fixTo: version,
           });
         }
       });
