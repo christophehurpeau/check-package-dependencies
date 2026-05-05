@@ -575,7 +575,8 @@ function checkIdenticalVersions(reportError, pkg, type, deps, onlyWarnsForCheck)
             errorMessage: `Invalid "${depKeyIdentical}"`,
             errorDetails: `expecting "${value}" to be "${version}" identical to "${depKey}" in "${type}"`,
             dependency: depValue,
-            onlyWarns: onlyWarnsForCheck?.shouldWarnsFor(depKey)
+            onlyWarns: onlyWarnsForCheck?.shouldWarnsFor(depKey),
+            fixTo: version
           });
         }
       });
