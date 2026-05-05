@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [11.1.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v11.0.0...v11.1.0) (2026-05-05)
+
+### Features
+
+* make checkIdenticalVersions fixable if the dep is not missing
+
 ## [11.0.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v10.5.0...v11.0.0) (2026-05-01)
 
 ### ⚠ BREAKING CHANGES
