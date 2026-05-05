@@ -540,7 +540,10 @@ function checkExactVersions(reportError, pkg, types, {
   reportNotWarnedFor(reportError, onlyWarnsForCheck);
 }
 
-function checkIdenticalVersions(reportError, pkg, type, deps, onlyWarnsForCheck) {
+function checkIdenticalVersions(reportError, pkg, type, deps, {
+  onlyWarnsForCheck,
+  tryToAutoFix
+} = {}) {
   const pkgDependencies = pkg[type] || {};
   getKeys(deps).forEach((depKey) => {
     const version = pkgDependencies[depKey]?.value;
@@ -571,13 +574,17 @@ function checkIdenticalVersions(reportError, pkg, type, deps, onlyWarnsForCheck)
           return;
         }
         if (value !== version) {
-          reportError({
-            errorMessage: `Invalid "${depKeyIdentical}"`,
-            errorDetails: `expecting "${value}" to be "${version}" identical to "${depKey}" in "${type}"`,
-            dependency: depValue,
-            onlyWarns: onlyWarnsForCheck?.shouldWarnsFor(depKey),
-            fixTo: version
-          });
+          if (tryToAutoFix) {
+            depValue.changeValue(version);
+          } else {
+            reportError({
+              errorMessage: `Invalid "${depKeyIdentical}"`,
+              errorDetails: `expecting "${value}" to be "${version}" identical to "${depKey}" in "${type}"`,
+              dependency: depValue,
+              onlyWarns: onlyWarnsForCheck?.shouldWarnsFor(depKey),
+              fixTo: version
+            });
+          }
         }
       });
     });
@@ -1707,7 +1714,8 @@ function createCheckPackage({
           reportError,
           parsedPkg,
           "resolutions",
-          resolutions
+          resolutions,
+          { tryToAutoFix }
         );
       }
       if (dependencies) {
@@ -1715,7 +1723,8 @@ function createCheckPackage({
           reportError,
           parsedPkg,
           "dependencies",
-          dependencies
+          dependencies,
+          { tryToAutoFix }
         );
       }
       if (devDependencies) {
@@ -1723,7 +1732,8 @@ function createCheckPackage({
           reportError,
           parsedPkg,
           "devDependencies",
-          devDependencies
+          devDependencies,
+          { tryToAutoFix }
         );
       }
       return this;

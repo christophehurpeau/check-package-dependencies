@@ -860,6 +860,7 @@ export function createCheckPackage({
           parsedPkg,
           "resolutions",
           resolutions,
+          { tryToAutoFix },
         );
       }
       if (dependencies) {
@@ -868,6 +869,7 @@ export function createCheckPackage({
           parsedPkg,
           "dependencies",
           dependencies,
+          { tryToAutoFix },
         );
       }
       if (devDependencies) {
@@ -876,6 +878,7 @@ export function createCheckPackage({
           parsedPkg,
           "devDependencies",
           devDependencies,
+          { tryToAutoFix },
         );
       }
       return this;
