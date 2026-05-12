@@ -94,7 +94,7 @@
   "dependencies": {
     "@eslint/plugin-kit": "^0.7.1",
     "jsonc-parser": "^3.3.1",
-    "semver": "^7.7.4",
+    "semver": "^7.8.0",
     "semver-utils": "^1.1.4",
     "type-fest": "^4.37.0 || ^5.1.0"
   },
