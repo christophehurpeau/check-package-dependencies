@@ -34,8 +34,8 @@ jobs:
         run: yarn run build
         if: startsWith(matrix.node-version, '24.')
 
-      - name: Prettier
-        run: yarn run lint:prettier
+      - name: Format
+        run: yarn run format:check
         if: startsWith(matrix.node-version, '24.')
 
       - name: Typescript
@@ -57,7 +57,7 @@ jobs:
           CI: true
 
       - name: Send results to codecov
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
           fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
