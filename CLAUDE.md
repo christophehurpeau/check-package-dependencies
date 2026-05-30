@@ -67,7 +67,7 @@ For Yarn/npm workspaces, `createCheckPackageWithWorkspaces()` (see `check-packag
 
 The plugin defines a custom `package-json` language (see `src/eslint/language.ts`) so ESLint can lint `package.json` files. Rules are created with `createPackageRule` which handles parsing, node traversal, and the `onlyWarnsFor` option consistently.
 
-ESLint configs exported: `base` (all rules), `recommended` (7 core rules), `recommended-library` (all 12 rules).
+ESLint configs exported: `base` (language + plugin, no rules enabled), `recommended` (7 rules — same set as `recommended-library` minus the two `min-range-*` rules), `recommended-library` (9 rules — adds the two `min-range-*` rules and sets `exact-versions` with `dependencies: false`). The remaining 3 rules (`satisfies-version`, `satisfies-versions-between-dependencies`, `satisfies-versions-from-dependencies`) are opt-in.
 
 ### Test utilities
 
