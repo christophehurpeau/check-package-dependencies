@@ -37,7 +37,7 @@
     }
   },
   "scripts": {
-    "build": "yarn clean:build && rollup --config rollup.config.mjs && yarn run build:definitions",
+    "build": "pnpm run clean:build && rollup --config rollup.config.mjs && pnpm run build:definitions",
     "build:definitions": "tsc -p tsconfig.json",
     "checks": "node scripts/check-package.js",
     "clean": "yarn clean:build",
@@ -46,16 +46,15 @@
     "format:check": "oxfmt --check .",
     "generate:api": "typedoc --tsconfig tsconfig.doc.json",
     "generate:test-coverage": "rm -Rf docs/coverage/ ; NODE_ENV=production BABEL_ENV=test jest --coverage --coverageReporters=pob-lcov-reporter --coverageDirectory=docs/coverage/",
-    "lint": "yarn run format && tsc && yarn run lint:eslint",
+    "lint": "pnpm run format && tsc && pnpm run lint:eslint",
     "lint:eslint": "eslint --quiet .",
     "lint:eslint:package.json": "eslint --quiet package.json",
-    "postinstall": "pob-root-postinstall",
-    "postpack": "pinst --enable",
-    "prepack": "pinst --disable",
+    "prepare": "pob-root-postinstall",
     "test": "TZ=UTC node --import ./src/test-setup.ts --test src/**/*.test.ts",
     "test:coverage": "TZ=UTC npx c8 --all --src ./src node --import ./src/test-setup.ts --test src/**/*.test.ts",
     "test:coverage:json": "TZ=UTC npx c8 --reporter=json --all --src ./src node --import ./src/test-setup.ts --test src/**/*.test.ts",
     "test:watch": "TZ=UTC node --import ./src/test-setup.ts --test src/**/*.test.ts",
+    "tsc": "tsc",
     "watch": "yarn clean:build && rollup --config rollup.config.mjs --watch"
   },
   "dependencies": {
@@ -66,14 +65,14 @@
     "type-fest": "^4.37.0 || ^5.1.0"
   },
   "devDependencies": {
+    "@eslint/core": "1.2.1",
     "@pob/eslint-config": "65.4.3",
     "@pob/rollup-esbuild": "9.1.0",
-    "@pob/root": "24.0.0",
+    "@pob/root": "24.2.1",
     "@types/node": "24.10.4",
     "@types/semver": "7.7.1",
     "@types/semver-utils": "1.1.3",
     "eslint": "10.4.0",
-    "pinst": "3.0.0",
     "typedoc": "0.28.19",
     "typescript": "6.0.3"
   },
@@ -93,7 +92,6 @@
   "engines": {
     "node": ">=22.18.0"
   },
-  "packageManager": "yarn@4.14.1",
   "pob": {
     "bundler": "rollup-esbuild",
     "entries": [

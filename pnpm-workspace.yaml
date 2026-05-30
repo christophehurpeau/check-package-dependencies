@@ -1,0 +1,13 @@
+allowBuilds:
+  esbuild: true
+  unrs-resolver: true
+dedupePeerDependents: true
+minimumReleaseAge: 4320
+minimumReleaseAgeExclude:
+  - "@pob/*"
+  - pob-dependencies
+  - alouette
+  - alouette-icons
+  - nightingale
+  - nightingale-logger
+savePrefix: ^
