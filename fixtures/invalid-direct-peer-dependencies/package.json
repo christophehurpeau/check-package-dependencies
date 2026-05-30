@@ -1,0 +1,8 @@
+{
+  "name": "fixtures-invalid-direct-peer-dependencies",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@eslint-community/eslint-utils": "^4.9.1"
+  }
+}

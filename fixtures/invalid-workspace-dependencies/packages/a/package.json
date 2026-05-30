@@ -1,0 +1,8 @@
+{
+  "name": "fixture-workspace-a",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "semver": "^7.0.0"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "fixtures-invalid-direct-duplicate-dependencies",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@eslint-community/eslint-utils": "^4.9.1",
+    "eslint-visitor-keys": "^2.0.0"
+  }
+}
