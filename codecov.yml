@@ -1,0 +1,5 @@
+ignore:
+  - "**/*.test.ts"
+  - "**/*.testUtils.ts"
+  - "src/test-setup.ts"
+  - "fixtures/**"
