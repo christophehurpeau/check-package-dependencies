@@ -3,6 +3,6 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "semver": "^6.0.0"
+    "semver": "^6.3.1"
   }
 }
