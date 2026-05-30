@@ -1,3 +1,5 @@
 {
-  "extends": ["config:js-lib", "github>christophehurpeau/renovate-presets"]
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:js-lib", "github>christophehurpeau/renovate-presets"],
+  "ignorePaths": ["fixtures/**"]
 }
