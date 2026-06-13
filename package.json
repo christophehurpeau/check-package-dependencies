@@ -53,8 +53,8 @@
     "lint:eslint:package.json": "eslint --quiet package.json",
     "prepare": "pob-root-postinstall",
     "test": "TZ=UTC node --import ./src/test-setup.ts --test src/**/*.test.ts",
-    "test:coverage": "TZ=UTC npx c8 --all --src ./src node --import ./src/test-setup.ts --test src/**/*.test.ts",
-    "test:coverage:json": "TZ=UTC npx c8 --reporter=json --all --src ./src node --import ./src/test-setup.ts --test src/**/*.test.ts",
+    "test:coverage": "TZ=UTC node --import ./src/test-setup.ts --test --experimental-test-coverage --test-coverage-include=\"src/**/*.ts\" src/**/*.test.ts",
+    "test:coverage:json": "TZ=UTC node --import ./src/test-setup.ts --test --experimental-test-coverage --test-coverage-include=\"src/**/*.ts\" src/**/*.test.ts",
     "test:watch": "TZ=UTC node --import ./src/test-setup.ts --test src/**/*.test.ts",
     "tsc": "tsc",
     "watch": "yarn clean:build && rollup --config rollup.config.mjs --watch"
