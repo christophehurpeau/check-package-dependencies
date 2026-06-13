@@ -9,7 +9,7 @@ importers:
   .:
     dependencies:
       '@eslint/plugin-kit':
-        specifier: ^0.7.1
+        specifier: ^0.7.2
         version: 0.7.2
       jsonc-parser:
         specifier: ^3.3.1
