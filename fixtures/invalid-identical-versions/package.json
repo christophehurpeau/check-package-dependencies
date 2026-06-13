@@ -1,0 +1,9 @@
+{
+  "name": "invalid-identical-versions",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "react": "1.0.0",
+    "react-dom": "1.0.1"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "name": "invalid-versions-from-dev-dependencies-of-dependency",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "some-lib": "^0.5.0"
+  }
+}

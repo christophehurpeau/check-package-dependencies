@@ -1,0 +1,5 @@
+{
+  "name": "invalid-satisfies-versions-in-dependency",
+  "private": true,
+  "type": "module"
+}

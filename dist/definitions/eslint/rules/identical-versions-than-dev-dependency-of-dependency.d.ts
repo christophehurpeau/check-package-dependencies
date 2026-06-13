@@ -1,0 +1,2 @@
+export declare const identicalVersionsThanDevDependencyOfDependencyRule: Record<string, import("eslint").Rule.RuleModule>;
+//# sourceMappingURL=identical-versions-than-dev-dependency-of-dependency.d.ts.map

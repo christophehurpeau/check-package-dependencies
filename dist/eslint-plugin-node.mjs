@@ -784,6 +784,9 @@ const directDuplicateDependenciesRule = createPackageRule(
 function fromDependency(depPkg, depType) {
   return `from "${depPkg.name || ""}"${depType ? ` in "${depType}"` : ""}`;
 }
+function inDependency(depPkg, depType) {
+  return `in ${depType ? `"${depType}" of ` : ""}"${depPkg.name || ""}"`;
+}
 
 semverUtils.parse;
 semverUtils.parseRange;
@@ -1086,6 +1089,254 @@ const exactVersionsRule = createPackageRule(
           onlyWarnsForCheck
         });
       }
+    }
+  }
+);
+
+function checkIdenticalVersionsThanDependency(reportError, pkg, type, depKeys, depPkg, dependencies = {}, onlyWarnsForCheck) {
+  const pkgDependencies = pkg[type] || {};
+  depKeys.forEach((depKey) => {
+    const version = dependencies[depKey];
+    const depValue = pkgDependencies[depKey];
+    if (!version) {
+      reportError({
+        errorMessage: `Unexpected missing dependency "${depKey}" ${inDependency(depPkg)}`,
+        errorDetails: `config expects "${depKey}" to be present`
+      });
+      return;
+    }
+    if (version.startsWith("^") || version.startsWith("~")) {
+      reportError({
+        errorMessage: `Unexpected range dependency "${depKey}" ${inDependency(depPkg)}`,
+        errorDetails: "perhaps use checkSatisfiesVersionsFromDependency() instead"
+      });
+      return;
+    }
+    const value = depValue?.value;
+    if (!value) {
+      reportError({
+        errorMessage: `Missing "${depKey}"`,
+        errorDetails: `expecting to be "${version}"`,
+        dependency: { name: depKey, fieldName: type },
+        onlyWarns: onlyWarnsForCheck?.shouldWarnsFor(depKey)
+      });
+      return;
+    }
+    if (value !== version) {
+      reportError({
+        errorMessage: `Invalid "${value}"`,
+        errorDetails: `expecting "${value}" to be "${version}" ${fromDependency(depPkg)}`,
+        dependency: depValue,
+        onlyWarns: onlyWarnsForCheck?.shouldWarnsFor(depKey)
+      });
+    }
+  });
+}
+
+const depGroupSchema = {
+  type: "object",
+  patternProperties: {
+    ".*": {
+      type: "object",
+      properties: {
+        resolutions: { type: "array", items: { type: "string" } },
+        dependencies: { type: "array", items: { type: "string" } },
+        devDependencies: { type: "array", items: { type: "string" } }
+      },
+      additionalProperties: false
+    }
+  },
+  additionalProperties: false
+};
+const identicalVersionsThanDependencyRule = createPackageRule(
+  "identical-versions-than-dependency",
+  {
+    type: "object",
+    properties: {
+      dependencies: depGroupSchema,
+      onlyWarnsFor: { type: "array", items: { type: "string" } }
+    },
+    required: ["dependencies"],
+    additionalProperties: false
+  },
+  {
+    checkPackage: ({
+      pkg,
+      reportError,
+      ruleOptions,
+      getDependencyPackageJson,
+      onlyWarnsForCheck
+    }) => {
+      Object.entries(ruleOptions.dependencies).forEach(([depName, targets]) => {
+        const [depPkg] = getDependencyPackageJson(depName);
+        const destTypes = [
+          "resolutions",
+          "dependencies",
+          "devDependencies"
+        ];
+        destTypes.forEach((destType) => {
+          const depKeys = targets[destType];
+          if (depKeys && depKeys.length > 0) {
+            checkIdenticalVersionsThanDependency(
+              reportError,
+              pkg,
+              destType,
+              depKeys,
+              depPkg,
+              depPkg.dependencies,
+              onlyWarnsForCheck
+            );
+          }
+        });
+      });
+    }
+  }
+);
+
+const identicalVersionsThanDevDependencyOfDependencyRule = createPackageRule(
+  "identical-versions-than-dev-dependency-of-dependency",
+  {
+    type: "object",
+    properties: {
+      dependencies: depGroupSchema,
+      onlyWarnsFor: { type: "array", items: { type: "string" } }
+    },
+    required: ["dependencies"],
+    additionalProperties: false
+  },
+  {
+    checkPackage: ({
+      pkg,
+      reportError,
+      ruleOptions,
+      getDependencyPackageJson,
+      onlyWarnsForCheck
+    }) => {
+      Object.entries(ruleOptions.dependencies).forEach(
+        ([depName, targets]) => {
+          const [depPkg] = getDependencyPackageJson(depName);
+          const destTypes = [
+            "resolutions",
+            "dependencies",
+            "devDependencies"
+          ];
+          destTypes.forEach((destType) => {
+            const depKeys = targets[destType];
+            if (depKeys && depKeys.length > 0) {
+              checkIdenticalVersionsThanDependency(
+                reportError,
+                pkg,
+                destType,
+                depKeys,
+                depPkg,
+                depPkg.devDependencies,
+                onlyWarnsForCheck
+              );
+            }
+          });
+        }
+      );
+    }
+  }
+);
+
+function checkIdenticalVersions(reportError, pkg, type, deps, {
+  onlyWarnsForCheck,
+  tryToAutoFix
+} = {}) {
+  const pkgDependencies = pkg[type] || {};
+  getKeys(deps).forEach((depKey) => {
+    const version = pkgDependencies[depKey]?.value;
+    if (!version) {
+      reportError({
+        errorMessage: `Unexpected missing ${type}`,
+        errorDetails: `missing "${depKey}"`
+      });
+      return;
+    }
+    const depConfigArrayOrObject = deps[depKey];
+    const depConfig = Array.isArray(depConfigArrayOrObject) ? { [type]: depConfigArrayOrObject } : depConfigArrayOrObject;
+    if (!depConfig) {
+      throw new Error(`depConfig is undefined for ${depKey}`);
+    }
+    getKeys(depConfig).forEach((depKeyType) => {
+      const pkgDependenciesType = pkg[depKeyType] || {};
+      depConfig[depKeyType]?.forEach((depKeyIdentical) => {
+        const depValue = pkgDependenciesType[depKeyIdentical];
+        const value = depValue?.value;
+        if (!value) {
+          reportError({
+            errorMessage: `Missing "${depKeyIdentical}" in "${depKeyType}"`,
+            errorDetails: `it should be "${version}" identical to "${depKey}" in "${type}"`,
+            dependency: { name: depKeyIdentical, fieldName: depKeyType },
+            onlyWarns: onlyWarnsForCheck?.shouldWarnsFor(depKey)
+          });
+          return;
+        }
+        if (value !== version) {
+          if (tryToAutoFix) {
+            depValue.changeValue(version);
+          } else {
+            reportError({
+              errorMessage: `Invalid "${depKeyIdentical}"`,
+              errorDetails: `expecting "${value}" to be "${version}" identical to "${depKey}" in "${type}"`,
+              dependency: depValue,
+              onlyWarns: onlyWarnsForCheck?.shouldWarnsFor(depKey),
+              fixTo: version
+            });
+          }
+        }
+      });
+    });
+  });
+}
+
+const depRecordSchema = {
+  type: "object",
+  patternProperties: {
+    ".*": {
+      oneOf: [
+        { type: "array", items: { type: "string" } },
+        {
+          type: "object",
+          properties: {
+            resolutions: { type: "array", items: { type: "string" } },
+            dependencies: { type: "array", items: { type: "string" } },
+            devDependencies: { type: "array", items: { type: "string" } }
+          },
+          additionalProperties: false
+        }
+      ]
+    }
+  }
+};
+const sourceTypes = [
+  "resolutions",
+  "dependencies",
+  "devDependencies"
+];
+const identicalVersionsRule = createPackageRule(
+  "identical-versions",
+  {
+    type: "object",
+    properties: {
+      resolutions: depRecordSchema,
+      dependencies: depRecordSchema,
+      devDependencies: depRecordSchema,
+      onlyWarnsFor: { type: "array", items: { type: "string" } }
+    },
+    additionalProperties: false
+  },
+  {
+    checkPackage: ({ pkg, reportError, ruleOptions, onlyWarnsForCheck }) => {
+      sourceTypes.forEach((type) => {
+        const deps = ruleOptions[type];
+        if (deps) {
+          checkIdenticalVersions(reportError, pkg, type, deps, {
+            onlyWarnsForCheck
+          });
+        }
+      });
     }
   }
 );
@@ -1593,6 +1844,191 @@ const satisfiesVersionsFromDependenciesRule = createPackageRule(
   }
 );
 
+const satisfiesVersionsFromDevDependenciesOfDependencyRule = createPackageRule(
+  "satisfies-versions-from-dev-dependencies-of-dependency",
+  {
+    type: "object",
+    properties: {
+      dependencies: {
+        type: "object",
+        patternProperties: {
+          ".*": {
+            type: "object",
+            properties: {
+              dependencies: {
+                type: "array",
+                items: { type: "string" },
+                optional: true
+              },
+              devDependencies: {
+                type: "array",
+                items: { type: "string" },
+                optional: true
+              },
+              optionalDependencies: {
+                type: "array",
+                items: { type: "string" },
+                optional: true
+              }
+            },
+            additionalProperties: false
+          }
+        },
+        additionalProperties: false
+      }
+    },
+    required: ["dependencies"],
+    additionalProperties: false
+  },
+  {
+    checkPackage: ({
+      pkg,
+      reportError,
+      ruleOptions,
+      getDependencyPackageJson,
+      onlyWarnsForCheck
+    }) => {
+      Object.entries(ruleOptions.dependencies).forEach(
+        ([depName, values]) => {
+          const [depPkg] = getDependencyPackageJson(depName);
+          regularDependencyTypes.forEach((type) => {
+            if (values[type]) {
+              const dependenciesRanges = Object.fromEntries(
+                values[type].map((v) => {
+                  const range = depPkg.devDependencies?.[v];
+                  if (!range) {
+                    throw new Error(
+                      `Dependency ${depName} has no devDependency ${v}`
+                    );
+                  }
+                  return [v, range];
+                })
+              );
+              checkMissingSatisfiesVersions(
+                reportError,
+                pkg,
+                type,
+                dependenciesRanges,
+                onlyWarnsForCheck
+              );
+            }
+          });
+        }
+      );
+    },
+    checkDependencyValue: ({
+      node,
+      reportError,
+      ruleOptions,
+      onlyWarnsForCheck,
+      getDependencyPackageJson
+    }) => {
+      if (!regularDependencyTypes.includes(node.fieldName)) {
+        return;
+      }
+      const fieldName = node.fieldName;
+      getEntries(ruleOptions.dependencies).forEach(([depName, values]) => {
+        if (values[fieldName]?.includes(node.name)) {
+          const [depPkg] = getDependencyPackageJson(depName);
+          const range = depPkg.devDependencies?.[node.name];
+          if (!range) {
+            throw new Error(
+              `Dependency "${depName}" has no devDependency "${node.name}"`
+            );
+          }
+          checkSatisfiesVersion(reportError, node, range, onlyWarnsForCheck);
+        }
+      });
+    }
+  }
+);
+
+function checkSatisfiesVersionsInDependency(reportError, depPkg, dependenciesRanges) {
+  for (const [dependenciesType, dependenciesTypeRanges] of getEntries(
+    dependenciesRanges
+  )) {
+    if (!dependenciesTypeRanges) return;
+    const dependencies = depPkg[dependenciesType];
+    for (const [dependencyName, dependencyRange] of getEntries(
+      dependenciesTypeRanges
+    )) {
+      if (dependencyRange == null) {
+        if (dependencies?.[dependencyName]) {
+          reportError({
+            errorMessage: `Invalid "${dependencyName}" ${inDependency(depPkg, dependenciesType)}`,
+            errorDetails: "it should not be present",
+            dependency: { name: dependencyName }
+          });
+        }
+      } else if (!dependencies) {
+        reportError({
+          errorMessage: `Missing "${dependencyName}" ${inDependency(depPkg, dependenciesType)}`,
+          errorDetails: `"${dependenciesType}" is missing`,
+          dependency: { name: dependencyName }
+        });
+      } else if (!dependencies[dependencyName]) {
+        reportError({
+          errorMessage: `Missing "${dependencyName}" ${inDependency(depPkg, dependenciesType)}`,
+          errorDetails: `"${dependencyName}" is missing but should satisfies "${dependencyRange}"`,
+          dependency: { name: dependencyName }
+        });
+      } else if (!semver.satisfies(dependencies[dependencyName], dependencyRange, {
+        includePrerelease: true
+      }) && !semver.intersects(dependencies[dependencyName], dependencyRange, {
+        includePrerelease: true
+      })) {
+        reportError({
+          errorMessage: `Invalid "${dependencyName}" ${inDependency(depPkg, dependenciesType)}`,
+          errorDetails: `"${dependencies[dependencyName]}" does not satisfies "${dependencyRange}"`,
+          dependency: { name: dependencyName }
+        });
+      }
+    }
+  }
+}
+
+const depTypeRangesSchema = {
+  type: "object",
+  patternProperties: {
+    ".*": { type: ["string", "null"] }
+  }
+};
+const satisfiesVersionsInDependencyRule = createPackageRule(
+  "satisfies-versions-in-dependency",
+  {
+    type: "object",
+    properties: {
+      dependencies: {
+        type: "object",
+        patternProperties: {
+          ".*": {
+            type: "object",
+            properties: {
+              resolutions: depTypeRangesSchema,
+              dependencies: depTypeRangesSchema,
+              devDependencies: depTypeRangesSchema,
+              peerDependencies: depTypeRangesSchema,
+              optionalDependencies: depTypeRangesSchema
+            },
+            additionalProperties: false
+          }
+        }
+      },
+      onlyWarnsFor: { type: "array", items: { type: "string" } }
+    },
+    required: ["dependencies"],
+    additionalProperties: false
+  },
+  {
+    checkPackage: ({ reportError, ruleOptions, getDependencyPackageJson }) => {
+      Object.entries(ruleOptions.dependencies).forEach(([depName, ranges]) => {
+        const [depPkg] = getDependencyPackageJson(depName);
+        checkSatisfiesVersionsInDependency(reportError, depPkg, ranges);
+      });
+    }
+  }
+);
+
 const duplicatesSearchInByDependencyType = {
   devDependencies: ["devDependencies", "dependencies"],
   dependencies: ["devDependencies", "dependencies"],
@@ -1748,6 +2184,9 @@ const rules = {
   ...directPeerDependenciesRule,
   ...directDuplicateDependenciesRule,
   ...exactVersionsRule,
+  ...identicalVersionsRule,
+  ...identicalVersionsThanDependencyRule,
+  ...identicalVersionsThanDevDependencyOfDependencyRule,
   ...minRangeDependenciesSatisfiesDevDependenciesRule,
   ...minRangePeerDependenciesSatisfiesDependenciesRule,
   ...resolutionsVersionsMatchRule,
@@ -1755,6 +2194,8 @@ const rules = {
   ...resolutionsHasExplanationRule,
   ...rootWorkspaceShouldNotHaveDependenciesRule,
   ...satisfiesVersionsFromDependenciesRule,
+  ...satisfiesVersionsFromDevDependenciesOfDependencyRule,
+  ...satisfiesVersionsInDependencyRule,
   ...satisfiesVersionsBetweenDependenciesRule,
   ...workspaceDependenciesRule,
   ...workspaceProtocolRule

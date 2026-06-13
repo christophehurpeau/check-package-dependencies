@@ -11,26 +11,26 @@
 
 ## Public API Checks (`CheckPackageApi`)
 
-| Check method                                          | Core function                                       | ESLint rule                                                                                                 | Unit test                                         |
-| ----------------------------------------------------- | --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
-| `checkExactVersions`                                  | `checkExactVersions`                                | `exact-versions` ✅                                                                                         | `checkExactVersions.test.ts` ✅                   |
-| `checkExactDevVersions`                               | `checkExactVersions` (devDeps only)                 | covered by `exact-versions` (partial) ⚠️                                                                    | covered by `checkExactVersions.test.ts` ⚠️        |
-| `checkResolutionsVersionsMatch`                       | `checkResolutionsVersionsMatch`                     | `resolutions-versions-match` ✅                                                                             | `checkResolutionsVersionsMatch.test.ts` ✅        |
-| `checkNoDependencies`                                 | `checkNoDependencies`                               | `root-workspace-should-not-have-dependencies` ⚠️ (workspace root only, via `check-package-with-workspaces`) | `checkNoDependencies.test.ts` ✅                  |
-| `checkDirectPeerDependencies`                         | `checkDirectPeerDependencies`                       | `direct-peer-dependencies` ✅                                                                               | `checkDirectPeerDependencies.test.ts` ✅          |
-| `checkDirectDuplicateDependencies`                    | `checkDirectDuplicateDependencies`                  | `direct-duplicate-dependencies` ✅                                                                          | ❌ no test file                                   |
-| `checkResolutionsHasExplanation`                      | `checkResolutionsHasExplanation`                    | `resolutions-has-explanation` ✅                                                                            | ❌ no test file                                   |
-| `checkRecommended`                                    | meta-check (combines others)                        | N/A                                                                                                         | ❌ no test file                                   |
-| `checkIdenticalVersionsThanDependency`                | `checkIdenticalVersionsThanDependency`              | ❌ not migrated                                                                                             | ❌ no test file                                   |
-| `checkIdenticalVersionsThanDevDependencyOfDependency` | `checkIdenticalVersionsThanDependency` (on devDeps) | ❌ not migrated                                                                                             | ❌ no test file                                   |
-| `checkSatisfiesVersions`                              | `checkSatisfiesVersions`                            | `satisfies-version` ✅                                                                                      | `checkSatisfiesVersions.test.ts` ✅               |
-| `checkSatisfiesVersionsFromDependency`                | `checkSatisfiesVersionsFromDependency`              | `satisfies-versions-from-dependencies` ✅                                                                   | `checkSatisfiesVersionsFromDependency.test.ts` ✅ |
-| `checkSatisfiesVersionsInDevDependenciesOfDependency` | `checkSatisfiesVersionsFromDependency` (on devDeps) | ❌ not migrated                                                                                             | ❌ no test file                                   |
-| `checkIdenticalVersions`                              | `checkIdenticalVersions`                            | ❌ not migrated                                                                                             | `checkIdenticalVersions.test.ts` ✅               |
-| `checkSatisfiesVersionsBetweenDependencies`           | `checkSatisfiesVersionsBetweenDependencies`         | `satisfies-versions-between-dependencies` ✅                                                                | ❌ no dedicated test (ESLint rule has test)       |
-| `checkSatisfiesVersionsInDependency`                  | `checkSatisfiesVersionsInDependency`                | ❌ not migrated                                                                                             | `checkSatisfiesVersionsInDependency.test.ts` ✅   |
-| `checkMinRangeDependenciesSatisfiesDevDependencies`   | `checkMinRangeSatisfies` (deps→devDeps)             | `min-range-dependencies-satisfies-dev-dependencies` ✅                                                      | `checkMinRangeSatisfies.test.ts` ✅               |
-| `checkMinRangePeerDependenciesSatisfiesDependencies`  | `checkMinRangeSatisfies` (peer→deps)                | `min-range-peer-dependencies-satisfies-dependencies` ✅                                                     | covered by `checkMinRangeSatisfies.test.ts` ⚠️    |
+| Check method                                          | Core function                                       | ESLint rule                                                                                                 | Unit test                                                                                      |
+| ----------------------------------------------------- | --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `checkExactVersions`                                  | `checkExactVersions`                                | `exact-versions` ✅                                                                                         | `checkExactVersions.test.ts` ✅                                                                |
+| `checkExactDevVersions`                               | `checkExactVersions` (devDeps only)                 | covered by `exact-versions` (partial) ⚠️                                                                    | covered by `checkExactVersions.test.ts` ⚠️                                                     |
+| `checkResolutionsVersionsMatch`                       | `checkResolutionsVersionsMatch`                     | `resolutions-versions-match` ✅                                                                             | `checkResolutionsVersionsMatch.test.ts` ✅                                                     |
+| `checkNoDependencies`                                 | `checkNoDependencies`                               | `root-workspace-should-not-have-dependencies` ⚠️ (workspace root only, via `check-package-with-workspaces`) | `checkNoDependencies.test.ts` ✅                                                               |
+| `checkDirectPeerDependencies`                         | `checkDirectPeerDependencies`                       | `direct-peer-dependencies` ✅                                                                               | `checkDirectPeerDependencies.test.ts` ✅                                                       |
+| `checkDirectDuplicateDependencies`                    | `checkDirectDuplicateDependencies`                  | `direct-duplicate-dependencies` ✅                                                                          | ❌ no test file                                                                                |
+| `checkResolutionsHasExplanation`                      | `checkResolutionsHasExplanation`                    | `resolutions-has-explanation` ✅                                                                            | ❌ no test file                                                                                |
+| `checkRecommended`                                    | meta-check (combines others)                        | N/A                                                                                                         | ❌ no test file                                                                                |
+| `checkIdenticalVersionsThanDependency`                | `checkIdenticalVersionsThanDependency`              | `identical-versions-than-dependency` ✅                                                                     | `checkIdenticalVersionsThanDependency.test.ts` ✅                                              |
+| `checkIdenticalVersionsThanDevDependencyOfDependency` | `checkIdenticalVersionsThanDependency` (on devDeps) | `identical-versions-than-dev-dependency-of-dependency` ✅                                                   | no dedicated unit test (core function is source-agnostic; ESLint rule has integration test) ⚠️ |
+| `checkSatisfiesVersions`                              | `checkSatisfiesVersions`                            | `satisfies-version` ✅                                                                                      | `checkSatisfiesVersions.test.ts` ✅                                                            |
+| `checkSatisfiesVersionsFromDependency`                | `checkSatisfiesVersionsFromDependency`              | `satisfies-versions-from-dependencies` ✅                                                                   | `checkSatisfiesVersionsFromDependency.test.ts` ✅                                              |
+| `checkSatisfiesVersionsInDevDependenciesOfDependency` | `checkSatisfiesVersionsFromDependency` (on devDeps) | `satisfies-versions-from-dev-dependencies-of-dependency` ✅                                                 | ❌ no test file                                                                                |
+| `checkIdenticalVersions`                              | `checkIdenticalVersions`                            | `identical-versions` ✅                                                                                     | `checkIdenticalVersions.test.ts` ✅                                                            |
+| `checkSatisfiesVersionsBetweenDependencies`           | `checkSatisfiesVersionsBetweenDependencies`         | `satisfies-versions-between-dependencies` ✅                                                                | ❌ no dedicated test (ESLint rule has test)                                                    |
+| `checkSatisfiesVersionsInDependency`                  | `checkSatisfiesVersionsInDependency`                | `satisfies-versions-in-dependency` ✅                                                                       | `checkSatisfiesVersionsInDependency.test.ts` ✅                                                |
+| `checkMinRangeDependenciesSatisfiesDevDependencies`   | `checkMinRangeSatisfies` (deps→devDeps)             | `min-range-dependencies-satisfies-dev-dependencies` ✅                                                      | `checkMinRangeSatisfies.test.ts` ✅                                                            |
+| `checkMinRangePeerDependenciesSatisfiesDependencies`  | `checkMinRangeSatisfies` (peer→deps)                | `min-range-peer-dependencies-satisfies-dependencies` ✅                                                     | covered by `checkMinRangeSatisfies.test.ts` ⚠️                                                 |
 
 Legend: ✅ done · ⚠️ partial/shared · ❌ missing
 
@@ -102,36 +102,35 @@ The workspace API exposes only `checkRecommended`, which internally runs the roo
 
 ## ESLint rule test coverage
 
-| ESLint rule                                          | Test file                                                                  |
-| ---------------------------------------------------- | -------------------------------------------------------------------------- |
-| `exact-versions`                                     | `exact-versions.ruletester.test.ts` ✅                                     |
-| `satisfies-versions-from-dependencies`               | `satisfies-versions-from-dependencies.test.ts` ✅                          |
-| `satisfies-versions-between-dependencies`            | `satisfies-versions-between-dependencies.test.ts` ✅                       |
-| `direct-peer-dependencies`                           | `direct-peer-dependencies.test.ts` ✅                                      |
-| `direct-duplicate-dependencies`                      | `direct-duplicate-dependencies.test.ts` ✅                                 |
-| `resolutions-versions-match`                         | `resolutions-versions-match.ruletester.test.ts` ✅                         |
-| `resolutions-has-explanation`                        | `resolutions-has-explanation.ruletester.test.ts` ✅                        |
-| `min-range-dependencies-satisfies-dev-dependencies`  | `min-range-dependencies-satisfies-dev-dependencies.ruletester.test.ts` ✅  |
-| `min-range-peer-dependencies-satisfies-dependencies` | `min-range-peer-dependencies-satisfies-dependencies.ruletester.test.ts` ✅ |
-| `satisfies-version`                                  | `satisfies-version.ruletester.test.ts` ✅                                  |
-| `root-workspace-should-not-have-dependencies`        | `root-workspace-should-not-have-dependencies.ruletester.test.ts` ✅        |
-| `workspace-dependencies`                             | `workspace-dependencies.test.ts` ✅                                        |
+| ESLint rule                                              | Test file                                                                  |
+| -------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `exact-versions`                                         | `exact-versions.ruletester.test.ts` ✅                                     |
+| `satisfies-versions-from-dependencies`                   | `satisfies-versions-from-dependencies.test.ts` ✅                          |
+| `satisfies-versions-between-dependencies`                | `satisfies-versions-between-dependencies.test.ts` ✅                       |
+| `direct-peer-dependencies`                               | `direct-peer-dependencies.test.ts` ✅                                      |
+| `direct-duplicate-dependencies`                          | `direct-duplicate-dependencies.test.ts` ✅                                 |
+| `resolutions-versions-match`                             | `resolutions-versions-match.ruletester.test.ts` ✅                         |
+| `resolutions-has-explanation`                            | `resolutions-has-explanation.ruletester.test.ts` ✅                        |
+| `min-range-dependencies-satisfies-dev-dependencies`      | `min-range-dependencies-satisfies-dev-dependencies.ruletester.test.ts` ✅  |
+| `min-range-peer-dependencies-satisfies-dependencies`     | `min-range-peer-dependencies-satisfies-dependencies.ruletester.test.ts` ✅ |
+| `satisfies-version`                                      | `satisfies-version.ruletester.test.ts` ✅                                  |
+| `root-workspace-should-not-have-dependencies`            | `root-workspace-should-not-have-dependencies.ruletester.test.ts` ✅        |
+| `identical-versions`                                     | `identical-versions.test.ts` ✅                                            |
+| `identical-versions-than-dependency`                     | `identical-versions-than-dependency.test.ts` ✅                            |
+| `identical-versions-than-dev-dependency-of-dependency`   | `identical-versions-than-dev-dependency-of-dependency.test.ts` ✅          |
+| `satisfies-versions-in-dependency`                       | `satisfies-versions-in-dependency.test.ts` ✅                              |
+| `satisfies-versions-from-dev-dependencies-of-dependency` | `satisfies-versions-from-dev-dependencies-of-dependency.test.ts` ✅        |
+| `workspace-dependencies`                                 | `workspace-dependencies.test.ts` ✅                                        |
 
 ## Checks not yet migrated to ESLint (summary)
 
 - `checkNoDependencies` — partially migrated: `root-workspace-should-not-have-dependencies` covers the workspace-root case only; no ESLint rule yet for the standalone `checkNoDependencies(type)` use case
-- `checkIdenticalVersions`
-- `checkIdenticalVersionsThanDependency`
-- `checkIdenticalVersionsThanDevDependencyOfDependency`
-- `checkSatisfiesVersionsInDependency`
-- `checkSatisfiesVersionsInDevDependenciesOfDependency`
 
 ## Checks missing unit tests (summary)
 
 - `checkDirectDuplicateDependencies` (core function tested indirectly via `checkDuplicateDependencies.test.ts`)
 - `checkResolutionsHasExplanation`
-- `checkIdenticalVersionsThanDependency`
-- `checkIdenticalVersionsThanDevDependencyOfDependency`
+- `checkIdenticalVersionsThanDevDependencyOfDependency` (core function is source-agnostic — no unique behavior to unit-test; ESLint rule has integration test)
 - `checkSatisfiesVersionsInDevDependenciesOfDependency`
 - `checkSatisfiesVersionsBetweenDependencies` (covered at the ESLint rule level)
 - `checkRecommended` (meta-check; combines others)

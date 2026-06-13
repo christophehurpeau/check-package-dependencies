@@ -1,0 +1,7 @@
+{
+  "name": "mock-dev-dep",
+  "version": "1.0.0",
+  "devDependencies": {
+    "some-lib": "1.0.0"
+  }
+}
