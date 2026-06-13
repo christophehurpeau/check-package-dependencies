@@ -31,8 +31,8 @@ importers:
         specifier: 65.4.3
         version: 65.4.3(@typescript-eslint/utils@8.60.0(eslint@10.4.0)(typescript@6.0.3))(eslint@10.4.0)(typescript@6.0.3)
       '@pob/rollup-esbuild':
-        specifier: 9.1.0
-        version: 9.1.0(rollup@4.60.4)(typescript@6.0.3)
+        specifier: 9.1.1
+        version: 9.1.1(rollup@4.60.4)(typescript@6.0.3)
       '@pob/root':
         specifier: 24.2.1
         version: 24.2.1
@@ -490,8 +490,8 @@ packages:
       typescript:
         optional: true
 
-  '@pob/rollup-esbuild@9.1.0':
-    resolution: {integrity: sha512-vs3v1ZyBZDXwZzDa/mR2WV+rUxWVpkAAJd53o3gv2INJTOgP/eok5IUTwIFY2mzCrU5tJLqtfcyABEnG6eVVnQ==}
+  '@pob/rollup-esbuild@9.1.1':
+    resolution: {integrity: sha512-Mn8o4LfR+nYfrK8K7jJWrjifVLCmVcW/WQ1bq5/HNzt1Z8iaZomUh9prwnp7Ihxr0rXAiN5a5a4Rb745j36bQQ==}
     engines: {node: '>=22.18.0'}
     hasBin: true
     peerDependencies:
@@ -501,8 +501,8 @@ packages:
       rollup:
         optional: true
 
-  '@pob/rollup@8.1.0':
-    resolution: {integrity: sha512-9ie9AdIVA+caIG9gCzYQ8nfZSe6sNfi++rLAfDQzTAwrIZd1yyYPi7uV/bVz13LHYXv056h+T8vxgwWfX1s1GQ==}
+  '@pob/rollup@8.1.1':
+    resolution: {integrity: sha512-F4kjb0ftwulcfVbna1RhLayxrRFM7n2GQYpP+j8HIJyhSRuXlV19e3wXaSfM/NSNgcfpCTDk/X57acrQTubbYA==}
     engines: {node: '>=22.18.0'}
     hasBin: true
 
@@ -2549,9 +2549,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@pob/rollup-esbuild@9.1.0(rollup@4.60.4)(typescript@6.0.3)':
+  '@pob/rollup-esbuild@9.1.1(rollup@4.60.4)(typescript@6.0.3)':
     dependencies:
-      '@pob/rollup': 8.1.0
+      '@pob/rollup': 8.1.1
       '@rollup/plugin-node-resolve': 16.0.3(rollup@4.60.4)
       '@rollup/plugin-replace': 6.0.3(rollup@4.60.4)
       '@rollup/plugin-run': 3.1.0(rollup@4.60.4)
@@ -2564,7 +2564,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@pob/rollup@8.1.0':
+  '@pob/rollup@8.1.1':
     dependencies:
       rollup: 4.60.4
 
