@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [11.2.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v11.1.1...v11.2.0) (2026-06-13)
+
+### Features
+
+* add workspace-protocol rule
+* **deps:** update dependency semver to ^7.8.0 ([#856](https://github.com/christophehurpeau/check-package-dependencies/issues/856))
+* migrate missing rules to eslint
+
+### Bug Fixes
+
+* add missing comma in .oxfmtrc.jsonc
+* **deps:** update dependency @eslint/plugin-kit to ^0.7.2 ([#864](https://github.com/christophehurpeau/check-package-dependencies/issues/864))
+* **deps:** update dependency semver to ^7.8.1 ([#860](https://github.com/christophehurpeau/check-package-dependencies/issues/860))
+* update coverage generation command and output destination
+* use dual reporters in test:coverage:generate and correct codecov path
+* use temp yarn cache folder in fixture tests to avoid CI cache corruption
+* use unique yarn cache folders per fixture to prevent concurrent install race
+
 ## [11.1.1](https://github.com/christophehurpeau/check-package-dependencies/compare/v11.1.0...v11.1.1) (2026-05-05)
 
 ### Bug Fixes
