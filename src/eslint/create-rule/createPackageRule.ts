@@ -273,6 +273,16 @@ export function createPackageRule<
               });
             };
 
+            const loadWorkspacePackageJsonsMemoized = (() => {
+              let cached: ParsedPackageJson[] | null = null;
+              return (): ParsedPackageJson[] => {
+                if (cached === null) {
+                  cached = loadWorkspacePackageJsons();
+                }
+                return cached;
+              };
+            })();
+
             try {
               // const checkPackage = createCheckPackage();
               if (checkPackage) {
@@ -280,7 +290,7 @@ export function createPackageRule<
                   node: parsedPkgJson,
                   pkg: parsedPkgJson,
                   getDependencyPackageJson,
-                  loadWorkspacePackageJsons,
+                  loadWorkspacePackageJsons: loadWorkspacePackageJsonsMemoized,
                   // languageOptions,
                   settings,
                   ruleOptions: options,

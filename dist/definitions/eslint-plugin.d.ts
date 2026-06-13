@@ -28,6 +28,7 @@ declare const checkPackagePlugin: {
                 "check-package-dependencies/resolutions-has-explanation": "error";
                 "check-package-dependencies/root-workspace-should-not-have-dependencies": "error";
                 "check-package-dependencies/workspace-dependencies": "error";
+                "check-package-dependencies/workspace-protocol": "error";
             };
         };
         "recommended-library": {
@@ -51,6 +52,7 @@ declare const checkPackagePlugin: {
                 "check-package-dependencies/min-range-peer-dependencies-satisfies-dependencies": "error";
                 "check-package-dependencies/root-workspace-should-not-have-dependencies": "error";
                 "check-package-dependencies/workspace-dependencies": "error";
+                "check-package-dependencies/workspace-protocol": "error";
             };
         };
     };

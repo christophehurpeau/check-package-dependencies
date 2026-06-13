@@ -28,6 +28,7 @@ const checkPackagePlugin = {
         "check-package-dependencies/root-workspace-should-not-have-dependencies":
           "error",
         "check-package-dependencies/workspace-dependencies": "error",
+        "check-package-dependencies/workspace-protocol": "error",
       },
     },
     "recommended-library": {
@@ -55,6 +56,7 @@ const checkPackagePlugin = {
         "check-package-dependencies/root-workspace-should-not-have-dependencies":
           "error",
         "check-package-dependencies/workspace-dependencies": "error",
+        "check-package-dependencies/workspace-protocol": "error",
       },
     },
   },

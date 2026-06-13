@@ -1,0 +1,8 @@
+{
+  "name": "fixture-wp-b",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "fixture-wp-a": "^1.0.0"
+  }
+}

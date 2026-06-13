@@ -10,6 +10,7 @@ import { satisfiesVersionsRule } from "./rules/satisfies-version.ts";
 import { satisfiesVersionsBetweenDependenciesRule } from "./rules/satisfies-versions-between-dependencies.ts";
 import { satisfiesVersionsFromDependenciesRule } from "./rules/satisfies-versions-from-dependencies.ts";
 import { workspaceDependenciesRule } from "./rules/workspace-dependencies.ts";
+import { workspaceProtocolRule } from "./rules/workspace-protocol.ts";
 
 const rules = {
   ...directPeerDependenciesRule,
@@ -24,6 +25,7 @@ const rules = {
   ...satisfiesVersionsFromDependenciesRule,
   ...satisfiesVersionsBetweenDependenciesRule,
   ...workspaceDependenciesRule,
+  ...workspaceProtocolRule,
 };
 
 export default rules;
