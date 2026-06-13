@@ -5,12 +5,15 @@ import { before, describe, it } from "node:test";
 import eslintPlugin from "../../eslint-plugin.ts";
 
 before(() => {
-  execSync("yarn install --frozen-lockfile", {
-    cwd: path.join(
-      process.cwd(),
-      "fixtures/invalid-versions-between-dependencies",
-    ),
-  });
+  execSync(
+    "yarn install --frozen-lockfile --cache-folder /tmp/yarn-test-cache",
+    {
+      cwd: path.join(
+        process.cwd(),
+        "fixtures/invalid-versions-between-dependencies",
+      ),
+    },
+  );
 });
 
 describe("satisfies-versions-between-dependencies", () => {
