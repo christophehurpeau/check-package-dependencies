@@ -28,8 +28,8 @@ importers:
         specifier: 1.2.1
         version: 1.2.1
       '@pob/eslint-config':
-        specifier: 65.4.3
-        version: 65.4.3(@typescript-eslint/utils@8.60.0(eslint@10.4.0)(typescript@6.0.3))(eslint@10.4.0)(typescript@6.0.3)
+        specifier: 65.5.0
+        version: 65.5.0(@typescript-eslint/utils@8.60.0(eslint@10.4.0)(typescript@6.0.3))(eslint@10.4.0)(typescript@6.0.3)
       '@pob/rollup-esbuild':
         specifier: 9.1.1
         version: 9.1.1(rollup@4.60.4)(typescript@6.0.3)
@@ -470,8 +470,8 @@ packages:
   '@package-json/types@0.0.12':
     resolution: {integrity: sha512-uu43FGU34B5VM9mCNjXCwLaGHYjXdNincqKLaraaCW+7S2+SmiBg1Nv8bPnmschrIfZmfKNY9f3fC376MRrObw==}
 
-  '@pob/eslint-config@65.4.3':
-    resolution: {integrity: sha512-jH26z30MhPQyuM34rzi34RkgQXyyEsVa6sN9rk0r6ifQRSdu04XQVML7YY7yFXka05yaCehh5g5zkVx0fw/zkg==}
+  '@pob/eslint-config@65.5.0':
+    resolution: {integrity: sha512-ke+WucF9gQT7OLeoKxNQWcjpj+91pXhRPQWecDYUgx4zipLgrm1Rb5Ag3+PLwFc4blI7I62zwgNFqm9Jcie32A==}
     engines: {node: '>=22.18.0'}
     peerDependencies:
       eslint: ^9.39.1 || ^10.0.2
@@ -480,8 +480,8 @@ packages:
       typescript:
         optional: true
 
-  '@pob/eslint-plugin@65.4.1':
-    resolution: {integrity: sha512-/T2vFVyHow2gBf+APplFfpn7AR8fmW9no/EOMnK9l02X+EpATrEA28AmoPzMQ30KKCiZ9cgaBcNUCnRuruPVZQ==}
+  '@pob/eslint-plugin@65.5.0':
+    resolution: {integrity: sha512-DanND2/nqq5al7uvJ3Meo9xEmHZQSZ51B2C0CBHP7HxD4yyxElLRE9iu6Z4hnlQBBu/w1ip3cNGtjzWEmzUVxw==}
     engines: {node: '>=22.18.0'}
     peerDependencies:
       eslint: ^9.39.1 || ^10.0.2
@@ -2518,11 +2518,11 @@ snapshots:
 
   '@package-json/types@0.0.12': {}
 
-  '@pob/eslint-config@65.4.3(@typescript-eslint/utils@8.60.0(eslint@10.4.0)(typescript@6.0.3))(eslint@10.4.0)(typescript@6.0.3)':
+  '@pob/eslint-config@65.5.0(@typescript-eslint/utils@8.60.0(eslint@10.4.0)(typescript@6.0.3))(eslint@10.4.0)(typescript@6.0.3)':
     dependencies:
       '@eslint/js': 10.0.1(eslint@10.4.0)
       '@eslint/json': 1.2.0
-      '@pob/eslint-plugin': 65.4.1(eslint@10.4.0)(typescript@6.0.3)
+      '@pob/eslint-plugin': 65.5.0(eslint@10.4.0)(typescript@6.0.3)
       '@typescript-eslint/eslint-plugin': 8.60.0(@typescript-eslint/parser@8.60.0(eslint@10.4.0)(typescript@6.0.3))(eslint@10.4.0)(typescript@6.0.3)
       '@typescript-eslint/parser': 8.60.0(eslint@10.4.0)(typescript@6.0.3)
       confusing-browser-globals: 1.0.11
@@ -2539,7 +2539,7 @@ snapshots:
       - eslint-import-resolver-node
       - supports-color
 
-  '@pob/eslint-plugin@65.4.1(eslint@10.4.0)(typescript@6.0.3)':
+  '@pob/eslint-plugin@65.5.0(eslint@10.4.0)(typescript@6.0.3)':
     dependencies:
       '@typescript-eslint/utils': 8.59.1(eslint@10.4.0)(typescript@6.0.3)
       eslint: 10.4.0
