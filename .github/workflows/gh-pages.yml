@@ -29,7 +29,7 @@ jobs:
         run: pnpm typedoc --tsconfig tsconfig.doc.json
 
       - name: Generate Coverage
-        run: NODE_V8_COVERAGE=./docs/coverage pnpm run test:coverage
+        run: pnpm run test:coverage:generate
 
       - name: Create nojekyll
         run: touch docs/.nojekyll
