@@ -53,7 +53,7 @@ jobs:
         run: pnpm exec repository-check-dirty
 
       - name: Generate Test Coverage
-        run: pnpm run test:coverage:json
+        run: pnpm run test:coverage:generate
         if: startsWith(matrix.node-version, '24.')
         env:
           CI: true
