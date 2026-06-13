@@ -54,7 +54,7 @@
     "prepare": "pob-root-postinstall",
     "test": "TZ=UTC node --import ./src/test-setup.ts --test 'src/**/*.test.ts'",
     "test:coverage": "TZ=UTC node --import ./src/test-setup.ts --test --experimental-test-coverage --test-coverage-include=\"src/**/*.ts\" 'src/**/*.test.ts'",
-    "test:coverage:generate": "TZ=UTC node --import ./src/test-setup.ts --test --experimental-test-coverage --test-reporter=lcov --test-reporter-destination=docs/coverage.lcov --test-coverage-include=\"src/**/*.ts\" 'src/**/*.test.ts'",
+    "test:coverage:generate": "mkdir -p coverage && TZ=UTC node --import ./src/test-setup.ts --test --experimental-test-coverage --test-reporter=lcov --test-reporter-destination=coverage/coverage.lcov 'src/**/*.test.ts'",
     "test:watch": "TZ=UTC node --import ./src/test-setup.ts --test 'src/**/*.test.ts'",
     "tsc": "tsc",
     "watch": "yarn clean:build && rollup --config rollup.config.mjs --watch"
