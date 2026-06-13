@@ -6,7 +6,7 @@ import eslintPlugin from "../../eslint-plugin.ts";
 
 before(() => {
   execSync(
-    "yarn install --frozen-lockfile --cache-folder /tmp/yarn-test-cache",
+    "yarn install --frozen-lockfile --cache-folder /tmp/yarn-cache-direct-peer",
     {
       cwd: path.join(
         process.cwd(),
