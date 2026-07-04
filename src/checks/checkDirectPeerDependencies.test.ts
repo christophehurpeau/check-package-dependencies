@@ -658,6 +658,66 @@ describe("checkDirectPeerDependencies", () => {
     assertNoMessages(messages);
   });
 
+  it("should not throw when a dependency is workspace:* and also declared as a peer dependency", () => {
+    const getDependencyPackageJsonMock = mock.fn<GetDependencyPackageJson>();
+    getDependencyPackageJsonMock.mock.mockImplementationOnce(() => [
+      {
+        name: "alouette-icons",
+        peerDependencies: { react: "^18.0.0" },
+      },
+      "",
+    ]);
+
+    checkDirectPeerDependencies(
+      mockReportError,
+      true,
+      parsePkgValue({
+        name: "test",
+        dependencies: {
+          "alouette-icons": "workspace:*",
+        },
+        peerDependencies: {
+          "alouette-icons": "^1.0.0",
+          react: "^18.0.0",
+        },
+      }),
+      getDependencyPackageJsonMock,
+      createOnlyWarnsForMappingCheck("test", []),
+      createOnlyWarnsForMappingCheck("test", []),
+    );
+    assertNoMessages(messages);
+  });
+
+  it("should not throw when a dependency is workspace:~ and also declared as a peer dependency", () => {
+    const getDependencyPackageJsonMock = mock.fn<GetDependencyPackageJson>();
+    getDependencyPackageJsonMock.mock.mockImplementationOnce(() => [
+      {
+        name: "alouette-icons",
+        peerDependencies: { react: "^18.0.0" },
+      },
+      "",
+    ]);
+
+    checkDirectPeerDependencies(
+      mockReportError,
+      true,
+      parsePkgValue({
+        name: "test",
+        dependencies: {
+          "alouette-icons": "workspace:~",
+        },
+        peerDependencies: {
+          "alouette-icons": "^1.0.0",
+          react: "^18.0.0",
+        },
+      }),
+      getDependencyPackageJsonMock,
+      createOnlyWarnsForMappingCheck("test", []),
+      createOnlyWarnsForMappingCheck("test", []),
+    );
+    assertNoMessages(messages);
+  });
+
   it("should not report error when peer dependency is a range with invalid comparator if not used with loose", () => {
     const getDependencyPackageJsonMock = mock.fn<GetDependencyPackageJson>();
     getDependencyPackageJsonMock.mock.mockImplementationOnce(() => [

@@ -15,6 +15,12 @@ describe("getRealVersion", () => {
   it("should get the real version from a workspace version", () => {
     assert.equal(getRealVersion("workspace:1.0.1-beta"), "1.0.1-beta");
   });
+  it("should get the real version from a workspace:~ shorthand", () => {
+    assert.equal(getRealVersion("workspace:~"), "*");
+  });
+  it("should get the real version from a workspace:^ shorthand", () => {
+    assert.equal(getRealVersion("workspace:^"), "*");
+  });
   it("should get the real version from a npm version", () => {
     assert.equal(getRealVersion("npm:pkg@1.0.1-beta"), "1.0.1-beta");
   });

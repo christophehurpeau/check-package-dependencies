@@ -98,7 +98,7 @@ export function checkPeerDependencies(
       if (providedDependenciesForDepName.length > 0) {
         if (
           providedDependenciesForDepName.every(([, depRange]) =>
-            semver.intersects(range, depRange),
+            semver.intersects(range, getRealVersion(depRange)),
           )
         ) {
           if (process.env.REPORT_PROVIDED_PEER_DEPENDENCIES) {

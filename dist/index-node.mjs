@@ -295,7 +295,9 @@ function getRealVersion(version) {
     if (realVersion) return realVersion;
   }
   if (version.startsWith("workspace:")) {
-    return version.slice("workspace:".length);
+    const realVersion = version.slice("workspace:".length);
+    if (realVersion === "~" || realVersion === "^") return "*";
+    return realVersion;
   }
   return version;
 }
@@ -350,7 +352,7 @@ function checkPeerDependencies(reportError, pkg, type, allowedPeerIn, allowMissi
       );
       if (providedDependenciesForDepName.length > 0) {
         if (providedDependenciesForDepName.every(
-          ([, depRange]) => semver.intersects(range, depRange)
+          ([, depRange]) => semver.intersects(range, getRealVersion(depRange))
         )) {
           if (process.env.REPORT_PROVIDED_PEER_DEPENDENCIES) {
             reportError({
@@ -413,8 +415,8 @@ function checkDirectPeerDependencies(reportError, isLibrary, pkg, getDependencyP
         type: depType,
         pkg: depPkg,
         hasDirectMatchingPeerDependency: pkg.peerDependencies?.[depName] ? semver.intersects(
-          dependencies[depName].value,
-          pkg.peerDependencies[depName].value
+          getRealVersion(dependencies[depName].value),
+          getRealVersion(pkg.peerDependencies[depName].value)
         ) : false
       });
       if (depPkg.dependencies && !isLibrary) {

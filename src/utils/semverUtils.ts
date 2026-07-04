@@ -61,7 +61,11 @@ export function getRealVersion(version: string): string {
     if (realVersion) return realVersion;
   }
   if (version.startsWith("workspace:")) {
-    return version.slice("workspace:".length);
+    const realVersion = version.slice("workspace:".length);
+    // "workspace:~" and "workspace:^" are shorthands resolved to the
+    // package's own version at publish time; there is no version to check here.
+    if (realVersion === "~" || realVersion === "^") return "*";
+    return realVersion;
   }
 
   return version;

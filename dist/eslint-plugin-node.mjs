@@ -4,8 +4,8 @@ import { findPackageJSON } from 'node:module';
 import { parseTree, findNodeAtLocation, getNodeValue } from 'jsonc-parser';
 import { TextSourceCodeBase, VisitNodeStep } from '@eslint/plugin-kit';
 import semver from 'semver';
-import 'node:util';
 import semverUtils from 'semver-utils';
+import 'node:util';
 
 const stripListItemValue = (rawValue) => {
   const withoutComment = rawValue.replace(/(?:^|\s)#.*$/, "").trim();
@@ -866,13 +866,6 @@ const directDuplicateDependenciesRule = createPackageRule(
   }
 );
 
-function fromDependency(depPkg, depType) {
-  return `from "${depPkg.name || ""}"${depType ? ` in "${depType}"` : ""}`;
-}
-function inDependency(depPkg, depType) {
-  return `in ${depType ? `"${depType}" of ` : ""}"${depPkg.name || ""}"`;
-}
-
 semverUtils.parse;
 semverUtils.parseRange;
 function getRealVersion(version) {
@@ -883,9 +876,18 @@ function getRealVersion(version) {
     if (realVersion) return realVersion;
   }
   if (version.startsWith("workspace:")) {
-    return version.slice("workspace:".length);
+    const realVersion = version.slice("workspace:".length);
+    if (realVersion === "~" || realVersion === "^") return "*";
+    return realVersion;
   }
   return version;
+}
+
+function fromDependency(depPkg, depType) {
+  return `from "${depPkg.name || ""}"${depType ? ` in "${depType}"` : ""}`;
+}
+function inDependency(depPkg, depType) {
+  return `in ${depType ? `"${depType}" of ` : ""}"${depPkg.name || ""}"`;
 }
 
 function checkSatisfiesPeerDependency(reportError, pkg, type, allowedPeerIn, peerDepName, range, depPkg, invalidOnlyWarnsForCheck) {
@@ -938,7 +940,7 @@ function checkPeerDependencies(reportError, pkg, type, allowedPeerIn, allowMissi
       );
       if (providedDependenciesForDepName.length > 0) {
         if (providedDependenciesForDepName.every(
-          ([, depRange]) => semver.intersects(range, depRange)
+          ([, depRange]) => semver.intersects(range, getRealVersion(depRange))
         )) {
           if (process.env.REPORT_PROVIDED_PEER_DEPENDENCIES) {
             reportError({
@@ -1001,8 +1003,8 @@ function checkDirectPeerDependencies(reportError, isLibrary, pkg, getDependencyP
         type: depType,
         pkg: depPkg,
         hasDirectMatchingPeerDependency: pkg.peerDependencies?.[depName] ? semver.intersects(
-          dependencies[depName].value,
-          pkg.peerDependencies[depName].value
+          getRealVersion(dependencies[depName].value),
+          getRealVersion(pkg.peerDependencies[depName].value)
         ) : false
       });
       if (depPkg.dependencies && !isLibrary) {
