@@ -37,8 +37,8 @@ importers:
         specifier: 24.3.0
         version: 24.3.0
       '@types/node':
-        specifier: 24.10.4
-        version: 24.10.4
+        specifier: 26.1.0
+        version: 26.1.0
       '@types/semver':
         specifier: 7.7.1
         version: 7.7.1
@@ -727,8 +727,8 @@ packages:
   '@types/node@14.18.30':
     resolution: {integrity: sha512-8OEyg4oc/CqN5+LbInKNLA8MfbGzbC+k8lVPePXazuwEVrVeQ9gwMDX00HJwWbC7syc1FWRU6Mow0Lm+mibHAQ==}
 
-  '@types/node@24.10.4':
-    resolution: {integrity: sha512-vnDVpYPMzs4wunl27jHrfmwojOGKya0xyM3sH+UE5iv5uPS6vX7UIoh6m+vQc5LGBq52HBKPIn/zcSZVzeDEZg==}
+  '@types/node@26.1.0':
+    resolution: {integrity: sha512-O0A1G3xPGy4w7AgQdAQYUlQ+BKk2Oovw8eRpofyp5KdBZULnbe+WqaOVNrm705SHphCiG4XHsACrSmPu1f+Kgw==}
 
   '@types/resolve@1.20.2':
     resolution: {integrity: sha512-60BCwRFOZCQhDncwQdxxeOEEkbc5dIMccYLwbxsS4TUNeVECQ/pBJ0j09mrHOl/JJvpRPGwO9SvE4nR2Nb/a4Q==}
@@ -2203,8 +2203,8 @@ packages:
     resolution: {integrity: sha512-nWJ91DjeOkej/TA8pXQ3myruKpKEYgqvpw9lz4OPHj/NWFNluYrjbz9j01CJ8yKQd2g4jFoOkINCTW2I5LEEyw==}
     engines: {node: '>= 0.4'}
 
-  undici-types@7.16.0:
-    resolution: {integrity: sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw==}
+  undici-types@8.3.0:
+    resolution: {integrity: sha512-j375ScV60dom+YkPFIfTLcOiPxkN/buHz5GobjLhixFuANaNs3C9l4GmrWqejgXWJ7BbJcFYpTEUkS1Ge8bpZQ==}
 
   unplugin-utils@0.2.5:
     resolution: {integrity: sha512-gwXJnPRewT4rT7sBi/IvxKTjsms7jX7QIDLOClApuZwR49SXbrB1z2NLUZ+vDHyqCj/n58OzRRqaW+B8OZi8vg==}
@@ -2771,9 +2771,9 @@ snapshots:
 
   '@types/node@14.18.30': {}
 
-  '@types/node@24.10.4':
+  '@types/node@26.1.0':
     dependencies:
-      undici-types: 7.16.0
+      undici-types: 8.3.0
 
   '@types/resolve@1.20.2': {}
 
@@ -4017,7 +4017,7 @@ snapshots:
 
   nightingale-logger@18.1.0:
     dependencies:
-      '@types/node': 24.10.4
+      '@types/node': 26.1.0
       nightingale-levels: 18.0.0
       nightingale-types: 18.0.0
 
@@ -4027,7 +4027,7 @@ snapshots:
 
   nightingale@18.1.0:
     dependencies:
-      '@types/node': 24.10.4
+      '@types/node': 26.1.0
       ansi-styles: 6.2.3
       nightingale-levels: 18.0.0
       nightingale-logger: 18.1.0
@@ -4541,7 +4541,7 @@ snapshots:
       has-symbols: 1.1.0
       which-boxed-primitive: 1.1.1
 
-  undici-types@7.16.0: {}
+  undici-types@8.3.0: {}
 
   unplugin-utils@0.2.5:
     dependencies:
