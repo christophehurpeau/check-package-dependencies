@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [11.4.3](https://github.com/christophehurpeau/check-package-dependencies/compare/v11.4.2...v11.4.3) (2026-07-04)
+
+### Bug Fixes
+
+* properly resolve and report on workspace members instead of root
+
 ## [11.4.2](https://github.com/christophehurpeau/check-package-dependencies/compare/v11.4.1...v11.4.2) (2026-07-04)
 
 ### Bug Fixes
