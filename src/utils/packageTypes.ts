@@ -43,6 +43,7 @@ export type ParsedPackageJson = {
   readonly name: string;
   readonly path: string;
   readonly value: Readonly<PackageJson>;
+  readonly workspacesPackages?: readonly string[];
   readonly resolutionsExplained?: Readonly<
     Record<string, Readonly<DependencyValue>>
   >;

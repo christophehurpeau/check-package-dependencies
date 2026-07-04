@@ -2,7 +2,7 @@ import path from 'node:path';
 import util, { styleText } from 'node:util';
 import semver from 'semver';
 import semverUtils from 'semver-utils';
-import fs, { readFileSync, writeFileSync, constants } from 'node:fs';
+import fs, { constants, readFileSync, writeFileSync } from 'node:fs';
 import { findPackageJSON } from 'node:module';
 import { parseTree, findNodeAtLocation, getNodeValue } from 'jsonc-parser';
 
@@ -965,6 +965,47 @@ function checkSatisfiesVersionsInDependency(reportError, depPkg, dependenciesRan
   }
 }
 
+const stripListItemValue = (rawValue) => {
+  const withoutComment = rawValue.replace(/(?:^|\s)#.*$/, "").trim();
+  const quoted = /^['"](.*)['"]$/.exec(withoutComment);
+  return quoted ? quoted[1] : withoutComment;
+};
+const parseFlowSequence = (flowValue) => flowValue.replace(/^\[/, "").replace(/\]$/, "").split(",").map((item) => stripListItemValue(item)).filter((item) => item.length > 0);
+const parsePnpmWorkspacePackages = (content) => {
+  const lines = content.split(/\r?\n/);
+  const packagesLineIndex = lines.findIndex(
+    (line) => line.startsWith("packages:")
+  );
+  if (packagesLineIndex === -1) return [];
+  const packagesLine = lines[packagesLineIndex];
+  const inlineValue = packagesLine.slice("packages:".length).trim();
+  if (inlineValue.startsWith("[")) {
+    return parseFlowSequence(inlineValue);
+  }
+  const packages = [];
+  for (let i = packagesLineIndex + 1; i < lines.length; i += 1) {
+    const line = lines[i];
+    if (line.trim().length === 0) continue;
+    const trimmedLine = line.trimStart();
+    if (line === trimmedLine || !trimmedLine.startsWith("-")) break;
+    const value = stripListItemValue(trimmedLine.slice(1));
+    if (value.length > 0) packages.push(value);
+  }
+  return packages;
+};
+const readPnpmWorkspacePackages = (dirname) => {
+  const pnpmWorkspacePath = path.join(dirname, "pnpm-workspace.yaml");
+  try {
+    fs.accessSync(pnpmWorkspacePath, constants.R_OK);
+  } catch {
+    return void 0;
+  }
+  const content = fs.readFileSync(pnpmWorkspacePath, "utf8");
+  const packages = parsePnpmWorkspacePackages(content);
+  return packages.length > 0 ? packages : void 0;
+};
+const resolveWorkspacesPackagesGlobs = (pkgValue, packagePath) => (pkgValue.workspaces && !Array.isArray(pkgValue.workspaces) ? pkgValue.workspaces.packages : pkgValue.workspaces) ?? readPnpmWorkspacePackages(path.dirname(packagePath));
+
 if (typeof findPackageJSON !== "function") {
   throw new Error("check-package-dependencies requires node >= 22.14.0");
 }
@@ -1090,6 +1131,7 @@ function parsePkg(packageContent, packagePath) {
     name: getNodeValue(nameNode),
     path: packagePath,
     value,
+    workspacesPackages: resolveWorkspacesPackagesGlobs(value, packagePath),
     ...Object.fromEntries(
       dependencyFieldNames.map(
         (fieldName) => parseDependencyField(json, fieldName, packageContent, value)
@@ -1896,7 +1938,10 @@ function createCheckPackageWithWorkspaces({
     isLibrary: false
   });
   const { pkg, pkgDirname } = checkPackage;
-  const pkgWorkspaces = pkg.workspaces && !Array.isArray(pkg.workspaces) ? pkg.workspaces.packages : pkg.workspaces;
+  const pkgWorkspaces = resolveWorkspacesPackagesGlobs(
+    pkg,
+    path.join(pkgDirname, "package.json")
+  );
   if (!pkgWorkspaces) {
     throw new Error('Package is missing "workspaces"');
   }

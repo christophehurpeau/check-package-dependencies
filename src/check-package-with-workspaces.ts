@@ -17,6 +17,7 @@ import {
   displayMessages,
   reportNotWarnedForMapping,
 } from "./reporting/cliErrorReporting.ts";
+import { resolveWorkspacesPackagesGlobs } from "./utils/pnpmWorkspaceYaml.ts";
 import type { OnlyWarnsForOptionalDependencyMapping } from "./utils/warnForUtils.ts";
 import { createOnlyWarnsForMappingCheck } from "./utils/warnForUtils.ts";
 
@@ -82,10 +83,10 @@ export function createCheckPackageWithWorkspaces({
   });
   const { pkg, pkgDirname } = checkPackage;
 
-  const pkgWorkspaces: string[] | undefined =
-    pkg.workspaces && !Array.isArray(pkg.workspaces)
-      ? pkg.workspaces.packages
-      : pkg.workspaces;
+  const pkgWorkspaces = resolveWorkspacesPackagesGlobs(
+    pkg,
+    path.join(pkgDirname, "package.json"),
+  );
 
   if (!pkgWorkspaces) {
     throw new Error('Package is missing "workspaces"');

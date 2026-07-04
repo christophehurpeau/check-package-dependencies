@@ -19,7 +19,7 @@ export const workspaceProtocolRule = createPackageRule(
   },
   {
     checkPackage: ({ pkg, reportError, loadWorkspacePackageJsons }) => {
-      if (!pkg.value.workspaces) {
+      if (!pkg.workspacesPackages) {
         return;
       }
 

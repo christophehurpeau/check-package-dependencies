@@ -34,6 +34,7 @@ export type ParsedPackageJson = {
     readonly name: string;
     readonly path: string;
     readonly value: Readonly<PackageJson>;
+    readonly workspacesPackages?: readonly string[];
     readonly resolutionsExplained?: Readonly<Record<string, Readonly<DependencyValue>>>;
     change: (type: DependencyTypes, dependencyName: string, newValue: string) => void;
 } & Readonly<Partial<Record<DependencyTypes, Partial<Record<string, Readonly<DependencyValue>>>>>>;

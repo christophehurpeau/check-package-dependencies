@@ -1,5 +1,8 @@
 {
   "permissions": {
-    "allow": ["Bash(TZ=UTC node --import ./src/test-setup.ts --test:*)"]
+    "allow": [
+      "Bash(TZ=UTC node --import ./src/test-setup.ts --test:*)",
+      "Bash(yarn lint *)"
+    ]
   }
 }

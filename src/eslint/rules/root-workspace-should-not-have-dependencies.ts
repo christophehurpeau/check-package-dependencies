@@ -9,7 +9,7 @@ export const rootWorkspaceShouldNotHaveDependenciesRule = createPackageRule(
   },
   {
     checkDependencyValue: ({ node, pkg, reportError }) => {
-      if (!pkg.value.workspaces) {
+      if (!pkg.workspacesPackages) {
         return;
       }
 

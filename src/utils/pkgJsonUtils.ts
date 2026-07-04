@@ -8,6 +8,7 @@ import type {
   PackageJson,
   ParsedPackageJson,
 } from "./packageTypes.ts";
+import { resolveWorkspacesPackagesGlobs } from "./pnpmWorkspaceYaml.ts";
 
 if (typeof findPackageJSON !== "function") {
   // eslint-disable-next-line unicorn/prefer-type-error
@@ -172,6 +173,7 @@ export function parsePkg(
     name: getNodeValue(nameNode) as string,
     path: packagePath,
     value,
+    workspacesPackages: resolveWorkspacesPackagesGlobs(value, packagePath),
     ...Object.fromEntries(
       dependencyFieldNames.map((fieldName) =>
         parseDependencyField(json, fieldName, packageContent, value),

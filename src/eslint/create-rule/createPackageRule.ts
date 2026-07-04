@@ -228,19 +228,15 @@ export function createPackageRule<
             const loadWorkspacePackageJsons = (): ParsedPackageJson[] => {
               const workspacePackagesPaths: string[] = [];
 
-              const pkgWorkspaces: string[] | undefined =
-                parsedPkgJson.value.workspaces &&
-                !Array.isArray(parsedPkgJson.value.workspaces)
-                  ? parsedPkgJson.value.workspaces.packages
-                  : parsedPkgJson.value.workspaces;
+              const dirname = path.dirname(parsedPkgJson.path);
+
+              const pkgWorkspaces = parsedPkgJson.workspacesPackages;
 
               if (!pkgWorkspaces) {
                 throw new Error(
                   "Tried to load workspaces package.json but no workspaces found",
                 );
               }
-
-              const dirname = path.dirname(parsedPkgJson.path);
 
               const match = fs.globSync(pkgWorkspaces, { cwd: dirname });
               for (const pathMatch of match) {

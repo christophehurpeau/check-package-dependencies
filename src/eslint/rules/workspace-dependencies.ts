@@ -67,7 +67,7 @@ export const workspaceDependenciesRule = createPackageRule(
       getDependencyPackageJson,
       onlyWarnsForMappingCheck,
     }) => {
-      if (!pkg.value.workspaces) {
+      if (!pkg.workspacesPackages) {
         return;
       }
 

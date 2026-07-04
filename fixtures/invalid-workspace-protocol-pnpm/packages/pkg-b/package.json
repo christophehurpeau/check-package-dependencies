@@ -1,0 +1,8 @@
+{
+  "name": "fixture-wp-pnpm-b",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "fixture-wp-pnpm-a": "^1.0.0"
+  }
+}
