@@ -2232,6 +2232,11 @@ const DEP_TYPES_TO_CHECK = [
   "optionalDependencies",
   "peerDependencies"
 ];
+const getWorkspaceProtocolFixTo = (value) => {
+  if (value.startsWith("^")) return "workspace:^";
+  if (value.startsWith("~")) return "workspace:~";
+  return "workspace:*";
+};
 const workspaceProtocolRule = createPackageRule(
   "workspace-protocol",
   {
@@ -2248,7 +2253,9 @@ const workspaceProtocolRule = createPackageRule(
       if (workspaceMemberNames?.has(node.name) && !node.value.startsWith(WORKSPACE_PROTOCOL_PREFIX)) {
         reportError({
           errorMessage: `Dependency "${node.name}" should use workspace protocol (workspace:, workspace:*, workspace:^, or workspace:~) instead of "${node.value}"`,
-          dependency: node
+          dependency: node,
+          errorTarget: "dependencyValue",
+          fixTo: getWorkspaceProtocolFixTo(node.value)
         });
       }
     }

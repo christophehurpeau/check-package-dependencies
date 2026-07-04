@@ -13,23 +13,33 @@ describe("workspace-protocol", () => {
     );
     process.chdir(fixtureCwd);
     const { ESLint } = await import("eslint");
+    const overrideConfig = {
+      rules: {
+        "check-package-dependencies-test/workspace-protocol": "error" as const,
+      },
+    };
+    const plugins = { "check-package-dependencies-test": eslintPlugin };
+    const filesToLint = [
+      path.join(fixtureCwd, "package.json"),
+      path.join(fixtureCwd, "packages/*/package.json"),
+    ];
+
     const eslint = new ESLint({
       cwd: fixtureCwd,
       ignore: false,
-      plugins: {
-        "check-package-dependencies-test": eslintPlugin,
-      },
-      overrideConfig: {
-        rules: {
-          "check-package-dependencies-test/workspace-protocol": "error",
-        },
-      },
+      plugins,
+      overrideConfig,
     });
+    const results = await eslint.lintFiles(filesToLint);
 
-    const results = await eslint.lintFiles([
-      path.join(fixtureCwd, "package.json"),
-      path.join(fixtureCwd, "packages/*/package.json"),
-    ]);
+    const fixEslint = new ESLint({
+      cwd: fixtureCwd,
+      ignore: false,
+      fix: true,
+      plugins,
+      overrideConfig,
+    });
+    const fixResults = await fixEslint.lintFiles(filesToLint);
     process.chdir(repoCwd);
 
     const messages = results
@@ -49,13 +59,33 @@ describe("workspace-protocol", () => {
             message:
               'dependencies > fixture-wp-a: Dependency "fixture-wp-a" should use workspace protocol (workspace:, workspace:*, workspace:^, or workspace:~) instead of "^1.0.0"',
             line: 6,
-            column: 5,
+            column: 21,
             endLine: 6,
             endColumn: 29,
+            fix: { range: [107, 115], text: '"workspace:^"' },
           },
         ],
       },
     ]);
+
+    const pkgBResult = fixResults.find((result) =>
+      result.filePath.endsWith("packages/pkg-b/package.json"),
+    )!;
+    deepEqual(
+      pkgBResult.output,
+      `${JSON.stringify(
+        {
+          name: "fixture-wp-b",
+          private: true,
+          type: "module",
+          dependencies: {
+            "fixture-wp-a": "workspace:^",
+          },
+        },
+        null,
+        2,
+      )}\n`,
+    );
   });
 
   it("should report dependency on workspace package not using workspace protocol (pnpm-workspace.yaml)", async () => {
@@ -66,23 +96,33 @@ describe("workspace-protocol", () => {
     );
     process.chdir(fixtureCwd);
     const { ESLint } = await import("eslint");
+    const overrideConfig = {
+      rules: {
+        "check-package-dependencies-test/workspace-protocol": "error" as const,
+      },
+    };
+    const plugins = { "check-package-dependencies-test": eslintPlugin };
+    const filesToLint = [
+      path.join(fixtureCwd, "package.json"),
+      path.join(fixtureCwd, "packages/*/package.json"),
+    ];
+
     const eslint = new ESLint({
       cwd: fixtureCwd,
       ignore: false,
-      plugins: {
-        "check-package-dependencies-test": eslintPlugin,
-      },
-      overrideConfig: {
-        rules: {
-          "check-package-dependencies-test/workspace-protocol": "error",
-        },
-      },
+      plugins,
+      overrideConfig,
     });
+    const results = await eslint.lintFiles(filesToLint);
 
-    const results = await eslint.lintFiles([
-      path.join(fixtureCwd, "package.json"),
-      path.join(fixtureCwd, "packages/*/package.json"),
-    ]);
+    const fixEslint = new ESLint({
+      cwd: fixtureCwd,
+      ignore: false,
+      fix: true,
+      plugins,
+      overrideConfig,
+    });
+    const fixResults = await fixEslint.lintFiles(filesToLint);
     process.chdir(repoCwd);
 
     const messages = results
@@ -102,13 +142,33 @@ describe("workspace-protocol", () => {
             message:
               'dependencies > fixture-wp-pnpm-a: Dependency "fixture-wp-pnpm-a" should use workspace protocol (workspace:, workspace:*, workspace:^, or workspace:~) instead of "^1.0.0"',
             line: 6,
-            column: 5,
+            column: 26,
             endLine: 6,
             endColumn: 34,
+            fix: { range: [117, 125], text: '"workspace:^"' },
           },
         ],
       },
     ]);
+
+    const pkgBResult = fixResults.find((result) =>
+      result.filePath.endsWith("packages/pkg-b/package.json"),
+    )!;
+    deepEqual(
+      pkgBResult.output,
+      `${JSON.stringify(
+        {
+          name: "fixture-wp-pnpm-b",
+          private: true,
+          type: "module",
+          dependencies: {
+            "fixture-wp-pnpm-a": "workspace:^",
+          },
+        },
+        null,
+        2,
+      )}\n`,
+    );
   });
 
   it("should not report when workspace protocol is used", async () => {
