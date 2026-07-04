@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [11.3.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v11.2.0...v11.3.0) (2026-07-04)
+
+### Features
+
+* add support for pnpm workspaces
+* **deps:** update eslint monorepo to v10.4.1 ([#865](https://github.com/christophehurpeau/check-package-dependencies/issues/865))
+
 ## [11.2.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v11.1.1...v11.2.0) (2026-06-13)
 
 ### Features
