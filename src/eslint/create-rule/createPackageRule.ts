@@ -22,7 +22,10 @@ import {
   createOnlyWarnsForArrayCheck,
   createOnlyWarnsForMappingCheck,
 } from "../../utils/warnForUtils.ts";
-import { findWorkspaceMemberNames } from "../../utils/workspaceMembers.ts";
+import {
+  findWorkspaceMemberNames,
+  findWorkspaceRootPackageJson,
+} from "../../utils/workspaceMembers.ts";
 import type { DependencyValueAst, PackageJsonAst } from "../language.ts";
 
 export const onlyWarnsForArraySchema = {
@@ -71,6 +74,7 @@ export function createPackageRule<
       {
         loadWorkspacePackageJsons: () => ParsedPackageJson[];
         getWorkspaceMemberNames: () => Set<string> | undefined;
+        getWorkspaceRootPackageJson: () => ParsedPackageJson | undefined;
         checkOnlyWarnsForArray: (onlyWarnsForCheck: OnlyWarnsForCheck) => void;
         checkOnlyWarnsForMapping: (
           onlyWarnsForMappingCheck: OnlyWarnsForMappingCheck,
@@ -107,6 +111,19 @@ export function createPackageRule<
           return (pkg: ParsedPackageJson): Set<string> | undefined => {
             if (!computed) {
               cached = findWorkspaceMemberNames(path.dirname(pkg.path));
+              computed = true;
+            }
+            return cached;
+          };
+        })();
+
+        // Memoized across the whole file (Package + every DependencyValue visit).
+        const getWorkspaceRootPackageJson = (() => {
+          let cached: ParsedPackageJson | undefined;
+          let computed = false;
+          return (pkg: ParsedPackageJson): ParsedPackageJson | undefined => {
+            if (!computed) {
+              cached = findWorkspaceRootPackageJson(path.dirname(pkg.path));
               computed = true;
             }
             return cached;
@@ -308,6 +325,8 @@ export function createPackageRule<
                   loadWorkspacePackageJsons: loadWorkspacePackageJsonsMemoized,
                   getWorkspaceMemberNames: () =>
                     getWorkspaceMemberNames(parsedPkgJson),
+                  getWorkspaceRootPackageJson: () =>
+                    getWorkspaceRootPackageJson(parsedPkgJson),
                   // languageOptions,
                   settings,
                   ruleOptions: options,

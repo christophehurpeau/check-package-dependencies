@@ -39,6 +39,7 @@ export declare function createPackageRule<RuleOptions extends {
     checkPackage?: CheckFn<RuleOptions, ParsedPackageJson, {
         loadWorkspacePackageJsons: () => ParsedPackageJson[];
         getWorkspaceMemberNames: () => Set<string> | undefined;
+        getWorkspaceRootPackageJson: () => ParsedPackageJson | undefined;
         checkOnlyWarnsForArray: (onlyWarnsForCheck: OnlyWarnsForCheck) => void;
         checkOnlyWarnsForMapping: (onlyWarnsForMappingCheck: OnlyWarnsForMappingCheck) => void;
     }>;

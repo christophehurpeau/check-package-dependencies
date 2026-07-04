@@ -186,6 +186,9 @@ function parsePkg(packageContent, packagePath) {
     }
   };
 }
+function readAndParsePkgJson(packagePath) {
+  return parsePkg(readFileSync(packagePath, "utf8"), packagePath);
+}
 function internalLoadPackageJsonFromNodeModules(pkgDepName, pkgDirname) {
   const packagePath = findPackageJSON(
     pkgDepName,
@@ -542,27 +545,35 @@ const readPackageJsonSafe = (packageJsonPath) => {
     return void 0;
   }
 };
-const findWorkspaceMemberNames = (startDirname) => {
+const findWorkspaceRootLocation = (startDirname) => {
   for (let dirname = startDirname; ; ) {
     const packageJsonPath = path.join(dirname, "package.json");
     const pkgValue = readPackageJsonSafe(packageJsonPath);
     if (pkgValue) {
       const globs = resolveWorkspacesPackagesGlobs(pkgValue, packageJsonPath);
       if (globs) {
-        const names = /* @__PURE__ */ new Set();
-        for (const match of fs.globSync(globs, { cwd: dirname })) {
-          const memberPkg = readPackageJsonSafe(
-            path.join(match, "package.json")
-          );
-          if (memberPkg?.name) names.add(memberPkg.name);
-        }
-        return names;
+        return { dirname, packageJsonPath, globs };
       }
     }
     const parentDirname = path.dirname(dirname);
     if (parentDirname === dirname) return void 0;
     dirname = parentDirname;
   }
+};
+const findWorkspaceMemberNames = (startDirname) => {
+  const root = findWorkspaceRootLocation(startDirname);
+  if (!root) return void 0;
+  const names = /* @__PURE__ */ new Set();
+  for (const match of fs.globSync(root.globs, { cwd: root.dirname })) {
+    const memberPkg = readPackageJsonSafe(path.join(match, "package.json"));
+    if (memberPkg?.name) names.add(memberPkg.name);
+  }
+  return names;
+};
+const findWorkspaceRootPackageJson = (startDirname) => {
+  const root = findWorkspaceRootLocation(startDirname);
+  if (!root) return void 0;
+  return readAndParsePkgJson(root.packageJsonPath);
 };
 
 const onlyWarnsForArraySchema = {
@@ -596,6 +607,17 @@ function createPackageRule(ruleName, schema, {
           return (pkg) => {
             if (!computed) {
               cached = findWorkspaceMemberNames(path.dirname(pkg.path));
+              computed = true;
+            }
+            return cached;
+          };
+        })();
+        const getWorkspaceRootPackageJson = /* @__PURE__ */ (() => {
+          let cached;
+          let computed = false;
+          return (pkg) => {
+            if (!computed) {
+              cached = findWorkspaceRootPackageJson(path.dirname(pkg.path));
               computed = true;
             }
             return cached;
@@ -727,6 +749,7 @@ function createPackageRule(ruleName, schema, {
                   getDependencyPackageJson,
                   loadWorkspacePackageJsons: loadWorkspacePackageJsonsMemoized,
                   getWorkspaceMemberNames: () => getWorkspaceMemberNames(parsedPkgJson),
+                  getWorkspaceRootPackageJson: () => getWorkspaceRootPackageJson(parsedPkgJson),
                   // languageOptions,
                   settings,
                   ruleOptions: options,
@@ -2155,71 +2178,70 @@ const workspaceDependenciesRule = createPackageRule(
       reportError,
       loadWorkspacePackageJsons,
       getDependencyPackageJson,
+      getWorkspaceRootPackageJson,
       onlyWarnsForMappingCheck
     }) => {
-      if (!pkg.workspacesPackages) {
-        return;
-      }
-      const workspacePackageJsons = loadWorkspacePackageJsons();
-      const previousCheckedWorkspaces = [];
-      for (const subPkg of workspacePackageJsons) {
-        const onlyWarnsForCheck = onlyWarnsForMappingCheck.createFor(
-          subPkg.name
-        );
-        checkDuplicateInAllDependencies(
-          reportError,
-          pkg,
-          subPkg,
-          settings.isLibrary ?? false,
-          onlyWarnsForCheck
-        );
-        previousCheckedWorkspaces.forEach((previousSubPkg) => {
+      if (pkg.workspacesPackages) {
+        const workspacePackageJsons = loadWorkspacePackageJsons();
+        const previousCheckedWorkspaces = [];
+        for (const subPkg of workspacePackageJsons) {
+          const onlyWarnsForCheck = onlyWarnsForMappingCheck.createFor(
+            subPkg.name
+          );
           checkDuplicateInAllDependencies(
             reportError,
-            previousSubPkg,
+            pkg,
             subPkg,
             settings.isLibrary ?? false,
             onlyWarnsForCheck
           );
-        });
-        previousCheckedWorkspaces.push(subPkg);
-        const allDepPkgs = [];
-        regularDependencyTypes.forEach((depType) => {
-          const dependencies = subPkg[depType];
-          if (!dependencies) return;
-          for (const depName of getKeys(dependencies)) {
-            const [depPkg] = getDependencyPackageJson(depName);
-            if (pkg.devDependencies?.[depName]) {
+          previousCheckedWorkspaces.forEach((previousSubPkg) => {
+            checkDuplicateInAllDependencies(
+              reportError,
+              previousSubPkg,
+              subPkg,
+              settings.isLibrary ?? false,
+              onlyWarnsForCheck
+            );
+          });
+          previousCheckedWorkspaces.push(subPkg);
+        }
+        return;
+      }
+      const rootPkg = getWorkspaceRootPackageJson();
+      if (!rootPkg) return;
+      const allDepPkgs = [];
+      regularDependencyTypes.forEach((depType) => {
+        const dependencies = pkg[depType];
+        if (!dependencies) return;
+        for (const depName of getKeys(dependencies)) {
+          const [depPkg] = getDependencyPackageJson(depName);
+          if (rootPkg.devDependencies?.[depName]) {
+            continue;
+          }
+          allDepPkgs.push({ name: depName, type: depType, pkg: depPkg });
+        }
+      });
+      for (const { name: depName, type: depType, pkg: depPkg } of allDepPkgs) {
+        if (depPkg.peerDependencies) {
+          for (const [peerDepName, range] of Object.entries(
+            depPkg.peerDependencies
+          )) {
+            if (pkg.devDependencies?.[peerDepName]) {
               continue;
             }
-            allDepPkgs.push({ name: depName, type: depType, pkg: depPkg });
-          }
-        });
-        for (const {
-          name: depName,
-          type: depType,
-          pkg: depPkg
-        } of allDepPkgs) {
-          if (depPkg.peerDependencies) {
-            for (const [peerDepName, range] of Object.entries(
-              depPkg.peerDependencies
-            )) {
-              if (subPkg.devDependencies?.[peerDepName]) {
-                continue;
-              }
-              checkSatisfiesPeerDependency(
-                reportError,
-                pkg,
-                depType,
-                ["devDependencies"],
-                peerDepName,
-                range,
-                depPkg,
-                onlyWarnsForMappingCheck.createFor(
-                  `${depName}:peedDepdencies:invalid`
-                )
-              );
-            }
+            checkSatisfiesPeerDependency(
+              reportError,
+              rootPkg,
+              depType,
+              ["devDependencies"],
+              peerDepName,
+              range,
+              depPkg,
+              onlyWarnsForMappingCheck.createFor(
+                `${depName}:peedDepdencies:invalid`
+              )
+            );
           }
         }
       }
