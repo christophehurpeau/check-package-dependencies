@@ -535,6 +535,36 @@ const createOnlyWarnsForMappingCheck = (configName, onlyWarnsFor) => {
   };
 };
 
+const readPackageJsonSafe = (packageJsonPath) => {
+  try {
+    return JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
+  } catch {
+    return void 0;
+  }
+};
+const findWorkspaceMemberNames = (startDirname) => {
+  for (let dirname = startDirname; ; ) {
+    const packageJsonPath = path.join(dirname, "package.json");
+    const pkgValue = readPackageJsonSafe(packageJsonPath);
+    if (pkgValue) {
+      const globs = resolveWorkspacesPackagesGlobs(pkgValue, packageJsonPath);
+      if (globs) {
+        const names = /* @__PURE__ */ new Set();
+        for (const match of fs.globSync(globs, { cwd: dirname })) {
+          const memberPkg = readPackageJsonSafe(
+            path.join(match, "package.json")
+          );
+          if (memberPkg?.name) names.add(memberPkg.name);
+        }
+        return names;
+      }
+    }
+    const parentDirname = path.dirname(dirname);
+    if (parentDirname === dirname) return void 0;
+    dirname = parentDirname;
+  }
+};
+
 const onlyWarnsForArraySchema = {
   type: "array",
   items: { type: "string" }
@@ -560,6 +590,17 @@ function createPackageRule(ruleName, schema, {
       create(context) {
         const options = context.options[0] ?? {};
         const settings = context.settings["check-package-dependencies"] ?? {};
+        const getWorkspaceMemberNames = /* @__PURE__ */ (() => {
+          let cached;
+          let computed = false;
+          return (pkg) => {
+            if (!computed) {
+              cached = findWorkspaceMemberNames(path.dirname(pkg.path));
+              computed = true;
+            }
+            return cached;
+          };
+        })();
         const schemaProperties = schema && "properties" in schema ? schema.properties : void 0;
         const onlyWarnsForCheck = schemaProperties && "onlyWarnsFor" in schemaProperties && schemaProperties.onlyWarnsFor.type === "array" && Array.isArray(options.onlyWarnsFor) ? createOnlyWarnsForArrayCheck("onlyWarnsFor", options.onlyWarnsFor) : createOnlyWarnsForArrayCheck("onlyWarnsFor", []);
         const onlyWarnsForMappingCheck = schemaProperties && "onlyWarnsFor" in schemaProperties && schemaProperties.onlyWarnsFor.type === "object" && typeof options.onlyWarnsFor === "object" ? createOnlyWarnsForMappingCheck(
@@ -685,6 +726,7 @@ function createPackageRule(ruleName, schema, {
                   pkg: parsedPkgJson,
                   getDependencyPackageJson,
                   loadWorkspacePackageJsons: loadWorkspacePackageJsonsMemoized,
+                  getWorkspaceMemberNames: () => getWorkspaceMemberNames(parsedPkgJson),
                   // languageOptions,
                   settings,
                   ruleOptions: options,
@@ -732,6 +774,7 @@ function createPackageRule(ruleName, schema, {
                 node: dependencyValue,
                 pkg: parsedPkgJson,
                 getDependencyPackageJson,
+                getWorkspaceMemberNames: () => getWorkspaceMemberNames(parsedPkgJson),
                 // languageOptions,
                 settings,
                 ruleOptions: options,
@@ -2197,26 +2240,16 @@ const workspaceProtocolRule = createPackageRule(
     additionalProperties: false
   },
   {
-    checkPackage: ({ pkg, reportError, loadWorkspacePackageJsons }) => {
-      if (!pkg.workspacesPackages) {
+    checkDependencyValue: ({ node, reportError, getWorkspaceMemberNames }) => {
+      if (!DEP_TYPES_TO_CHECK.includes(node.fieldName)) {
         return;
       }
-      const workspacePackageJsons = loadWorkspacePackageJsons();
-      const workspacePackageNames = new Set(
-        workspacePackageJsons.map((p) => p.name)
-      );
-      for (const subPkg of workspacePackageJsons) {
-        for (const depType of DEP_TYPES_TO_CHECK) {
-          const deps = subPkg[depType];
-          if (!deps) continue;
-          for (const depValue of Object.values(deps)) {
-            if (depValue && workspacePackageNames.has(depValue.name) && !depValue.value.startsWith(WORKSPACE_PROTOCOL_PREFIX)) {
-              reportError({
-                errorMessage: `${subPkg.name}: Dependency "${depValue.name}" in "${depType}" should use workspace protocol (workspace:, workspace:*, workspace:^, or workspace:~) instead of "${depValue.value}"`
-              });
-            }
-          }
-        }
+      const workspaceMemberNames = getWorkspaceMemberNames();
+      if (workspaceMemberNames?.has(node.name) && !node.value.startsWith(WORKSPACE_PROTOCOL_PREFIX)) {
+        reportError({
+          errorMessage: `Dependency "${node.name}" should use workspace protocol (workspace:, workspace:*, workspace:^, or workspace:~) instead of "${node.value}"`,
+          dependency: node
+        });
       }
     }
   }

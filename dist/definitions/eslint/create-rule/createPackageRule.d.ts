@@ -38,10 +38,13 @@ export declare function createPackageRule<RuleOptions extends {
 }>(ruleName: string, schema: NonNullable<NonNullable<Rule.RuleModule["meta"]>["schema"]>, { checkPackage, checkDependencyValue, }: {
     checkPackage?: CheckFn<RuleOptions, ParsedPackageJson, {
         loadWorkspacePackageJsons: () => ParsedPackageJson[];
+        getWorkspaceMemberNames: () => Set<string> | undefined;
         checkOnlyWarnsForArray: (onlyWarnsForCheck: OnlyWarnsForCheck) => void;
         checkOnlyWarnsForMapping: (onlyWarnsForMappingCheck: OnlyWarnsForMappingCheck) => void;
     }>;
-    checkDependencyValue?: CheckFn<RuleOptions, DependencyValue>;
+    checkDependencyValue?: CheckFn<RuleOptions, DependencyValue, {
+        getWorkspaceMemberNames: () => Set<string> | undefined;
+    }>;
 }): Record<string, Rule.RuleModule>;
 export {};
 //# sourceMappingURL=createPackageRule.d.ts.map

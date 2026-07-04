@@ -22,6 +22,7 @@ import {
   createOnlyWarnsForArrayCheck,
   createOnlyWarnsForMappingCheck,
 } from "../../utils/warnForUtils.ts";
+import { findWorkspaceMemberNames } from "../../utils/workspaceMembers.ts";
 import type { DependencyValueAst, PackageJsonAst } from "../language.ts";
 
 export const onlyWarnsForArraySchema = {
@@ -69,13 +70,18 @@ export function createPackageRule<
       ParsedPackageJson,
       {
         loadWorkspacePackageJsons: () => ParsedPackageJson[];
+        getWorkspaceMemberNames: () => Set<string> | undefined;
         checkOnlyWarnsForArray: (onlyWarnsForCheck: OnlyWarnsForCheck) => void;
         checkOnlyWarnsForMapping: (
           onlyWarnsForMappingCheck: OnlyWarnsForMappingCheck,
         ) => void;
       }
     >;
-    checkDependencyValue?: CheckFn<RuleOptions, DependencyValue>;
+    checkDependencyValue?: CheckFn<
+      RuleOptions,
+      DependencyValue,
+      { getWorkspaceMemberNames: () => Set<string> | undefined }
+    >;
   },
 ): Record<string, Rule.RuleModule> {
   return {
@@ -93,6 +99,19 @@ export function createPackageRule<
         const options = (context.options[0] ?? {}) as RuleOptions;
         const settings = (context.settings["check-package-dependencies"] ??
           {}) as CheckPackageDependenciesSettings;
+
+        // Memoized across the whole file (Package + every DependencyValue visit).
+        const getWorkspaceMemberNames = (() => {
+          let cached: Set<string> | undefined;
+          let computed = false;
+          return (pkg: ParsedPackageJson): Set<string> | undefined => {
+            if (!computed) {
+              cached = findWorkspaceMemberNames(path.dirname(pkg.path));
+              computed = true;
+            }
+            return cached;
+          };
+        })();
 
         const schemaProperties =
           schema && "properties" in schema ? schema.properties : undefined;
@@ -287,6 +306,8 @@ export function createPackageRule<
                   pkg: parsedPkgJson,
                   getDependencyPackageJson,
                   loadWorkspacePackageJsons: loadWorkspacePackageJsonsMemoized,
+                  getWorkspaceMemberNames: () =>
+                    getWorkspaceMemberNames(parsedPkgJson),
                   // languageOptions,
                   settings,
                   ruleOptions: options,
@@ -341,6 +362,8 @@ export function createPackageRule<
                     node: dependencyValue,
                     pkg: parsedPkgJson,
                     getDependencyPackageJson,
+                    getWorkspaceMemberNames: () =>
+                      getWorkspaceMemberNames(parsedPkgJson),
                     // languageOptions,
                     settings,
                     ruleOptions: options,

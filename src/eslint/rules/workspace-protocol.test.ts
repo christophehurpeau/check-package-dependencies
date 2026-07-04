@@ -28,21 +28,32 @@ describe("workspace-protocol", () => {
 
     const results = await eslint.lintFiles([
       path.join(fixtureCwd, "package.json"),
+      path.join(fixtureCwd, "packages/*/package.json"),
     ]);
     process.chdir(repoCwd);
 
-    const messages = results.flatMap((result) => result.messages);
+    const messages = results
+      .filter((result) => result.messages.length > 0)
+      .map((result) => ({
+        file: path.relative(fixtureCwd, result.filePath),
+        messages: result.messages,
+      }));
 
     deepEqual(messages, [
       {
-        ruleId: "check-package-dependencies-test/workspace-protocol",
-        severity: 2,
-        message:
-          'fixture-wp-b: Dependency "fixture-wp-a" in "dependencies" should use workspace protocol (workspace:, workspace:*, workspace:^, or workspace:~) instead of "^1.0.0"',
-        line: 1,
-        column: 1,
-        endLine: 1,
-        endColumn: 1,
+        file: "packages/pkg-b/package.json",
+        messages: [
+          {
+            ruleId: "check-package-dependencies-test/workspace-protocol",
+            severity: 2,
+            message:
+              'dependencies > fixture-wp-a: Dependency "fixture-wp-a" should use workspace protocol (workspace:, workspace:*, workspace:^, or workspace:~) instead of "^1.0.0"',
+            line: 6,
+            column: 5,
+            endLine: 6,
+            endColumn: 29,
+          },
+        ],
       },
     ]);
   });
@@ -70,21 +81,32 @@ describe("workspace-protocol", () => {
 
     const results = await eslint.lintFiles([
       path.join(fixtureCwd, "package.json"),
+      path.join(fixtureCwd, "packages/*/package.json"),
     ]);
     process.chdir(repoCwd);
 
-    const messages = results.flatMap((result) => result.messages);
+    const messages = results
+      .filter((result) => result.messages.length > 0)
+      .map((result) => ({
+        file: path.relative(fixtureCwd, result.filePath),
+        messages: result.messages,
+      }));
 
     deepEqual(messages, [
       {
-        ruleId: "check-package-dependencies-test/workspace-protocol",
-        severity: 2,
-        message:
-          'fixture-wp-pnpm-b: Dependency "fixture-wp-pnpm-a" in "dependencies" should use workspace protocol (workspace:, workspace:*, workspace:^, or workspace:~) instead of "^1.0.0"',
-        line: 1,
-        column: 1,
-        endLine: 1,
-        endColumn: 1,
+        file: "packages/pkg-b/package.json",
+        messages: [
+          {
+            ruleId: "check-package-dependencies-test/workspace-protocol",
+            severity: 2,
+            message:
+              'dependencies > fixture-wp-pnpm-a: Dependency "fixture-wp-pnpm-a" should use workspace protocol (workspace:, workspace:*, workspace:^, or workspace:~) instead of "^1.0.0"',
+            line: 6,
+            column: 5,
+            endLine: 6,
+            endColumn: 34,
+          },
+        ],
       },
     ]);
   });

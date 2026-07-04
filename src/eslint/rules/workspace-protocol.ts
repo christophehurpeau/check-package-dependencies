@@ -18,33 +18,20 @@ export const workspaceProtocolRule = createPackageRule(
     additionalProperties: false,
   },
   {
-    checkPackage: ({ pkg, reportError, loadWorkspacePackageJsons }) => {
-      if (!pkg.workspacesPackages) {
+    checkDependencyValue: ({ node, reportError, getWorkspaceMemberNames }) => {
+      if (!DEP_TYPES_TO_CHECK.includes(node.fieldName)) {
         return;
       }
 
-      const workspacePackageJsons = loadWorkspacePackageJsons();
-      const workspacePackageNames = new Set(
-        workspacePackageJsons.map((p) => p.name),
-      );
-
-      for (const subPkg of workspacePackageJsons) {
-        for (const depType of DEP_TYPES_TO_CHECK) {
-          const deps = subPkg[depType];
-          if (!deps) continue;
-
-          for (const depValue of Object.values(deps)) {
-            if (
-              depValue &&
-              workspacePackageNames.has(depValue.name) &&
-              !depValue.value.startsWith(WORKSPACE_PROTOCOL_PREFIX)
-            ) {
-              reportError({
-                errorMessage: `${subPkg.name}: Dependency "${depValue.name}" in "${depType}" should use workspace protocol (workspace:, workspace:*, workspace:^, or workspace:~) instead of "${depValue.value}"`,
-              });
-            }
-          }
-        }
+      const workspaceMemberNames = getWorkspaceMemberNames();
+      if (
+        workspaceMemberNames?.has(node.name) &&
+        !node.value.startsWith(WORKSPACE_PROTOCOL_PREFIX)
+      ) {
+        reportError({
+          errorMessage: `Dependency "${node.name}" should use workspace protocol (workspace:, workspace:*, workspace:^, or workspace:~) instead of "${node.value}"`,
+          dependency: node,
+        });
       }
     },
   },
