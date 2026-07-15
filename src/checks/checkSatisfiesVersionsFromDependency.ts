@@ -10,7 +10,11 @@ import type {
   PackageJson,
   ParsedPackageJson,
 } from "../utils/packageTypes.ts";
-import { changeOperator, getOperator } from "../utils/semverUtils.ts";
+import {
+  changeOperator,
+  getOperator,
+  getRealVersion,
+} from "../utils/semverUtils.ts";
 import type { OnlyWarnsForCheck } from "../utils/warnForUtils.ts";
 
 export interface CheckSatisfiesVersionsFromDependencyOptions {
@@ -60,8 +64,8 @@ export function checkSatisfiesVersionsFromDependency(
       })();
 
       return expectedOperator === ""
-        ? semver.minVersion(range)?.version
-        : changeOperator(range, expectedOperator);
+        ? semver.minVersion(getRealVersion(range))?.version
+        : changeOperator(getRealVersion(range), expectedOperator);
     };
 
     if (!pkgRange) {
@@ -78,10 +82,13 @@ export function checkSatisfiesVersionsFromDependency(
         pkg.change(type, depKey, fix);
       }
     } else {
-      const minVersionOfVersion = semver.minVersion(pkgRange.value);
+      const pkgRealRange = getRealVersion(pkgRange.value);
+      // "workspace:*" resolves to the local package's own version; treat as satisfied.
+      if (pkgRealRange === "*") return;
+      const minVersionOfVersion = semver.minVersion(pkgRealRange);
       if (
         !minVersionOfVersion ||
-        !semver.satisfies(minVersionOfVersion, range, {
+        !semver.satisfies(minVersionOfVersion, getRealVersion(range), {
           includePrerelease: true,
         })
       ) {

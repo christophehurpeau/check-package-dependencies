@@ -61,6 +61,20 @@ describe(checkMinRangeSatisfies.name, () => {
           devDependencies: { test1: "^1.1.0" },
         },
       ],
+      [
+        "workspace:* dependency",
+        {
+          dependencies: { test1: "workspace:*" },
+          devDependencies: { test1: "^1.1.0" },
+        },
+      ],
+      [
+        "workspace:* dev dependency",
+        {
+          dependencies: { test1: "^1.1.0" },
+          devDependencies: { test1: "workspace:*" },
+        },
+      ],
     ];
 
     for (const [description, pkgContent] of testCases) {

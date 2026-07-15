@@ -38,6 +38,30 @@ tester.run(
         )}\n`,
         filename: "/tmp/package.json",
       },
+      {
+        code: `${JSON.stringify(
+          {
+            name: "test",
+            peerDependencies: { foo: "^2.0.0" },
+            dependencies: { foo: "workspace:*" },
+          },
+          null,
+          2,
+        )}\n`,
+        filename: "/tmp/package.json",
+      },
+      {
+        code: `${JSON.stringify(
+          {
+            name: "test",
+            peerDependencies: { foo: "workspace:*" },
+            dependencies: { foo: "^2.0.0" },
+          },
+          null,
+          2,
+        )}\n`,
+        filename: "/tmp/package.json",
+      },
     ],
     invalid: [
       {

@@ -75,6 +75,13 @@ describe(checkSatisfiesVersionsInDependency.name, () => {
         "^1.0.0",
         { dependencies: { test3: "^1.1.0" } },
       ],
+      [
+        "test3",
+        "dependencies",
+        "workspace:*",
+        "^1.0.0",
+        { dependencies: { test3: "workspace:*" } },
+      ],
     ];
 
     for (const [

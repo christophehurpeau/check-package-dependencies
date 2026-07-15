@@ -45,6 +45,18 @@ describe("checkResolutionsVersionsMatch", () => {
     assertNoMessages(messages);
   });
 
+  it('should return no error when the dependency uses "workspace:*"', () => {
+    checkResolutionsVersionsMatch(
+      mockReportError,
+      parsePkgValue({
+        name: "test",
+        resolutions: { test1: "1.0.0" },
+        dependencies: { test1: "workspace:*" },
+      }),
+    );
+    assertNoMessages(messages);
+  });
+
   it("should return error when multiple dependencies not matching", () => {
     checkResolutionsVersionsMatch(
       mockReportError,

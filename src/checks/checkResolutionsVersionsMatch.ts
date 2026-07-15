@@ -4,6 +4,7 @@ import type {
   DependencyValue,
   ParsedPackageJson,
 } from "../utils/packageTypes.ts";
+import { getRealVersion } from "../utils/semverUtils.ts";
 
 export function checkResolutionVersionMatch(
   reportError: ReportError,
@@ -26,8 +27,12 @@ export function checkResolutionVersionMatch(
 
     if (!range) return;
 
+    const realRange = getRealVersion(range.value);
+    // "workspace:*" resolves to the local package's own version; nothing to match.
+    if (realRange === "*") return;
+
     if (
-      !semver.satisfies(resolutionDepVersion, range.value, {
+      !semver.satisfies(resolutionDepVersion, realRange, {
         includePrerelease: true,
       })
     ) {

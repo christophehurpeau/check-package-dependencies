@@ -37,6 +37,30 @@ tester.run(
         )}\n`,
         filename: "/tmp/package.json",
       },
+      {
+        code: `${JSON.stringify(
+          {
+            name: "test",
+            dependencies: { foo: "^2.0.0" },
+            devDependencies: { foo: "workspace:*" },
+          },
+          null,
+          2,
+        )}\n`,
+        filename: "/tmp/package.json",
+      },
+      {
+        code: `${JSON.stringify(
+          {
+            name: "test",
+            dependencies: { foo: "workspace:*" },
+            devDependencies: { foo: "^2.0.0" },
+          },
+          null,
+          2,
+        )}\n`,
+        filename: "/tmp/package.json",
+      },
     ],
     invalid: [
       {

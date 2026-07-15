@@ -1453,21 +1453,25 @@ const identicalVersionsRule = createPackageRule(
 
 function checkDependencyMinRangeSatisfies(reportError, dependencyValue, pkg, dependencyType2) {
   if (!pkg[dependencyType2]) return;
-  if (!dependencyValue || dependencyValue.value === "*") return;
+  if (!dependencyValue) return;
+  const range1 = getRealVersion(dependencyValue.value);
+  if (range1 === "*") return;
   const depRange2 = pkg[dependencyType2][dependencyValue.name];
   if (!depRange2) return;
-  const minDepRange1 = semver.minVersion(dependencyValue.value)?.version || dependencyValue.value;
-  if (!semver.satisfies(minDepRange1, depRange2.value, {
+  const range2 = getRealVersion(depRange2.value);
+  if (range2 === "*") return;
+  const minDepRange1 = semver.minVersion(range1)?.version || range1;
+  if (!semver.satisfies(minDepRange1, range2, {
     includePrerelease: true
   })) {
-    const depRange1Parsed = semverUtils.parseRange(dependencyValue.value);
+    const depRange1Parsed = semverUtils.parseRange(range1);
     reportError({
       errorMessage: `Invalid "${dependencyValue.value}" in "${dependencyValue.fieldName}"`,
       errorDetails: `"${dependencyValue.value}" should satisfies "${depRange2.value}" from "${dependencyType2}"`,
       dependency: dependencyValue,
       autoFixable: true,
       errorTarget: "dependencyValue",
-      fixTo: (depRange1Parsed[0]?.operator || "") + (semver.minVersion(depRange2.value)?.version || depRange2.value)
+      fixTo: (depRange1Parsed[0]?.operator || "") + (semver.minVersion(range2)?.version || range2)
     });
   }
 }
@@ -1563,7 +1567,9 @@ function checkResolutionVersionMatch(reportError, pkg, resolutionValue, { tryToA
   ["dependencies", "devDependencies"].forEach((depType) => {
     const range = pkg[depType]?.[depName];
     if (!range) return;
-    if (!semver.satisfies(resolutionDepVersion, range.value, {
+    const realRange = getRealVersion(range.value);
+    if (realRange === "*") return;
+    if (!semver.satisfies(resolutionDepVersion, realRange, {
       includePrerelease: true
     })) {
       if (tryToAutoFix) {
@@ -1632,8 +1638,12 @@ const rootWorkspaceShouldNotHaveDependenciesRule = createPackageRule(
 );
 
 function isVersionSatisfiesRange(version, range) {
-  const minVersionOfVersion = semver.minVersion(version);
-  return !!minVersionOfVersion && semver.satisfies(minVersionOfVersion, range, { includePrerelease: true });
+  const realVersion = getRealVersion(version);
+  if (realVersion === "*") return true;
+  const minVersionOfVersion = semver.minVersion(realVersion);
+  return !!minVersionOfVersion && semver.satisfies(minVersionOfVersion, getRealVersion(range), {
+    includePrerelease: true
+  });
 }
 function checkSatisfiesVersion(reportError, dependencyValue, range, onlyWarnsForCheck) {
   if (!isVersionSatisfiesRange(dependencyValue.value, range)) {
@@ -2082,11 +2092,19 @@ function checkSatisfiesVersionsInDependency(reportError, depPkg, dependenciesRan
           errorDetails: `"${dependencyName}" is missing but should satisfies "${dependencyRange}"`,
           dependency: { name: dependencyName }
         });
-      } else if (!semver.satisfies(dependencies[dependencyName], dependencyRange, {
-        includePrerelease: true
-      }) && !semver.intersects(dependencies[dependencyName], dependencyRange, {
-        includePrerelease: true
-      })) {
+      } else if (getRealVersion(dependencies[dependencyName]) !== "*" && !semver.satisfies(
+        getRealVersion(dependencies[dependencyName]),
+        dependencyRange,
+        {
+          includePrerelease: true
+        }
+      ) && !semver.intersects(
+        getRealVersion(dependencies[dependencyName]),
+        dependencyRange,
+        {
+          includePrerelease: true
+        }
+      )) {
         reportError({
           errorMessage: `Invalid "${dependencyName}" ${inDependency(depPkg, dependenciesType)}`,
           errorDetails: `"${dependencies[dependencyName]}" does not satisfies "${dependencyRange}"`,

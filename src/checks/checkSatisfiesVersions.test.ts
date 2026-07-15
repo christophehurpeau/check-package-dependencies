@@ -20,6 +20,19 @@ describe("checkSatisfiesVersions", () => {
     assertNoMessages(messages);
   });
 
+  it("should return no error when version is workspace:*", () => {
+    checkSatisfiesVersions(
+      mockReportError,
+      parsePkgValue({
+        name: "test",
+        devDependencies: { test: "workspace:*" },
+      }),
+      "devDependencies",
+      { test: "^2.0.0" },
+    );
+    assertNoMessages(messages);
+  });
+
   it("should return error when version not satisfied", () => {
     checkSatisfiesVersions(
       mockReportError,

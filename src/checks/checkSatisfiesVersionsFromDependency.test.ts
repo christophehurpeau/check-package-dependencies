@@ -60,6 +60,13 @@ describe(checkSatisfiesVersionsFromDependency.name, () => {
       ],
       ["test5", "dependencies", "is exact", "1.0.0", "1.0.0"],
       ["test6", "resolutions", "is exact", "1.0.0", "1.0.0"],
+      [
+        "test7",
+        "devDependencies",
+        "is workspace:* in pkg",
+        "^1.0.0",
+        "workspace:*",
+      ],
     ];
 
     for (const [

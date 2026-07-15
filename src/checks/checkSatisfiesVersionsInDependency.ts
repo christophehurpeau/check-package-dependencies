@@ -3,6 +3,7 @@ import type { ReportError } from "../reporting/ReportError.ts";
 import { inDependency } from "../reporting/cliErrorReporting.ts";
 import { getEntries } from "../utils/object.ts";
 import type { DependenciesRanges, PackageJson } from "../utils/packageTypes.ts";
+import { getRealVersion } from "../utils/semverUtils.ts";
 
 export function checkSatisfiesVersionsInDependency(
   reportError: ReportError,
@@ -39,12 +40,21 @@ export function checkSatisfiesVersionsInDependency(
           dependency: { name: dependencyName },
         });
       } else if (
-        !semver.satisfies(dependencies[dependencyName], dependencyRange, {
-          includePrerelease: true,
-        }) &&
-        !semver.intersects(dependencies[dependencyName], dependencyRange, {
-          includePrerelease: true,
-        })
+        getRealVersion(dependencies[dependencyName]) !== "*" &&
+        !semver.satisfies(
+          getRealVersion(dependencies[dependencyName]),
+          dependencyRange,
+          {
+            includePrerelease: true,
+          },
+        ) &&
+        !semver.intersects(
+          getRealVersion(dependencies[dependencyName]),
+          dependencyRange,
+          {
+            includePrerelease: true,
+          },
+        )
       ) {
         reportError({
           errorMessage: `Invalid "${dependencyName}" ${inDependency(depPkg, dependenciesType)}`,

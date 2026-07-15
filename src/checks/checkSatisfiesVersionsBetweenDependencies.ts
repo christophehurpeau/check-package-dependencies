@@ -6,6 +6,7 @@ import {
   inDependency,
 } from "../reporting/cliErrorReporting.ts";
 import type { DependencyTypes, PackageJson } from "../utils/packageTypes.ts";
+import { getRealVersion } from "../utils/semverUtils.ts";
 import type { OnlyWarnsForCheck } from "../utils/warnForUtils.ts";
 
 export interface CheckSatisfiesVersionsFromDependencyOptions {
@@ -54,10 +55,13 @@ export function checkSatisfiesVersionsBetweenDependencies(
       return;
     }
 
-    const minVersionOfVersion = semver.minVersion(dep2Range);
+    const dep2RealRange = getRealVersion(dep2Range);
+    // "workspace:*" resolves to the local package's own version; treat as satisfied.
+    if (dep2RealRange === "*") return;
+    const minVersionOfVersion = semver.minVersion(dep2RealRange);
     if (
       !minVersionOfVersion ||
-      !semver.satisfies(minVersionOfVersion, dep1Range, {
+      !semver.satisfies(minVersionOfVersion, getRealVersion(dep1Range), {
         includePrerelease: true,
       })
     ) {

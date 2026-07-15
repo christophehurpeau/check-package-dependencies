@@ -640,17 +640,21 @@ function checkMinRangeSatisfies(reportError, pkg, type1 = "dependencies", type2 
     return;
   }
   for (const [depName, depRange1] of getEntries(dependencies1)) {
-    if (!depRange1 || depRange1.value === "*") continue;
+    if (!depRange1) continue;
+    const range1 = getRealVersion(depRange1.value);
+    if (range1 === "*") continue;
     const depRange2 = dependencies2[depName];
     if (!depRange2) continue;
-    const minDepRange1 = semver.minVersion(depRange1.value)?.version || depRange1.value;
-    if (!semver.satisfies(minDepRange1, depRange2.value, {
+    const range2 = getRealVersion(depRange2.value);
+    if (range2 === "*") continue;
+    const minDepRange1 = semver.minVersion(range1)?.version || range1;
+    if (!semver.satisfies(minDepRange1, range2, {
       includePrerelease: true
     })) {
       if (tryToAutoFix) {
-        const depRange1Parsed = semverUtils.parseRange(depRange1.value);
+        const depRange1Parsed = semverUtils.parseRange(range1);
         depRange1.changeValue(
-          (depRange1Parsed[0]?.operator || "") + (semver.minVersion(depRange2.value)?.version || depRange2.value)
+          (depRange1Parsed[0]?.operator || "") + (semver.minVersion(range2)?.version || range2)
         );
       } else {
         reportError({
@@ -719,7 +723,9 @@ function checkResolutionVersionMatch(reportError, pkg, resolutionValue, { tryToA
   ["dependencies", "devDependencies"].forEach((depType) => {
     const range = pkg[depType]?.[depName];
     if (!range) return;
-    if (!semver.satisfies(resolutionDepVersion, range.value, {
+    const realRange = getRealVersion(range.value);
+    if (realRange === "*") return;
+    if (!semver.satisfies(resolutionDepVersion, realRange, {
       includePrerelease: true
     })) {
       if (tryToAutoFix) {
@@ -758,8 +764,12 @@ function checkResolutionsVersionsMatch(reportError, pkg, { tryToAutoFix } = {}) 
 }
 
 function isVersionSatisfiesRange(version, range) {
-  const minVersionOfVersion = semver.minVersion(version);
-  return !!minVersionOfVersion && semver.satisfies(minVersionOfVersion, range, { includePrerelease: true });
+  const realVersion = getRealVersion(version);
+  if (realVersion === "*") return true;
+  const minVersionOfVersion = semver.minVersion(realVersion);
+  return !!minVersionOfVersion && semver.satisfies(minVersionOfVersion, getRealVersion(range), {
+    includePrerelease: true
+  });
 }
 function checkSatisfiesVersion(reportError, dependencyValue, range, onlyWarnsForCheck) {
   if (!isVersionSatisfiesRange(dependencyValue.value, range)) {
@@ -846,8 +856,10 @@ function checkSatisfiesVersionsBetweenDependencies(reportError, dep1Pkg, dep1Typ
       });
       return;
     }
-    const minVersionOfVersion = semver.minVersion(dep2Range);
-    if (!minVersionOfVersion || !semver.satisfies(minVersionOfVersion, dep1Range, {
+    const dep2RealRange = getRealVersion(dep2Range);
+    if (dep2RealRange === "*") return;
+    const minVersionOfVersion = semver.minVersion(dep2RealRange);
+    if (!minVersionOfVersion || !semver.satisfies(minVersionOfVersion, getRealVersion(dep1Range), {
       includePrerelease: true
     })) {
       reportError({
@@ -886,7 +898,7 @@ function checkSatisfiesVersionsFromDependency(reportError, pkg, type, depKeys, d
         }
         return shouldHaveExactVersions(type) ? "" : null;
       })();
-      return expectedOperator === "" ? semver.minVersion(range)?.version : changeOperator(range, expectedOperator);
+      return expectedOperator === "" ? semver.minVersion(getRealVersion(range))?.version : changeOperator(getRealVersion(range), expectedOperator);
     };
     if (!pkgRange) {
       const fix = getAutoFixIfExists();
@@ -902,8 +914,10 @@ function checkSatisfiesVersionsFromDependency(reportError, pkg, type, depKeys, d
         pkg.change(type, depKey, fix);
       }
     } else {
-      const minVersionOfVersion = semver.minVersion(pkgRange.value);
-      if (!minVersionOfVersion || !semver.satisfies(minVersionOfVersion, range, {
+      const pkgRealRange = getRealVersion(pkgRange.value);
+      if (pkgRealRange === "*") return;
+      const minVersionOfVersion = semver.minVersion(pkgRealRange);
+      if (!minVersionOfVersion || !semver.satisfies(minVersionOfVersion, getRealVersion(range), {
         includePrerelease: true
       })) {
         const fix = getAutoFixIfExists();
@@ -952,11 +966,19 @@ function checkSatisfiesVersionsInDependency(reportError, depPkg, dependenciesRan
           errorDetails: `"${dependencyName}" is missing but should satisfies "${dependencyRange}"`,
           dependency: { name: dependencyName }
         });
-      } else if (!semver.satisfies(dependencies[dependencyName], dependencyRange, {
-        includePrerelease: true
-      }) && !semver.intersects(dependencies[dependencyName], dependencyRange, {
-        includePrerelease: true
-      })) {
+      } else if (getRealVersion(dependencies[dependencyName]) !== "*" && !semver.satisfies(
+        getRealVersion(dependencies[dependencyName]),
+        dependencyRange,
+        {
+          includePrerelease: true
+        }
+      ) && !semver.intersects(
+        getRealVersion(dependencies[dependencyName]),
+        dependencyRange,
+        {
+          includePrerelease: true
+        }
+      )) {
         reportError({
           errorMessage: `Invalid "${dependencyName}" ${inDependency(depPkg, dependenciesType)}`,
           errorDetails: `"${dependencies[dependencyName]}" does not satisfies "${dependencyRange}"`,
