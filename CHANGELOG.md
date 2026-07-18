@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [11.6.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v11.5.0...v11.6.0) (2026-07-18)
+
+### Features
+
+* rename ESLint rules for better consistency and naming
+
 ## [11.5.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v11.4.3...v11.5.0) (2026-07-15)
 
 ### Features
