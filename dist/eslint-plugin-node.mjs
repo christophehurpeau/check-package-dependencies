@@ -381,6 +381,194 @@ const PackageJSONLanguage = {
   }
 };
 
+const getKeys = (o) => Object.keys(o);
+const getEntries = (o) => Object.entries(o);
+
+semverUtils.parse;
+semverUtils.parseRange;
+function getRealVersion(version) {
+  if (version.startsWith("npm:")) {
+    const match = /^npm:@?[^@]+@(.*)$/.exec(version);
+    if (!match) throw new Error(`Invalid version match: ${version}`);
+    const [, realVersion] = match;
+    if (realVersion) return realVersion;
+  }
+  if (version.startsWith("workspace:")) {
+    const realVersion = version.slice("workspace:".length);
+    if (realVersion === "~" || realVersion === "^") return "*";
+    return realVersion;
+  }
+  return version;
+}
+
+const getLocFromDependency = (dependency, errorTarget) => {
+  if (!dependency.locations) {
+    return void 0;
+  }
+  if (errorTarget === "dependencyName") {
+    return dependency.locations.name;
+  }
+  if (errorTarget === "dependencyValue") {
+    return dependency.locations.value;
+  }
+  return dependency.locations.all;
+};
+
+function fromDependency(depPkg, depType) {
+  return `from "${depPkg.name || ""}"${depType ? ` in "${depType}"` : ""}`;
+}
+function inDependency(depPkg, depType) {
+  return `in ${depType ? `"${depType}" of ` : ""}"${depPkg.name || ""}"`;
+}
+
+function checkSatisfiesPeerDependency(reportError, pkg, type, allowedPeerIn, peerDepName, range, depPkg, invalidOnlyWarnsForCheck) {
+  const versions = allowedPeerIn.map(
+    (versionsInType) => pkg[versionsInType]?.[peerDepName]
+  );
+  versions.forEach((versionV, index) => {
+    if (!versionV) {
+      return;
+    }
+    const version = getRealVersion(versionV.value);
+    if (version === "*" || version.startsWith("patch:")) {
+      return;
+    }
+    const minVersionOfVersion = semver.minVersion(version);
+    if (!minVersionOfVersion || !semver.satisfies(minVersionOfVersion, range, {
+      includePrerelease: true,
+      loose: true
+    })) {
+      reportError({
+        errorMessage: "Invalid peer dependency version",
+        errorDetails: `"${version}" should satisfies "${range}" ${fromDependency(depPkg, type)}`,
+        dependency: allowedPeerIn[index] ? pkg[allowedPeerIn[index]]?.[peerDepName] ?? void 0 : void 0,
+        onlyWarns: invalidOnlyWarnsForCheck.shouldWarnsFor(peerDepName)
+      });
+    }
+  });
+}
+function checkPeerDependencies(reportError, pkg, type, allowedPeerIn, allowMissing, providedDependencies, depPkg, missingOnlyWarnsForCheck, invalidOnlyWarnsForCheck) {
+  const { peerDependencies, peerDependenciesMeta } = depPkg;
+  if (!peerDependencies) return;
+  const allowedPeerInExisting = allowedPeerIn.filter(
+    (allowedPeerInType) => pkg[allowedPeerInType]
+  );
+  for (const [peerDepName, range] of Object.entries(peerDependencies)) {
+    const versionsIn = allowedPeerInExisting.filter(
+      (allowedPeerInExistingType) => pkg[allowedPeerInExistingType]?.[peerDepName]
+    );
+    if (versionsIn.length === 0) {
+      if (allowMissing) {
+        continue;
+      }
+      const peerDependenciesMetaPeerDep = peerDependenciesMeta?.[peerDepName];
+      if (peerDependenciesMetaPeerDep?.optional) {
+        continue;
+      }
+      let additionalDetails = "";
+      const providedDependenciesForDepName = providedDependencies.filter(
+        ([depName]) => depName === peerDepName
+      );
+      if (providedDependenciesForDepName.length > 0) {
+        if (providedDependenciesForDepName.every(
+          ([, depRange]) => semver.intersects(range, getRealVersion(depRange))
+        )) {
+          if (process.env.REPORT_PROVIDED_PEER_DEPENDENCIES) {
+            reportError({
+              errorMessage: `Missing "${peerDepName}" peer dependency ${fromDependency(depPkg, type)}`,
+              errorDetails: `but it is provided by ${providedDependenciesForDepName.map(([depName, depRange, depPkgName]) => depPkgName).join(", ")}`,
+              dependency: { name: peerDepName },
+              onlyWarns: process.env.REPORT_PROVIDED_PEER_DEPENDENCIES === "warn"
+            });
+          }
+          continue;
+        }
+        additionalDetails += " (required as some dependencies have non-satisfying range too)";
+      }
+      reportError({
+        errorMessage: `Missing "${peerDepName}" peer dependency ${fromDependency(depPkg, type)}`,
+        errorDetails: `it should satisfies "${range}" and be in ${allowedPeerIn.join(" or ")}${additionalDetails}`,
+        dependency: { name: peerDepName },
+        onlyWarns: missingOnlyWarnsForCheck.shouldWarnsFor(peerDepName)
+      });
+    } else {
+      checkSatisfiesPeerDependency(
+        reportError,
+        pkg,
+        type,
+        allowedPeerInExisting,
+        peerDepName,
+        range,
+        depPkg,
+        invalidOnlyWarnsForCheck
+      );
+    }
+  }
+}
+
+const regularDependencyTypes = [
+  "devDependencies",
+  "dependencies",
+  "optionalDependencies"
+];
+const getAllowedPeerInFromType = (depPkgType, isLibrary) => {
+  switch (depPkgType) {
+    case "devDependencies":
+      return ["devDependencies", "dependencies"];
+    case "dependencies":
+      return isLibrary ? ["dependencies", "peerDependencies"] : ["devDependencies", "dependencies"];
+    case "optionalDependencies":
+      return isLibrary ? ["dependencies", "optionalDependencies", "peerDependencies"] : ["devDependencies", "dependencies"];
+  }
+};
+function checkDirectPeerDependencies(reportError, isLibrary, pkg, getDependencyPackageJson, missingOnlyWarnsForCheck, invalidOnlyWarnsForCheck) {
+  const allDepPkgs = [];
+  const allDirectDependenciesDependencies = [];
+  regularDependencyTypes.forEach((depType) => {
+    const dependencies = pkg[depType];
+    if (!dependencies) return;
+    for (const depName of getKeys(dependencies)) {
+      const [depPkg] = getDependencyPackageJson(depName);
+      allDepPkgs.push({
+        name: depName,
+        type: depType,
+        pkg: depPkg,
+        hasDirectMatchingPeerDependency: pkg.peerDependencies?.[depName] ? semver.intersects(
+          getRealVersion(dependencies[depName].value),
+          getRealVersion(pkg.peerDependencies[depName].value)
+        ) : false
+      });
+      if (depPkg.dependencies && !isLibrary) {
+        allDirectDependenciesDependencies.push(
+          ...Object.entries(depPkg.dependencies).map(
+            ([depName2, depVersion]) => [depName2, depVersion, depPkg.name || ""]
+          )
+        );
+      }
+    }
+  });
+  for (const {
+    name: depName,
+    type: depType,
+    pkg: depPkg,
+    hasDirectMatchingPeerDependency
+  } of allDepPkgs) {
+    if (depPkg.peerDependencies) {
+      checkPeerDependencies(
+        reportError,
+        pkg,
+        depType,
+        getAllowedPeerInFromType(depType, isLibrary),
+        hasDirectMatchingPeerDependency,
+        allDirectDependenciesDependencies,
+        depPkg,
+        missingOnlyWarnsForCheck.createFor(depName),
+        invalidOnlyWarnsForCheck.createFor(depName)
+      );
+    }
+  }
+}
+
 function checkDuplicateDependencies(reportError, pkg, isPkgLibrary, depType, searchIn, depPkg, onlyWarnsForCheck) {
   const dependencies = depPkg[depType];
   if (!dependencies) return;
@@ -443,22 +631,6 @@ function checkDuplicateDependencies(reportError, pkg, isPkgLibrary, depType, sea
     }
   }
 }
-
-const getLocFromDependency = (dependency, errorTarget) => {
-  if (!dependency.locations) {
-    return void 0;
-  }
-  if (errorTarget === "dependencyName") {
-    return dependency.locations.name;
-  }
-  if (errorTarget === "dependencyValue") {
-    return dependency.locations.value;
-  }
-  return dependency.locations.all;
-};
-
-const getKeys = (o) => Object.keys(o);
-const getEntries = (o) => Object.entries(o);
 
 const createOnlyWarnsForArrayCheck = (configName, onlyWarnsFor = []) => {
   const notWarnedFor = new Set(onlyWarnsFor);
@@ -847,10 +1019,187 @@ function createPackageRule(ruleName, schema, {
 
 const duplicatesSearchInByDependencyType$1 = {
   devDependencies: ["devDependencies", "dependencies"],
+  dependencies: ["devDependencies", "dependencies"],
+  peerDependencies: ["peerDependencies"]
+};
+const checkDuplicateInAllDependencies = (reportError, basePkg, subPkg, isPkgLibrary, onlyWarnsForCheck) => {
+  ["devDependencies", "dependencies"].forEach((depType) => {
+    const dependencies = basePkg[depType];
+    if (!dependencies || !duplicatesSearchInByDependencyType$1[depType]) return;
+    checkDuplicateDependencies(
+      ({ dependency, errorMessage, ...otherDetails }) => {
+        reportError({
+          ...otherDetails,
+          errorMessage: `${subPkg.name}: ${errorMessage}`
+        });
+      },
+      subPkg,
+      isPkgLibrary,
+      depType,
+      duplicatesSearchInByDependencyType$1[depType],
+      basePkg.value,
+      onlyWarnsForCheck
+    );
+  });
+};
+const consistentWorkspaceDependenciesRule = createPackageRule(
+  "consistent-workspace-dependencies",
+  {
+    type: "object",
+    properties: {},
+    additionalProperties: false
+  },
+  {
+    checkPackage: ({
+      pkg,
+      settings,
+      reportError,
+      loadWorkspacePackageJsons,
+      getDependencyPackageJson,
+      getWorkspaceRootPackageJson,
+      onlyWarnsForMappingCheck
+    }) => {
+      if (pkg.workspacesPackages) {
+        const workspacePackageJsons = loadWorkspacePackageJsons();
+        const previousCheckedWorkspaces = [];
+        for (const subPkg of workspacePackageJsons) {
+          const onlyWarnsForCheck = onlyWarnsForMappingCheck.createFor(
+            subPkg.name
+          );
+          checkDuplicateInAllDependencies(
+            reportError,
+            pkg,
+            subPkg,
+            settings.isLibrary ?? false,
+            onlyWarnsForCheck
+          );
+          previousCheckedWorkspaces.forEach((previousSubPkg) => {
+            checkDuplicateInAllDependencies(
+              reportError,
+              previousSubPkg,
+              subPkg,
+              settings.isLibrary ?? false,
+              onlyWarnsForCheck
+            );
+          });
+          previousCheckedWorkspaces.push(subPkg);
+        }
+        return;
+      }
+      const rootPkg = getWorkspaceRootPackageJson();
+      if (!rootPkg) return;
+      const allDepPkgs = [];
+      regularDependencyTypes.forEach((depType) => {
+        const dependencies = pkg[depType];
+        if (!dependencies) return;
+        for (const depName of getKeys(dependencies)) {
+          const [depPkg] = getDependencyPackageJson(depName);
+          if (rootPkg.devDependencies?.[depName]) {
+            continue;
+          }
+          allDepPkgs.push({ name: depName, type: depType, pkg: depPkg });
+        }
+      });
+      for (const { name: depName, type: depType, pkg: depPkg } of allDepPkgs) {
+        if (depPkg.peerDependencies) {
+          for (const [peerDepName, range] of Object.entries(
+            depPkg.peerDependencies
+          )) {
+            if (pkg.devDependencies?.[peerDepName]) {
+              continue;
+            }
+            checkSatisfiesPeerDependency(
+              reportError,
+              rootPkg,
+              depType,
+              ["devDependencies"],
+              peerDepName,
+              range,
+              depPkg,
+              onlyWarnsForMappingCheck.createFor(
+                `${depName}:peedDepdencies:invalid`
+              )
+            );
+          }
+        }
+      }
+    }
+  }
+);
+
+function checkDependencyMinRangeSatisfies(reportError, dependencyValue, pkg, dependencyType2) {
+  if (!pkg[dependencyType2]) return;
+  if (!dependencyValue) return;
+  const range1 = getRealVersion(dependencyValue.value);
+  if (range1 === "*") return;
+  const depRange2 = pkg[dependencyType2][dependencyValue.name];
+  if (!depRange2) return;
+  const range2 = getRealVersion(depRange2.value);
+  if (range2 === "*") return;
+  const minDepRange1 = semver.minVersion(range1)?.version || range1;
+  if (!semver.satisfies(minDepRange1, range2, {
+    includePrerelease: true
+  })) {
+    const depRange1Parsed = semverUtils.parseRange(range1);
+    reportError({
+      errorMessage: `Invalid "${dependencyValue.value}" in "${dependencyValue.fieldName}"`,
+      errorDetails: `"${dependencyValue.value}" should satisfies "${depRange2.value}" from "${dependencyType2}"`,
+      dependency: dependencyValue,
+      autoFixable: true,
+      errorTarget: "dependencyValue",
+      fixTo: (depRange1Parsed[0]?.operator || "") + (semver.minVersion(range2)?.version || range2)
+    });
+  }
+}
+
+const minRangeDependenciesSatisfiesDevDependenciesRule = createPackageRule(
+  "min-range-dependencies-satisfies-dev-dependencies",
+  {
+    type: "object",
+    properties: {},
+    additionalProperties: false
+  },
+  {
+    checkDependencyValue: ({ node, pkg, reportError }) => {
+      if (node.fieldName === "dependencies") {
+        checkDependencyMinRangeSatisfies(
+          reportError,
+          node,
+          pkg,
+          "devDependencies"
+        );
+      }
+    }
+  }
+);
+
+const minRangePeerDependenciesSatisfiesDependenciesRule = createPackageRule(
+  "min-range-peer-dependencies-satisfies-dependencies",
+  {
+    type: "object",
+    properties: {},
+    additionalProperties: false
+  },
+  {
+    checkDependencyValue: ({ node, pkg, reportError }) => {
+      if (node.fieldName === "peerDependencies") {
+        checkDependencyMinRangeSatisfies(
+          reportError,
+          node,
+          pkg,
+          "dependencies"
+        );
+      }
+    }
+  }
+);
+
+const duplicatesSearchInByDependencyType = {
+  devDependencies: ["devDependencies", "dependencies"],
   dependencies: ["devDependencies", "dependencies"]
 };
-const directDuplicateDependenciesRule = createPackageRule(
-  "direct-duplicate-dependencies",
+const noDirectDuplicateDependenciesRule = createPackageRule(
+  "no-direct-duplicate-dependencies",
   {
     type: "object",
     properties: {
@@ -871,7 +1220,7 @@ const directDuplicateDependenciesRule = createPackageRule(
       if (node.fieldName === "resolutionsExplained") {
         return;
       }
-      const searchIn = duplicatesSearchInByDependencyType$1[node.fieldName];
+      const searchIn = duplicatesSearchInByDependencyType[node.fieldName];
       if (!searchIn) {
         return;
       }
@@ -889,180 +1238,30 @@ const directDuplicateDependenciesRule = createPackageRule(
   }
 );
 
-semverUtils.parse;
-semverUtils.parseRange;
-function getRealVersion(version) {
-  if (version.startsWith("npm:")) {
-    const match = /^npm:@?[^@]+@(.*)$/.exec(version);
-    if (!match) throw new Error(`Invalid version match: ${version}`);
-    const [, realVersion] = match;
-    if (realVersion) return realVersion;
-  }
-  if (version.startsWith("workspace:")) {
-    const realVersion = version.slice("workspace:".length);
-    if (realVersion === "~" || realVersion === "^") return "*";
-    return realVersion;
-  }
-  return version;
-}
-
-function fromDependency(depPkg, depType) {
-  return `from "${depPkg.name || ""}"${depType ? ` in "${depType}"` : ""}`;
-}
-function inDependency(depPkg, depType) {
-  return `in ${depType ? `"${depType}" of ` : ""}"${depPkg.name || ""}"`;
-}
-
-function checkSatisfiesPeerDependency(reportError, pkg, type, allowedPeerIn, peerDepName, range, depPkg, invalidOnlyWarnsForCheck) {
-  const versions = allowedPeerIn.map(
-    (versionsInType) => pkg[versionsInType]?.[peerDepName]
-  );
-  versions.forEach((versionV, index) => {
-    if (!versionV) {
-      return;
-    }
-    const version = getRealVersion(versionV.value);
-    if (version === "*" || version.startsWith("patch:")) {
-      return;
-    }
-    const minVersionOfVersion = semver.minVersion(version);
-    if (!minVersionOfVersion || !semver.satisfies(minVersionOfVersion, range, {
-      includePrerelease: true,
-      loose: true
-    })) {
-      reportError({
-        errorMessage: "Invalid peer dependency version",
-        errorDetails: `"${version}" should satisfies "${range}" ${fromDependency(depPkg, type)}`,
-        dependency: allowedPeerIn[index] ? pkg[allowedPeerIn[index]]?.[peerDepName] ?? void 0 : void 0,
-        onlyWarns: invalidOnlyWarnsForCheck.shouldWarnsFor(peerDepName)
-      });
-    }
-  });
-}
-function checkPeerDependencies(reportError, pkg, type, allowedPeerIn, allowMissing, providedDependencies, depPkg, missingOnlyWarnsForCheck, invalidOnlyWarnsForCheck) {
-  const { peerDependencies, peerDependenciesMeta } = depPkg;
-  if (!peerDependencies) return;
-  const allowedPeerInExisting = allowedPeerIn.filter(
-    (allowedPeerInType) => pkg[allowedPeerInType]
-  );
-  for (const [peerDepName, range] of Object.entries(peerDependencies)) {
-    const versionsIn = allowedPeerInExisting.filter(
-      (allowedPeerInExistingType) => pkg[allowedPeerInExistingType]?.[peerDepName]
-    );
-    if (versionsIn.length === 0) {
-      if (allowMissing) {
-        continue;
+const noRootWorkspaceDependenciesRule = createPackageRule(
+  "no-root-workspace-dependencies",
+  {
+    type: "object",
+    properties: {},
+    additionalProperties: false
+  },
+  {
+    checkDependencyValue: ({ node, pkg, reportError }) => {
+      if (!pkg.workspacesPackages) {
+        return;
       }
-      const peerDependenciesMetaPeerDep = peerDependenciesMeta?.[peerDepName];
-      if (peerDependenciesMetaPeerDep?.optional) {
-        continue;
-      }
-      let additionalDetails = "";
-      const providedDependenciesForDepName = providedDependencies.filter(
-        ([depName]) => depName === peerDepName
-      );
-      if (providedDependenciesForDepName.length > 0) {
-        if (providedDependenciesForDepName.every(
-          ([, depRange]) => semver.intersects(range, getRealVersion(depRange))
-        )) {
-          if (process.env.REPORT_PROVIDED_PEER_DEPENDENCIES) {
-            reportError({
-              errorMessage: `Missing "${peerDepName}" peer dependency ${fromDependency(depPkg, type)}`,
-              errorDetails: `but it is provided by ${providedDependenciesForDepName.map(([depName, depRange, depPkgName]) => depPkgName).join(", ")}`,
-              dependency: { name: peerDepName },
-              onlyWarns: process.env.REPORT_PROVIDED_PEER_DEPENDENCIES === "warn"
-            });
-          }
-          continue;
-        }
-        additionalDetails += " (required as some dependencies have non-satisfying range too)";
-      }
-      reportError({
-        errorMessage: `Missing "${peerDepName}" peer dependency ${fromDependency(depPkg, type)}`,
-        errorDetails: `it should satisfies "${range}" and be in ${allowedPeerIn.join(" or ")}${additionalDetails}`,
-        dependency: { name: peerDepName },
-        onlyWarns: missingOnlyWarnsForCheck.shouldWarnsFor(peerDepName)
-      });
-    } else {
-      checkSatisfiesPeerDependency(
-        reportError,
-        pkg,
-        type,
-        allowedPeerInExisting,
-        peerDepName,
-        range,
-        depPkg,
-        invalidOnlyWarnsForCheck
-      );
-    }
-  }
-}
-
-const regularDependencyTypes = [
-  "devDependencies",
-  "dependencies",
-  "optionalDependencies"
-];
-const getAllowedPeerInFromType = (depPkgType, isLibrary) => {
-  switch (depPkgType) {
-    case "devDependencies":
-      return ["devDependencies", "dependencies"];
-    case "dependencies":
-      return isLibrary ? ["dependencies", "peerDependencies"] : ["devDependencies", "dependencies"];
-    case "optionalDependencies":
-      return isLibrary ? ["dependencies", "optionalDependencies", "peerDependencies"] : ["devDependencies", "dependencies"];
-  }
-};
-function checkDirectPeerDependencies(reportError, isLibrary, pkg, getDependencyPackageJson, missingOnlyWarnsForCheck, invalidOnlyWarnsForCheck) {
-  const allDepPkgs = [];
-  const allDirectDependenciesDependencies = [];
-  regularDependencyTypes.forEach((depType) => {
-    const dependencies = pkg[depType];
-    if (!dependencies) return;
-    for (const depName of getKeys(dependencies)) {
-      const [depPkg] = getDependencyPackageJson(depName);
-      allDepPkgs.push({
-        name: depName,
-        type: depType,
-        pkg: depPkg,
-        hasDirectMatchingPeerDependency: pkg.peerDependencies?.[depName] ? semver.intersects(
-          getRealVersion(dependencies[depName].value),
-          getRealVersion(pkg.peerDependencies[depName].value)
-        ) : false
-      });
-      if (depPkg.dependencies && !isLibrary) {
-        allDirectDependenciesDependencies.push(
-          ...Object.entries(depPkg.dependencies).map(
-            ([depName2, depVersion]) => [depName2, depVersion, depPkg.name || ""]
-          )
-        );
+      if (node.fieldName === "dependencies") {
+        reportError({
+          errorMessage: "Root workspace should not have dependencies",
+          dependency: node
+        });
       }
     }
-  });
-  for (const {
-    name: depName,
-    type: depType,
-    pkg: depPkg,
-    hasDirectMatchingPeerDependency
-  } of allDepPkgs) {
-    if (depPkg.peerDependencies) {
-      checkPeerDependencies(
-        reportError,
-        pkg,
-        depType,
-        getAllowedPeerInFromType(depType, isLibrary),
-        hasDirectMatchingPeerDependency,
-        allDirectDependenciesDependencies,
-        depPkg,
-        missingOnlyWarnsForCheck.createFor(depName),
-        invalidOnlyWarnsForCheck.createFor(depName)
-      );
-    }
   }
-}
+);
 
-const directPeerDependenciesRule = createPackageRule(
-  "direct-peer-dependencies",
+const requireDirectPeerDependenciesRule = createPackageRule(
+  "require-direct-peer-dependencies",
   {
     type: "object",
     properties: {
@@ -1169,8 +1368,8 @@ function checkExactVersion(reportError, dependencyValue, {
   }
 }
 
-const exactVersionsRule = createPackageRule(
-  "exact-versions",
+const requireExactVersionsRule = createPackageRule(
+  "require-exact-versions",
   {
     type: "object",
     properties: {
@@ -1258,8 +1457,8 @@ const depGroupSchema = {
   },
   additionalProperties: false
 };
-const identicalVersionsThanDependencyRule = createPackageRule(
-  "identical-versions-than-dependency",
+const requireIdenticalVersionsAsDependencyRule = createPackageRule(
+  "require-identical-versions-as-dependency",
   {
     type: "object",
     properties: {
@@ -1277,34 +1476,36 @@ const identicalVersionsThanDependencyRule = createPackageRule(
       getDependencyPackageJson,
       onlyWarnsForCheck
     }) => {
-      Object.entries(ruleOptions.dependencies).forEach(([depName, targets]) => {
-        const [depPkg] = getDependencyPackageJson(depName);
-        const destTypes = [
-          "resolutions",
-          "dependencies",
-          "devDependencies"
-        ];
-        destTypes.forEach((destType) => {
-          const depKeys = targets[destType];
-          if (depKeys && depKeys.length > 0) {
-            checkIdenticalVersionsThanDependency(
-              reportError,
-              pkg,
-              destType,
-              depKeys,
-              depPkg,
-              depPkg.dependencies,
-              onlyWarnsForCheck
-            );
-          }
-        });
-      });
+      Object.entries(ruleOptions.dependencies).forEach(
+        ([depName, targets]) => {
+          const [depPkg] = getDependencyPackageJson(depName);
+          const destTypes = [
+            "resolutions",
+            "dependencies",
+            "devDependencies"
+          ];
+          destTypes.forEach((destType) => {
+            const depKeys = targets[destType];
+            if (depKeys && depKeys.length > 0) {
+              checkIdenticalVersionsThanDependency(
+                reportError,
+                pkg,
+                destType,
+                depKeys,
+                depPkg,
+                depPkg.dependencies,
+                onlyWarnsForCheck
+              );
+            }
+          });
+        }
+      );
     }
   }
 );
 
-const identicalVersionsThanDevDependencyOfDependencyRule = createPackageRule(
-  "identical-versions-than-dev-dependency-of-dependency",
+const requireIdenticalVersionsAsDevDependencyOfDependencyRule = createPackageRule(
+  "require-identical-versions-as-dev-dependency-of-dependency",
   {
     type: "object",
     properties: {
@@ -1425,8 +1626,8 @@ const sourceTypes = [
   "dependencies",
   "devDependencies"
 ];
-const identicalVersionsRule = createPackageRule(
-  "identical-versions",
+const requireIdenticalVersionsRule = createPackageRule(
+  "require-identical-versions",
   {
     type: "object",
     properties: {
@@ -1451,73 +1652,6 @@ const identicalVersionsRule = createPackageRule(
   }
 );
 
-function checkDependencyMinRangeSatisfies(reportError, dependencyValue, pkg, dependencyType2) {
-  if (!pkg[dependencyType2]) return;
-  if (!dependencyValue) return;
-  const range1 = getRealVersion(dependencyValue.value);
-  if (range1 === "*") return;
-  const depRange2 = pkg[dependencyType2][dependencyValue.name];
-  if (!depRange2) return;
-  const range2 = getRealVersion(depRange2.value);
-  if (range2 === "*") return;
-  const minDepRange1 = semver.minVersion(range1)?.version || range1;
-  if (!semver.satisfies(minDepRange1, range2, {
-    includePrerelease: true
-  })) {
-    const depRange1Parsed = semverUtils.parseRange(range1);
-    reportError({
-      errorMessage: `Invalid "${dependencyValue.value}" in "${dependencyValue.fieldName}"`,
-      errorDetails: `"${dependencyValue.value}" should satisfies "${depRange2.value}" from "${dependencyType2}"`,
-      dependency: dependencyValue,
-      autoFixable: true,
-      errorTarget: "dependencyValue",
-      fixTo: (depRange1Parsed[0]?.operator || "") + (semver.minVersion(range2)?.version || range2)
-    });
-  }
-}
-
-const minRangeDependenciesSatisfiesDevDependenciesRule = createPackageRule(
-  "min-range-dependencies-satisfies-dev-dependencies",
-  {
-    type: "object",
-    properties: {},
-    additionalProperties: false
-  },
-  {
-    checkDependencyValue: ({ node, pkg, reportError }) => {
-      if (node.fieldName === "dependencies") {
-        checkDependencyMinRangeSatisfies(
-          reportError,
-          node,
-          pkg,
-          "devDependencies"
-        );
-      }
-    }
-  }
-);
-
-const minRangePeerDependenciesSatisfiesDependenciesRule = createPackageRule(
-  "min-range-peer-dependencies-satisfies-dependencies",
-  {
-    type: "object",
-    properties: {},
-    additionalProperties: false
-  },
-  {
-    checkDependencyValue: ({ node, pkg, reportError }) => {
-      if (node.fieldName === "peerDependencies") {
-        checkDependencyMinRangeSatisfies(
-          reportError,
-          node,
-          pkg,
-          "dependencies"
-        );
-      }
-    }
-  }
-);
-
 function checkResolutionHasExplanation(reportError, dependencyValue, pkg) {
   if (!pkg.resolutionsExplained?.[dependencyValue.name]) {
     reportError({
@@ -1535,8 +1669,8 @@ function checkResolutionExplanation(reportError, dependencyValue, pkg) {
   }
 }
 
-const resolutionsHasExplanationRule = createPackageRule(
-  "resolutions-has-explanation",
+const requireResolutionsExplanationRule = createPackageRule(
+  "require-resolutions-explanation",
   {
     type: "object",
     properties: {},
@@ -1548,6 +1682,43 @@ const resolutionsHasExplanationRule = createPackageRule(
         checkResolutionHasExplanation(reportError, node, pkg);
       } else if (node.fieldName === "resolutionsExplained") {
         checkResolutionExplanation(reportError, node, pkg);
+      }
+    }
+  }
+);
+
+const WORKSPACE_PROTOCOL_PREFIX = "workspace:";
+const DEP_TYPES_TO_CHECK = [
+  "dependencies",
+  "devDependencies",
+  "optionalDependencies",
+  "peerDependencies"
+];
+const getWorkspaceProtocolFixTo = (value) => {
+  if (value.startsWith("^")) return "workspace:^";
+  if (value.startsWith("~")) return "workspace:~";
+  return "workspace:*";
+};
+const requireWorkspaceProtocolRule = createPackageRule(
+  "require-workspace-protocol",
+  {
+    type: "object",
+    properties: {},
+    additionalProperties: false
+  },
+  {
+    checkDependencyValue: ({ node, reportError, getWorkspaceMemberNames }) => {
+      if (!DEP_TYPES_TO_CHECK.includes(node.fieldName)) {
+        return;
+      }
+      const workspaceMemberNames = getWorkspaceMemberNames();
+      if (workspaceMemberNames?.has(node.name) && !node.value.startsWith(WORKSPACE_PROTOCOL_PREFIX)) {
+        reportError({
+          errorMessage: `Dependency "${node.name}" should use workspace protocol (workspace:, workspace:*, workspace:^, or workspace:~) instead of "${node.value}"`,
+          dependency: node,
+          errorTarget: "dependencyValue",
+          fixTo: getWorkspaceProtocolFixTo(node.value)
+        });
       }
     }
   }
@@ -1615,28 +1786,6 @@ const resolutionsVersionsMatchRule = createPackageRule(
   }
 );
 
-const rootWorkspaceShouldNotHaveDependenciesRule = createPackageRule(
-  "root-workspace-should-not-have-dependencies",
-  {
-    type: "object",
-    properties: {},
-    additionalProperties: false
-  },
-  {
-    checkDependencyValue: ({ node, pkg, reportError }) => {
-      if (!pkg.workspacesPackages) {
-        return;
-      }
-      if (node.fieldName === "dependencies") {
-        reportError({
-          errorMessage: "Root workspace should not have dependencies",
-          dependency: node
-        });
-      }
-    }
-  }
-);
-
 function isVersionSatisfiesRange(version, range) {
   const realVersion = getRealVersion(version);
   if (realVersion === "*") return true;
@@ -1686,69 +1835,6 @@ function checkMissingSatisfiesVersions(reportError, pkg, acceptedTypes, dependen
     }
   });
 }
-
-const satisfiesVersionsRule = createPackageRule(
-  "satisfies-versions",
-  {
-    type: "object",
-    properties: {
-      dependencies: {
-        type: "object",
-        additionalProperties: { type: "string" }
-      },
-      devDependencies: {
-        type: "object",
-        additionalProperties: { type: "string" }
-      },
-      optionalDependencies: {
-        type: "object",
-        additionalProperties: { type: "string" }
-      },
-      onlyWarnsFor: { type: "array", items: { type: "string" } }
-    },
-    additionalProperties: false
-  },
-  {
-    checkPackage: ({ pkg, reportError, ruleOptions, onlyWarnsForCheck }) => {
-      if (!ruleOptions.dependencies && !ruleOptions.devDependencies) {
-        throw new Error(
-          'Rule "check-package-dependencies/satisfies-versions" is enabled but no dependencies are configured to check'
-        );
-      }
-      regularDependencyTypes.forEach((type) => {
-        if (ruleOptions[type]) {
-          checkMissingSatisfiesVersions(
-            reportError,
-            pkg,
-            type,
-            ruleOptions[type],
-            onlyWarnsForCheck
-          );
-        }
-      });
-    },
-    checkDependencyValue: ({
-      node,
-      reportError,
-      ruleOptions,
-      onlyWarnsForCheck
-    }) => {
-      if (!regularDependencyTypes.includes(node.fieldName)) {
-        return;
-      }
-      const fieldName = node.fieldName;
-      if (ruleOptions[fieldName]?.[node.name]) {
-        const range = ruleOptions[fieldName][node.name];
-        if (!range) {
-          throw new Error(
-            `Range is undefined for ${node.name} in ${node.fieldName}`
-          );
-        }
-        checkSatisfiesVersion(reportError, node, range, onlyWarnsForCheck);
-      }
-    }
-  }
-);
 
 const satisfiesVersionsBetweenDependenciesRule = createPackageRule(
   "satisfies-versions-between-dependencies",
@@ -2157,172 +2243,88 @@ const satisfiesVersionsInDependencyRule = createPackageRule(
   }
 );
 
-const duplicatesSearchInByDependencyType = {
-  devDependencies: ["devDependencies", "dependencies"],
-  dependencies: ["devDependencies", "dependencies"],
-  peerDependencies: ["peerDependencies"]
-};
-const checkDuplicateInAllDependencies = (reportError, basePkg, subPkg, isPkgLibrary, onlyWarnsForCheck) => {
-  ["devDependencies", "dependencies"].forEach((depType) => {
-    const dependencies = basePkg[depType];
-    if (!dependencies || !duplicatesSearchInByDependencyType[depType]) return;
-    checkDuplicateDependencies(
-      ({ dependency, errorMessage, ...otherDetails }) => {
-        reportError({
-          ...otherDetails,
-          errorMessage: `${subPkg.name}: ${errorMessage}`
-        });
-      },
-      subPkg,
-      isPkgLibrary,
-      depType,
-      duplicatesSearchInByDependencyType[depType],
-      basePkg.value,
-      onlyWarnsForCheck
-    );
-  });
-};
-const workspaceDependenciesRule = createPackageRule(
-  "workspace-dependencies",
+const satisfiesVersionsRule = createPackageRule(
+  "satisfies-versions",
   {
     type: "object",
-    properties: {},
+    properties: {
+      dependencies: {
+        type: "object",
+        additionalProperties: { type: "string" }
+      },
+      devDependencies: {
+        type: "object",
+        additionalProperties: { type: "string" }
+      },
+      optionalDependencies: {
+        type: "object",
+        additionalProperties: { type: "string" }
+      },
+      onlyWarnsFor: { type: "array", items: { type: "string" } }
+    },
     additionalProperties: false
   },
   {
-    checkPackage: ({
-      pkg,
-      settings,
-      reportError,
-      loadWorkspacePackageJsons,
-      getDependencyPackageJson,
-      getWorkspaceRootPackageJson,
-      onlyWarnsForMappingCheck
-    }) => {
-      if (pkg.workspacesPackages) {
-        const workspacePackageJsons = loadWorkspacePackageJsons();
-        const previousCheckedWorkspaces = [];
-        for (const subPkg of workspacePackageJsons) {
-          const onlyWarnsForCheck = onlyWarnsForMappingCheck.createFor(
-            subPkg.name
-          );
-          checkDuplicateInAllDependencies(
+    checkPackage: ({ pkg, reportError, ruleOptions, onlyWarnsForCheck }) => {
+      if (!ruleOptions.dependencies && !ruleOptions.devDependencies) {
+        throw new Error(
+          'Rule "check-package-dependencies/satisfies-versions" is enabled but no dependencies are configured to check'
+        );
+      }
+      regularDependencyTypes.forEach((type) => {
+        if (ruleOptions[type]) {
+          checkMissingSatisfiesVersions(
             reportError,
             pkg,
-            subPkg,
-            settings.isLibrary ?? false,
+            type,
+            ruleOptions[type],
             onlyWarnsForCheck
           );
-          previousCheckedWorkspaces.forEach((previousSubPkg) => {
-            checkDuplicateInAllDependencies(
-              reportError,
-              previousSubPkg,
-              subPkg,
-              settings.isLibrary ?? false,
-              onlyWarnsForCheck
-            );
-          });
-          previousCheckedWorkspaces.push(subPkg);
-        }
-        return;
-      }
-      const rootPkg = getWorkspaceRootPackageJson();
-      if (!rootPkg) return;
-      const allDepPkgs = [];
-      regularDependencyTypes.forEach((depType) => {
-        const dependencies = pkg[depType];
-        if (!dependencies) return;
-        for (const depName of getKeys(dependencies)) {
-          const [depPkg] = getDependencyPackageJson(depName);
-          if (rootPkg.devDependencies?.[depName]) {
-            continue;
-          }
-          allDepPkgs.push({ name: depName, type: depType, pkg: depPkg });
         }
       });
-      for (const { name: depName, type: depType, pkg: depPkg } of allDepPkgs) {
-        if (depPkg.peerDependencies) {
-          for (const [peerDepName, range] of Object.entries(
-            depPkg.peerDependencies
-          )) {
-            if (pkg.devDependencies?.[peerDepName]) {
-              continue;
-            }
-            checkSatisfiesPeerDependency(
-              reportError,
-              rootPkg,
-              depType,
-              ["devDependencies"],
-              peerDepName,
-              range,
-              depPkg,
-              onlyWarnsForMappingCheck.createFor(
-                `${depName}:peedDepdencies:invalid`
-              )
-            );
-          }
-        }
-      }
-    }
-  }
-);
-
-const WORKSPACE_PROTOCOL_PREFIX = "workspace:";
-const DEP_TYPES_TO_CHECK = [
-  "dependencies",
-  "devDependencies",
-  "optionalDependencies",
-  "peerDependencies"
-];
-const getWorkspaceProtocolFixTo = (value) => {
-  if (value.startsWith("^")) return "workspace:^";
-  if (value.startsWith("~")) return "workspace:~";
-  return "workspace:*";
-};
-const workspaceProtocolRule = createPackageRule(
-  "workspace-protocol",
-  {
-    type: "object",
-    properties: {},
-    additionalProperties: false
-  },
-  {
-    checkDependencyValue: ({ node, reportError, getWorkspaceMemberNames }) => {
-      if (!DEP_TYPES_TO_CHECK.includes(node.fieldName)) {
+    },
+    checkDependencyValue: ({
+      node,
+      reportError,
+      ruleOptions,
+      onlyWarnsForCheck
+    }) => {
+      if (!regularDependencyTypes.includes(node.fieldName)) {
         return;
       }
-      const workspaceMemberNames = getWorkspaceMemberNames();
-      if (workspaceMemberNames?.has(node.name) && !node.value.startsWith(WORKSPACE_PROTOCOL_PREFIX)) {
-        reportError({
-          errorMessage: `Dependency "${node.name}" should use workspace protocol (workspace:, workspace:*, workspace:^, or workspace:~) instead of "${node.value}"`,
-          dependency: node,
-          errorTarget: "dependencyValue",
-          fixTo: getWorkspaceProtocolFixTo(node.value)
-        });
+      const fieldName = node.fieldName;
+      if (ruleOptions[fieldName]?.[node.name]) {
+        const range = ruleOptions[fieldName][node.name];
+        if (!range) {
+          throw new Error(
+            `Range is undefined for ${node.name} in ${node.fieldName}`
+          );
+        }
+        checkSatisfiesVersion(reportError, node, range, onlyWarnsForCheck);
       }
     }
   }
 );
 
 const rules = {
-  ...directPeerDependenciesRule,
-  ...directDuplicateDependenciesRule,
-  ...exactVersionsRule,
-  ...identicalVersionsRule,
-  ...identicalVersionsThanDependencyRule,
-  ...identicalVersionsThanDevDependencyOfDependencyRule,
+  ...requireDirectPeerDependenciesRule,
+  ...noDirectDuplicateDependenciesRule,
+  ...requireExactVersionsRule,
+  ...requireIdenticalVersionsRule,
+  ...requireIdenticalVersionsAsDependencyRule,
+  ...requireIdenticalVersionsAsDevDependencyOfDependencyRule,
   ...minRangeDependenciesSatisfiesDevDependenciesRule,
   ...minRangePeerDependenciesSatisfiesDependenciesRule,
   ...resolutionsVersionsMatchRule,
   ...satisfiesVersionsRule,
-  ...resolutionsHasExplanationRule,
-  ...rootWorkspaceShouldNotHaveDependenciesRule,
+  ...requireResolutionsExplanationRule,
+  ...noRootWorkspaceDependenciesRule,
   ...satisfiesVersionsFromDependenciesRule,
   ...satisfiesVersionsFromDevDependenciesOfDependencyRule,
   ...satisfiesVersionsInDependencyRule,
   ...satisfiesVersionsBetweenDependenciesRule,
-  ...workspaceDependenciesRule,
-  ...workspaceProtocolRule
+  ...consistentWorkspaceDependenciesRule,
+  ...requireWorkspaceProtocolRule
 };
 
 const checkPackagePlugin = {
@@ -2343,14 +2345,14 @@ const checkPackagePlugin = {
       language: "check-package-dependencies/package-json",
       plugins: {},
       rules: {
-        "check-package-dependencies/exact-versions": "error",
+        "check-package-dependencies/require-exact-versions": "error",
         "check-package-dependencies/resolutions-versions-match": "error",
-        "check-package-dependencies/direct-peer-dependencies": "error",
-        "check-package-dependencies/direct-duplicate-dependencies": "error",
-        "check-package-dependencies/resolutions-has-explanation": "error",
-        "check-package-dependencies/root-workspace-should-not-have-dependencies": "error",
-        "check-package-dependencies/workspace-dependencies": "error",
-        "check-package-dependencies/workspace-protocol": "error"
+        "check-package-dependencies/require-direct-peer-dependencies": "error",
+        "check-package-dependencies/no-direct-duplicate-dependencies": "error",
+        "check-package-dependencies/require-resolutions-explanation": "error",
+        "check-package-dependencies/no-root-workspace-dependencies": "error",
+        "check-package-dependencies/consistent-workspace-dependencies": "error",
+        "check-package-dependencies/require-workspace-protocol": "error"
       }
     },
     "recommended-library": {
@@ -2363,19 +2365,19 @@ const checkPackagePlugin = {
         }
       },
       rules: {
-        "check-package-dependencies/exact-versions": [
+        "check-package-dependencies/require-exact-versions": [
           "error",
           { dependencies: false }
         ],
         "check-package-dependencies/resolutions-versions-match": "error",
-        "check-package-dependencies/direct-peer-dependencies": "error",
-        "check-package-dependencies/direct-duplicate-dependencies": "error",
-        "check-package-dependencies/resolutions-has-explanation": "error",
+        "check-package-dependencies/require-direct-peer-dependencies": "error",
+        "check-package-dependencies/no-direct-duplicate-dependencies": "error",
+        "check-package-dependencies/require-resolutions-explanation": "error",
         "check-package-dependencies/min-range-dependencies-satisfies-dev-dependencies": "error",
         "check-package-dependencies/min-range-peer-dependencies-satisfies-dependencies": "error",
-        "check-package-dependencies/root-workspace-should-not-have-dependencies": "error",
-        "check-package-dependencies/workspace-dependencies": "error",
-        "check-package-dependencies/workspace-protocol": "error"
+        "check-package-dependencies/no-root-workspace-dependencies": "error",
+        "check-package-dependencies/consistent-workspace-dependencies": "error",
+        "check-package-dependencies/require-workspace-protocol": "error"
       }
     }
   }

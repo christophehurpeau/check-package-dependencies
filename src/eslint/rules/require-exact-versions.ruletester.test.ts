@@ -1,0 +1,34 @@
+import { RuleTester } from "eslint";
+import checkPackagePlugin from "../../eslint-plugin.ts";
+import { requireExactVersionsRule } from "./require-exact-versions.ts";
+
+const tester = new RuleTester({
+  plugins: checkPackagePlugin.configs.recommended.plugins,
+  language: "check-package-dependencies/package-json",
+});
+
+tester.run(
+  "require-exact-versions",
+  requireExactVersionsRule["require-exact-versions"]!,
+  {
+    valid: [
+      {
+        code: `${JSON.stringify({ name: "test", devDependencies: { dep: "1.0.0" } }, null, 2)}\n`,
+        filename: "/tmp/package.json",
+        options: [
+          { dependencies: true, devDependencies: true, resolutions: true },
+        ],
+      },
+    ],
+    invalid: [
+      {
+        code: `${JSON.stringify({ name: "test", devDependencies: { dep: "^1.0.0" } }, null, 2)}\n`,
+        filename: "/tmp/package.json",
+        options: [
+          { dependencies: true, devDependencies: true, resolutions: true },
+        ],
+        errors: [{ message: /Unexpected range value/ }],
+      },
+    ],
+  },
+);

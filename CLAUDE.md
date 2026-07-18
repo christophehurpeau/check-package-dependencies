@@ -61,13 +61,13 @@ await createCheckPackage()
   .run();
 ```
 
-For Yarn/npm workspaces, `createCheckPackageWithWorkspaces()` (see `check-package-with-workspaces.ts`) returns a `CheckPackageWithWorkspacesApi` that exposes only `checkRecommended`, `forRoot`, `forEach`, and `for(id, …)`. Its `checkRecommended` runs the root `checkNoDependencies`, the root `checkRecommended`, then iterates each workspace package running their `checkRecommended` plus monorepo-wide duplicate-dependency and subpackage-peer-dependency checks. The corresponding ESLint rules are `root-workspace-should-not-have-dependencies` and `workspace-dependencies`.
+For Yarn/npm workspaces, `createCheckPackageWithWorkspaces()` (see `check-package-with-workspaces.ts`) returns a `CheckPackageWithWorkspacesApi` that exposes only `checkRecommended`, `forRoot`, `forEach`, and `for(id, …)`. Its `checkRecommended` runs the root `checkNoDependencies`, the root `checkRecommended`, then iterates each workspace package running their `checkRecommended` plus monorepo-wide duplicate-dependency and subpackage-peer-dependency checks. The corresponding ESLint rules are `no-root-workspace-dependencies` and `consistent-workspace-dependencies`.
 
 ### ESLint plugin
 
 The plugin defines a custom `package-json` language (see `src/eslint/language.ts`) so ESLint can lint `package.json` files. Rules are created with `createPackageRule` which handles parsing, node traversal, and the `onlyWarnsFor` option consistently.
 
-ESLint configs exported: `base` (language + plugin, no rules enabled), `recommended` (7 rules — same set as `recommended-library` minus the two `min-range-*` rules), `recommended-library` (9 rules — adds the two `min-range-*` rules and sets `exact-versions` with `dependencies: false`). The remaining 3 rules (`satisfies-version`, `satisfies-versions-between-dependencies`, `satisfies-versions-from-dependencies`) are opt-in.
+ESLint configs exported: `base` (language + plugin, no rules enabled), `recommended` (7 rules — same set as `recommended-library` minus the two `min-range-*` rules), `recommended-library` (9 rules — adds the two `min-range-*` rules and sets `require-exact-versions` with `dependencies: false`). The remaining 3 rules (`satisfies-versions`, `satisfies-versions-between-dependencies`, `satisfies-versions-from-dependencies`) are opt-in.
 
 ### Test utilities
 

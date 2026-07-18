@@ -20,15 +20,14 @@ const checkPackagePlugin = {
       language: "check-package-dependencies/package-json",
       plugins: {},
       rules: {
-        "check-package-dependencies/exact-versions": "error",
+        "check-package-dependencies/require-exact-versions": "error",
         "check-package-dependencies/resolutions-versions-match": "error",
-        "check-package-dependencies/direct-peer-dependencies": "error",
-        "check-package-dependencies/direct-duplicate-dependencies": "error",
-        "check-package-dependencies/resolutions-has-explanation": "error",
-        "check-package-dependencies/root-workspace-should-not-have-dependencies":
-          "error",
-        "check-package-dependencies/workspace-dependencies": "error",
-        "check-package-dependencies/workspace-protocol": "error",
+        "check-package-dependencies/require-direct-peer-dependencies": "error",
+        "check-package-dependencies/no-direct-duplicate-dependencies": "error",
+        "check-package-dependencies/require-resolutions-explanation": "error",
+        "check-package-dependencies/no-root-workspace-dependencies": "error",
+        "check-package-dependencies/consistent-workspace-dependencies": "error",
+        "check-package-dependencies/require-workspace-protocol": "error",
       },
     },
     "recommended-library": {
@@ -41,22 +40,21 @@ const checkPackagePlugin = {
         },
       },
       rules: {
-        "check-package-dependencies/exact-versions": [
+        "check-package-dependencies/require-exact-versions": [
           "error",
           { dependencies: false },
         ],
         "check-package-dependencies/resolutions-versions-match": "error",
-        "check-package-dependencies/direct-peer-dependencies": "error",
-        "check-package-dependencies/direct-duplicate-dependencies": "error",
-        "check-package-dependencies/resolutions-has-explanation": "error",
+        "check-package-dependencies/require-direct-peer-dependencies": "error",
+        "check-package-dependencies/no-direct-duplicate-dependencies": "error",
+        "check-package-dependencies/require-resolutions-explanation": "error",
         "check-package-dependencies/min-range-dependencies-satisfies-dev-dependencies":
           "error",
         "check-package-dependencies/min-range-peer-dependencies-satisfies-dependencies":
           "error",
-        "check-package-dependencies/root-workspace-should-not-have-dependencies":
-          "error",
-        "check-package-dependencies/workspace-dependencies": "error",
-        "check-package-dependencies/workspace-protocol": "error",
+        "check-package-dependencies/no-root-workspace-dependencies": "error",
+        "check-package-dependencies/consistent-workspace-dependencies": "error",
+        "check-package-dependencies/require-workspace-protocol": "error",
       },
     },
   },
