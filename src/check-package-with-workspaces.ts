@@ -91,10 +91,9 @@ export function createCheckPackageWithWorkspaces({
   });
   const { pkg, pkgDirname } = checkPackage;
 
-  const pkgWorkspaces = resolveWorkspacesPackagesGlobs(
-    pkg,
-    path.join(pkgDirname, "package.json"),
-  );
+  const pkgPathName = path.join(pkgDirname, "package.json");
+
+  const pkgWorkspaces = resolveWorkspacesPackagesGlobs(pkg, pkgPathName);
 
   if (!pkgWorkspaces) {
     throw new Error('Package is missing "workspaces"');
@@ -110,8 +109,8 @@ export function createCheckPackageWithWorkspaces({
     try {
       fs.accessSync(path.join(pathMatch, "package.json"), constants.R_OK);
     } catch {
-      console.log(
-        `Ignored potential directory, no package.json found: ${pathMatch}`,
+      console.warn(
+        `[warn] ${pkgPathName} workspaces: ignored potential directory, no package.json found: ${pathMatch}`,
       );
       continue;
     }

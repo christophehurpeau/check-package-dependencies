@@ -868,7 +868,10 @@ function createPackageRule(ruleName, schema, {
           const dependencyInfo = details.dependency ? `${details.dependency.fieldName ? `${details.dependency.fieldName} > ` : ""}${details.dependency.name}: ` : "";
           const message = dependencyInfo + details.errorMessage + (details.errorDetails ? `: ${details.errorDetails}` : "");
           if (isWarn) {
-            console.warn(`[warn] ${message} - ${ruleName}`);
+            const locationString = location ? `:${location.start.line}:${location.start.column}` : "";
+            console.warn(
+              `[warn] ${context.filename}${locationString} ${message} - ${ruleName}`
+            );
           } else {
             context.report({
               message,
@@ -953,8 +956,8 @@ function createPackageRule(ruleName, schema, {
                 try {
                   fs.accessSync(pkgPath, constants.R_OK);
                 } catch {
-                  console.log(
-                    `Ignored potential directory, no package.json found: ${pathMatch}`
+                  console.warn(
+                    `[warn] ${parsedPkgJson.path} workspaces: ignored potential directory, no package.json found: ${pathMatch}`
                   );
                   continue;
                 }
