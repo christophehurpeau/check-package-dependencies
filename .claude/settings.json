@@ -16,5 +16,18 @@
       "Bash(TZ=UTC node --import ./src/test-setup.ts --test:*)",
       "Bash(yarn lint *)"
     ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pob-claude-run-lint-staged"
+          }
+        ]
+      }
+    ]
   }
 }
