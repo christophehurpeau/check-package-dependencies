@@ -59,6 +59,11 @@ export const consistentWorkspaceDependenciesRule = createPackageRule(
     additionalProperties: false,
   },
   {
+    docs: {
+      description:
+        "Enforce consistent dependency versions across the packages of a workspace",
+      recommended: true,
+    },
     checkPackage: ({
       pkg,
       settings,

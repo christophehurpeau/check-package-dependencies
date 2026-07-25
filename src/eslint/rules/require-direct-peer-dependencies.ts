@@ -23,6 +23,11 @@ export const requireDirectPeerDependenciesRule =
       additionalProperties: false,
     },
     {
+      docs: {
+        description:
+          "Require peer dependencies of direct dependencies to be present and satisfied",
+        recommended: true,
+      },
       checkPackage: ({
         pkg,
         reportError,

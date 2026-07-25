@@ -51,6 +51,11 @@ export const requireIdenticalVersionsRule = createPackageRule<Options>(
     additionalProperties: false,
   },
   {
+    docs: {
+      description:
+        "Require configured dependencies to have the same version as another dependency of the same package.json",
+      recommended: false,
+    },
     checkPackage: ({ pkg, reportError, ruleOptions, onlyWarnsForCheck }) => {
       sourceTypes.forEach((type) => {
         const deps = ruleOptions[type];

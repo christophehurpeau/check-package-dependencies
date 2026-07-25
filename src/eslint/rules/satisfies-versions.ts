@@ -36,6 +36,12 @@ export const satisfiesVersionsRule =
       additionalProperties: false,
     },
     {
+      docs: {
+        description:
+          "Require configured dependencies to be present and to satisfy the configured ranges",
+        recommended: false,
+      },
+      hasSuggestions: true,
       checkPackage: ({ pkg, reportError, ruleOptions, onlyWarnsForCheck }) => {
         if (!ruleOptions.dependencies && !ruleOptions.devDependencies) {
           throw new Error(

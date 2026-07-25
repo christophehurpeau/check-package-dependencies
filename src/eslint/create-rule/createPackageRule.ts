@@ -45,6 +45,15 @@ interface CheckPackageDependenciesSettings {
   isLibrary?: boolean;
 }
 
+const documentationUrlBase =
+  "https://github.com/christophehurpeau/check-package-dependencies/blob/main/documentation/rules";
+
+export interface PackageRuleDocs {
+  description: string;
+  /** enabled in the "recommended" config */
+  recommended: boolean;
+}
+
 type CheckFn<RuleOptions, Node, T = Record<never, never>> = (
   params: T & {
     node: Node;
@@ -65,9 +74,17 @@ export function createPackageRule<
   ruleName: string,
   schema: NonNullable<NonNullable<Rule.RuleModule["meta"]>["schema"]>,
   {
+    docs,
+    fixable = false,
+    hasSuggestions = false,
     checkPackage,
     checkDependencyValue,
   }: {
+    docs: PackageRuleDocs;
+    /** the rule reports errors with a fix applied by "eslint --fix" */
+    fixable?: boolean;
+    /** the rule reports errors with editor suggestions */
+    hasSuggestions?: boolean;
     checkPackage?: CheckFn<
       RuleOptions,
       ParsedPackageJson,
@@ -92,8 +109,13 @@ export function createPackageRule<
     [ruleName]: {
       meta: {
         type: "problem",
-        fixable: "code",
-        hasSuggestions: true,
+        docs: {
+          description: docs.description,
+          recommended: docs.recommended,
+          url: `${documentationUrlBase}/${ruleName}.md`,
+        },
+        fixable: fixable ? "code" : undefined,
+        hasSuggestions,
         schema: schema ? [schema] : undefined,
       },
 

@@ -24,6 +24,12 @@ export const requireWorkspaceProtocolRule = createPackageRule(
     additionalProperties: false,
   },
   {
+    docs: {
+      description:
+        "Require dependencies on other packages of the workspace to use the `workspace:` protocol",
+      recommended: true,
+    },
+    fixable: true,
     checkDependencyValue: ({ node, reportError, getWorkspaceMemberNames }) => {
       if (!DEP_TYPES_TO_CHECK.includes(node.fieldName)) {
         return;

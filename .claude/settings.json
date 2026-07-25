@@ -1,4 +1,16 @@
 {
+  "sandbox": {
+    "enabled": true,
+    "failIfUnavailable": true,
+    "allowUnsandboxedCommands": true,
+    "autoAllowBashIfSandboxed": true,
+    "enableWeakerNetworkIsolation": true,
+    "filesystem": {
+      "denyRead": ["~/"],
+      "allowRead": [".", "~/.gitconfig", "~/.dotfiles", "~/.claude"]
+    },
+    "excludedCommands": ["git commit:*", "git push:*"]
+  },
   "permissions": {
     "allow": [
       "Bash(TZ=UTC node --import ./src/test-setup.ts --test:*)",

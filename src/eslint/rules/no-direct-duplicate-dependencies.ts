@@ -28,6 +28,11 @@ export const noDirectDuplicateDependenciesRule =
       additionalProperties: false,
     },
     {
+      docs: {
+        description:
+          "Disallow dependencies that will be installed twice because a direct dependency requires an incompatible range",
+        recommended: true,
+      },
       checkDependencyValue: ({
         node,
         pkg,

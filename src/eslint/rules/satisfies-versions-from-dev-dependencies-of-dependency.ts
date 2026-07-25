@@ -53,6 +53,12 @@ export const satisfiesVersionsFromDevDependenciesOfDependencyRule =
       additionalProperties: false,
     },
     {
+      docs: {
+        description:
+          "Require configured dependencies to satisfy the ranges declared in the `devDependencies` of another dependency",
+        recommended: false,
+      },
+      hasSuggestions: true,
       checkPackage: ({
         pkg,
         reportError,

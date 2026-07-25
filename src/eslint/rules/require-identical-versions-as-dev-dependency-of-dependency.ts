@@ -23,6 +23,11 @@ export const requireIdenticalVersionsAsDevDependencyOfDependencyRule =
       additionalProperties: false,
     },
     {
+      docs: {
+        description:
+          "Require configured dependencies to have the same version as the one in the `devDependencies` of another dependency",
+        recommended: false,
+      },
       checkPackage: ({
         pkg,
         reportError,

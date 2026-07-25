@@ -8,6 +8,11 @@ export const noRootWorkspaceDependenciesRule = createPackageRule(
     additionalProperties: false,
   },
   {
+    docs: {
+      description:
+        "Disallow `dependencies` in the root package.json of a workspace",
+      recommended: true,
+    },
     checkDependencyValue: ({ node, pkg, reportError }) => {
       if (!pkg.workspacesPackages) {
         return;

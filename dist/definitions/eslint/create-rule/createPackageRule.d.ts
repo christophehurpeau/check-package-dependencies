@@ -23,6 +23,11 @@ export declare const onlyWarnsForMappingSchema: {
 interface CheckPackageDependenciesSettings {
     isLibrary?: boolean;
 }
+export interface PackageRuleDocs {
+    description: string;
+    /** enabled in the "recommended" config */
+    recommended: boolean;
+}
 type CheckFn<RuleOptions, Node, T = Record<never, never>> = (params: T & {
     node: Node;
     pkg: ParsedPackageJson;
@@ -35,7 +40,12 @@ type CheckFn<RuleOptions, Node, T = Record<never, never>> = (params: T & {
 }) => void;
 export declare function createPackageRule<RuleOptions extends {
     onlyWarnsFor?: OnlyWarnsFor;
-}>(ruleName: string, schema: NonNullable<NonNullable<Rule.RuleModule["meta"]>["schema"]>, { checkPackage, checkDependencyValue, }: {
+}>(ruleName: string, schema: NonNullable<NonNullable<Rule.RuleModule["meta"]>["schema"]>, { docs, fixable, hasSuggestions, checkPackage, checkDependencyValue, }: {
+    docs: PackageRuleDocs;
+    /** the rule reports errors with a fix applied by "eslint --fix" */
+    fixable?: boolean;
+    /** the rule reports errors with editor suggestions */
+    hasSuggestions?: boolean;
     checkPackage?: CheckFn<RuleOptions, ParsedPackageJson, {
         loadWorkspacePackageJsons: () => ParsedPackageJson[];
         getWorkspaceMemberNames: () => Set<string> | undefined;

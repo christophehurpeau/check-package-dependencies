@@ -48,6 +48,8 @@
     "format": "oxfmt",
     "format:check": "oxfmt --check .",
     "generate:api": "typedoc --tsconfig tsconfig.doc.json",
+    "generate:rules-docs": "node scripts/generate-rules-docs.js",
+    "generate:rules-docs:check": "node scripts/generate-rules-docs.js --check",
     "lint": "pnpm run format && tsc && pnpm run lint:eslint",
     "lint:eslint": "eslint --quiet .",
     "lint:eslint:package.json": "eslint --quiet package.json",

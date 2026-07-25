@@ -25,6 +25,12 @@ export const requireExactVersionsRule =
       additionalProperties: false,
     },
     {
+      docs: {
+        description:
+          "Require exact versions in `dependencies`, `devDependencies` and `resolutions`",
+        recommended: true,
+      },
+      fixable: true,
       checkDependencyValue: ({
         node,
         reportError,

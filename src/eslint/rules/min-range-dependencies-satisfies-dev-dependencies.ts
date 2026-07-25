@@ -10,6 +10,12 @@ export const minRangeDependenciesSatisfiesDevDependenciesRule =
       additionalProperties: false,
     },
     {
+      docs: {
+        description:
+          "Enforce the minimum of a `dependencies` range to satisfy the version in `devDependencies`",
+        recommended: false,
+      },
+      fixable: true,
       checkDependencyValue: ({ node, pkg, reportError }) => {
         if (node.fieldName === "dependencies") {
           checkDependencyMinRangeSatisfies(

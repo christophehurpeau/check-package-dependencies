@@ -66,6 +66,11 @@ export const satisfiesVersionsBetweenDependenciesRule =
       additionalProperties: false,
     },
     {
+      docs: {
+        description:
+          "Require the range of a dependency in one dependency to satisfy the range of the same dependency in another dependency",
+        recommended: false,
+      },
       checkPackage: ({
         pkg,
         reportError,

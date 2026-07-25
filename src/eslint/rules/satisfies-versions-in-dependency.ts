@@ -41,6 +41,11 @@ export const satisfiesVersionsInDependencyRule = createPackageRule<Options>(
     additionalProperties: false,
   },
   {
+    docs: {
+      description:
+        "Require the dependencies of an installed dependency to satisfy the configured ranges",
+      recommended: false,
+    },
     checkPackage: ({ reportError, ruleOptions, getDependencyPackageJson }) => {
       Object.entries(ruleOptions.dependencies).forEach(([depName, ranges]) => {
         const [depPkg] = getDependencyPackageJson(depName);

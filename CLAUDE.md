@@ -18,6 +18,8 @@ yarn test           # run all tests (uses Node built-in test runner, TZ=UTC)
 yarn test:coverage  # coverage via c8
 yarn lint           # format + tsc + eslint
 yarn checks         # run the repo's own check-package script (scripts/check-package.js)
+yarn generate:rules-docs        # update the generated parts of the ESLint rules documentation
+yarn generate:rules-docs:check  # fail if they are out of date (also covered by a test)
 ```
 
 ## Project structure
@@ -45,6 +47,9 @@ bin/
   check-package-dependencies.mjs   # CLI entry point
 scripts/
   check-package.js            # example / self-check script
+  generate-rules-docs.js      # generates the rules documentation headers and the README rules table
+documentation/
+  rules/                      # one markdown file per ESLint rule
 ```
 
 ## Key concepts
@@ -66,6 +71,8 @@ For Yarn/npm workspaces, `createCheckPackageWithWorkspaces()` (see `check-packag
 ### ESLint plugin
 
 The plugin defines a custom `package-json` language (see `src/eslint/language.ts`) so ESLint can lint `package.json` files. Rules are created with `createPackageRule` which handles parsing, node traversal, and the `onlyWarnsFor` option consistently.
+
+Each rule declares `docs` (description, `recommended`), and `fixable` / `hasSuggestions` when it reports fixes or suggestions. Every rule has a documentation file in `documentation/rules/` and a row in the README rules table — see the `eslint-rule-docs` skill when adding or changing a rule.
 
 ESLint configs exported: `base` (language + plugin, no rules enabled), `recommended` (7 rules — same set as `recommended-library` minus the two `min-range-*` rules), `recommended-library` (9 rules — adds the two `min-range-*` rules and sets `require-exact-versions` with `dependencies: false`). The remaining 3 rules (`satisfies-versions`, `satisfies-versions-between-dependencies`, `satisfies-versions-from-dependencies`) are opt-in.
 

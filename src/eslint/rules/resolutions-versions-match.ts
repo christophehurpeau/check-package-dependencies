@@ -11,6 +11,12 @@ export const resolutionsVersionsMatchRule =
       additionalProperties: false,
     },
     {
+      docs: {
+        description:
+          "Require `resolutions` versions to match the versions in `dependencies` and `devDependencies`",
+        recommended: true,
+      },
+      hasSuggestions: true,
       checkDependencyValue: ({ node, pkg, reportError }) => {
         if (node.fieldName === "resolutions") {
           checkResolutionVersionMatch(reportError, pkg, node);

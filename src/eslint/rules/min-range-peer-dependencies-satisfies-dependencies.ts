@@ -10,6 +10,12 @@ export const minRangePeerDependenciesSatisfiesDependenciesRule =
       additionalProperties: false,
     },
     {
+      docs: {
+        description:
+          "Enforce the minimum of a `peerDependencies` range to satisfy the version in `dependencies`",
+        recommended: false,
+      },
+      fixable: true,
       checkDependencyValue: ({ node, pkg, reportError }) => {
         if (node.fieldName === "peerDependencies") {
           checkDependencyMinRangeSatisfies(

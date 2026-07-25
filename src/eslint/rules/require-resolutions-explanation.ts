@@ -16,6 +16,11 @@ export const requireResolutionsExplanationRule =
       additionalProperties: false,
     },
     {
+      docs: {
+        description:
+          "Require every entry of `resolutions` to be explained in `resolutionsExplained`",
+        recommended: true,
+      },
       checkDependencyValue: ({ node, reportError, pkg }) => {
         if (node.fieldName === "resolutions") {
           checkResolutionHasExplanation(reportError, node, pkg);

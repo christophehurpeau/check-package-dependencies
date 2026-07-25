@@ -40,6 +40,11 @@ export const requireIdenticalVersionsAsDependencyRule =
       additionalProperties: false,
     },
     {
+      docs: {
+        description:
+          "Require configured dependencies to have the same version as the one in the `dependencies` of another dependency",
+        recommended: false,
+      },
       checkPackage: ({
         pkg,
         reportError,

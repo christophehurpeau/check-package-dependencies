@@ -758,7 +758,11 @@ const onlyWarnsForMappingSchema = {
     "^.*$": onlyWarnsForArraySchema
   }
 };
+const documentationUrlBase = "https://github.com/christophehurpeau/check-package-dependencies/blob/main/documentation/rules";
 function createPackageRule(ruleName, schema, {
+  docs,
+  fixable = false,
+  hasSuggestions = false,
   checkPackage,
   checkDependencyValue
 }) {
@@ -766,8 +770,13 @@ function createPackageRule(ruleName, schema, {
     [ruleName]: {
       meta: {
         type: "problem",
-        fixable: "code",
-        hasSuggestions: true,
+        docs: {
+          description: docs.description,
+          recommended: docs.recommended,
+          url: `${documentationUrlBase}/${ruleName}.md`
+        },
+        fixable: fixable ? "code" : void 0,
+        hasSuggestions,
         schema: schema ? [schema] : void 0
       },
       create(context) {
@@ -1050,6 +1059,10 @@ const consistentWorkspaceDependenciesRule = createPackageRule(
     additionalProperties: false
   },
   {
+    docs: {
+      description: "Enforce consistent dependency versions across the packages of a workspace",
+      recommended: true
+    },
     checkPackage: ({
       pkg,
       settings,
@@ -1160,6 +1173,11 @@ const minRangeDependenciesSatisfiesDevDependenciesRule = createPackageRule(
     additionalProperties: false
   },
   {
+    docs: {
+      description: "Enforce the minimum of a `dependencies` range to satisfy the version in `devDependencies`",
+      recommended: false
+    },
+    fixable: true,
     checkDependencyValue: ({ node, pkg, reportError }) => {
       if (node.fieldName === "dependencies") {
         checkDependencyMinRangeSatisfies(
@@ -1181,6 +1199,11 @@ const minRangePeerDependenciesSatisfiesDependenciesRule = createPackageRule(
     additionalProperties: false
   },
   {
+    docs: {
+      description: "Enforce the minimum of a `peerDependencies` range to satisfy the version in `dependencies`",
+      recommended: false
+    },
+    fixable: true,
     checkDependencyValue: ({ node, pkg, reportError }) => {
       if (node.fieldName === "peerDependencies") {
         checkDependencyMinRangeSatisfies(
@@ -1208,6 +1231,10 @@ const noDirectDuplicateDependenciesRule = createPackageRule(
     additionalProperties: false
   },
   {
+    docs: {
+      description: "Disallow dependencies that will be installed twice because a direct dependency requires an incompatible range",
+      recommended: true
+    },
     checkDependencyValue: ({
       node,
       pkg,
@@ -1246,6 +1273,10 @@ const noRootWorkspaceDependenciesRule = createPackageRule(
     additionalProperties: false
   },
   {
+    docs: {
+      description: "Disallow `dependencies` in the root package.json of a workspace",
+      recommended: true
+    },
     checkDependencyValue: ({ node, pkg, reportError }) => {
       if (!pkg.workspacesPackages) {
         return;
@@ -1271,6 +1302,10 @@ const requireDirectPeerDependenciesRule = createPackageRule(
     additionalProperties: false
   },
   {
+    docs: {
+      description: "Require peer dependencies of direct dependencies to be present and satisfied",
+      recommended: true
+    },
     checkPackage: ({
       pkg,
       reportError,
@@ -1381,6 +1416,11 @@ const requireExactVersionsRule = createPackageRule(
     additionalProperties: false
   },
   {
+    docs: {
+      description: "Require exact versions in `dependencies`, `devDependencies` and `resolutions`",
+      recommended: true
+    },
+    fixable: true,
     checkDependencyValue: ({
       node,
       reportError,
@@ -1469,6 +1509,10 @@ const requireIdenticalVersionsAsDependencyRule = createPackageRule(
     additionalProperties: false
   },
   {
+    docs: {
+      description: "Require configured dependencies to have the same version as the one in the `dependencies` of another dependency",
+      recommended: false
+    },
     checkPackage: ({
       pkg,
       reportError,
@@ -1516,6 +1560,10 @@ const requireIdenticalVersionsAsDevDependencyOfDependencyRule = createPackageRul
     additionalProperties: false
   },
   {
+    docs: {
+      description: "Require configured dependencies to have the same version as the one in the `devDependencies` of another dependency",
+      recommended: false
+    },
     checkPackage: ({
       pkg,
       reportError,
@@ -1639,6 +1687,10 @@ const requireIdenticalVersionsRule = createPackageRule(
     additionalProperties: false
   },
   {
+    docs: {
+      description: "Require configured dependencies to have the same version as another dependency of the same package.json",
+      recommended: false
+    },
     checkPackage: ({ pkg, reportError, ruleOptions, onlyWarnsForCheck }) => {
       sourceTypes.forEach((type) => {
         const deps = ruleOptions[type];
@@ -1677,6 +1729,10 @@ const requireResolutionsExplanationRule = createPackageRule(
     additionalProperties: false
   },
   {
+    docs: {
+      description: "Require every entry of `resolutions` to be explained in `resolutionsExplained`",
+      recommended: true
+    },
     checkDependencyValue: ({ node, reportError, pkg }) => {
       if (node.fieldName === "resolutions") {
         checkResolutionHasExplanation(reportError, node, pkg);
@@ -1707,6 +1763,11 @@ const requireWorkspaceProtocolRule = createPackageRule(
     additionalProperties: false
   },
   {
+    docs: {
+      description: "Require dependencies on other packages of the workspace to use the `workspace:` protocol",
+      recommended: true
+    },
+    fixable: true,
     checkDependencyValue: ({ node, reportError, getWorkspaceMemberNames }) => {
       if (!DEP_TYPES_TO_CHECK.includes(node.fieldName)) {
         return;
@@ -1778,6 +1839,11 @@ const resolutionsVersionsMatchRule = createPackageRule(
     additionalProperties: false
   },
   {
+    docs: {
+      description: "Require `resolutions` versions to match the versions in `dependencies` and `devDependencies`",
+      recommended: true
+    },
+    hasSuggestions: true,
     checkDependencyValue: ({ node, pkg, reportError }) => {
       if (node.fieldName === "resolutions") {
         checkResolutionVersionMatch(reportError, pkg, node);
@@ -1886,6 +1952,10 @@ const satisfiesVersionsBetweenDependenciesRule = createPackageRule(
     additionalProperties: false
   },
   {
+    docs: {
+      description: "Require the range of a dependency in one dependency to satisfy the range of the same dependency in another dependency",
+      recommended: false
+    },
     checkPackage: ({
       pkg,
       reportError,
@@ -1983,6 +2053,11 @@ const satisfiesVersionsFromDependenciesRule = createPackageRule(
     additionalProperties: false
   },
   {
+    docs: {
+      description: "Require configured dependencies to satisfy the ranges declared in the `dependencies` of another dependency",
+      recommended: false
+    },
+    hasSuggestions: true,
     checkPackage: ({
       pkg,
       reportError,
@@ -2087,6 +2162,11 @@ const satisfiesVersionsFromDevDependenciesOfDependencyRule = createPackageRule(
     additionalProperties: false
   },
   {
+    docs: {
+      description: "Require configured dependencies to satisfy the ranges declared in the `devDependencies` of another dependency",
+      recommended: false
+    },
+    hasSuggestions: true,
     checkPackage: ({
       pkg,
       reportError,
@@ -2234,6 +2314,10 @@ const satisfiesVersionsInDependencyRule = createPackageRule(
     additionalProperties: false
   },
   {
+    docs: {
+      description: "Require the dependencies of an installed dependency to satisfy the configured ranges",
+      recommended: false
+    },
     checkPackage: ({ reportError, ruleOptions, getDependencyPackageJson }) => {
       Object.entries(ruleOptions.dependencies).forEach(([depName, ranges]) => {
         const [depPkg] = getDependencyPackageJson(depName);
@@ -2265,6 +2349,11 @@ const satisfiesVersionsRule = createPackageRule(
     additionalProperties: false
   },
   {
+    docs: {
+      description: "Require configured dependencies to be present and to satisfy the configured ranges",
+      recommended: false
+    },
+    hasSuggestions: true,
     checkPackage: ({ pkg, reportError, ruleOptions, onlyWarnsForCheck }) => {
       if (!ruleOptions.dependencies && !ruleOptions.devDependencies) {
         throw new Error(
