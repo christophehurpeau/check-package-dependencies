@@ -10,10 +10,7 @@ const fixtureDirectoryPath = path.join(
 );
 
 before(() => {
-  execSync(
-    "yarn install --frozen-lockfile --cache-folder /tmp/yarn-cache-member-peer",
-    { cwd: fixtureDirectoryPath },
-  );
+  execSync("pnpm install --frozen-lockfile", { cwd: fixtureDirectoryPath });
 });
 
 const lintPackageJson = async (

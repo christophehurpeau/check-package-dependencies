@@ -1,8 +1,5 @@
 {
   "name": "fixtures-invalid-workspace-dependencies",
   "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
   "type": "module"
 }

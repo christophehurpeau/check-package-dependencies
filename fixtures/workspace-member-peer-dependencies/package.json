@@ -1,9 +1,6 @@
 {
   "name": "fixtures-workspace-member-peer-dependencies",
   "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
   "type": "module",
   "devDependencies": {
     "eslint": "7.32.0"
