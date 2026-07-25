@@ -36,7 +36,7 @@
 
 <h3 id="eslint-plugin" class="tsd-anchor-link">ESLint plugin<a href="#eslint-plugin" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <p>The plugin lints <code>package.json</code> files with a dedicated ESLint <a href="https://eslint.org/docs/latest/extend/languages">language</a>, so errors are reported inline, with fixes and suggestions when possible.</p>
-<pre><code class="js"><span class="hl-4">// eslint.config.js</span><br/><span class="hl-5">import</span><span class="hl-1"> </span><span class="hl-6">checkPackageDependenciesPlugin</span><span class="hl-1"> </span><span class="hl-5">from</span><span class="hl-1"> </span><span class="hl-2">&quot;check-package-dependencies/eslint-plugin&quot;</span><span class="hl-1">;</span><br/><br/><span class="hl-5">export</span><span class="hl-1"> </span><span class="hl-5">default</span><span class="hl-1"> [</span><br/><span class="hl-1">  </span><span class="hl-4">// for an application</span><br/><span class="hl-1">  </span><span class="hl-6">checkPackageDependenciesPlugin</span><span class="hl-1">.</span><span class="hl-6">configs</span><span class="hl-1">.</span><span class="hl-6">recommended</span><span class="hl-1">,</span><br/><span class="hl-1">  </span><span class="hl-4">// …or for a library, which also sets the &quot;isLibrary&quot; setting</span><br/><span class="hl-1">  </span><span class="hl-4">// checkPackageDependenciesPlugin.configs[&quot;recommended-library&quot;],</span><br/><span class="hl-1">];</span>
+<pre><code class="js"><span class="hl-4">// eslint.config.js</span><br/><span class="hl-5">import</span><span class="hl-1"> </span><span class="hl-6">checkPackageDependenciesPlugin</span><span class="hl-1"> </span><span class="hl-5">from</span><span class="hl-1"> </span><span class="hl-2">&quot;check-package-dependencies/eslint-plugin&quot;</span><span class="hl-1">;</span><br/><br/><span class="hl-5">export</span><span class="hl-1"> </span><span class="hl-5">default</span><span class="hl-1"> [</span><span class="hl-6">checkPackageDependenciesPlugin</span><span class="hl-1">.</span><span class="hl-6">configs</span><span class="hl-1">.</span><span class="hl-6">recommended</span><span class="hl-1">];</span>
 </code><button type="button">Copy</button></pre>
 
 <p>Available configs:</p>
@@ -57,12 +57,7 @@
 <tr>
 <td style="text-align:left"><code>recommended</code></td>
 <td style="text-align:left">✅</td>
-<td style="text-align:left">Recommended rules for an application.</td>
-</tr>
-<tr>
-<td style="text-align:left"><code>recommended-library</code></td>
-<td style="text-align:left">📚</td>
-<td style="text-align:left">Recommended rules for a library: sets <code>isLibrary</code>, allows ranges in <code>dependencies</code> and adds the min range rules.</td>
+<td style="text-align:left">Recommended rules. A library is not checked like a package that is not published: this is driven by the <code>library</code> setting, not by config.</td>
 </tr>
 </tbody>
 </table>
@@ -81,17 +76,66 @@
 </thead>
 <tbody>
 <tr>
-<td style="text-align:left"><code>isLibrary</code></td>
-<td style="text-align:left"><code>false</code></td>
-<td style="text-align:left">The package is published and consumed by other packages: ranges are expected in <code>dependencies</code> and peer dependencies can be satisfied by <code>peerDependencies</code>.</td>
+<td style="text-align:left"><code>library</code></td>
+<td style="text-align:left"><code>&quot;auto&quot;</code></td>
+<td style="text-align:left">Whether a package is published and consumed by other packages. A library keeps ranges in <code>dependencies</code> and can satisfy a peer dependency with its own <code>peerDependencies</code>; any other package pins every version.</td>
 </tr>
 </tbody>
 </table>
-<pre><code class="js"><span class="hl-5">export</span><span class="hl-1"> </span><span class="hl-5">default</span><span class="hl-1"> [</span><br/><span class="hl-1">  {</span><br/><span class="hl-1">    </span><span class="hl-6">files:</span><span class="hl-1"> [</span><span class="hl-2">&quot;package.json&quot;</span><span class="hl-1">],</span><br/><span class="hl-1">    </span><span class="hl-6">settings:</span><span class="hl-1"> { </span><span class="hl-2">&quot;check-package-dependencies&quot;</span><span class="hl-6">:</span><span class="hl-1"> { </span><span class="hl-6">isLibrary:</span><span class="hl-1"> </span><span class="hl-3">true</span><span class="hl-1"> } },</span><br/><span class="hl-1">  },</span><br/><span class="hl-1">];</span>
+<p>Accepted values:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Value</th>
+<th style="text-align:left">Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>&quot;auto&quot;</code> <em>(default)</em></td>
+<td style="text-align:left">Derived from the <code>package.json</code>: a workspace root or a <code>private</code> package is not a library, anything else is.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>true</code> / <code>false</code></td>
+<td style="text-align:left">Every package checked with this config entry is, or is not, a library.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>string[]</code></td>
+<td style="text-align:left">Package name patterns: <code>*</code> matches any characters, a <code>!</code> prefix excludes, and the last matching pattern wins. A package matching no pattern is not a library.</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="js"><span class="hl-5">export</span><span class="hl-1"> </span><span class="hl-5">default</span><span class="hl-1"> [</span><br/><span class="hl-1">  </span><span class="hl-6">checkPackageDependenciesPlugin</span><span class="hl-1">.</span><span class="hl-6">configs</span><span class="hl-1">.</span><span class="hl-6">recommended</span><span class="hl-1">,</span><br/><span class="hl-1">  {</span><br/><span class="hl-1">    </span><span class="hl-6">files:</span><span class="hl-1"> [</span><span class="hl-2">&quot;package.json&quot;</span><span class="hl-1">],</span><br/><span class="hl-1">    </span><span class="hl-6">settings:</span><span class="hl-1"> {</span><br/><span class="hl-1">      </span><span class="hl-2">&quot;check-package-dependencies&quot;</span><span class="hl-6">:</span><span class="hl-1"> {</span><br/><span class="hl-1">        </span><span class="hl-6">library:</span><span class="hl-1"> [</span><span class="hl-2">&quot;@scope/*&quot;</span><span class="hl-1">, </span><span class="hl-2">&quot;!@scope/app-*&quot;</span><span class="hl-1">],</span><br/><span class="hl-1">      },</span><br/><span class="hl-1">    },</span><br/><span class="hl-1">  },</span><br/><span class="hl-1">];</span>
 </code><button type="button">Copy</button></pre>
 
+<p>The setting is resolved per package, not per linted file: when linting the <code>package.json</code>
+of a monorepo root, <code>consistent-workspace-dependencies</code> resolves it against each
+workspace member. So a list of patterns, or <code>&quot;auto&quot;</code>, is what a monorepo mixing published
+and private packages wants — a plain <code>true</code> would make the root a library too.</p>
+<h4 id="migrating-from-v11" class="tsd-anchor-link">Migrating from v11<a href="#migrating-from-v11" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h4>
+<ul>
+<li>The <code>recommended-library</code> config is removed: use <code>recommended</code>, and let <code>library</code>
+decide. <code>&quot;auto&quot;</code> covers the usual case; set it explicitly when the detection is wrong
+for you.</li>
+<li><code>require-exact-versions</code> is renamed to <code>require-pinned-versions</code> and its
+<code>dependencies</code> / <code>devDependencies</code> / <code>resolutions</code> options are removed: which fields
+are checked now follows <code>library</code>.</li>
+<li>The two <code>min-range-*</code> rules are part of <code>recommended</code>, and now report whether or not
+the package is a library — they were previously only run for a library.</li>
+<li>The <code>isLibrary</code> setting and the <code>isLibrary</code> option of the programmatic API are renamed
+to <code>library</code>, as they accept more than a boolean. Using the old name is reported: as a
+lint error once per <code>package.json</code> for the setting, and as a thrown error for the
+option.</li>
+<li><code>library</code> defaults to <code>&quot;auto&quot;</code> instead of <code>false</code>, in the plugin and in the programmatic
+API. A published, non-private package is therefore checked as a library
+now: ranges become allowed in its <code>dependencies</code>, and a peer dependency of a
+<code>dependencies</code> entry must be satisfied by its <code>dependencies</code> or <code>peerDependencies</code>
+rather than by its <code>devDependencies</code>. Set <code>library: false</code> to keep the previous
+behaviour.</li>
+</ul>
 <h4 id="rules" class="tsd-anchor-link">Rules<a href="#rules" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h4>
-<p>💼 Configs enabling the rule: ✅ <code>recommended</code>, 📚 <code>recommended-library</code>.
+<p>💼 Configs enabling the rule: ✅ <code>recommended</code>. A few rules check a library differently,
+depending on the <code>library</code> setting: see each rule’s page.
 🔧 Automatically fixable by the <a href="https://eslint.org/docs/latest/use/command-line-interface#--fix"><code>--fix</code> CLI option</a>.
 💡 Manually fixable by <a href="https://eslint.org/docs/latest/use/core-concepts#rule-suggestions">editor suggestions</a>.</p>
 <!-- begin auto-generated rules list -->
@@ -109,50 +153,43 @@
 <tr>
 <td style="text-align:left"><a href="media/consistent-workspace-dependencies.md">consistent-workspace-dependencies</a></td>
 <td style="text-align:left">Enforce consistent dependency versions across the packages of a workspace</td>
-<td style="text-align:left">✅ 📚</td>
+<td style="text-align:left">✅</td>
 <td style="text-align:left"></td>
 <td style="text-align:left"></td>
 </tr>
 <tr>
 <td style="text-align:left"><a href="media/min-range-dependencies-satisfies-dev-dependencies.md">min-range-dependencies-satisfies-dev-dependencies</a></td>
 <td style="text-align:left">Enforce the minimum of a <code>dependencies</code> range to satisfy the version in <code>devDependencies</code></td>
-<td style="text-align:left">📚</td>
+<td style="text-align:left">✅</td>
 <td style="text-align:left">🔧</td>
 <td style="text-align:left"></td>
 </tr>
 <tr>
 <td style="text-align:left"><a href="media/min-range-peer-dependencies-satisfies-dependencies.md">min-range-peer-dependencies-satisfies-dependencies</a></td>
 <td style="text-align:left">Enforce the minimum of a <code>peerDependencies</code> range to satisfy the version in <code>dependencies</code></td>
-<td style="text-align:left">📚</td>
+<td style="text-align:left">✅</td>
 <td style="text-align:left">🔧</td>
 <td style="text-align:left"></td>
 </tr>
 <tr>
 <td style="text-align:left"><a href="media/no-direct-duplicate-dependencies.md">no-direct-duplicate-dependencies</a></td>
 <td style="text-align:left">Disallow dependencies that will be installed twice because a direct dependency requires an incompatible range</td>
-<td style="text-align:left">✅ 📚</td>
+<td style="text-align:left">✅</td>
 <td style="text-align:left"></td>
 <td style="text-align:left"></td>
 </tr>
 <tr>
 <td style="text-align:left"><a href="media/no-root-workspace-dependencies.md">no-root-workspace-dependencies</a></td>
 <td style="text-align:left">Disallow <code>dependencies</code> in the root package.json of a workspace</td>
-<td style="text-align:left">✅ 📚</td>
+<td style="text-align:left">✅</td>
 <td style="text-align:left"></td>
 <td style="text-align:left"></td>
 </tr>
 <tr>
 <td style="text-align:left"><a href="media/require-direct-peer-dependencies.md">require-direct-peer-dependencies</a></td>
 <td style="text-align:left">Require peer dependencies of direct dependencies to be present and satisfied</td>
-<td style="text-align:left">✅ 📚</td>
+<td style="text-align:left">✅</td>
 <td style="text-align:left"></td>
-<td style="text-align:left"></td>
-</tr>
-<tr>
-<td style="text-align:left"><a href="media/require-exact-versions.md">require-exact-versions</a></td>
-<td style="text-align:left">Require exact versions in <code>dependencies</code>, <code>devDependencies</code> and <code>resolutions</code></td>
-<td style="text-align:left">✅ 📚</td>
-<td style="text-align:left">🔧</td>
 <td style="text-align:left"></td>
 </tr>
 <tr>
@@ -177,23 +214,30 @@
 <td style="text-align:left"></td>
 </tr>
 <tr>
+<td style="text-align:left"><a href="media/require-pinned-versions.md">require-pinned-versions</a></td>
+<td style="text-align:left">Require pinned versions in <code>dependencies</code>, <code>devDependencies</code> and <code>resolutions</code></td>
+<td style="text-align:left">✅</td>
+<td style="text-align:left">🔧</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
 <td style="text-align:left"><a href="media/require-resolutions-explanation.md">require-resolutions-explanation</a></td>
 <td style="text-align:left">Require every entry of <code>resolutions</code> to be explained in <code>resolutionsExplained</code></td>
-<td style="text-align:left">✅ 📚</td>
+<td style="text-align:left">✅</td>
 <td style="text-align:left"></td>
 <td style="text-align:left"></td>
 </tr>
 <tr>
 <td style="text-align:left"><a href="media/require-workspace-protocol.md">require-workspace-protocol</a></td>
 <td style="text-align:left">Require dependencies on other packages of the workspace to use the <code>workspace:</code> protocol</td>
-<td style="text-align:left">✅ 📚</td>
+<td style="text-align:left">✅</td>
 <td style="text-align:left">🔧</td>
 <td style="text-align:left"></td>
 </tr>
 <tr>
 <td style="text-align:left"><a href="media/resolutions-versions-match.md">resolutions-versions-match</a></td>
 <td style="text-align:left">Require <code>resolutions</code> versions to match the versions in <code>dependencies</code> and <code>devDependencies</code></td>
-<td style="text-align:left">✅ 📚</td>
+<td style="text-align:left">✅</td>
 <td style="text-align:left"></td>
 <td style="text-align:left">💡</td>
 </tr>
@@ -238,7 +282,7 @@
 <h4 id="_" class="tsd-anchor-link"><code>onlyWarnsFor</code><a href="#_" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h4>
 <p>Most rules accept an <code>onlyWarnsFor</code> option that downgrades errors to warnings, printed in the console instead of being reported to ESLint. Entries that never matched an error are reported as errors, so the list stays up to date.</p>
 <p>Depending on the rule, <code>onlyWarnsFor</code> is either an array of dependency names:</p>
-<pre><code class="js"><span class="hl-2">&quot;check-package-dependencies/require-exact-versions&quot;</span><span class="hl-1">: [</span><span class="hl-2">&quot;error&quot;</span><span class="hl-1">, { </span><span class="hl-6">onlyWarnsFor:</span><span class="hl-1"> [</span><span class="hl-2">&quot;type-fest&quot;</span><span class="hl-1">] }]</span>
+<pre><code class="js"><span class="hl-2">&quot;check-package-dependencies/require-pinned-versions&quot;</span><span class="hl-1">: [</span><span class="hl-2">&quot;error&quot;</span><span class="hl-1">, { </span><span class="hl-6">onlyWarnsFor:</span><span class="hl-1"> [</span><span class="hl-2">&quot;type-fest&quot;</span><span class="hl-1">] }]</span>
 </code><button type="button">Copy</button></pre>
 
 <p>or a mapping from the dependency causing the error to the dependency names to only warn for, <code>&quot;*&quot;</code> matching any dependency:</p>
@@ -257,14 +301,14 @@
 <p>If something is missing for your need, please open an issue !</p>
 <h3 id="how-to-use" class="tsd-anchor-link">How to use<a href="#how-to-use" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <p>Create a script, for example <code>scripts/check-package.js</code>. Add it in <code>&quot;scripts&quot;</code> in your package.json. Run in CI and/or in your husky hooks.</p>
-<pre><code class="js"><span class="hl-5">import</span><span class="hl-1"> { </span><span class="hl-6">createCheckPackage</span><span class="hl-1"> } </span><span class="hl-5">from</span><span class="hl-1"> </span><span class="hl-2">&quot;check-package-dependencies&quot;</span><span class="hl-1">;</span><br/><br/><span class="hl-5">await</span><span class="hl-1"> </span><span class="hl-0">createCheckPackage</span><span class="hl-1">(</span><span class="hl-4">/* &#39;.&#39; */</span><span class="hl-1">)</span><br/><span class="hl-1">  </span><span class="hl-4">// Check that your package.json contains only exact versions of package, not range.</span><br/><span class="hl-1">  .</span><span class="hl-0">checkExactVersions</span><span class="hl-1">({</span><br/><span class="hl-1">    </span><span class="hl-4">// When isLibrary is true, it doesnt check &quot;dependencies&quot; as they should mostly have a range, not an exact version</span><br/><span class="hl-1">    </span><span class="hl-6">isLibrary:</span><span class="hl-1"> </span><span class="hl-3">false</span><span class="hl-1">,</span><br/><span class="hl-1">  })</span><br/><span class="hl-1">  .</span><span class="hl-0">checkDirectPeerDependencies</span><span class="hl-1">({</span><br/><span class="hl-1">    </span><span class="hl-4">// Allow to only warn for not respected peer dependencies.</span><br/><span class="hl-1">    </span><span class="hl-4">// Example: { &#39;@babel/cli&#39;: [&#39;@babel/core&#39;] }</span><br/><span class="hl-1">    </span><span class="hl-4">// Only warns for missing &quot;@babel/core&quot; peer dependency asked in &quot;@babel/cli&quot;.</span><br/><span class="hl-1">    </span><span class="hl-4">// You can also use &quot;*&quot; for any library</span><br/><span class="hl-1">    </span><span class="hl-4">// { &#39;*&#39;: [&#39;semver&#39;] }</span><br/><span class="hl-1">    </span><span class="hl-6">missingOnlyWarnsFor:</span><span class="hl-1"> {},</span><br/><span class="hl-1">    </span><span class="hl-6">invalidOnlyWarnsFor:</span><span class="hl-1"> {},</span><br/><span class="hl-1">  })</span><br/><span class="hl-1">  </span><span class="hl-4">// Check that there are no duplicates among your dependencies and your devDependencies.</span><br/><span class="hl-1">  </span><span class="hl-4">// For example, If you use &quot;@babel/core&quot;: &quot;7.0.0&quot; and one of your direct dependency requires &quot;^7.0.1&quot; (in dependencies, not peerDependency)</span><br/><span class="hl-1">  </span><span class="hl-4">// you will have two versions of @babel/core. This check will display an error that can be changed to a warning.</span><br/><span class="hl-1">  </span><span class="hl-4">// You will probably need to add warnings for common library where duplicate have low impact,</span><br/><span class="hl-1">  </span><span class="hl-4">// like type-fest or fast-deep-equal.</span><br/><span class="hl-1">  .</span><span class="hl-0">checkDirectDuplicateDependencies</span><span class="hl-1">({</span><br/><span class="hl-1">    </span><span class="hl-6">onlyWarnsFor:</span><span class="hl-1"> { </span><span class="hl-2">&quot;*&quot;</span><span class="hl-6">:</span><span class="hl-1"> </span><span class="hl-2">&quot;type-fest&quot;</span><span class="hl-1"> },</span><br/><span class="hl-1">  })</span><br/><span class="hl-1">  </span><span class="hl-4">// Check resolutions versions matches versions in devDependencies or dependencies</span><br/><span class="hl-1">  .</span><span class="hl-0">checkResolutionsVersionsMatch</span><span class="hl-1">()</span><br/><span class="hl-1">  </span><span class="hl-4">// Check that all your resolutions are also present in an &quot;resolutionsExplained&quot; field, forcing you to explain why the resolution was necessary</span><br/><span class="hl-1">  .</span><span class="hl-0">checkResolutionsHasExplanation</span><span class="hl-1">()</span><br/><span class="hl-1">  </span><span class="hl-4">// Same as calling .checkExactVersions(), checkDirectPeerDependencies(), checkDirectDuplicateDependencies()</span><br/><span class="hl-1">  </span><span class="hl-4">// and checkResolutionsHasExplanation(). It&#39;s recommended to use it as new recommended features will be added here too.</span><br/><span class="hl-1">  .</span><span class="hl-0">checkRecommended</span><span class="hl-1">({</span><br/><span class="hl-1">    </span><span class="hl-6">isLibrary:</span><span class="hl-1"> </span><span class="hl-3">false</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-6">peerDependenciesOnlyWarnsFor:</span><span class="hl-1"> [],</span><br/><span class="hl-1">    </span><span class="hl-6">directDuplicateDependenciesOnlyWarnsFor:</span><span class="hl-1"> [</span><span class="hl-2">&quot;type-fest&quot;</span><span class="hl-1">],</span><br/><span class="hl-1">  })</span><br/><span class="hl-1">  </span><span class="hl-4">// Check that your package.json contains the same version of @babel/core than react-scripts, both in resolutions and devDependencies</span><br/><span class="hl-1">  .</span><span class="hl-0">checkIdenticalVersionsThanDependency</span><span class="hl-1">(</span><span class="hl-2">&quot;react-scripts&quot;</span><span class="hl-1">, {</span><br/><span class="hl-1">    </span><span class="hl-6">resolutions:</span><span class="hl-1"> [</span><span class="hl-2">&quot;@babel/core&quot;</span><span class="hl-1">],</span><br/><span class="hl-1">    </span><span class="hl-6">devDependencies:</span><span class="hl-1"> [</span><span class="hl-2">&quot;@babel/core&quot;</span><span class="hl-1">],</span><br/><span class="hl-1">  })</span><br/><span class="hl-1">  </span><span class="hl-4">// Check that your package.json dependencies specifically satisfies the range set in another dependencies</span><br/><span class="hl-1">  .</span><span class="hl-0">checkSatisfiesVersionsFromDependency</span><span class="hl-1">(</span><span class="hl-2">&quot;@pob/eslint-config&quot;</span><span class="hl-1">, {</span><br/><span class="hl-1">    </span><span class="hl-6">devDependencies:</span><span class="hl-1"> [</span><br/><span class="hl-1">      </span><span class="hl-2">&quot;@typescript-eslint/eslint-plugin&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">      </span><span class="hl-2">&quot;@typescript-eslint/parser&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">    ],</span><br/><span class="hl-1">  })</span><br/><span class="hl-1">  </span><span class="hl-4">// Check that your package.json dependencies have the exact same version that another dependency also present in your package.json</span><br/><span class="hl-1">  </span><span class="hl-4">// The react-dom version should match react, so this check will ensure it does</span><br/><span class="hl-1">  .</span><span class="hl-0">checkIdenticalVersions</span><span class="hl-1">({</span><br/><span class="hl-1">    </span><span class="hl-6">dependencies:</span><span class="hl-1"> {</span><br/><span class="hl-1">      </span><span class="hl-6">react:</span><span class="hl-1"> {</span><br/><span class="hl-1">        </span><span class="hl-6">dependencies:</span><span class="hl-1"> [</span><span class="hl-2">&quot;react-dom&quot;</span><span class="hl-1">],</span><br/><span class="hl-1">        </span><span class="hl-6">devDependencies:</span><span class="hl-1"> [</span><span class="hl-2">&quot;react-test-renderer&quot;</span><span class="hl-1">],</span><br/><span class="hl-1">      },</span><br/><span class="hl-1">    },</span><br/><span class="hl-1">  })</span><br/><span class="hl-1">  .</span><span class="hl-0">run</span><span class="hl-1">();</span>
+<pre><code class="js"><span class="hl-5">import</span><span class="hl-1"> { </span><span class="hl-6">createCheckPackage</span><span class="hl-1"> } </span><span class="hl-5">from</span><span class="hl-1"> </span><span class="hl-2">&quot;check-package-dependencies&quot;</span><span class="hl-1">;</span><br/><br/><span class="hl-5">await</span><span class="hl-1"> </span><span class="hl-0">createCheckPackage</span><span class="hl-1">({</span><br/><span class="hl-1">  </span><span class="hl-4">// Whether the package is published and consumed by other packages.</span><br/><span class="hl-1">  </span><span class="hl-4">// &quot;auto&quot; (the default) derives it from the package.json: a workspace root or a</span><br/><span class="hl-1">  </span><span class="hl-4">// private package is not a library. Also accepts true, false, a list of package</span><br/><span class="hl-1">  </span><span class="hl-4">// name patterns ([&quot;@scope/*&quot;, &quot;!@scope/app-*&quot;]) or a (pkg) =&gt; boolean predicate.</span><br/><span class="hl-1">  </span><span class="hl-6">library:</span><span class="hl-1"> </span><span class="hl-2">&quot;auto&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">})</span><br/><span class="hl-1">  </span><span class="hl-4">// Check that your package.json contains only exact versions of package, not range.</span><br/><span class="hl-1">  </span><span class="hl-4">// A library keeps ranges in &quot;dependencies&quot;, so only &quot;devDependencies&quot; and</span><br/><span class="hl-1">  </span><span class="hl-4">// &quot;resolutions&quot; are checked for it.</span><br/><span class="hl-1">  .</span><span class="hl-0">checkExactVersions</span><span class="hl-1">({})</span><br/><span class="hl-1">  .</span><span class="hl-0">checkDirectPeerDependencies</span><span class="hl-1">({</span><br/><span class="hl-1">    </span><span class="hl-4">// Allow to only warn for not respected peer dependencies.</span><br/><span class="hl-1">    </span><span class="hl-4">// Example: { &#39;@babel/cli&#39;: [&#39;@babel/core&#39;] }</span><br/><span class="hl-1">    </span><span class="hl-4">// Only warns for missing &quot;@babel/core&quot; peer dependency asked in &quot;@babel/cli&quot;.</span><br/><span class="hl-1">    </span><span class="hl-4">// You can also use &quot;*&quot; for any library</span><br/><span class="hl-1">    </span><span class="hl-4">// { &#39;*&#39;: [&#39;semver&#39;] }</span><br/><span class="hl-1">    </span><span class="hl-6">missingOnlyWarnsFor:</span><span class="hl-1"> {},</span><br/><span class="hl-1">    </span><span class="hl-6">invalidOnlyWarnsFor:</span><span class="hl-1"> {},</span><br/><span class="hl-1">  })</span><br/><span class="hl-1">  </span><span class="hl-4">// Check that there are no duplicates among your dependencies and your devDependencies.</span><br/><span class="hl-1">  </span><span class="hl-4">// For example, If you use &quot;@babel/core&quot;: &quot;7.0.0&quot; and one of your direct dependency requires &quot;^7.0.1&quot; (in dependencies, not peerDependency)</span><br/><span class="hl-1">  </span><span class="hl-4">// you will have two versions of @babel/core. This check will display an error that can be changed to a warning.</span><br/><span class="hl-1">  </span><span class="hl-4">// You will probably need to add warnings for common library where duplicate have low impact,</span><br/><span class="hl-1">  </span><span class="hl-4">// like type-fest or fast-deep-equal.</span><br/><span class="hl-1">  .</span><span class="hl-0">checkDirectDuplicateDependencies</span><span class="hl-1">({</span><br/><span class="hl-1">    </span><span class="hl-6">onlyWarnsFor:</span><span class="hl-1"> { </span><span class="hl-2">&quot;*&quot;</span><span class="hl-6">:</span><span class="hl-1"> </span><span class="hl-2">&quot;type-fest&quot;</span><span class="hl-1"> },</span><br/><span class="hl-1">  })</span><br/><span class="hl-1">  </span><span class="hl-4">// Check resolutions versions matches versions in devDependencies or dependencies</span><br/><span class="hl-1">  .</span><span class="hl-0">checkResolutionsVersionsMatch</span><span class="hl-1">()</span><br/><span class="hl-1">  </span><span class="hl-4">// Check that all your resolutions are also present in an &quot;resolutionsExplained&quot; field, forcing you to explain why the resolution was necessary</span><br/><span class="hl-1">  .</span><span class="hl-0">checkResolutionsHasExplanation</span><span class="hl-1">()</span><br/><span class="hl-1">  </span><span class="hl-4">// Same as calling .checkExactVersions(), checkDirectPeerDependencies(), checkDirectDuplicateDependencies()</span><br/><span class="hl-1">  </span><span class="hl-4">// and checkResolutionsHasExplanation(). It&#39;s recommended to use it as new recommended features will be added here too.</span><br/><span class="hl-1">  .</span><span class="hl-0">checkRecommended</span><span class="hl-1">({</span><br/><span class="hl-1">    </span><span class="hl-6">peerDependenciesOnlyWarnsFor:</span><span class="hl-1"> [],</span><br/><span class="hl-1">    </span><span class="hl-6">directDuplicateDependenciesOnlyWarnsFor:</span><span class="hl-1"> [</span><span class="hl-2">&quot;type-fest&quot;</span><span class="hl-1">],</span><br/><span class="hl-1">  })</span><br/><span class="hl-1">  </span><span class="hl-4">// Check that your package.json contains the same version of @babel/core than react-scripts, both in resolutions and devDependencies</span><br/><span class="hl-1">  .</span><span class="hl-0">checkIdenticalVersionsThanDependency</span><span class="hl-1">(</span><span class="hl-2">&quot;react-scripts&quot;</span><span class="hl-1">, {</span><br/><span class="hl-1">    </span><span class="hl-6">resolutions:</span><span class="hl-1"> [</span><span class="hl-2">&quot;@babel/core&quot;</span><span class="hl-1">],</span><br/><span class="hl-1">    </span><span class="hl-6">devDependencies:</span><span class="hl-1"> [</span><span class="hl-2">&quot;@babel/core&quot;</span><span class="hl-1">],</span><br/><span class="hl-1">  })</span><br/><span class="hl-1">  </span><span class="hl-4">// Check that your package.json dependencies specifically satisfies the range set in another dependencies</span><br/><span class="hl-1">  .</span><span class="hl-0">checkSatisfiesVersionsFromDependency</span><span class="hl-1">(</span><span class="hl-2">&quot;@pob/eslint-config&quot;</span><span class="hl-1">, {</span><br/><span class="hl-1">    </span><span class="hl-6">devDependencies:</span><span class="hl-1"> [</span><br/><span class="hl-1">      </span><span class="hl-2">&quot;@typescript-eslint/eslint-plugin&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">      </span><span class="hl-2">&quot;@typescript-eslint/parser&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">    ],</span><br/><span class="hl-1">  })</span><br/><span class="hl-1">  </span><span class="hl-4">// Check that your package.json dependencies have the exact same version that another dependency also present in your package.json</span><br/><span class="hl-1">  </span><span class="hl-4">// The react-dom version should match react, so this check will ensure it does</span><br/><span class="hl-1">  .</span><span class="hl-0">checkIdenticalVersions</span><span class="hl-1">({</span><br/><span class="hl-1">    </span><span class="hl-6">dependencies:</span><span class="hl-1"> {</span><br/><span class="hl-1">      </span><span class="hl-6">react:</span><span class="hl-1"> {</span><br/><span class="hl-1">        </span><span class="hl-6">dependencies:</span><span class="hl-1"> [</span><span class="hl-2">&quot;react-dom&quot;</span><span class="hl-1">],</span><br/><span class="hl-1">        </span><span class="hl-6">devDependencies:</span><span class="hl-1"> [</span><span class="hl-2">&quot;react-test-renderer&quot;</span><span class="hl-1">],</span><br/><span class="hl-1">      },</span><br/><span class="hl-1">    },</span><br/><span class="hl-1">  })</span><br/><span class="hl-1">  .</span><span class="hl-0">run</span><span class="hl-1">();</span>
 </code><button type="button">Copy</button></pre>
 
 <pre><code class="js"><span class="hl-5">import</span><span class="hl-1"> { </span><span class="hl-6">createCheckPackage</span><span class="hl-1"> } </span><span class="hl-5">from</span><span class="hl-1"> </span><span class="hl-2">&quot;check-package-dependencies&quot;</span><span class="hl-1">;</span><br/><br/><span class="hl-5">await</span><span class="hl-1"> </span><span class="hl-0">createCheckPackage</span><span class="hl-1">(</span><span class="hl-4">/* &#39;.&#39; */</span><span class="hl-1">)</span><br/><span class="hl-1">  </span><span class="hl-4">// Call .checkExactVersions(), checkDirectPeerDependencies(), checkDirectDuplicateDependencies()</span><br/><span class="hl-1">  </span><span class="hl-4">// checkResolutionsVersionsMatch() and checkResolutionsHasExplanation()</span><br/><span class="hl-1">  .</span><span class="hl-0">checkRecommended</span><span class="hl-1">({})</span><br/><span class="hl-1">  .</span><span class="hl-0">run</span><span class="hl-1">();</span>
 </code><button type="button">Copy</button></pre>
 
 <p>If you use workspaces:</p>
-<pre><code class="js"><span class="hl-5">import</span><span class="hl-1"> { </span><span class="hl-6">createCheckPackageWithWorkspaces</span><span class="hl-1"> } </span><span class="hl-5">from</span><span class="hl-1"> </span><span class="hl-2">&quot;check-package-dependencies&quot;</span><span class="hl-1">;</span><br/><br/><span class="hl-5">await</span><span class="hl-1"> </span><span class="hl-0">createCheckPackageWithWorkspaces</span><span class="hl-1">()</span><br/><span class="hl-1">  </span><span class="hl-4">// Call .checkExactVersions(), checkDirectPeerDependencies(), checkDirectDuplicateDependencies()</span><br/><span class="hl-1">  </span><span class="hl-4">// checkResolutionsVersionsMatch() and checkResolutionsHasExplanation() for root package and workspaces packages, but also</span><br/><span class="hl-1">  </span><span class="hl-4">// checks your workspaces packages doesn&#39;t have different versions than the ones in devDependencies of root packages.</span><br/><span class="hl-1">  .</span><span class="hl-0">checkRecommended</span><span class="hl-1">({</span><br/><span class="hl-1">    </span><span class="hl-0">isLibrary</span><span class="hl-6">:</span><span class="hl-1"> (</span><span class="hl-6">pkgName</span><span class="hl-1">) </span><span class="hl-3">=&gt;</span><span class="hl-1"> !</span><span class="hl-6">pkgName</span><span class="hl-1">.</span><span class="hl-0">endsWith</span><span class="hl-1">(</span><span class="hl-2">&quot;-example&quot;</span><span class="hl-1">),</span><br/><span class="hl-1">    </span><span class="hl-6">peerDependenciesOnlyWarnsFor:</span><span class="hl-1"> [],</span><br/><span class="hl-1">    </span><span class="hl-6">directDuplicateDependenciesOnlyWarnsFor:</span><span class="hl-1"> [</span><span class="hl-2">&quot;semver&quot;</span><span class="hl-1">, </span><span class="hl-2">&quot;github-username&quot;</span><span class="hl-1">],</span><br/><span class="hl-1">  })</span><br/><span class="hl-1">  .</span><span class="hl-0">forRoot</span><span class="hl-1">((</span><span class="hl-6">rootPackageCheck</span><span class="hl-1">) </span><span class="hl-3">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">    </span><span class="hl-4">/* rootPackageCheck has the same API presented for single package */</span><br/><span class="hl-1">  })</span><br/><span class="hl-1">  .</span><span class="hl-0">for</span><span class="hl-1">(</span><span class="hl-2">&quot;packageName&quot;</span><span class="hl-1">, (</span><span class="hl-6">pkgCheck</span><span class="hl-1">) </span><span class="hl-3">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">    </span><span class="hl-4">/* pkgCheck has the same API presented for single package */</span><br/><span class="hl-1">  })</span><br/><span class="hl-1">  .</span><span class="hl-0">run</span><span class="hl-1">();</span>
+<pre><code class="js"><span class="hl-5">import</span><span class="hl-1"> { </span><span class="hl-6">createCheckPackageWithWorkspaces</span><span class="hl-1"> } </span><span class="hl-5">from</span><span class="hl-1"> </span><span class="hl-2">&quot;check-package-dependencies&quot;</span><span class="hl-1">;</span><br/><br/><span class="hl-5">await</span><span class="hl-1"> </span><span class="hl-0">createCheckPackageWithWorkspaces</span><span class="hl-1">({</span><br/><span class="hl-1">  </span><span class="hl-4">// Applied to the workspace members, the root is never a library.</span><br/><span class="hl-1">  </span><span class="hl-4">// Defaults to &quot;auto&quot;, so private members are not treated as libraries.</span><br/><span class="hl-1">  </span><span class="hl-6">library:</span><span class="hl-1"> [</span><span class="hl-2">&quot;*&quot;</span><span class="hl-1">, </span><span class="hl-2">&quot;!*-example&quot;</span><span class="hl-1">],</span><br/><span class="hl-1">})</span><br/><span class="hl-1">  </span><span class="hl-4">// Call .checkExactVersions(), checkDirectPeerDependencies(), checkDirectDuplicateDependencies()</span><br/><span class="hl-1">  </span><span class="hl-4">// checkResolutionsVersionsMatch() and checkResolutionsHasExplanation() for root package and workspaces packages, but also</span><br/><span class="hl-1">  </span><span class="hl-4">// checks your workspaces packages doesn&#39;t have different versions than the ones in devDependencies of root packages.</span><br/><span class="hl-1">  .</span><span class="hl-0">checkRecommended</span><span class="hl-1">({</span><br/><span class="hl-1">    </span><span class="hl-6">peerDependenciesOnlyWarnsFor:</span><span class="hl-1"> [],</span><br/><span class="hl-1">    </span><span class="hl-6">directDuplicateDependenciesOnlyWarnsFor:</span><span class="hl-1"> [</span><span class="hl-2">&quot;semver&quot;</span><span class="hl-1">, </span><span class="hl-2">&quot;github-username&quot;</span><span class="hl-1">],</span><br/><span class="hl-1">  })</span><br/><span class="hl-1">  .</span><span class="hl-0">forRoot</span><span class="hl-1">((</span><span class="hl-6">rootPackageCheck</span><span class="hl-1">) </span><span class="hl-3">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">    </span><span class="hl-4">/* rootPackageCheck has the same API presented for single package */</span><br/><span class="hl-1">  })</span><br/><span class="hl-1">  .</span><span class="hl-0">for</span><span class="hl-1">(</span><span class="hl-2">&quot;packageName&quot;</span><span class="hl-1">, (</span><span class="hl-6">pkgCheck</span><span class="hl-1">) </span><span class="hl-3">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">    </span><span class="hl-4">/* pkgCheck has the same API presented for single package */</span><br/><span class="hl-1">  })</span><br/><span class="hl-1">  .</span><span class="hl-0">run</span><span class="hl-1">();</span>
 </code><button type="button">Copy</button></pre>
 
 </div></div>
@@ -285,6 +329,7 @@
 <div class="tsd-accordion-details"><a href="#install"><span>Install</span></a><a href="#what-is-it-for-"><span>What is it for ?</span></a><a href="#try-it-with-cli"><span>Try it with cli</span></a><a href="#eslint-plugin"><span>ES<wbr/>Lint plugin</span></a>
 <ul>
 <li><a href="#settings"><span>Settings</span></a></li>
+<li><a href="#migrating-from-v11"><span>Migrating from v11</span></a></li>
 <li><a href="#rules"><span>Rules</span></a></li>
 <li><a href="#_"><span></span></a></li></ul><a href="#uses-cases"><span>Uses <wbr/>Cases</span></a><a href="#how-to-use"><span>How to use</span></a></div></details></div>
 <div class="site-menu">
