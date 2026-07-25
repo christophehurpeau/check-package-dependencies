@@ -1,0 +1,10 @@
+{
+  "name": "fixture-workspace-member-a",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@eslint-community/eslint-utils": "^4.9.1",
+    "eslint-plugin-es-x": "^7.8.0"
+  }
+}

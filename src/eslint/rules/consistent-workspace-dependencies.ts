@@ -51,7 +51,7 @@ const checkDuplicateInAllDependencies = ({
       ({ dependency, errorMessage, ...otherDetails }) => {
         // hide dependency from error details as it is the dependency of the sub package and we are in the context of the root package
         const message = `${subPkg.name}: ${errorMessage}`;
-        const reportKey = `${message}: ${otherDetails.errorDetails ?? ""}`;
+        const reportKey = `${message}: ${String(otherDetails.errorDetails)}`;
         if (alreadyReported.has(reportKey)) return;
         alreadyReported.add(reportKey);
         reportError({

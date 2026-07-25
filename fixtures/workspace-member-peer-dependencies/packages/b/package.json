@@ -1,0 +1,12 @@
+{
+  "name": "fixture-workspace-member-b",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "eslint-plugin-es-x": "^7.8.0"
+  },
+  "peerDependencies": {
+    "eslint": ">=8"
+  }
+}

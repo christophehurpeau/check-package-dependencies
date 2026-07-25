@@ -1108,7 +1108,7 @@ const checkDuplicateInAllDependencies = ({
     checkDuplicateDependencies(
       ({ dependency, errorMessage, ...otherDetails }) => {
         const message = `${subPkg.name}: ${errorMessage}`;
-        const reportKey = `${message}: ${otherDetails.errorDetails ?? ""}`;
+        const reportKey = `${message}: ${String(otherDetails.errorDetails)}`;
         if (alreadyReported.has(reportKey)) return;
         alreadyReported.add(reportKey);
         reportError({
