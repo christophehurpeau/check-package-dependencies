@@ -4,20 +4,20 @@
 
 `check-package-dependencies` is a Node.js library that validates `package.json` files for dependency issues. It provides:
 
-- A legacy **programmatic JavaScript API** for running checks as part of a script — `createCheckPackage` for a single package, or `createCheckPackageWithWorkspaces` for a monorepo root (Yarn/npm workspaces)
+- A legacy **programmatic JavaScript API** for running checks as part of a script — `createCheckPackage` for a single package, or `createCheckPackageWithWorkspaces` for a monorepo root (pnpm workspaces)
 - An **ESLint plugin** (`eslint-plugin-check-package-dependencies`) with rules for inline linting
 - A **CLI** (`npx check-package-dependencies`) for quick validation
 
 ## Commands
 
 ```sh
-yarn build          # compile with rollup + tsc
-yarn test           # run all tests (uses Node built-in test runner, TZ=UTC)
-yarn test:coverage  # coverage via c8
-yarn lint           # format + tsc + eslint
-yarn checks         # run the repo's own check-package script (scripts/check-package.js)
-yarn generate:rules-docs        # update the generated parts of the ESLint rules documentation
-yarn generate:rules-docs:check  # fail if they are out of date (also covered by a test)
+pnpm build          # compile with rollup + tsc
+pnpm test           # run all tests (uses Node built-in test runner, TZ=UTC)
+pnpm test:coverage  # coverage via c8
+pnpm lint           # format + tsc + eslint
+pnpm checks         # run the repo's own check-package script (scripts/check-package.js)
+pnpm generate:rules-docs        # update the generated parts of the ESLint rules documentation
+pnpm generate:rules-docs:check  # fail if they are out of date (also covered by a test)
 ```
 
 ## Project structure
@@ -67,7 +67,7 @@ await createCheckPackage()
 
 `createCheckPackage` accepts the `library` option (see below), which also takes a `(pkg) => boolean` predicate here.
 
-For Yarn/npm workspaces, `createCheckPackageWithWorkspaces()` (see `check-package-with-workspaces.ts`) returns a `CheckPackageWithWorkspacesApi` that exposes only `checkRecommended`, `forRoot`, `forEach`, and `for(id, …)`. Its `library` option applies to the workspace members, the root always being checked as a non-library. Its `checkRecommended` runs the root `checkNoDependencies`, the root `checkRecommended`, then iterates each workspace package running their `checkRecommended` plus monorepo-wide duplicate-dependency and subpackage-peer-dependency checks. The corresponding ESLint rules are `no-root-workspace-dependencies` and `consistent-workspace-dependencies`.
+For workspaces, `createCheckPackageWithWorkspaces()` (see `check-package-with-workspaces.ts`) returns a `CheckPackageWithWorkspacesApi` that exposes only `checkRecommended`, `forRoot`, `forEach`, and `for(id, …)`. Its `library` option applies to the workspace members, the root always being checked as a non-library. Its `checkRecommended` runs the root `checkNoDependencies`, the root `checkRecommended`, then iterates each workspace package running their `checkRecommended` plus monorepo-wide duplicate-dependency and subpackage-peer-dependency checks. The corresponding ESLint rules are `no-root-workspace-dependencies` and `consistent-workspace-dependencies`.
 
 ### ESLint plugin
 
