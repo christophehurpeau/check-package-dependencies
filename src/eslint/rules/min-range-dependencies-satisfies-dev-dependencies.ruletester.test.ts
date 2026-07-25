@@ -5,6 +5,7 @@ import { minRangeDependenciesSatisfiesDevDependenciesRule } from "./min-range-de
 const tester = new RuleTester({
   plugins: checkPackagePlugin.configs.recommended.plugins,
   language: "check-package-dependencies/package-json",
+  settings: { "check-package-dependencies": { library: true } },
 });
 
 tester.run(
@@ -74,6 +75,35 @@ tester.run(
           2,
         )}\n`,
         filename: "/tmp/package.json",
+        errors: [
+          {
+            message:
+              /Invalid "\^1\.0\.0" in "dependencies".*should satisfies "\^2\.0\.0"/,
+          },
+        ],
+        output: `${JSON.stringify(
+          {
+            name: "test",
+            dependencies: { foo: "^2.0.0" },
+            devDependencies: { foo: "^2.0.0" },
+          },
+          null,
+          2,
+        )}\n`,
+      },
+      {
+        // a package that is not a library gets the same report
+        code: `${JSON.stringify(
+          {
+            name: "test",
+            dependencies: { foo: "^1.0.0" },
+            devDependencies: { foo: "^2.0.0" },
+          },
+          null,
+          2,
+        )}\n`,
+        filename: "/tmp/package.json",
+        settings: { "check-package-dependencies": { library: false } },
         errors: [
           {
             message:

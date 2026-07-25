@@ -40,7 +40,7 @@ export const requireDirectPeerDependenciesRule =
       checkPackage: ({
         pkg,
         reportError,
-        settings,
+        isLibrary,
         ruleOptions,
         getDependencyPackageJson,
         onlyWarnsForMappingCheck: invalidOnlyWarnsForCheck,
@@ -53,7 +53,7 @@ export const requireDirectPeerDependenciesRule =
 
         checkDirectPeerDependencies(
           reportError,
-          settings.isLibrary ?? false,
+          isLibrary,
           pkg,
           getDependencyPackageJson,
           missingOnlyWarnsForCheck,

@@ -6,14 +6,9 @@ export default [
   {
     ignores: ["vite.config.ts", "fixtures/**/package.json"],
   },
-  checkPackagePlugin.configs["recommended-library"],
+  checkPackagePlugin.configs.recommended,
   {
     files: ["package.json"],
-    settings: {
-      "check-package-dependencies": {
-        isLibrary: true,
-      },
-    },
     rules: {
       "check-package-dependencies/satisfies-versions": [
         "error",

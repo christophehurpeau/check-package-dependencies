@@ -7,6 +7,11 @@ import type {
   ReportErrorDetails,
 } from "../../reporting/ReportError.ts";
 import type { GetDependencyPackageJson } from "../../utils/createGetDependencyPackageJson.ts";
+import type { LibrarySetting } from "../../utils/library.ts";
+import {
+  legacyIsLibrarySettingMessage,
+  resolveIsLibrary,
+} from "../../utils/library.ts";
 import { getEntries } from "../../utils/object.ts";
 import type {
   DependencyValue,
@@ -42,8 +47,11 @@ export const onlyWarnsForMappingSchema = {
 // interface CheckPackageDependenciesLanguageOptions {}
 
 interface CheckPackageDependenciesSettings {
-  isLibrary?: boolean;
+  library?: LibrarySetting;
 }
+
+/** the package.json ast nodes the legacy "isLibrary" setting was already reported for */
+const legacySettingReportedFor = new WeakSet<object>();
 
 const documentationUrlBase =
   "https://github.com/christophehurpeau/check-package-dependencies/blob/main/documentation/rules";
@@ -62,6 +70,8 @@ type CheckFn<RuleOptions, Node, T = Record<never, never>> = (
     // languageOptions: CheckPackageDependenciesLanguageOptions;
     getDependencyPackageJson: GetDependencyPackageJson;
     settings: CheckPackageDependenciesSettings;
+    /** the `library` setting resolved for the linted package.json */
+    isLibrary: boolean;
     ruleOptions: RuleOptions;
     onlyWarnsForCheck: OnlyWarnsForCheck;
     onlyWarnsForMappingCheck: OnlyWarnsForMappingCheck;
@@ -92,6 +102,8 @@ export function createPackageRule<
         loadWorkspacePackageJsons: () => ParsedPackageJson[];
         getWorkspaceMemberNames: () => Set<string> | undefined;
         getWorkspaceRootPackageJson: () => ParsedPackageJson | undefined;
+        /** resolves the `library` setting for another package, eg a workspace member */
+        isLibraryFor: (pkg: ParsedPackageJson) => boolean;
         checkOnlyWarnsForArray: (onlyWarnsForCheck: OnlyWarnsForCheck) => void;
         checkOnlyWarnsForMapping: (
           onlyWarnsForMappingCheck: OnlyWarnsForMappingCheck,
@@ -125,6 +137,9 @@ export function createPackageRule<
         const options = (context.options[0] ?? {}) as RuleOptions;
         const settings = (context.settings["check-package-dependencies"] ??
           {}) as CheckPackageDependenciesSettings;
+
+        const isLibraryFor = (pkg: ParsedPackageJson): boolean =>
+          resolveIsLibrary(settings.library, pkg);
 
         // Memoized across the whole file (Package + every DependencyValue visit).
         const getWorkspaceMemberNames = (() => {
@@ -280,6 +295,23 @@ export function createPackageRule<
               });
             }
 
+            // reported by the first rule visiting this package.json, so the renamed
+            // setting is not silently ignored without repeating the message for
+            // every enabled rule
+            if (
+              "isLibrary" in settings &&
+              !legacySettingReportedFor.has(node as object)
+            ) {
+              legacySettingReportedFor.add(node as object);
+              context.report({
+                message: legacyIsLibrarySettingMessage,
+                loc: {
+                  start: { line: 1, column: 1 },
+                  end: { line: 1, column: 1 },
+                },
+              });
+            }
+
             const { parsedPkgJson, getDependencyPackageJson } =
               node as PackageJsonAst;
 
@@ -351,6 +383,8 @@ export function createPackageRule<
                     getWorkspaceRootPackageJson(parsedPkgJson),
                   // languageOptions,
                   settings,
+                  isLibrary: isLibraryFor(parsedPkgJson),
+                  isLibraryFor,
                   ruleOptions: options,
                   onlyWarnsForCheck,
                   onlyWarnsForMappingCheck,
@@ -407,6 +441,7 @@ export function createPackageRule<
                       getWorkspaceMemberNames(parsedPkgJson),
                     // languageOptions,
                     settings,
+                    isLibrary: isLibraryFor(parsedPkgJson),
                     ruleOptions: options,
                     onlyWarnsForCheck,
                     onlyWarnsForMappingCheck,

@@ -1,14 +1,14 @@
 # Require peer dependencies of direct dependencies to be present and satisfied
 
-💼 This rule is enabled in the ✅ `recommended` and 📚 `recommended-library` configs.
+💼 This rule is enabled in the ✅ `recommended` config.
 
 <!-- end auto-generated rule header -->
 
 A peer dependency is not installed by the package declaring it: it has to be provided by the package depending on it. This rule reads the `peerDependencies` of each of your direct dependencies and reports the ones missing from your `package.json`, or declared with a version that does not satisfy the required range.
 
-Where a peer dependency is allowed to be declared depends on the `isLibrary` setting and on where the dependency itself is declared:
+Where a peer dependency is allowed to be declared depends on the `library` setting and on where the dependency itself is declared:
 
-| Dependency declared in | Application (`isLibrary: false`)  | Library (`isLibrary: true`)                                |
+| Dependency declared in | `library: false`                  | `library: true`                                            |
 | :--------------------- | :-------------------------------- | :--------------------------------------------------------- |
 | `devDependencies`      | `devDependencies`, `dependencies` | `devDependencies`, `dependencies`                          |
 | `dependencies`         | `devDependencies`, `dependencies` | `dependencies`, `peerDependencies`                         |
@@ -18,7 +18,7 @@ Dev-only peer dependencies are an exception: a peer dependency whose name matche
 
 Peer dependencies marked `optional` in `peerDependenciesMeta` are ignored, and so are the ones already covered by a matching entry of your own `peerDependencies`.
 
-For an application, a missing peer dependency that is already provided by another direct dependency with a compatible range is not reported. Set the `REPORT_PROVIDED_PEER_DEPENDENCIES` environment variable to `warn` or `1` to report them anyway.
+When `library` is false, a missing peer dependency that is already provided by another direct dependency with a compatible range is not reported. Set the `REPORT_PROVIDED_PEER_DEPENDENCIES` environment variable to `warn` or `1` to report them anyway.
 
 ## Fail
 

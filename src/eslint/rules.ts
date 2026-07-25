@@ -4,10 +4,10 @@ import { minRangePeerDependenciesSatisfiesDependenciesRule } from "./rules/min-r
 import { noDirectDuplicateDependenciesRule } from "./rules/no-direct-duplicate-dependencies.ts";
 import { noRootWorkspaceDependenciesRule } from "./rules/no-root-workspace-dependencies.ts";
 import { requireDirectPeerDependenciesRule } from "./rules/require-direct-peer-dependencies.ts";
-import { requireExactVersionsRule } from "./rules/require-exact-versions.ts";
 import { requireIdenticalVersionsAsDependencyRule } from "./rules/require-identical-versions-as-dependency.ts";
 import { requireIdenticalVersionsAsDevDependencyOfDependencyRule } from "./rules/require-identical-versions-as-dev-dependency-of-dependency.ts";
 import { requireIdenticalVersionsRule } from "./rules/require-identical-versions.ts";
+import { requirePinnedVersionsRule } from "./rules/require-pinned-versions.ts";
 import { requireResolutionsExplanationRule } from "./rules/require-resolutions-explanation.ts";
 import { requireWorkspaceProtocolRule } from "./rules/require-workspace-protocol.ts";
 import { resolutionsVersionsMatchRule } from "./rules/resolutions-versions-match.ts";
@@ -20,7 +20,7 @@ import { satisfiesVersionsRule } from "./rules/satisfies-versions.ts";
 const rules = {
   ...requireDirectPeerDependenciesRule,
   ...noDirectDuplicateDependenciesRule,
-  ...requireExactVersionsRule,
+  ...requirePinnedVersionsRule,
   ...requireIdenticalVersionsRule,
   ...requireIdenticalVersionsAsDependencyRule,
   ...requireIdenticalVersionsAsDevDependencyOfDependencyRule,

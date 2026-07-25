@@ -22,13 +22,27 @@ const duplicatesSearchInByDependencyType: Partial<
   peerDependencies: ["peerDependencies"],
 };
 
-const checkDuplicateInAllDependencies = (
-  reportError: ReportError,
-  basePkg: ParsedPackageJson,
-  subPkg: ParsedPackageJson,
-  isPkgLibrary: boolean,
-  onlyWarnsForCheck: OnlyWarnsForCheck,
-): void => {
+interface CheckDuplicateInAllDependenciesParams {
+  reportError: ReportError;
+  basePkg: ParsedPackageJson;
+  subPkg: ParsedPackageJson;
+  isPkgLibrary: boolean;
+  onlyWarnsForCheck: OnlyWarnsForCheck;
+  /**
+   * Errors about the subpackage alone do not depend on the package it is compared
+   * to, so they would otherwise be reported once per comparison.
+   */
+  alreadyReported: Set<string>;
+}
+
+const checkDuplicateInAllDependencies = ({
+  reportError,
+  basePkg,
+  subPkg,
+  isPkgLibrary,
+  onlyWarnsForCheck,
+  alreadyReported,
+}: CheckDuplicateInAllDependenciesParams): void => {
   (["devDependencies", "dependencies"] as const).forEach((depType) => {
     const dependencies = basePkg[depType];
     if (!dependencies || !duplicatesSearchInByDependencyType[depType]) return;
@@ -36,9 +50,13 @@ const checkDuplicateInAllDependencies = (
     checkDuplicateDependencies(
       ({ dependency, errorMessage, ...otherDetails }) => {
         // hide dependency from error details as it is the dependency of the sub package and we are in the context of the root package
+        const message = `${subPkg.name}: ${errorMessage}`;
+        const reportKey = `${message}: ${otherDetails.errorDetails ?? ""}`;
+        if (alreadyReported.has(reportKey)) return;
+        alreadyReported.add(reportKey);
         reportError({
           ...otherDetails,
-          errorMessage: `${subPkg.name}: ${errorMessage}`,
+          errorMessage: message,
         });
       },
       subPkg,
@@ -67,12 +85,12 @@ export const consistentWorkspaceDependenciesRule = createPackageRule(
     },
     checkPackage: ({
       pkg,
-      settings,
       reportError,
       loadWorkspacePackageJsons,
       getDependencyPackageJson,
       getWorkspaceRootPackageJson,
       onlyWarnsForMappingCheck,
+      isLibraryFor,
     }) => {
       if (pkg.workspacesPackages) {
         // running on the monorepo root package.json: duplicate dependencies only need
@@ -80,30 +98,36 @@ export const consistentWorkspaceDependenciesRule = createPackageRule(
         const workspacePackageJsons = loadWorkspacePackageJsons();
 
         const previousCheckedWorkspaces: ParsedPackageJson[] = [];
+        const alreadyReported = new Set<string>();
 
         for (const subPkg of workspacePackageJsons) {
           const onlyWarnsForCheck = onlyWarnsForMappingCheck.createFor(
             subPkg.name,
           );
+          // the subpackage is checked here, not the linted root, so the "library"
+          // setting is resolved against the subpackage itself.
+          const isSubPkgLibrary = isLibraryFor(subPkg);
 
           // root
-          checkDuplicateInAllDependencies(
+          checkDuplicateInAllDependencies({
             reportError,
-            pkg,
+            basePkg: pkg,
             subPkg,
-            settings.isLibrary ?? false,
+            isPkgLibrary: isSubPkgLibrary,
             onlyWarnsForCheck,
-          );
+            alreadyReported,
+          });
 
           // previous packages
           previousCheckedWorkspaces.forEach((previousSubPkg) => {
-            checkDuplicateInAllDependencies(
+            checkDuplicateInAllDependencies({
               reportError,
-              previousSubPkg,
+              basePkg: previousSubPkg,
               subPkg,
-              settings.isLibrary ?? false,
+              isPkgLibrary: isSubPkgLibrary,
               onlyWarnsForCheck,
-            );
+              alreadyReported,
+            });
           });
 
           // add to previous checked workspaces

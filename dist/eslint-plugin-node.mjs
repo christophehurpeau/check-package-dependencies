@@ -645,6 +645,41 @@ const isPeerDependencyDeclaredInPackage = (pkg, peerDepName) => subpackageDeclar
   (depType) => pkg[depType]?.[peerDepName]
 );
 
+const renamedFromIsLibrary = 'was renamed to "library", which also accepts "auto" (the default) and a list of package name patterns such as ["@scope/*", "!@scope/app-*"]';
+const legacyIsLibrarySettingMessage = `The "isLibrary" setting ${renamedFromIsLibrary}`;
+function detectIsLibrary(pkg) {
+  if (pkg.workspacesPackages) return false;
+  return pkg.value.private !== true;
+}
+const parsePackageNamePattern = (pattern) => {
+  const isLibrary = !pattern.startsWith("!");
+  const namePattern = isLibrary ? pattern : pattern.slice(1);
+  if (!namePattern.includes("*")) {
+    return { isLibrary, matches: (packageName) => packageName === namePattern };
+  }
+  const regExp = new RegExp(
+    `^${namePattern.split("*").map((part) => part.replaceAll(/[$()*+.?[\\\]^{|}]/g, "\\$&")).join(".*")}$`
+  );
+  return { isLibrary, matches: (packageName) => regExp.test(packageName) };
+};
+const matchesPackageNamePatterns = (patterns, packageName) => {
+  let isLibrary = false;
+  for (const pattern of patterns) {
+    const parsedPattern = parsePackageNamePattern(pattern);
+    if (parsedPattern.matches(packageName)) {
+      isLibrary = parsedPattern.isLibrary;
+    }
+  }
+  return isLibrary;
+};
+function resolveIsLibrary(setting, pkg) {
+  if (setting === void 0 || setting === "auto") return detectIsLibrary(pkg);
+  if (Array.isArray(setting)) {
+    return matchesPackageNamePatterns(setting, pkg.name);
+  }
+  return setting;
+}
+
 const createOnlyWarnsForArrayCheck = (configName, onlyWarnsFor = []) => {
   const notWarnedFor = new Set(onlyWarnsFor);
   return {
@@ -771,6 +806,7 @@ const onlyWarnsForMappingSchema = {
     "^.*$": onlyWarnsForArraySchema
   }
 };
+const legacySettingReportedFor = /* @__PURE__ */ new WeakSet();
 const documentationUrlBase = "https://github.com/christophehurpeau/check-package-dependencies/blob/main/documentation/rules";
 function createPackageRule(ruleName, schema, {
   docs,
@@ -795,6 +831,7 @@ function createPackageRule(ruleName, schema, {
       create(context) {
         const options = context.options[0] ?? {};
         const settings = context.settings["check-package-dependencies"] ?? {};
+        const isLibraryFor = (pkg) => resolveIsLibrary(settings.library, pkg);
         const getWorkspaceMemberNames = /* @__PURE__ */ (() => {
           let cached;
           let computed = false;
@@ -889,6 +926,16 @@ function createPackageRule(ruleName, schema, {
                 }
               });
             }
+            if ("isLibrary" in settings && !legacySettingReportedFor.has(node)) {
+              legacySettingReportedFor.add(node);
+              context.report({
+                message: legacyIsLibrarySettingMessage,
+                loc: {
+                  start: { line: 1, column: 1 },
+                  end: { line: 1, column: 1 }
+                }
+              });
+            }
             const { parsedPkgJson, getDependencyPackageJson } = node;
             const loadWorkspacePackageJsons = () => {
               const workspacePackagesPaths = [];
@@ -946,6 +993,8 @@ function createPackageRule(ruleName, schema, {
                   getWorkspaceRootPackageJson: () => getWorkspaceRootPackageJson(parsedPkgJson),
                   // languageOptions,
                   settings,
+                  isLibrary: isLibraryFor(parsedPkgJson),
+                  isLibraryFor,
                   ruleOptions: options,
                   onlyWarnsForCheck,
                   onlyWarnsForMappingCheck,
@@ -994,6 +1043,7 @@ function createPackageRule(ruleName, schema, {
                 getWorkspaceMemberNames: () => getWorkspaceMemberNames(parsedPkgJson),
                 // languageOptions,
                 settings,
+                isLibrary: isLibraryFor(parsedPkgJson),
                 ruleOptions: options,
                 onlyWarnsForCheck,
                 onlyWarnsForMappingCheck,
@@ -1044,15 +1094,26 @@ const duplicatesSearchInByDependencyType$1 = {
   dependencies: ["devDependencies", "dependencies"],
   peerDependencies: ["peerDependencies"]
 };
-const checkDuplicateInAllDependencies = (reportError, basePkg, subPkg, isPkgLibrary, onlyWarnsForCheck) => {
+const checkDuplicateInAllDependencies = ({
+  reportError,
+  basePkg,
+  subPkg,
+  isPkgLibrary,
+  onlyWarnsForCheck,
+  alreadyReported
+}) => {
   ["devDependencies", "dependencies"].forEach((depType) => {
     const dependencies = basePkg[depType];
     if (!dependencies || !duplicatesSearchInByDependencyType$1[depType]) return;
     checkDuplicateDependencies(
       ({ dependency, errorMessage, ...otherDetails }) => {
+        const message = `${subPkg.name}: ${errorMessage}`;
+        const reportKey = `${message}: ${otherDetails.errorDetails ?? ""}`;
+        if (alreadyReported.has(reportKey)) return;
+        alreadyReported.add(reportKey);
         reportError({
           ...otherDetails,
-          errorMessage: `${subPkg.name}: ${errorMessage}`
+          errorMessage: message
         });
       },
       subPkg,
@@ -1078,35 +1139,39 @@ const consistentWorkspaceDependenciesRule = createPackageRule(
     },
     checkPackage: ({
       pkg,
-      settings,
       reportError,
       loadWorkspacePackageJsons,
       getDependencyPackageJson,
       getWorkspaceRootPackageJson,
-      onlyWarnsForMappingCheck
+      onlyWarnsForMappingCheck,
+      isLibraryFor
     }) => {
       if (pkg.workspacesPackages) {
         const workspacePackageJsons = loadWorkspacePackageJsons();
         const previousCheckedWorkspaces = [];
+        const alreadyReported = /* @__PURE__ */ new Set();
         for (const subPkg of workspacePackageJsons) {
           const onlyWarnsForCheck = onlyWarnsForMappingCheck.createFor(
             subPkg.name
           );
-          checkDuplicateInAllDependencies(
+          const isSubPkgLibrary = isLibraryFor(subPkg);
+          checkDuplicateInAllDependencies({
             reportError,
-            pkg,
+            basePkg: pkg,
             subPkg,
-            settings.isLibrary ?? false,
-            onlyWarnsForCheck
-          );
+            isPkgLibrary: isSubPkgLibrary,
+            onlyWarnsForCheck,
+            alreadyReported
+          });
           previousCheckedWorkspaces.forEach((previousSubPkg) => {
-            checkDuplicateInAllDependencies(
+            checkDuplicateInAllDependencies({
               reportError,
-              previousSubPkg,
+              basePkg: previousSubPkg,
               subPkg,
-              settings.isLibrary ?? false,
-              onlyWarnsForCheck
-            );
+              isPkgLibrary: isSubPkgLibrary,
+              onlyWarnsForCheck,
+              alreadyReported
+            });
           });
           previousCheckedWorkspaces.push(subPkg);
         }
@@ -1188,7 +1253,7 @@ const minRangeDependenciesSatisfiesDevDependenciesRule = createPackageRule(
   {
     docs: {
       description: "Enforce the minimum of a `dependencies` range to satisfy the version in `devDependencies`",
-      recommended: false
+      recommended: true
     },
     fixable: true,
     checkDependencyValue: ({ node, pkg, reportError }) => {
@@ -1214,7 +1279,7 @@ const minRangePeerDependenciesSatisfiesDependenciesRule = createPackageRule(
   {
     docs: {
       description: "Enforce the minimum of a `peerDependencies` range to satisfy the version in `dependencies`",
-      recommended: false
+      recommended: true
     },
     fixable: true,
     checkDependencyValue: ({ node, pkg, reportError }) => {
@@ -1252,7 +1317,7 @@ const noDirectDuplicateDependenciesRule = createPackageRule(
       node,
       pkg,
       reportError,
-      settings,
+      isLibrary,
       ruleOptions,
       getDependencyPackageJson,
       onlyWarnsForMappingCheck
@@ -1268,7 +1333,7 @@ const noDirectDuplicateDependenciesRule = createPackageRule(
       checkDuplicateDependencies(
         reportError,
         pkg,
-        settings.isLibrary ?? false,
+        isLibrary,
         "dependencies",
         searchIn,
         depPkg,
@@ -1326,7 +1391,7 @@ const requireDirectPeerDependenciesRule = createPackageRule(
     checkPackage: ({
       pkg,
       reportError,
-      settings,
+      isLibrary,
       ruleOptions,
       getDependencyPackageJson,
       onlyWarnsForMappingCheck: invalidOnlyWarnsForCheck,
@@ -1338,7 +1403,7 @@ const requireDirectPeerDependenciesRule = createPackageRule(
       );
       checkDirectPeerDependencies(
         reportError,
-        settings.isLibrary ?? false,
+        isLibrary,
         pkg,
         getDependencyPackageJson,
         missingOnlyWarnsForCheck,
@@ -1346,116 +1411,6 @@ const requireDirectPeerDependenciesRule = createPackageRule(
         ruleOptions.allowedPeerInDevDependencies
       );
       checkOnlyWarnsForMapping(missingOnlyWarnsForCheck);
-    }
-  }
-);
-
-const isVersionRange = (version) => version.startsWith("^") || version.startsWith("~") || version.startsWith(">") || version.startsWith("<");
-function checkExactVersion(reportError, dependencyValue, {
-  getDependencyPackageJson,
-  onlyWarnsForCheck,
-  internalExactVersionsIgnore,
-  tryToAutoFix = false
-}) {
-  const dependencyName = dependencyValue.name;
-  const version = getRealVersion(dependencyValue.value);
-  if (isVersionRange(version)) {
-    if (internalExactVersionsIgnore?.includes(dependencyName)) {
-      return;
-    }
-    const shouldOnlyWarn = onlyWarnsForCheck.shouldWarnsFor(dependencyName);
-    if (!shouldOnlyWarn && getDependencyPackageJson) {
-      let resolvedDep;
-      try {
-        [resolvedDep] = getDependencyPackageJson(dependencyName);
-      } catch {
-        resolvedDep = null;
-      }
-      if (!resolvedDep?.version) {
-        reportError({
-          errorMessage: "Unexpected range value",
-          errorDetails: `expecting "${version}" to be exact${tryToAutoFix ? `, autofix failed to resolve "${dependencyName}"` : ""}`,
-          errorTarget: "dependencyValue",
-          dependency: dependencyValue,
-          onlyWarns: shouldOnlyWarn
-        });
-      } else if (!semver.satisfies(resolvedDep.version, version, {
-        includePrerelease: true
-      })) {
-        reportError({
-          errorMessage: "Unexpected range value",
-          errorDetails: `expecting "${version}" to be exact${tryToAutoFix ? `, autofix failed as resolved version "${resolvedDep.version}" doesn't satisfy "${version}"` : ""}`,
-          dependency: dependencyValue,
-          errorTarget: "dependencyValue",
-          onlyWarns: shouldOnlyWarn
-        });
-      } else if (tryToAutoFix) {
-        dependencyValue.changeValue(resolvedDep.version);
-      } else {
-        reportError({
-          errorMessage: "Unexpected range value",
-          errorDetails: `expecting "${version}" to be exact "${resolvedDep.version}"`,
-          dependency: dependencyValue,
-          errorTarget: "dependencyValue",
-          onlyWarns: shouldOnlyWarn,
-          fixTo: resolvedDep.version
-        });
-      }
-    } else {
-      let exactVersion = version.slice(version[1] === "=" ? 2 : 1);
-      if (exactVersion.split(".").length < 3) {
-        if (exactVersion.split(".").length === 1) {
-          exactVersion = `${exactVersion}.0.0`;
-        } else {
-          exactVersion = `${exactVersion}.0`;
-        }
-      }
-      reportError({
-        errorMessage: "Unexpected range value",
-        errorDetails: `expecting "${version}" to be exact "${exactVersion}"`,
-        errorTarget: "dependencyValue",
-        dependency: dependencyValue,
-        onlyWarns: shouldOnlyWarn
-      });
-    }
-  }
-}
-
-const requireExactVersionsRule = createPackageRule(
-  "require-exact-versions",
-  {
-    type: "object",
-    properties: {
-      dependencies: { type: "boolean", default: true },
-      devDependencies: { type: "boolean", default: true },
-      resolutions: { type: "boolean", default: true },
-      onlyWarnsFor: onlyWarnsForArraySchema
-    },
-    additionalProperties: false
-  },
-  {
-    docs: {
-      description: "Require exact versions in `dependencies`, `devDependencies` and `resolutions`",
-      recommended: true
-    },
-    fixable: true,
-    checkDependencyValue: ({
-      node,
-      reportError,
-      ruleOptions,
-      getDependencyPackageJson,
-      onlyWarnsForCheck
-    }) => {
-      if ([
-        ruleOptions.dependencies && "dependencies",
-        ruleOptions.devDependencies && "devDependencies",
-        ruleOptions.resolutions && "resolutions"
-      ].filter(Boolean).includes(node.fieldName)) {
-        checkExactVersion(reportError, node, {
-          getDependencyPackageJson,
-          onlyWarnsForCheck
-        });
-      }
     }
   }
 );
@@ -1717,6 +1672,114 @@ const requireIdenticalVersionsRule = createPackageRule(
             onlyWarnsForCheck
           });
         }
+      });
+    }
+  }
+);
+
+const isVersionRange = (version) => version.startsWith("^") || version.startsWith("~") || version.startsWith(">") || version.startsWith("<");
+function checkExactVersion(reportError, dependencyValue, {
+  getDependencyPackageJson,
+  onlyWarnsForCheck,
+  internalExactVersionsIgnore,
+  tryToAutoFix = false
+}) {
+  const dependencyName = dependencyValue.name;
+  const version = getRealVersion(dependencyValue.value);
+  if (isVersionRange(version)) {
+    if (internalExactVersionsIgnore?.includes(dependencyName)) {
+      return;
+    }
+    const shouldOnlyWarn = onlyWarnsForCheck.shouldWarnsFor(dependencyName);
+    if (!shouldOnlyWarn && getDependencyPackageJson) {
+      let resolvedDep;
+      try {
+        [resolvedDep] = getDependencyPackageJson(dependencyName);
+      } catch {
+        resolvedDep = null;
+      }
+      if (!resolvedDep?.version) {
+        reportError({
+          errorMessage: "Unexpected range value",
+          errorDetails: `expecting "${version}" to be exact${tryToAutoFix ? `, autofix failed to resolve "${dependencyName}"` : ""}`,
+          errorTarget: "dependencyValue",
+          dependency: dependencyValue,
+          onlyWarns: shouldOnlyWarn
+        });
+      } else if (!semver.satisfies(resolvedDep.version, version, {
+        includePrerelease: true
+      })) {
+        reportError({
+          errorMessage: "Unexpected range value",
+          errorDetails: `expecting "${version}" to be exact${tryToAutoFix ? `, autofix failed as resolved version "${resolvedDep.version}" doesn't satisfy "${version}"` : ""}`,
+          dependency: dependencyValue,
+          errorTarget: "dependencyValue",
+          onlyWarns: shouldOnlyWarn
+        });
+      } else if (tryToAutoFix) {
+        dependencyValue.changeValue(resolvedDep.version);
+      } else {
+        reportError({
+          errorMessage: "Unexpected range value",
+          errorDetails: `expecting "${version}" to be exact "${resolvedDep.version}"`,
+          dependency: dependencyValue,
+          errorTarget: "dependencyValue",
+          onlyWarns: shouldOnlyWarn,
+          fixTo: resolvedDep.version
+        });
+      }
+    } else {
+      let exactVersion = version.slice(version[1] === "=" ? 2 : 1);
+      if (exactVersion.split(".").length < 3) {
+        if (exactVersion.split(".").length === 1) {
+          exactVersion = `${exactVersion}.0.0`;
+        } else {
+          exactVersion = `${exactVersion}.0`;
+        }
+      }
+      reportError({
+        errorMessage: "Unexpected range value",
+        errorDetails: `expecting "${version}" to be exact "${exactVersion}"`,
+        errorTarget: "dependencyValue",
+        dependency: dependencyValue,
+        onlyWarns: shouldOnlyWarn
+      });
+    }
+  }
+}
+
+const pinnedDependencyTypes = [
+  "dependencies",
+  "devDependencies",
+  "resolutions"
+];
+const requirePinnedVersionsRule = createPackageRule(
+  "require-pinned-versions",
+  {
+    type: "object",
+    properties: {
+      onlyWarnsFor: onlyWarnsForArraySchema
+    },
+    additionalProperties: false
+  },
+  {
+    docs: {
+      description: "Require pinned versions in `dependencies`, `devDependencies` and `resolutions`",
+      recommended: true
+    },
+    fixable: true,
+    checkDependencyValue: ({
+      node,
+      reportError,
+      isLibrary,
+      getDependencyPackageJson,
+      onlyWarnsForCheck
+    }) => {
+      if (!pinnedDependencyTypes.includes(node.fieldName)) return;
+      if (isLibrary && node.fieldName === "dependencies") return;
+      checkExactVersion(reportError, node, {
+        getDependencyPackageJson,
+        onlyWarnsForCheck
       });
     }
   }
@@ -2416,7 +2479,7 @@ const satisfiesVersionsRule = createPackageRule(
 const rules = {
   ...requireDirectPeerDependenciesRule,
   ...noDirectDuplicateDependenciesRule,
-  ...requireExactVersionsRule,
+  ...requirePinnedVersionsRule,
   ...requireIdenticalVersionsRule,
   ...requireIdenticalVersionsAsDependencyRule,
   ...requireIdenticalVersionsAsDevDependencyOfDependencyRule,
@@ -2452,39 +2515,16 @@ const checkPackagePlugin = {
       language: "check-package-dependencies/package-json",
       plugins: {},
       rules: {
-        "check-package-dependencies/require-exact-versions": "error",
+        "check-package-dependencies/require-pinned-versions": "error",
         "check-package-dependencies/resolutions-versions-match": "error",
         "check-package-dependencies/require-direct-peer-dependencies": "error",
         "check-package-dependencies/no-direct-duplicate-dependencies": "error",
         "check-package-dependencies/require-resolutions-explanation": "error",
         "check-package-dependencies/no-root-workspace-dependencies": "error",
         "check-package-dependencies/consistent-workspace-dependencies": "error",
-        "check-package-dependencies/require-workspace-protocol": "error"
-      }
-    },
-    "recommended-library": {
-      files: ["**/package.json"],
-      language: "check-package-dependencies/package-json",
-      plugins: {},
-      settings: {
-        "check-package-dependencies": {
-          isLibrary: true
-        }
-      },
-      rules: {
-        "check-package-dependencies/require-exact-versions": [
-          "error",
-          { dependencies: false }
-        ],
-        "check-package-dependencies/resolutions-versions-match": "error",
-        "check-package-dependencies/require-direct-peer-dependencies": "error",
-        "check-package-dependencies/no-direct-duplicate-dependencies": "error",
-        "check-package-dependencies/require-resolutions-explanation": "error",
+        "check-package-dependencies/require-workspace-protocol": "error",
         "check-package-dependencies/min-range-dependencies-satisfies-dev-dependencies": "error",
-        "check-package-dependencies/min-range-peer-dependencies-satisfies-dependencies": "error",
-        "check-package-dependencies/no-root-workspace-dependencies": "error",
-        "check-package-dependencies/consistent-workspace-dependencies": "error",
-        "check-package-dependencies/require-workspace-protocol": "error"
+        "check-package-dependencies/min-range-peer-dependencies-satisfies-dependencies": "error"
       }
     }
   }
@@ -2493,9 +2533,6 @@ checkPackagePlugin.configs.base.plugins = {
   "check-package-dependencies": checkPackagePlugin
 };
 checkPackagePlugin.configs.recommended.plugins = {
-  "check-package-dependencies": checkPackagePlugin
-};
-checkPackagePlugin.configs["recommended-library"].plugins = {
   "check-package-dependencies": checkPackagePlugin
 };
 

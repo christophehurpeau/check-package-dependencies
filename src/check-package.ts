@@ -23,6 +23,11 @@ import {
 } from "./reporting/cliErrorReporting.ts";
 import type { GetDependencyPackageJson } from "./utils/createGetDependencyPackageJson.ts";
 import { createGetDependencyPackageJson } from "./utils/createGetDependencyPackageJson.ts";
+import type { LibrarySetting } from "./utils/library.ts";
+import {
+  assertNoLegacyIsLibraryOption,
+  resolveIsLibrary,
+} from "./utils/library.ts";
 import { getEntries } from "./utils/object.ts";
 import type {
   DependenciesRanges,
@@ -44,7 +49,12 @@ import {
 
 export interface CreateCheckPackageOptions {
   packageDirectoryPath?: string;
-  isLibrary?: boolean | ((pkg: PackageJson) => boolean);
+  /**
+   * Defaults to "auto", which derives it from the package.json: a workspace root or
+   * a private package is not a library, anything else is. Also accepts a boolean, a
+   * list of package name patterns (`["@scope/*", "!@scope/app-*"]`) or a predicate.
+   */
+  library?: LibrarySetting | ((pkg: PackageJson) => boolean);
   /** @internal */
   internalWorkspacePkgDirectoryPath?: string;
   /** @internal */
@@ -314,9 +324,12 @@ export type ShouldHaveExactVersions = (depType: DependencyTypes) => boolean;
 export function createCheckPackage({
   packageDirectoryPath = ".",
   internalWorkspacePkgDirectoryPath,
-  isLibrary = false,
+  library = "auto",
   createReportError = createCliReportError,
+  ...otherOptions
 }: CreateCheckPackageOptions = {}): CheckPackageApi {
+  assertNoLegacyIsLibraryOption(otherOptions);
+
   const pkgDirname = path.resolve(packageDirectoryPath);
   const pkgPath = `${pkgDirname}/package.json`;
   const pkgPathName = `${packageDirectoryPath}/package.json`;
@@ -325,7 +338,9 @@ export function createCheckPackage({
     JSON.stringify(parsedPkg.value),
   ) as PackageJson;
   const isPkgLibrary =
-    typeof isLibrary === "function" ? isLibrary(parsedPkg.value) : isLibrary;
+    typeof library === "function"
+      ? library(parsedPkg.value)
+      : resolveIsLibrary(library, parsedPkg);
   const shouldHaveExactVersions: ShouldHaveExactVersions = (depType) =>
     !isPkgLibrary ? true : depType === "devDependencies";
 
@@ -637,10 +652,10 @@ export function createCheckPackage({
           "onlyWarnsForInDependencies.duplicateDirectDependency",
       });
 
-      if (isPkgLibrary) {
-        this.checkMinRangeDependenciesSatisfiesDevDependencies();
-        this.checkMinRangePeerDependenciesSatisfiesDependencies();
-      }
+      // also when the package is not a library: a range whose minimum does not satisfy
+      // the version used in development is wrong whoever installs it
+      this.checkMinRangeDependenciesSatisfiesDevDependencies();
+      this.checkMinRangePeerDependenciesSatisfiesDependencies();
 
       return this;
     },

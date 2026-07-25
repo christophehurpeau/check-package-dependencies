@@ -43,21 +43,15 @@ The plugin lints `package.json` files with a dedicated ESLint [language](https:/
 // eslint.config.js
 import checkPackageDependenciesPlugin from "check-package-dependencies/eslint-plugin";
 
-export default [
-  // for an application
-  checkPackageDependenciesPlugin.configs.recommended,
-  // …or for a library, which also sets the "isLibrary" setting
-  // checkPackageDependenciesPlugin.configs["recommended-library"],
-];
+export default [checkPackageDependenciesPlugin.configs.recommended];
 ```
 
 Available configs:
 
-| Config                | Emoji | Description                                                                                                      |
-| :-------------------- | :---- | :--------------------------------------------------------------------------------------------------------------- |
-| `base`                |       | Only registers the `package-json` language and the plugin. No rule enabled.                                      |
-| `recommended`         | ✅    | Recommended rules for an application.                                                                            |
-| `recommended-library` | 📚    | Recommended rules for a library: sets `isLibrary`, allows ranges in `dependencies` and adds the min range rules. |
+| Config        | Emoji | Description                                                                                                                               |
+| :------------ | :---- | :---------------------------------------------------------------------------------------------------------------------------------------- |
+| `base`        |       | Only registers the `package-json` language and the plugin. No rule enabled.                                                               |
+| `recommended` | ✅    | Recommended rules. A library is not checked like a package that is not published: this is driven by the `library` setting, not by config. |
 
 To enable a rule that is not part of a config, or to change its options, add it to your config:
 
@@ -78,47 +72,87 @@ export default [
 
 #### Settings
 
-| Setting     | Default | Description                                                                                                                                                  |
-| :---------- | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `isLibrary` | `false` | The package is published and consumed by other packages: ranges are expected in `dependencies` and peer dependencies can be satisfied by `peerDependencies`. |
+| Setting   | Default  | Description                                                                                                                                                                                                      |
+| :-------- | :------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `library` | `"auto"` | Whether a package is published and consumed by other packages. A library keeps ranges in `dependencies` and can satisfy a peer dependency with its own `peerDependencies`; any other package pins every version. |
+
+Accepted values:
+
+| Value                | Meaning                                                                                                                                                       |
+| :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `"auto"` _(default)_ | Derived from the `package.json`: a workspace root or a `private` package is not a library, anything else is.                                                  |
+| `true` / `false`     | Every package checked with this config entry is, or is not, a library.                                                                                        |
+| `string[]`           | Package name patterns: `*` matches any characters, a `!` prefix excludes, and the last matching pattern wins. A package matching no pattern is not a library. |
 
 ```js
 export default [
+  checkPackageDependenciesPlugin.configs.recommended,
   {
     files: ["package.json"],
-    settings: { "check-package-dependencies": { isLibrary: true } },
+    settings: {
+      "check-package-dependencies": {
+        library: ["@scope/*", "!@scope/app-*"],
+      },
+    },
   },
 ];
 ```
 
+The setting is resolved per package, not per linted file: when linting the `package.json`
+of a monorepo root, `consistent-workspace-dependencies` resolves it against each
+workspace member. So a list of patterns, or `"auto"`, is what a monorepo mixing published
+and private packages wants — a plain `true` would make the root a library too.
+
+#### Migrating from v11
+
+- The `recommended-library` config is removed: use `recommended`, and let `library`
+  decide. `"auto"` covers the usual case; set it explicitly when the detection is wrong
+  for you.
+- `require-exact-versions` is renamed to `require-pinned-versions` and its
+  `dependencies` / `devDependencies` / `resolutions` options are removed: which fields
+  are checked now follows `library`.
+- The two `min-range-*` rules are part of `recommended`, and now report whether or not
+  the package is a library — they were previously only run for a library.
+- The `isLibrary` setting and the `isLibrary` option of the programmatic API are renamed
+  to `library`, as they accept more than a boolean. Using the old name is reported: as a
+  lint error once per `package.json` for the setting, and as a thrown error for the
+  option.
+- `library` defaults to `"auto"` instead of `false`, in the plugin and in the programmatic
+  API. A published, non-private package is therefore checked as a library
+  now: ranges become allowed in its `dependencies`, and a peer dependency of a
+  `dependencies` entry must be satisfied by its `dependencies` or `peerDependencies`
+  rather than by its `devDependencies`. Set `library: false` to keep the previous
+  behaviour.
+
 #### Rules
 
-💼 Configs enabling the rule: ✅ `recommended`, 📚 `recommended-library`.
+💼 Configs enabling the rule: ✅ `recommended`. A few rules check a library differently,
+depending on the `library` setting: see each rule’s page.
 🔧 Automatically fixable by the [`--fix` CLI option](https://eslint.org/docs/latest/use/command-line-interface#--fix).
 💡 Manually fixable by [editor suggestions](https://eslint.org/docs/latest/use/core-concepts#rule-suggestions).
 
 <!-- begin auto-generated rules list -->
 
-| Name                                                                                                                                            | Description                                                                                                           | 💼    | 🔧  | 💡  |
-| :---------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------- | :---- | :-- | :-- |
-| [consistent-workspace-dependencies](documentation/rules/consistent-workspace-dependencies.md)                                                   | Enforce consistent dependency versions across the packages of a workspace                                             | ✅ 📚 |     |     |
-| [min-range-dependencies-satisfies-dev-dependencies](documentation/rules/min-range-dependencies-satisfies-dev-dependencies.md)                   | Enforce the minimum of a `dependencies` range to satisfy the version in `devDependencies`                             | 📚    | 🔧  |     |
-| [min-range-peer-dependencies-satisfies-dependencies](documentation/rules/min-range-peer-dependencies-satisfies-dependencies.md)                 | Enforce the minimum of a `peerDependencies` range to satisfy the version in `dependencies`                            | 📚    | 🔧  |     |
-| [no-direct-duplicate-dependencies](documentation/rules/no-direct-duplicate-dependencies.md)                                                     | Disallow dependencies that will be installed twice because a direct dependency requires an incompatible range         | ✅ 📚 |     |     |
-| [no-root-workspace-dependencies](documentation/rules/no-root-workspace-dependencies.md)                                                         | Disallow `dependencies` in the root package.json of a workspace                                                       | ✅ 📚 |     |     |
-| [require-direct-peer-dependencies](documentation/rules/require-direct-peer-dependencies.md)                                                     | Require peer dependencies of direct dependencies to be present and satisfied                                          | ✅ 📚 |     |     |
-| [require-exact-versions](documentation/rules/require-exact-versions.md)                                                                         | Require exact versions in `dependencies`, `devDependencies` and `resolutions`                                         | ✅ 📚 | 🔧  |     |
-| [require-identical-versions](documentation/rules/require-identical-versions.md)                                                                 | Require configured dependencies to have the same version as another dependency of the same package.json               |       |     |     |
-| [require-identical-versions-as-dependency](documentation/rules/require-identical-versions-as-dependency.md)                                     | Require configured dependencies to have the same version as the one in the `dependencies` of another dependency       |       |     |     |
-| [require-identical-versions-as-dev-dependency-of-dependency](documentation/rules/require-identical-versions-as-dev-dependency-of-dependency.md) | Require configured dependencies to have the same version as the one in the `devDependencies` of another dependency    |       |     |     |
-| [require-resolutions-explanation](documentation/rules/require-resolutions-explanation.md)                                                       | Require every entry of `resolutions` to be explained in `resolutionsExplained`                                        | ✅ 📚 |     |     |
-| [require-workspace-protocol](documentation/rules/require-workspace-protocol.md)                                                                 | Require dependencies on other packages of the workspace to use the `workspace:` protocol                              | ✅ 📚 | 🔧  |     |
-| [resolutions-versions-match](documentation/rules/resolutions-versions-match.md)                                                                 | Require `resolutions` versions to match the versions in `dependencies` and `devDependencies`                          | ✅ 📚 |     | 💡  |
-| [satisfies-versions](documentation/rules/satisfies-versions.md)                                                                                 | Require configured dependencies to be present and to satisfy the configured ranges                                    |       |     | 💡  |
-| [satisfies-versions-between-dependencies](documentation/rules/satisfies-versions-between-dependencies.md)                                       | Require the range of a dependency in one dependency to satisfy the range of the same dependency in another dependency |       |     |     |
-| [satisfies-versions-from-dependencies](documentation/rules/satisfies-versions-from-dependencies.md)                                             | Require configured dependencies to satisfy the ranges declared in the `dependencies` of another dependency            |       |     | 💡  |
-| [satisfies-versions-from-dev-dependencies-of-dependency](documentation/rules/satisfies-versions-from-dev-dependencies-of-dependency.md)         | Require configured dependencies to satisfy the ranges declared in the `devDependencies` of another dependency         |       |     | 💡  |
-| [satisfies-versions-in-dependency](documentation/rules/satisfies-versions-in-dependency.md)                                                     | Require the dependencies of an installed dependency to satisfy the configured ranges                                  |       |     |     |
+| Name                                                                                                                                            | Description                                                                                                           | 💼  | 🔧  | 💡  |
+| :---------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------- | :-- | :-- | :-- |
+| [consistent-workspace-dependencies](documentation/rules/consistent-workspace-dependencies.md)                                                   | Enforce consistent dependency versions across the packages of a workspace                                             | ✅  |     |     |
+| [min-range-dependencies-satisfies-dev-dependencies](documentation/rules/min-range-dependencies-satisfies-dev-dependencies.md)                   | Enforce the minimum of a `dependencies` range to satisfy the version in `devDependencies`                             | ✅  | 🔧  |     |
+| [min-range-peer-dependencies-satisfies-dependencies](documentation/rules/min-range-peer-dependencies-satisfies-dependencies.md)                 | Enforce the minimum of a `peerDependencies` range to satisfy the version in `dependencies`                            | ✅  | 🔧  |     |
+| [no-direct-duplicate-dependencies](documentation/rules/no-direct-duplicate-dependencies.md)                                                     | Disallow dependencies that will be installed twice because a direct dependency requires an incompatible range         | ✅  |     |     |
+| [no-root-workspace-dependencies](documentation/rules/no-root-workspace-dependencies.md)                                                         | Disallow `dependencies` in the root package.json of a workspace                                                       | ✅  |     |     |
+| [require-direct-peer-dependencies](documentation/rules/require-direct-peer-dependencies.md)                                                     | Require peer dependencies of direct dependencies to be present and satisfied                                          | ✅  |     |     |
+| [require-identical-versions](documentation/rules/require-identical-versions.md)                                                                 | Require configured dependencies to have the same version as another dependency of the same package.json               |     |     |     |
+| [require-identical-versions-as-dependency](documentation/rules/require-identical-versions-as-dependency.md)                                     | Require configured dependencies to have the same version as the one in the `dependencies` of another dependency       |     |     |     |
+| [require-identical-versions-as-dev-dependency-of-dependency](documentation/rules/require-identical-versions-as-dev-dependency-of-dependency.md) | Require configured dependencies to have the same version as the one in the `devDependencies` of another dependency    |     |     |     |
+| [require-pinned-versions](documentation/rules/require-pinned-versions.md)                                                                       | Require pinned versions in `dependencies`, `devDependencies` and `resolutions`                                        | ✅  | 🔧  |     |
+| [require-resolutions-explanation](documentation/rules/require-resolutions-explanation.md)                                                       | Require every entry of `resolutions` to be explained in `resolutionsExplained`                                        | ✅  |     |     |
+| [require-workspace-protocol](documentation/rules/require-workspace-protocol.md)                                                                 | Require dependencies on other packages of the workspace to use the `workspace:` protocol                              | ✅  | 🔧  |     |
+| [resolutions-versions-match](documentation/rules/resolutions-versions-match.md)                                                                 | Require `resolutions` versions to match the versions in `dependencies` and `devDependencies`                          | ✅  |     | 💡  |
+| [satisfies-versions](documentation/rules/satisfies-versions.md)                                                                                 | Require configured dependencies to be present and to satisfy the configured ranges                                    |     |     | 💡  |
+| [satisfies-versions-between-dependencies](documentation/rules/satisfies-versions-between-dependencies.md)                                       | Require the range of a dependency in one dependency to satisfy the range of the same dependency in another dependency |     |     |     |
+| [satisfies-versions-from-dependencies](documentation/rules/satisfies-versions-from-dependencies.md)                                             | Require configured dependencies to satisfy the ranges declared in the `dependencies` of another dependency            |     |     | 💡  |
+| [satisfies-versions-from-dev-dependencies-of-dependency](documentation/rules/satisfies-versions-from-dev-dependencies-of-dependency.md)         | Require configured dependencies to satisfy the ranges declared in the `devDependencies` of another dependency         |     |     | 💡  |
+| [satisfies-versions-in-dependency](documentation/rules/satisfies-versions-in-dependency.md)                                                     | Require the dependencies of an installed dependency to satisfy the configured ranges                                  |     |     |     |
 
 <!-- end auto-generated rules list -->
 
@@ -129,7 +163,7 @@ Most rules accept an `onlyWarnsFor` option that downgrades errors to warnings, p
 Depending on the rule, `onlyWarnsFor` is either an array of dependency names:
 
 ```js
-"check-package-dependencies/require-exact-versions": ["error", { onlyWarnsFor: ["type-fest"] }]
+"check-package-dependencies/require-pinned-versions": ["error", { onlyWarnsFor: ["type-fest"] }]
 ```
 
 or a mapping from the dependency causing the error to the dependency names to only warn for, `"*"` matching any dependency:
@@ -156,12 +190,17 @@ Create a script, for example `scripts/check-package.js`. Add it in `"scripts"` i
 ```js
 import { createCheckPackage } from "check-package-dependencies";
 
-await createCheckPackage(/* '.' */)
+await createCheckPackage({
+  // Whether the package is published and consumed by other packages.
+  // "auto" (the default) derives it from the package.json: a workspace root or a
+  // private package is not a library. Also accepts true, false, a list of package
+  // name patterns (["@scope/*", "!@scope/app-*"]) or a (pkg) => boolean predicate.
+  library: "auto",
+})
   // Check that your package.json contains only exact versions of package, not range.
-  .checkExactVersions({
-    // When isLibrary is true, it doesnt check "dependencies" as they should mostly have a range, not an exact version
-    isLibrary: false,
-  })
+  // A library keeps ranges in "dependencies", so only "devDependencies" and
+  // "resolutions" are checked for it.
+  .checkExactVersions({})
   .checkDirectPeerDependencies({
     // Allow to only warn for not respected peer dependencies.
     // Example: { '@babel/cli': ['@babel/core'] }
@@ -186,7 +225,6 @@ await createCheckPackage(/* '.' */)
   // Same as calling .checkExactVersions(), checkDirectPeerDependencies(), checkDirectDuplicateDependencies()
   // and checkResolutionsHasExplanation(). It's recommended to use it as new recommended features will be added here too.
   .checkRecommended({
-    isLibrary: false,
     peerDependenciesOnlyWarnsFor: [],
     directDuplicateDependenciesOnlyWarnsFor: ["type-fest"],
   })
@@ -230,12 +268,15 @@ If you use workspaces:
 ```js
 import { createCheckPackageWithWorkspaces } from "check-package-dependencies";
 
-await createCheckPackageWithWorkspaces()
+await createCheckPackageWithWorkspaces({
+  // Applied to the workspace members, the root is never a library.
+  // Defaults to "auto", so private members are not treated as libraries.
+  library: ["*", "!*-example"],
+})
   // Call .checkExactVersions(), checkDirectPeerDependencies(), checkDirectDuplicateDependencies()
   // checkResolutionsVersionsMatch() and checkResolutionsHasExplanation() for root package and workspaces packages, but also
   // checks your workspaces packages doesn't have different versions than the ones in devDependencies of root packages.
   .checkRecommended({
-    isLibrary: (pkgName) => !pkgName.endsWith("-example"),
     peerDependenciesOnlyWarnsFor: [],
     directDuplicateDependenciesOnlyWarnsFor: ["semver", "github-username"],
   })

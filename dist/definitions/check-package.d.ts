@@ -2,11 +2,17 @@ import type { SetRequired } from "type-fest";
 import type { CheckResolutionMessage } from "./checks/checkResolutionsHasExplanation.ts";
 import type { CreateReportError } from "./reporting/ReportError.ts";
 import type { GetDependencyPackageJson } from "./utils/createGetDependencyPackageJson.ts";
+import type { LibrarySetting } from "./utils/library.ts";
 import type { DependenciesRanges, DependencyName, DependencyTypes, PackageJson, ParsedPackageJson } from "./utils/packageTypes.ts";
 import type { OnlyWarnsFor, OnlyWarnsForOptionalDependencyMapping } from "./utils/warnForUtils.ts";
 export interface CreateCheckPackageOptions {
     packageDirectoryPath?: string;
-    isLibrary?: boolean | ((pkg: PackageJson) => boolean);
+    /**
+     * Defaults to "auto", which derives it from the package.json: a workspace root or
+     * a private package is not a library, anything else is. Also accepts a boolean, a
+     * list of package name patterns (`["@scope/*", "!@scope/app-*"]`) or a predicate.
+     */
+    library?: LibrarySetting | ((pkg: PackageJson) => boolean);
     /** @internal */
     internalWorkspacePkgDirectoryPath?: string;
     /** @internal */
@@ -202,5 +208,5 @@ export interface CheckPackageApi {
     checkMinRangePeerDependenciesSatisfiesDependencies: () => CheckPackageApi;
 }
 export type ShouldHaveExactVersions = (depType: DependencyTypes) => boolean;
-export declare function createCheckPackage({ packageDirectoryPath, internalWorkspacePkgDirectoryPath, isLibrary, createReportError, }?: CreateCheckPackageOptions): CheckPackageApi;
+export declare function createCheckPackage({ packageDirectoryPath, internalWorkspacePkgDirectoryPath, library, createReportError, ...otherOptions }?: CreateCheckPackageOptions): CheckPackageApi;
 //# sourceMappingURL=check-package.d.ts.map

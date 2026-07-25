@@ -8,9 +8,7 @@ import {
 const checkPackage = createCheckPackage();
 if (checkPackage.pkg.workspaces) {
   const checkPackageWithWorkspaces = await createCheckPackageWithWorkspaces();
-  checkPackageWithWorkspaces.checkRecommended({
-    isLibrary: () => true,
-  });
+  checkPackageWithWorkspaces.checkRecommended();
   await checkPackageWithWorkspaces.run();
 } else {
   checkPackage.checkRecommended();

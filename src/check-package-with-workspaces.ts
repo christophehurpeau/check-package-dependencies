@@ -17,6 +17,8 @@ import {
   displayMessages,
   reportNotWarnedForMapping,
 } from "./reporting/cliErrorReporting.ts";
+import type { LibrarySetting } from "./utils/library.ts";
+import { assertNoLegacyIsLibraryOption } from "./utils/library.ts";
 import { resolveWorkspacesPackagesGlobs } from "./utils/pnpmWorkspaceYaml.ts";
 import type { OnlyWarnsForOptionalDependencyMapping } from "./utils/warnForUtils.ts";
 import { createOnlyWarnsForMappingCheck } from "./utils/warnForUtils.ts";
@@ -67,19 +69,25 @@ export interface CheckPackageWithWorkspacesApi {
 
 interface CreateCheckPackageWithWorkspacesOptions extends Except<
   CreateCheckPackageOptions,
-  "isLibrary"
+  "library"
 > {
-  isLibrary?: (pkg: PackageJson) => boolean;
+  /**
+   * Applied to the workspace members only, the root is never a library.
+   * Defaults to "auto", see {@link CreateCheckPackageOptions.library}.
+   */
+  library?: LibrarySetting | ((pkg: PackageJson) => boolean);
 }
 
 export function createCheckPackageWithWorkspaces({
   createReportError = createCliReportError,
   ...createCheckPackageOptions
 }: CreateCheckPackageWithWorkspacesOptions = {}): CheckPackageWithWorkspacesApi {
+  assertNoLegacyIsLibraryOption(createCheckPackageOptions);
+
   const checkPackage = createCheckPackage({
     createReportError,
     ...createCheckPackageOptions,
-    isLibrary: false,
+    library: false,
   });
   const { pkg, pkgDirname } = checkPackage;
 
