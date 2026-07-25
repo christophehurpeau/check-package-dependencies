@@ -1,0 +1,11 @@
+{
+  "name": "fixture-workspace-library-member",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "semver": "^7.0.0"
+  },
+  "devDependencies": {
+    "semver": "7.8.5"
+  }
+}

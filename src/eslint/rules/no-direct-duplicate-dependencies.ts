@@ -37,7 +37,7 @@ export const noDirectDuplicateDependenciesRule =
         node,
         pkg,
         reportError,
-        settings,
+        isLibrary,
         ruleOptions,
         getDependencyPackageJson,
         onlyWarnsForMappingCheck,
@@ -55,7 +55,7 @@ export const noDirectDuplicateDependenciesRule =
         checkDuplicateDependencies(
           reportError,
           pkg,
-          settings.isLibrary ?? false,
+          isLibrary,
           "dependencies",
           searchIn,
           depPkg,

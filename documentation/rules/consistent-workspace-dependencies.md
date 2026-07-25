@@ -1,6 +1,6 @@
 # Enforce consistent dependency versions across the packages of a workspace
 
-💼 This rule is enabled in the ✅ `recommended` and 📚 `recommended-library` configs.
+💼 This rule is enabled in the ✅ `recommended` config.
 
 <!-- end auto-generated rule header -->
 
@@ -10,6 +10,8 @@ The rule behaves differently depending on the `package.json` being linted:
 
 - on the **workspace root**, every workspace package is compared with the root and with the workspace packages already checked, reporting dependencies that would be installed twice;
 - on a **workspace package**, the peer dependencies of its own dependencies are checked against the `devDependencies` of the workspace root, which is where a workspace package usually gets them from. The ones already declared by the package itself are left to [require-direct-peer-dependencies](require-direct-peer-dependencies.md).
+
+When run on the workspace root, each workspace package is checked as a library or not by resolving the [`library` setting](../../README.md#settings) against that package, not against the root: with the default `"auto"` a private member is not a library, and a list of package name patterns lets the root config classify the members explicitly.
 
 ## Fail
 

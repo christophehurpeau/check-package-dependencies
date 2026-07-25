@@ -1,6 +1,6 @@
 # Disallow `dependencies` in the root package.json of a workspace
 
-💼 This rule is enabled in the ✅ `recommended` and 📚 `recommended-library` configs.
+💼 This rule is enabled in the ✅ `recommended` config.
 
 <!-- end auto-generated rule header -->
 

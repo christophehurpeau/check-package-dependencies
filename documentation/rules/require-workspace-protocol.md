@@ -1,6 +1,6 @@
 # Require dependencies on other packages of the workspace to use the `workspace:` protocol
 
-💼 This rule is enabled in the ✅ `recommended` and 📚 `recommended-library` configs.
+💼 This rule is enabled in the ✅ `recommended` config.
 
 🔧 This rule is automatically fixable by the [`--fix` CLI option](https://eslint.org/docs/latest/use/command-line-interface#--fix).
 

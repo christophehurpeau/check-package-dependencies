@@ -31,7 +31,7 @@ export const someRule = createPackageRule(
 
 `fixable` and `hasSuggestions` are declared to ESLint: a rule reporting a fix without declaring it throws at lint time, and a rule declaring one it never produces misleads editors. Only the `checkDependencyValue` code path can produce fixes and suggestions — `checkPackage` reports without them, even when the underlying check passes a `fixTo`.
 
-`docs.recommended` is validated against `configs.recommended` of `src/eslint-plugin.ts`. Membership in `recommended-library` is read from that config directly, there is nothing to declare for it.
+`docs.recommended` is validated against `configs.recommended` of `src/eslint-plugin.ts`, the only config enabling rules. A rule that checks a library differently, or only applies to one of the two, is still enabled in `recommended` and gates on the `isLibrary` param itself (resolved from the `library` setting) — that condition belongs in the documentation body, not in a config.
 
 ## Workflow
 
@@ -44,12 +44,14 @@ export const someRule = createPackageRule(
 
 Below the generated header, in this order:
 
-- **Why the rule exists**: the concrete problem it prevents (duplicated package in the tree, non reproducible install, broken peer dependency…), then what it checks. Mention what it ignores (`workspace:`, `patch:`, `file:`, `latest`, `*`, optional peer dependencies…) and how the `isLibrary` setting changes the behaviour, when it applies.
+- **Why the rule exists**: the concrete problem it prevents (duplicated package in the tree, non reproducible install, broken peer dependency…), then what it checks. Mention what it ignores (`workspace:`, `patch:`, `file:`, `latest`, `*`, optional peer dependencies…) and how the `library` setting changes the behaviour, when it applies.
 - **`## Fail`**: a minimal `package.json` triggering the rule. When the error depends on another package, introduce the snippet with a sentence stating the relevant part of that package, such as "With some-lib depending on semver ^7.8.0:". For a rule that is only configuration-driven, show the rule configuration instead.
 - **`## Pass`**: the same example, fixed.
 - **`## Options`**: a table with `Name`, `Type`, `Default`, `Description` describing exactly the JSON schema of the rule — required options are marked `(required)` with `—` as default. Then a `js` snippet of a realistic configuration. Write `This rule has no options.` when the schema has no property.
 
-Link related rules with relative links (`[require-exact-versions](require-exact-versions.md)`).
+Link related rules with relative links (`[require-pinned-versions](require-pinned-versions.md)`).
+
+Never write "application" for the false side of the `library` setting: a monorepo root or a private package is not a library and not an application either. Write "a package that is not a library", or head the columns of a behaviour table with `library: false` / `library: true`.
 
 Keep the description of the rule, the H1 (generated from it) and the `README.md` row consistent — they all come from `docs.description`.
 

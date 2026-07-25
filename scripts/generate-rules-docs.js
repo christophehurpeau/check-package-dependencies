@@ -27,7 +27,6 @@ const getRules = () =>
       name,
       description: rule.meta.docs.description,
       recommended: rule.meta.docs.recommended,
-      recommendedLibrary: isRuleInConfig("recommended-library", name),
       fixable: rule.meta.fixable === "code",
       hasSuggestions: rule.meta.hasSuggestions === true,
     }))
@@ -54,15 +53,9 @@ const validateRules = (rules) => {
   return errors;
 };
 
-const getConfigsSentence = ({ recommended, recommendedLibrary }) => {
-  if (recommended && recommendedLibrary) {
-    return "💼 This rule is enabled in the ✅ `recommended` and 📚 `recommended-library` configs.";
-  }
+const getConfigsSentence = ({ recommended }) => {
   if (recommended) {
     return "💼 This rule is enabled in the ✅ `recommended` config.";
-  }
-  if (recommendedLibrary) {
-    return "💼 This rule is enabled in the 📚 `recommended-library` config.";
   }
   return "🚫 This rule is not enabled in any config, it has to be enabled and configured explicitly.";
 };
@@ -135,15 +128,10 @@ const generateRulesList = (rules) => {
     "| Name | Description | 💼 | 🔧 | 💡 |",
     "| :--- | :---------- | :- | :- | :- |",
   ];
-  const rows = rules.map((rule) => {
-    const configs = [
-      rule.recommended ? "✅" : "",
-      rule.recommendedLibrary ? "📚" : "",
-    ]
-      .filter(Boolean)
-      .join(" ");
-    return `| [${rule.name}](documentation/rules/${rule.name}.md) | ${rule.description} | ${configs} | ${rule.fixable ? "🔧" : ""} | ${rule.hasSuggestions ? "💡" : ""} |`;
-  });
+  const rows = rules.map(
+    (rule) =>
+      `| [${rule.name}](documentation/rules/${rule.name}.md) | ${rule.description} | ${rule.recommended ? "✅" : ""} | ${rule.fixable ? "🔧" : ""} | ${rule.hasSuggestions ? "💡" : ""} |`,
+  );
 
   return [...header, ...rows].join("\n");
 };

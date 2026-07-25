@@ -1,6 +1,6 @@
 # Require `resolutions` versions to match the versions in `dependencies` and `devDependencies`
 
-💼 This rule is enabled in the ✅ `recommended` and 📚 `recommended-library` configs.
+💼 This rule is enabled in the ✅ `recommended` config.
 
 💡 This rule is manually fixable by [editor suggestions](https://eslint.org/docs/latest/use/core-concepts#rule-suggestions).
 

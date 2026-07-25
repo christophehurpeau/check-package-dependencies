@@ -1,6 +1,7 @@
 import type { Rule } from "eslint";
 import type { ReportError } from "../../reporting/ReportError.ts";
 import type { GetDependencyPackageJson } from "../../utils/createGetDependencyPackageJson.ts";
+import type { LibrarySetting } from "../../utils/library.ts";
 import type { DependencyValue, ParsedPackageJson } from "../../utils/packageTypes.ts";
 import type { OnlyWarnsFor, OnlyWarnsForCheck, OnlyWarnsForMappingCheck } from "../../utils/warnForUtils.ts";
 export declare const onlyWarnsForArraySchema: {
@@ -21,7 +22,7 @@ export declare const onlyWarnsForMappingSchema: {
     };
 };
 interface CheckPackageDependenciesSettings {
-    isLibrary?: boolean;
+    library?: LibrarySetting;
 }
 export interface PackageRuleDocs {
     description: string;
@@ -34,6 +35,8 @@ type CheckFn<RuleOptions, Node, T = Record<never, never>> = (params: T & {
     reportError: ReportError;
     getDependencyPackageJson: GetDependencyPackageJson;
     settings: CheckPackageDependenciesSettings;
+    /** the `library` setting resolved for the linted package.json */
+    isLibrary: boolean;
     ruleOptions: RuleOptions;
     onlyWarnsForCheck: OnlyWarnsForCheck;
     onlyWarnsForMappingCheck: OnlyWarnsForMappingCheck;
@@ -50,6 +53,8 @@ export declare function createPackageRule<RuleOptions extends {
         loadWorkspacePackageJsons: () => ParsedPackageJson[];
         getWorkspaceMemberNames: () => Set<string> | undefined;
         getWorkspaceRootPackageJson: () => ParsedPackageJson | undefined;
+        /** resolves the `library` setting for another package, eg a workspace member */
+        isLibraryFor: (pkg: ParsedPackageJson) => boolean;
         checkOnlyWarnsForArray: (onlyWarnsForCheck: OnlyWarnsForCheck) => void;
         checkOnlyWarnsForMapping: (onlyWarnsForMappingCheck: OnlyWarnsForMappingCheck) => void;
     }>;

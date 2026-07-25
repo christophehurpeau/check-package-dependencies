@@ -1,6 +1,7 @@
 import type { Except, PackageJson } from "type-fest";
 import type { CheckPackageApi, CreateCheckPackageOptions, OnlyWarnsForInDependenciesCheckPackageRecommendedOption, OnlyWarnsForInDependencyCheckPackageRecommendedOption, OnlyWarnsForInPackageCheckPackageRecommendedOption } from "./check-package.ts";
 import type { CheckResolutionMessage } from "./checks/checkResolutionsHasExplanation.ts";
+import type { LibrarySetting } from "./utils/library.ts";
 import type { OnlyWarnsForOptionalDependencyMapping } from "./utils/warnForUtils.ts";
 interface OnlyWarnsForInMonorepoPackageCheckPackageRecommendedOption extends OnlyWarnsForInPackageCheckPackageRecommendedOption {
     duplicateDirectDependency: OnlyWarnsForInDependencyCheckPackageRecommendedOption["duplicateDirectDependency"];
@@ -25,8 +26,12 @@ export interface CheckPackageWithWorkspacesApi {
     forEach: (callback: (checkPackage: CheckPackageApi) => void) => CheckPackageWithWorkspacesApi;
     for: (id: string, callback: (checkPackage: CheckPackageApi) => void) => CheckPackageWithWorkspacesApi;
 }
-interface CreateCheckPackageWithWorkspacesOptions extends Except<CreateCheckPackageOptions, "isLibrary"> {
-    isLibrary?: (pkg: PackageJson) => boolean;
+interface CreateCheckPackageWithWorkspacesOptions extends Except<CreateCheckPackageOptions, "library"> {
+    /**
+     * Applied to the workspace members only, the root is never a library.
+     * Defaults to "auto", see {@link CreateCheckPackageOptions.library}.
+     */
+    library?: LibrarySetting | ((pkg: PackageJson) => boolean);
 }
 export declare function createCheckPackageWithWorkspaces({ createReportError, ...createCheckPackageOptions }?: CreateCheckPackageWithWorkspacesOptions): CheckPackageWithWorkspacesApi;
 export {};

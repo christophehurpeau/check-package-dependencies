@@ -6,6 +6,7 @@ export type {
   OnlyWarnsFor,
 } from "./utils/warnForUtils.ts";
 export type { GetDependencyPackageJson } from "./utils/createGetDependencyPackageJson.ts";
+export type { LibrarySetting } from "./utils/library.ts";
 export type {
   PackageJson,
   DependencyName,

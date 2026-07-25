@@ -1231,6 +1231,45 @@ function createGetDependencyPackageJson({
   };
 }
 
+const renamedFromIsLibrary = 'was renamed to "library", which also accepts "auto" (the default) and a list of package name patterns such as ["@scope/*", "!@scope/app-*"]';
+function assertNoLegacyIsLibraryOption(options) {
+  if ("isLibrary" in options) {
+    throw new Error(`The "isLibrary" option ${renamedFromIsLibrary}`);
+  }
+}
+function detectIsLibrary(pkg) {
+  if (pkg.workspacesPackages) return false;
+  return pkg.value.private !== true;
+}
+const parsePackageNamePattern = (pattern) => {
+  const isLibrary = !pattern.startsWith("!");
+  const namePattern = isLibrary ? pattern : pattern.slice(1);
+  if (!namePattern.includes("*")) {
+    return { isLibrary, matches: (packageName) => packageName === namePattern };
+  }
+  const regExp = new RegExp(
+    `^${namePattern.split("*").map((part) => part.replaceAll(/[$()*+.?[\\\]^{|}]/g, "\\$&")).join(".*")}$`
+  );
+  return { isLibrary, matches: (packageName) => regExp.test(packageName) };
+};
+const matchesPackageNamePatterns = (patterns, packageName) => {
+  let isLibrary = false;
+  for (const pattern of patterns) {
+    const parsedPattern = parsePackageNamePattern(pattern);
+    if (parsedPattern.matches(packageName)) {
+      isLibrary = parsedPattern.isLibrary;
+    }
+  }
+  return isLibrary;
+};
+function resolveIsLibrary(setting, pkg) {
+  if (setting === void 0 || setting === "auto") return detectIsLibrary(pkg);
+  if (Array.isArray(setting)) {
+    return matchesPackageNamePatterns(setting, pkg.name);
+  }
+  return setting;
+}
+
 const createOnlyWarnsForArrayCheck = (configName, onlyWarnsFor = []) => {
   const notWarnedFor = new Set(onlyWarnsFor);
   return {
@@ -1312,9 +1351,11 @@ const createOnlyWarnsForMappingCheck = (configName, onlyWarnsFor) => {
 function createCheckPackage({
   packageDirectoryPath = ".",
   internalWorkspacePkgDirectoryPath,
-  isLibrary = false,
-  createReportError = createCliReportError
+  library = "auto",
+  createReportError = createCliReportError,
+  ...otherOptions
 } = {}) {
+  assertNoLegacyIsLibraryOption(otherOptions);
   const pkgDirname = path.resolve(packageDirectoryPath);
   const pkgPath = `${pkgDirname}/package.json`;
   const pkgPathName = `${packageDirectoryPath}/package.json`;
@@ -1322,7 +1363,7 @@ function createCheckPackage({
   const copyPkg = JSON.parse(
     JSON.stringify(parsedPkg.value)
   );
-  const isPkgLibrary = typeof isLibrary === "function" ? isLibrary(parsedPkg.value) : isLibrary;
+  const isPkgLibrary = typeof library === "function" ? library(parsedPkg.value) : resolveIsLibrary(library, parsedPkg);
   const shouldHaveExactVersions = (depType) => !isPkgLibrary ? true : depType === "devDependencies";
   let tryToAutoFix = false;
   if (process.argv.slice(2).includes("--fix")) {
@@ -1575,10 +1616,8 @@ function createCheckPackage({
         onlyWarnsFor: internalDirectDuplicateDependenciesOnlyWarnsFor,
         internalConfigName: "onlyWarnsForInDependencies.duplicateDirectDependency"
       });
-      if (isPkgLibrary) {
-        this.checkMinRangeDependenciesSatisfiesDevDependencies();
-        this.checkMinRangePeerDependenciesSatisfiesDependencies();
-      }
+      this.checkMinRangeDependenciesSatisfiesDevDependencies();
+      this.checkMinRangePeerDependenciesSatisfiesDependencies();
       return this;
     },
     checkIdenticalVersionsThanDependency(depName, { resolutions, dependencies, devDependencies }) {
@@ -1970,10 +2009,11 @@ function createCheckPackageWithWorkspaces({
   createReportError = createCliReportError,
   ...createCheckPackageOptions
 } = {}) {
+  assertNoLegacyIsLibraryOption(createCheckPackageOptions);
   const checkPackage = createCheckPackage({
     createReportError,
     ...createCheckPackageOptions,
-    isLibrary: false
+    library: false
   });
   const { pkg, pkgDirname } = checkPackage;
   const pkgWorkspaces = resolveWorkspacesPackagesGlobs(

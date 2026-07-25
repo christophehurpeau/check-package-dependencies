@@ -1,6 +1,6 @@
 # Require every entry of `resolutions` to be explained in `resolutionsExplained`
 
-💼 This rule is enabled in the ✅ `recommended` and 📚 `recommended-library` configs.
+💼 This rule is enabled in the ✅ `recommended` config.
 
 <!-- end auto-generated rule header -->
 
