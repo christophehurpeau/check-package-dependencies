@@ -306,7 +306,7 @@ describe("checkDirectPeerDependencies", () => {
     assertNoMessages(messages);
   });
 
-  it("should not report error when @types is missing in dependencies/peerDependency of a library", () => {
+  it("should not report error when @types peer dependency is in devDependencies of a library", () => {
     const getDependencyPackageJsonMock = mock.fn<GetDependencyPackageJson>();
     getDependencyPackageJsonMock.mock.mockImplementationOnce(
       () => [
@@ -344,14 +344,138 @@ describe("checkDirectPeerDependencies", () => {
       createOnlyWarnsForMappingCheck("test", []),
       createOnlyWarnsForMappingCheck("test", []),
     );
+    assertNoMessages(messages);
+  });
+
+  it("should not report error when a */types peer dependency is in devDependencies of a library", () => {
+    const getDependencyPackageJsonMock = mock.fn<GetDependencyPackageJson>();
+    getDependencyPackageJsonMock.mock.mockImplementationOnce(
+      () => [
+        {
+          name: "@scope/types",
+        },
+        "",
+      ],
+      0,
+    );
+    getDependencyPackageJsonMock.mock.mockImplementationOnce(
+      () => [
+        {
+          name: "some-lib-using-types",
+          peerDependencies: { "@scope/types": "^1.0.0" },
+        },
+        "",
+      ],
+      1,
+    );
+
+    checkDirectPeerDependencies(
+      mockReportError,
+      true,
+      parsePkgValue({
+        name: "test",
+        dependencies: {
+          "some-lib-using-types": "1.0.0",
+        },
+        devDependencies: {
+          "@scope/types": "1.0.0",
+        },
+      }),
+      getDependencyPackageJsonMock,
+      createOnlyWarnsForMappingCheck("test", []),
+      createOnlyWarnsForMappingCheck("test", []),
+    );
+    assertNoMessages(messages);
+  });
+
+  it("should still report a non-types peer dependency missing from dependencies of a library", () => {
+    const getDependencyPackageJsonMock = mock.fn<GetDependencyPackageJson>();
+    getDependencyPackageJsonMock.mock.mockImplementationOnce(
+      () => [
+        {
+          name: "rollup",
+        },
+        "",
+      ],
+      0,
+    );
+    getDependencyPackageJsonMock.mock.mockImplementationOnce(
+      () => [
+        {
+          name: "some-lib-using-rollup",
+          peerDependencies: { rollup: "^1.0.0" },
+        },
+        "",
+      ],
+      1,
+    );
+
+    checkDirectPeerDependencies(
+      mockReportError,
+      true,
+      parsePkgValue({
+        name: "test",
+        dependencies: {
+          "some-lib-using-rollup": "1.0.0",
+        },
+        devDependencies: {
+          rollup: "1.0.0",
+        },
+      }),
+      getDependencyPackageJsonMock,
+      createOnlyWarnsForMappingCheck("test", []),
+      createOnlyWarnsForMappingCheck("test", []),
+    );
     assertSingleMessage(messages, {
       errorMessage:
-        'Missing "@types/a" peer dependency from "some-lib-using-types" in "dependencies"',
+        'Missing "rollup" peer dependency from "some-lib-using-rollup" in "dependencies"',
       errorDetails:
         'it should satisfies "^1.0.0" and be in dependencies or peerDependencies',
       onlyWarns: false,
-      dependency: { name: "@types/a" },
+      dependency: { name: "rollup" },
     });
+  });
+
+  it("should not report error when peer dependency is in allowedPeerInDevDependencies of a library", () => {
+    const getDependencyPackageJsonMock = mock.fn<GetDependencyPackageJson>();
+    getDependencyPackageJsonMock.mock.mockImplementationOnce(
+      () => [
+        {
+          name: "rollup",
+        },
+        "",
+      ],
+      0,
+    );
+    getDependencyPackageJsonMock.mock.mockImplementationOnce(
+      () => [
+        {
+          name: "some-lib-using-rollup",
+          peerDependencies: { rollup: "^1.0.0" },
+        },
+        "",
+      ],
+      1,
+    );
+
+    checkDirectPeerDependencies(
+      mockReportError,
+      true,
+      parsePkgValue({
+        name: "test",
+        dependencies: {
+          "some-lib-using-rollup": "1.0.0",
+        },
+        devDependencies: {
+          rollup: "1.0.0",
+        },
+      }),
+      getDependencyPackageJsonMock,
+      createOnlyWarnsForMappingCheck("test", []),
+      createOnlyWarnsForMappingCheck("test", []),
+      ["rollup"],
+    );
+    assertNoMessages(messages);
   });
 
   it("should report error even when peer dependency is provided by another dependency for libraries", () => {

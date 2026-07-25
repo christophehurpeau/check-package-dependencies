@@ -6,5 +6,5 @@ export declare function checkPeerDependencies(reportError: ReportError, pkg: Par
     depName: string,
     depVersion: string,
     depPkgName: string
-][], depPkg: PackageJson, missingOnlyWarnsForCheck: OnlyWarnsForCheck, invalidOnlyWarnsForCheck: OnlyWarnsForCheck): void;
+][], depPkg: PackageJson, missingOnlyWarnsForCheck: OnlyWarnsForCheck, invalidOnlyWarnsForCheck: OnlyWarnsForCheck, allowedPeerInDevDependencies?: readonly string[]): void;
 //# sourceMappingURL=checkPeerDependencies.d.ts.map

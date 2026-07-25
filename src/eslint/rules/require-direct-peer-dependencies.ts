@@ -9,6 +9,11 @@ import {
 
 interface CheckDirectPeerDependenciesOptions extends BaseRuleOptions {
   onlyWarnsForMissing?: OnlyWarnsFor;
+  /**
+   * Peer dependency names allowed to be satisfied from devDependencies even for
+   * libraries, in addition to the built-in "@types/*" and "*\/types" packages.
+   */
+  allowedPeerInDevDependencies?: string[];
 }
 
 export const requireDirectPeerDependenciesRule =
@@ -19,6 +24,10 @@ export const requireDirectPeerDependenciesRule =
       properties: {
         onlyWarnsFor: onlyWarnsForMappingSchema,
         onlyWarnsForMissing: onlyWarnsForMappingSchema,
+        allowedPeerInDevDependencies: {
+          type: "array",
+          items: { type: "string" },
+        },
       },
       additionalProperties: false,
     },
@@ -49,6 +58,7 @@ export const requireDirectPeerDependenciesRule =
           getDependencyPackageJson,
           missingOnlyWarnsForCheck,
           invalidOnlyWarnsForCheck,
+          ruleOptions.allowedPeerInDevDependencies,
         );
 
         checkOnlyWarnsForMapping(missingOnlyWarnsForCheck);

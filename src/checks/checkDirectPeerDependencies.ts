@@ -45,6 +45,7 @@ export function checkDirectPeerDependencies(
   getDependencyPackageJson: GetDependencyPackageJson,
   missingOnlyWarnsForCheck: OnlyWarnsForMappingCheck,
   invalidOnlyWarnsForCheck: OnlyWarnsForMappingCheck,
+  allowedPeerInDevDependencies?: readonly string[],
 ): void {
   const allDepPkgs: {
     name: string;
@@ -102,6 +103,7 @@ export function checkDirectPeerDependencies(
         depPkg,
         missingOnlyWarnsForCheck.createFor(depName),
         invalidOnlyWarnsForCheck.createFor(depName),
+        allowedPeerInDevDependencies,
       );
     }
   }

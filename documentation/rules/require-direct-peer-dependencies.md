@@ -14,6 +14,8 @@ Where a peer dependency is allowed to be declared depends on the `isLibrary` set
 | `dependencies`         | `devDependencies`, `dependencies` | `dependencies`, `peerDependencies`                         |
 | `optionalDependencies` | `devDependencies`, `dependencies` | `dependencies`, `optionalDependencies`, `peerDependencies` |
 
+Dev-only peer dependencies are an exception: a peer dependency whose name matches `@types/*` or `*/types`, or is listed in the `allowedPeerInDevDependencies` option, is always allowed in `devDependencies`, even for a library. Such a type-only package is never shipped at runtime, so it does not need to be re-exposed as a `dependency` or `peerDependency`.
+
 Peer dependencies marked `optional` in `peerDependenciesMeta` are ignored, and so are the ones already covered by a matching entry of your own `peerDependencies`.
 
 For an application, a missing peer dependency that is already provided by another direct dependency with a compatible range is not reported. Set the `REPORT_PROVIDED_PEER_DEPENDENCIES` environment variable to `warn` or `1` to report them anyway.
@@ -45,14 +47,18 @@ With `@babel/cli` declaring `"@babel/core": "^7.0.0"` as a peer dependency:
 
 ## Options
 
-| Name                  | Type                       | Default | Description                                                                                                                             |
-| :-------------------- | :------------------------- | :------ | :-------------------------------------------------------------------------------------------------------------------------------------- |
-| `onlyWarnsFor`        | `Record<string, string[]>` | `{}`    | Maps the dependency requiring the peer dependency (or `"*"`) to the peer dependency names to only warn for when the version is invalid. |
-| `onlyWarnsForMissing` | `Record<string, string[]>` | `{}`    | Same, for missing peer dependencies.                                                                                                    |
+| Name                           | Type                       | Default | Description                                                                                                                             |
+| :----------------------------- | :------------------------- | :------ | :-------------------------------------------------------------------------------------------------------------------------------------- |
+| `onlyWarnsFor`                 | `Record<string, string[]>` | `{}`    | Maps the dependency requiring the peer dependency (or `"*"`) to the peer dependency names to only warn for when the version is invalid. |
+| `onlyWarnsForMissing`          | `Record<string, string[]>` | `{}`    | Same, for missing peer dependencies.                                                                                                    |
+| `allowedPeerInDevDependencies` | `string[]`                 | `[]`    | Peer dependency names allowed in `devDependencies` even for a library, in addition to the built-in `@types/*` and `*/types` packages.   |
 
 ```js
 "check-package-dependencies/require-direct-peer-dependencies": [
   "error",
-  { onlyWarnsForMissing: { "@babel/cli": ["@babel/core"] } },
+  {
+    onlyWarnsForMissing: { "@babel/cli": ["@babel/core"] },
+    allowedPeerInDevDependencies: ["typescript"],
+  },
 ]
 ```

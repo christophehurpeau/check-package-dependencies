@@ -9,6 +9,14 @@ import type {
 import { getRealVersion } from "../utils/semverUtils.ts";
 import type { OnlyWarnsForCheck } from "../utils/warnForUtils.ts";
 
+const isDevOnlyPeerDependency = (
+  name: string,
+  additionalNames: readonly string[] | undefined,
+): boolean =>
+  name.startsWith("@types/") ||
+  name.endsWith("/types") ||
+  (additionalNames?.includes(name) ?? false);
+
 export function checkSatisfiesPeerDependency(
   reportError: ReportError,
   pkg: ParsedPackageJson,
@@ -67,15 +75,23 @@ export function checkPeerDependencies(
   depPkg: PackageJson,
   missingOnlyWarnsForCheck: OnlyWarnsForCheck,
   invalidOnlyWarnsForCheck: OnlyWarnsForCheck,
+  allowedPeerInDevDependencies?: readonly string[],
 ): void {
   const { peerDependencies, peerDependenciesMeta } = depPkg;
   if (!peerDependencies) return;
 
-  const allowedPeerInExisting = allowedPeerIn.filter(
-    (allowedPeerInType) => pkg[allowedPeerInType],
-  );
-
   for (const [peerDepName, range] of Object.entries(peerDependencies)) {
+    // types-only packages are dev-only, allow them in devDependencies even for libraries
+    const allowedPeerInForDep =
+      isDevOnlyPeerDependency(peerDepName, allowedPeerInDevDependencies) &&
+      !allowedPeerIn.includes("devDependencies")
+        ? [...allowedPeerIn, "devDependencies" as const]
+        : allowedPeerIn;
+
+    const allowedPeerInExisting = allowedPeerInForDep.filter(
+      (allowedPeerInType) => pkg[allowedPeerInType],
+    );
+
     const versionsIn = allowedPeerInExisting.filter(
       (allowedPeerInExistingType) =>
         pkg[allowedPeerInExistingType]?.[peerDepName],
@@ -119,7 +135,7 @@ export function checkPeerDependencies(
 
       reportError({
         errorMessage: `Missing "${peerDepName}" peer dependency ${fromDependency(depPkg, type)}`,
-        errorDetails: `it should satisfies "${range}" and be in ${allowedPeerIn.join(" or ")}${additionalDetails}`,
+        errorDetails: `it should satisfies "${range}" and be in ${allowedPeerInForDep.join(" or ")}${additionalDetails}`,
         dependency: { name: peerDepName },
         onlyWarns: missingOnlyWarnsForCheck.shouldWarnsFor(peerDepName),
       });

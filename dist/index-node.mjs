@@ -302,6 +302,7 @@ function getRealVersion(version) {
   return version;
 }
 
+const isDevOnlyPeerDependency = (name, additionalNames) => name.startsWith("@types/") || name.endsWith("/types") || (additionalNames?.includes(name) ?? false);
 function checkSatisfiesPeerDependency(reportError, pkg, type, allowedPeerIn, peerDepName, range, depPkg, invalidOnlyWarnsForCheck) {
   const versions = allowedPeerIn.map(
     (versionsInType) => pkg[versionsInType]?.[peerDepName]
@@ -328,13 +329,14 @@ function checkSatisfiesPeerDependency(reportError, pkg, type, allowedPeerIn, pee
     }
   });
 }
-function checkPeerDependencies(reportError, pkg, type, allowedPeerIn, allowMissing, providedDependencies, depPkg, missingOnlyWarnsForCheck, invalidOnlyWarnsForCheck) {
+function checkPeerDependencies(reportError, pkg, type, allowedPeerIn, allowMissing, providedDependencies, depPkg, missingOnlyWarnsForCheck, invalidOnlyWarnsForCheck, allowedPeerInDevDependencies) {
   const { peerDependencies, peerDependenciesMeta } = depPkg;
   if (!peerDependencies) return;
-  const allowedPeerInExisting = allowedPeerIn.filter(
-    (allowedPeerInType) => pkg[allowedPeerInType]
-  );
   for (const [peerDepName, range] of Object.entries(peerDependencies)) {
+    const allowedPeerInForDep = isDevOnlyPeerDependency(peerDepName, allowedPeerInDevDependencies) && !allowedPeerIn.includes("devDependencies") ? [...allowedPeerIn, "devDependencies"] : allowedPeerIn;
+    const allowedPeerInExisting = allowedPeerInForDep.filter(
+      (allowedPeerInType) => pkg[allowedPeerInType]
+    );
     const versionsIn = allowedPeerInExisting.filter(
       (allowedPeerInExistingType) => pkg[allowedPeerInExistingType]?.[peerDepName]
     );
@@ -368,7 +370,7 @@ function checkPeerDependencies(reportError, pkg, type, allowedPeerIn, allowMissi
       }
       reportError({
         errorMessage: `Missing "${peerDepName}" peer dependency ${fromDependency(depPkg, type)}`,
-        errorDetails: `it should satisfies "${range}" and be in ${allowedPeerIn.join(" or ")}${additionalDetails}`,
+        errorDetails: `it should satisfies "${range}" and be in ${allowedPeerInForDep.join(" or ")}${additionalDetails}`,
         dependency: { name: peerDepName },
         onlyWarns: missingOnlyWarnsForCheck.shouldWarnsFor(peerDepName)
       });
@@ -402,7 +404,7 @@ const getAllowedPeerInFromType = (depPkgType, isLibrary) => {
       return isLibrary ? ["dependencies", "optionalDependencies", "peerDependencies"] : ["devDependencies", "dependencies"];
   }
 };
-function checkDirectPeerDependencies(reportError, isLibrary, pkg, getDependencyPackageJson, missingOnlyWarnsForCheck, invalidOnlyWarnsForCheck) {
+function checkDirectPeerDependencies(reportError, isLibrary, pkg, getDependencyPackageJson, missingOnlyWarnsForCheck, invalidOnlyWarnsForCheck, allowedPeerInDevDependencies) {
   const allDepPkgs = [];
   const allDirectDependenciesDependencies = [];
   regularDependencyTypes.forEach((depType) => {
@@ -444,7 +446,8 @@ function checkDirectPeerDependencies(reportError, isLibrary, pkg, getDependencyP
         allDirectDependenciesDependencies,
         depPkg,
         missingOnlyWarnsForCheck.createFor(depName),
-        invalidOnlyWarnsForCheck.createFor(depName)
+        invalidOnlyWarnsForCheck.createFor(depName),
+        allowedPeerInDevDependencies
       );
     }
   }
@@ -1460,6 +1463,7 @@ function createCheckPackage({
     checkDirectPeerDependencies({
       missingOnlyWarnsFor,
       invalidOnlyWarnsFor,
+      allowedPeerInDevDependencies,
       internalMissingConfigName = "missingOnlyWarnsFor",
       internalInvalidConfigName = "invalidOnlyWarnsFor"
     } = {}) {
@@ -1483,7 +1487,8 @@ function createCheckPackage({
             parsedPkg,
             getDependencyPackageJson,
             missingOnlyWarnsForCheck,
-            invalidOnlyWarnsForCheck
+            invalidOnlyWarnsForCheck,
+            allowedPeerInDevDependencies
           );
           reportNotWarnedForMapping(reportError, missingOnlyWarnsForCheck);
           if (missingOnlyWarnsForCheck !== invalidOnlyWarnsForCheck) {

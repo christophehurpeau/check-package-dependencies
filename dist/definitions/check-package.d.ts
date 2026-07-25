@@ -15,6 +15,11 @@ export interface CreateCheckPackageOptions {
 export interface CheckDirectPeerDependenciesOptions {
     missingOnlyWarnsFor?: OnlyWarnsForOptionalDependencyMapping;
     invalidOnlyWarnsFor?: OnlyWarnsForOptionalDependencyMapping;
+    /**
+     * Peer dependency names allowed to be satisfied from devDependencies even for
+     * libraries, in addition to the built-in "@types/*" and "*\/types" packages.
+     */
+    allowedPeerInDevDependencies?: readonly string[];
     internalMissingConfigName?: string;
     internalInvalidConfigName?: string;
 }
