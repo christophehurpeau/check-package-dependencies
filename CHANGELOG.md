@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [11.7.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v11.6.0...v11.7.0) (2026-07-25)
+
+### Features
+
+* add new rules for dependency management and documentation
+* **require-direct-peer-dependencies:** allow dev-only peer dependencies in devDependencies for libraries
+
+### Bug Fixes
+
+* **consistent-workspace-dependencies:** skip monorepo peer check when subpackage declares the peer itself
+* **deps:** update dependency semver to ^7.8.5 ([#866](https://github.com/christophehurpeau/check-package-dependencies/issues/866))
+
 ## [11.6.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v11.5.0...v11.6.0) (2026-07-18)
 
 ### Features
