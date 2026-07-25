@@ -635,6 +635,16 @@ function checkDuplicateDependencies(reportError, pkg, isPkgLibrary, depType, sea
   }
 }
 
+const subpackageDeclaredDependencyTypes = [
+  "devDependencies",
+  "dependencies",
+  "peerDependencies",
+  "optionalDependencies"
+];
+const isPeerDependencyDeclaredInPackage = (pkg, peerDepName) => subpackageDeclaredDependencyTypes.some(
+  (depType) => pkg[depType]?.[peerDepName]
+);
+
 const createOnlyWarnsForArrayCheck = (configName, onlyWarnsFor = []) => {
   const notWarnedFor = new Set(onlyWarnsFor);
   return {
@@ -1121,7 +1131,7 @@ const consistentWorkspaceDependenciesRule = createPackageRule(
           for (const [peerDepName, range] of Object.entries(
             depPkg.peerDependencies
           )) {
-            if (pkg.devDependencies?.[peerDepName]) {
+            if (isPeerDependencyDeclaredInPackage(pkg, peerDepName)) {
               continue;
             }
             checkSatisfiesPeerDependency(

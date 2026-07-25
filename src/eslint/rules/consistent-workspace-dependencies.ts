@@ -1,5 +1,6 @@
 import { regularDependencyTypes } from "../../checks/checkDirectPeerDependencies.ts";
 import { checkDuplicateDependencies } from "../../checks/checkDuplicateDependencies.ts";
+import { isPeerDependencyDeclaredInPackage } from "../../checks/checkMonorepoDirectSubpackagePeerDependencies.ts";
 import { checkSatisfiesPeerDependency } from "../../checks/checkPeerDependencies.ts";
 import type { ReportError } from "../../reporting/ReportError.ts";
 import { getKeys } from "../../utils/object.ts";
@@ -141,7 +142,7 @@ export const consistentWorkspaceDependenciesRule = createPackageRule(
           for (const [peerDepName, range] of Object.entries(
             depPkg.peerDependencies,
           )) {
-            if (pkg.devDependencies?.[peerDepName]) {
+            if (isPeerDependencyDeclaredInPackage(pkg, peerDepName)) {
               continue; // skip as already checked in checkDirectPeerDependencies for the subpackage itself.
             }
             checkSatisfiesPeerDependency(

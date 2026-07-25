@@ -1917,6 +1917,15 @@ function createCheckPackage({
   };
 }
 
+const subpackageDeclaredDependencyTypes = [
+  "devDependencies",
+  "dependencies",
+  "peerDependencies",
+  "optionalDependencies"
+];
+const isPeerDependencyDeclaredInPackage = (pkg, peerDepName) => subpackageDeclaredDependencyTypes.some(
+  (depType) => pkg[depType]?.[peerDepName]
+);
 function checkMonorepoDirectSubpackagePeerDependencies(reportError, isLibrary, monorepoPkg, subpackagePkg, getDependencyPackageJson, invalidOnlyWarnsForCheck, missingOnlyWarnsForCheck) {
   const allDepPkgs = [];
   regularDependencyTypes.forEach((depType) => {
@@ -1935,7 +1944,7 @@ function checkMonorepoDirectSubpackagePeerDependencies(reportError, isLibrary, m
       for (const [peerDepName, range] of Object.entries(
         depPkg.peerDependencies
       )) {
-        if (subpackagePkg.devDependencies?.[peerDepName]) {
+        if (isPeerDependencyDeclaredInPackage(subpackagePkg, peerDepName)) {
           continue;
         }
         checkSatisfiesPeerDependency(

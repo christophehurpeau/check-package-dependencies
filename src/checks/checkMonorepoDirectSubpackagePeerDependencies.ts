@@ -3,6 +3,7 @@ import { reportNotWarnedForMapping } from "../reporting/cliErrorReporting.ts";
 import type { GetDependencyPackageJson } from "../utils/createGetDependencyPackageJson.ts";
 import { getKeys } from "../utils/object.ts";
 import type {
+  DependencyTypes,
   PackageJson,
   ParsedPackageJson,
   RegularDependencyTypes,
@@ -10,6 +11,24 @@ import type {
 import type { OnlyWarnsForMappingCheck } from "../utils/warnForUtils.ts";
 import { regularDependencyTypes } from "./checkDirectPeerDependencies.ts";
 import { checkSatisfiesPeerDependency } from "./checkPeerDependencies.ts";
+
+const subpackageDeclaredDependencyTypes: DependencyTypes[] = [
+  "devDependencies",
+  "dependencies",
+  "peerDependencies",
+  "optionalDependencies",
+];
+
+// A peer dependency already declared by the subpackage itself is validated by
+// checkDirectPeerDependencies (the require-direct-peer-dependencies rule), so the
+// monorepo-root check would only duplicate that report.
+export const isPeerDependencyDeclaredInPackage = (
+  pkg: ParsedPackageJson,
+  peerDepName: string,
+): boolean =>
+  subpackageDeclaredDependencyTypes.some(
+    (depType) => pkg[depType]?.[peerDepName],
+  );
 
 export function checkMonorepoDirectSubpackagePeerDependencies(
   reportError: ReportError,
@@ -43,7 +62,7 @@ export function checkMonorepoDirectSubpackagePeerDependencies(
       for (const [peerDepName, range] of Object.entries(
         depPkg.peerDependencies,
       )) {
-        if (subpackagePkg.devDependencies?.[peerDepName]) {
+        if (isPeerDependencyDeclaredInPackage(subpackagePkg, peerDepName)) {
           continue; // skip as already checked in checkDirectPeerDependencies for the subpackage itself.
         }
         checkSatisfiesPeerDependency(
