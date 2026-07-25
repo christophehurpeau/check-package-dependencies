@@ -7,7 +7,15 @@
     "enableWeakerNetworkIsolation": true,
     "filesystem": {
       "denyRead": ["~/"],
-      "allowRead": [".", "~/.gitconfig", "~/.dotfiles", "~/.claude"]
+      "allowRead": [
+        ".",
+        "~/.gitconfig",
+        "~/.dotfiles",
+        "~/.claude",
+        "~/.npmrc",
+        "~/Library/pnpm"
+      ],
+      "allowWrite": ["~/Library/pnpm"]
     },
     "excludedCommands": ["git commit:*", "git push:*"]
   },
