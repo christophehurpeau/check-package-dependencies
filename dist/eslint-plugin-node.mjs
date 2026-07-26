@@ -1,5 +1,5 @@
 import path, { dirname } from 'node:path';
-import fs, { constants, readFileSync } from 'node:fs';
+import fs, { constants } from 'node:fs';
 import { findPackageJSON } from 'node:module';
 import { parseTree, findNodeAtLocation, getNodeValue } from 'jsonc-parser';
 import { TextSourceCodeBase, VisitNodeStep } from '@eslint/plugin-kit';
@@ -52,7 +52,7 @@ if (typeof findPackageJSON !== "function") {
   throw new Error("check-package-dependencies requires node >= 22.14.0");
 }
 function readPkgJson(packagePath) {
-  return JSON.parse(readFileSync(packagePath, "utf8"));
+  return JSON.parse(fs.readFileSync(packagePath, "utf8"));
 }
 function stringifyPkgJson(pkg) {
   return `${JSON.stringify(pkg, null, 2)}
@@ -187,7 +187,7 @@ function parsePkg(packageContent, packagePath) {
   };
 }
 function readAndParsePkgJson(packagePath) {
-  return parsePkg(readFileSync(packagePath, "utf8"), packagePath);
+  return parsePkg(fs.readFileSync(packagePath, "utf8"), packagePath);
 }
 function internalLoadPackageJsonFromNodeModules(pkgDepName, pkgDirname) {
   const packagePath = findPackageJSON(

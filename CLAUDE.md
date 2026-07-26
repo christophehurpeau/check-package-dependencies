@@ -109,16 +109,16 @@ Tests use Node's built-in `node:test` / `node:assert/strict`. The shared helpers
 
 Avoid `fixtures/` most of the time. They put the interesting part of the test in a separate file the reader has to open, they cannot express several cases without several directories, and they cost a `pnpm install --frozen-lockfile` on every run.
 
-Add one **only to validate a real case against a real install** — a real `pnpm-lock.yaml` and real `node_modules`, where what is under test is the resolution itself. If the fixture would carry nothing but `package.json` files, it should have been a mock: the check only reads declared ranges, so the directory buys nothing over inline objects. Several existing fixtures are in exactly that state (`workspace-dependencies-library`, `invalid-workspace-protocol`, …) — they predate this rule and are not a precedent.
+Add one **only to validate a real case against a real install** — a real `pnpm-lock.yaml` and real `node_modules`, where what is under test is the resolution itself. If the fixture would carry nothing but `package.json` files, it should have been a mock: the check only reads declared ranges, so the directory buys nothing over inline objects. Every remaining fixture has a committed lockfile and installs it in a `before()` hook; a new one without them does not belong here.
 
 In order of preference:
 
 1. **Call the check directly** with `parsePkgValue({...})` and `createMockReportError()`. Most behaviour lives in `src/checks/` and needs nothing else — this is where a new case belongs unless it is specifically about rule wiring.
-2. **`RuleTester`** with inline `package.json` contents, in a `*.ruletester.test.ts` file.
-3. **`Linter.verify(code, [config], filename)`** when the rule needs to read other `package.json` files. The `package-json` language parses `file.body` as a string, so the linted file never has to exist. Mock the reads with `mock.method` from `node:test`, and make the mock **throw** on any path it does not know so an unexpected disk read fails loudly. See `consistent-workspace-dependencies.npm-alias.test.ts`, which mocks the `globSync` / `accessSync` / `readFileSync` calls of `loadWorkspacePackageJsons` and declares its workspace members as inline objects.
+2. **`RuleTester`** with inline `package.json` contents, in a `*.ruletester.test.ts` file. For a rule that reads nothing but the linted `package.json` and its options.
+3. **The `src/eslint/eslint.testUtils.ts` helpers** when the rule needs to read other `package.json` files — a workspace root, its members, or a dependency's own manifest. `mockFileSystem(files)` replaces the `globSync` / `accessSync` / `readFileSync` calls the rules make with an in-memory set of files, and **throws** on any path it does not know so an unexpected disk read fails loudly. `lintPackageJson` / `lintPackageJsonMessages` / `fixPackageJson` lint one of those files through `Linter.verify`, which never touches the disk. Always `mock.restoreAll()` in an `afterEach`. See `consistent-workspace-dependencies.npm-alias.test.ts` and `require-workspace-protocol.test.ts`.
 4. **A fixture directory** only when the check resolves real packages out of `node_modules`, with the lockfile and the install to back it — mocking that would only assert the mock. `fixtures/invalid-workspace-dependencies` is the example: it commits a `pnpm-lock.yaml` and its test installs it in a `before()` hook.
 
-`Linter` also avoids the `process.chdir` juggling the `ESLint`-class fixture tests need. `node --test` runs each file in its own process, so mutating `node:fs` with `mock.method` is safe, but still `mock.restoreAll()` in `afterEach`.
+The mocked filesystem is mounted on the current working directory, because that is what `loadWorkspacePackageJsons` and `findWorkspaceMemberNames` resolve their glob matches against — which is also why the `ESLint`-class fixture tests have to `process.chdir`. `node --test` runs each file in its own process, so mutating `node:fs` with `mock.method` is safe.
 
 ### `onlyWarnsFor`
 

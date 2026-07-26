@@ -1,4 +1,5 @@
-import { readFileSync, writeFileSync } from "node:fs";
+// the default import keeps "fs.readFileSync" mockable, which the tests rely on
+import fs from "node:fs";
 // eslint-disable-next-line n/no-unsupported-features/node-builtins
 import { findPackageJSON } from "node:module";
 import type { ParseError } from "jsonc-parser";
@@ -16,7 +17,8 @@ if (typeof findPackageJSON !== "function") {
 }
 
 export function readPkgJson(packagePath: string): PackageJson {
-  return JSON.parse(readFileSync(packagePath, "utf8")) as PackageJson;
+  // eslint-disable-next-line unicorn/prefer-json-parse-buffer -- JSON.parse's TS types require a string
+  return JSON.parse(fs.readFileSync(packagePath, "utf8")) as PackageJson;
 }
 
 export function stringifyPkgJson(pkg: PackageJson): string {
@@ -24,7 +26,7 @@ export function stringifyPkgJson(pkg: PackageJson): string {
 }
 
 export function writePkgJson(packagePath: string, pkg: PackageJson): void {
-  writeFileSync(packagePath, stringifyPkgJson(pkg));
+  fs.writeFileSync(packagePath, stringifyPkgJson(pkg));
 }
 
 function getLocationFromOffset(
@@ -199,7 +201,7 @@ export function parsePkgValue(
 }
 
 export function readAndParsePkgJson(packagePath: string): ParsedPackageJson {
-  return parsePkg(readFileSync(packagePath, "utf8"), packagePath);
+  return parsePkg(fs.readFileSync(packagePath, "utf8"), packagePath);
 }
 
 /** @internal */

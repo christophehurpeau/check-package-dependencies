@@ -73,18 +73,4 @@ describe("consistent-workspace-dependencies on a workspace member", () => {
     // "semver", which has no peer dependency
     deepEqual(await lintMember("c"), []);
   });
-
-  it("should report nothing for a package that is not in a workspace", async () => {
-    const standaloneDirectoryPath = path.join(
-      process.cwd(),
-      "fixtures/standalone-package",
-    );
-    deepEqual(
-      await lintPackageJson(
-        path.join(standaloneDirectoryPath, "package.json"),
-        standaloneDirectoryPath,
-      ),
-      [],
-    );
-  });
 });

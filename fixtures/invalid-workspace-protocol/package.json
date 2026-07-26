@@ -1,8 +1,0 @@
-{
-  "name": "fixtures-invalid-workspace-protocol",
-  "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
-  "type": "module"
-}

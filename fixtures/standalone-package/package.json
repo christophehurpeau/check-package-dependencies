@@ -1,8 +1,0 @@
-{
-  "name": "fixture-standalone-package",
-  "private": true,
-  "type": "module",
-  "dependencies": {
-    "semver": "^7.8.5"
-  }
-}
