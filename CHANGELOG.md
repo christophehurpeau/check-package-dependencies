@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [12.1.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v12.0.0...v12.1.0) (2026-07-26)
+
+### Features
+
+* implement npm alias parsing and enhance duplicate dependency checks
+* improve warnings
+
 ## [12.0.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v11.7.0...v12.0.0) (2026-07-25)
 
 ### ⚠ BREAKING CHANGES
