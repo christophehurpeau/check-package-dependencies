@@ -208,6 +208,194 @@ describe("checkDuplicateDependencies", () => {
     });
   });
 
+  it("should not report error when both are npm aliases of the same package with intersecting ranges", () => {
+    checkDuplicateDependencies(
+      mockReportError,
+      parsePkgValue({
+        name: "test",
+        devDependencies: {
+          typescript: "npm:@typescript/typescript6@6.0.2",
+          "some-lib-using-typescript": "1.0.0",
+        },
+      }),
+      false,
+      "dependencies",
+      ["devDependencies"],
+      {
+        name: "some-lib-using-typescript",
+        dependencies: { typescript: "npm:@typescript/typescript6@^6.0.0" },
+      },
+      createOnlyWarnsForArrayCheck("test", []),
+    );
+
+    assertNoMessages(messages);
+  });
+
+  it("should report error when both are npm aliases of the same package with non intersecting ranges", () => {
+    checkDuplicateDependencies(
+      mockReportError,
+      parsePkgValue({
+        name: "test",
+        devDependencies: {
+          typescript: "npm:@typescript/typescript6@6.0.2",
+          "some-lib-using-typescript": "1.0.0",
+        },
+      }),
+      false,
+      "dependencies",
+      ["devDependencies"],
+      {
+        name: "some-lib-using-typescript",
+        dependencies: { typescript: "npm:@typescript/typescript6@^7.0.0" },
+      },
+      createOnlyWarnsForArrayCheck("test", []),
+    );
+
+    assertSingleMessage(messages, {
+      errorMessage: "Invalid duplicate dependency",
+      errorDetails:
+        '"npm:@typescript/typescript6@6.0.2" should satisfies "npm:@typescript/typescript6@^7.0.0" from some-lib-using-typescript in dependencies',
+      onlyWarns: false,
+      dependency: {
+        name: "typescript",
+        fieldName: "devDependencies",
+        value: "npm:@typescript/typescript6@6.0.2",
+      },
+    });
+  });
+
+  it("should report error when only one of the two is an npm alias", () => {
+    checkDuplicateDependencies(
+      mockReportError,
+      parsePkgValue({
+        name: "test",
+        devDependencies: {
+          typescript: "npm:@typescript/typescript6@6.0.2",
+          "some-lib-using-typescript": "1.0.0",
+        },
+      }),
+      false,
+      "dependencies",
+      ["devDependencies"],
+      {
+        name: "some-lib-using-typescript",
+        dependencies: { typescript: "^5.0.0" },
+      },
+      createOnlyWarnsForArrayCheck("test", []),
+    );
+
+    assertSingleMessage(messages, {
+      errorMessage: "Invalid duplicate dependency",
+      errorDetails:
+        '"npm:@typescript/typescript6@6.0.2" and "^5.0.0" from some-lib-using-typescript in dependencies install different packages',
+      onlyWarns: false,
+      dependency: {
+        name: "typescript",
+        fieldName: "devDependencies",
+        value: "npm:@typescript/typescript6@6.0.2",
+      },
+    });
+  });
+
+  it("should report error when the npm aliases point to different packages", () => {
+    checkDuplicateDependencies(
+      mockReportError,
+      parsePkgValue({
+        name: "test",
+        devDependencies: {
+          typescript: "npm:@typescript/typescript6@6.0.2",
+          "some-lib-using-typescript": "1.0.0",
+        },
+      }),
+      false,
+      "dependencies",
+      ["devDependencies"],
+      {
+        name: "some-lib-using-typescript",
+        dependencies: { typescript: "npm:other-typescript@1.0.0" },
+      },
+      createOnlyWarnsForArrayCheck("test", []),
+    );
+
+    assertSingleMessage(messages, {
+      errorMessage: "Invalid duplicate dependency",
+      errorDetails:
+        '"npm:@typescript/typescript6@6.0.2" and "npm:other-typescript@1.0.0" from some-lib-using-typescript in dependencies install different packages',
+      onlyWarns: false,
+      dependency: {
+        name: "typescript",
+        fieldName: "devDependencies",
+        value: "npm:@typescript/typescript6@6.0.2",
+      },
+    });
+  });
+
+  it("should report error when the dependency's value is a dist tag", () => {
+    checkDuplicateDependencies(
+      mockReportError,
+      parsePkgValue({
+        name: "test",
+        devDependencies: {
+          rollup: "next",
+          "some-lib-using-rollup": "1.0.0",
+        },
+      }),
+      false,
+      "dependencies",
+      ["devDependencies"],
+      {
+        name: "some-lib-using-rollup",
+        dependencies: { rollup: "^2.0.0" },
+      },
+      createOnlyWarnsForArrayCheck("test", []),
+    );
+
+    assertSingleMessage(messages, {
+      errorMessage: 'Unsupported range for "rollup"',
+      errorDetails:
+        '"next" is not a valid semver range, "next" cannot be compared with "^2.0.0" from some-lib-using-rollup in dependencies',
+      onlyWarns: false,
+      dependency: {
+        name: "rollup",
+        fieldName: "devDependencies",
+        value: "next",
+      },
+    });
+  });
+
+  it("should report error when the npm alias range is a dist tag", () => {
+    checkDuplicateDependencies(
+      mockReportError,
+      parsePkgValue({
+        name: "test",
+        devDependencies: {
+          typescript: "npm:@typescript/typescript6",
+          "some-lib-using-typescript": "1.0.0",
+        },
+      }),
+      false,
+      "dependencies",
+      ["devDependencies"],
+      {
+        name: "some-lib-using-typescript",
+        dependencies: { typescript: "npm:@typescript/typescript6@next" },
+      },
+      createOnlyWarnsForArrayCheck("test", []),
+    );
+
+    assertSingleMessage(messages, {
+      errorMessage: 'Unsupported range for "typescript"',
+      errorDetails:
+        '"next" is not a valid semver range, "npm:@typescript/typescript6" cannot be compared with "npm:@typescript/typescript6@next" from some-lib-using-typescript in dependencies',
+      onlyWarns: false,
+      dependency: {
+        name: "typescript",
+        fieldName: "devDependencies",
+        value: "npm:@typescript/typescript6",
+      },
+    });
+  });
+
   it("should not report error when dependency's value is latest", () => {
     checkDuplicateDependencies(
       mockReportError,

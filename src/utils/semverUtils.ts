@@ -53,13 +53,33 @@ export function isExactRange(range: string): boolean {
   return isExactParsedRange(parseRange(range));
 }
 
+export interface NpmAlias {
+  aliasedName: string;
+  range: string;
+}
+
+/**
+ * Parses an alias to another package, `npm:name@range`, returning null for any
+ * other value. The range is optional, `npm:name` aliasing its latest version.
+ */
+export function parseNpmAlias(version: string): NpmAlias | null {
+  if (!version.startsWith("npm:")) return null;
+  const target = version.slice("npm:".length);
+  const rangeSeparatorIndex = target.indexOf(
+    "@",
+    target.startsWith("@") ? 1 : 0,
+  );
+  if (rangeSeparatorIndex === -1) return { aliasedName: target, range: "*" };
+  return {
+    aliasedName: target.slice(0, rangeSeparatorIndex),
+    range: target.slice(rangeSeparatorIndex + 1) || "*",
+  };
+}
+
 export function getRealVersion(version: string): string {
-  if (version.startsWith("npm:")) {
-    const match = /^npm:@?[^@]+@(.*)$/.exec(version);
-    if (!match) throw new Error(`Invalid version match: ${version}`);
-    const [, realVersion] = match;
-    if (realVersion) return realVersion;
-  }
+  const npmAlias = parseNpmAlias(version);
+  if (npmAlias) return npmAlias.range;
+
   if (version.startsWith("workspace:")) {
     const realVersion = version.slice("workspace:".length);
     // "workspace:~" and "workspace:^" are shorthands resolved to the

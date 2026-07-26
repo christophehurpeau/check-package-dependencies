@@ -163,6 +163,64 @@ function inDependency(depPkg, depType) {
   return `in ${depType ? `"${depType}" of ` : ""}"${depPkg.name || ""}"`;
 }
 
+semverUtils.parse;
+const parseRange = semverUtils.parseRange;
+function stringify(semver) {
+  let str = "";
+  if (semver.operator) {
+    str += semver.operator;
+  }
+  str += semver.major || "0";
+  str += ".";
+  str += semver.minor || "0";
+  str += ".";
+  str += semver.patch || "0";
+  if (semver.release) {
+    str += `-${semver.release}`;
+  }
+  if (semver.build) {
+    str += `+${semver.build}`;
+  }
+  return str;
+}
+function getOperator(range) {
+  const parsedRange = parseRange(range);
+  if (parsedRange.length !== 1) return null;
+  return parsedRange[0]?.operator || "";
+}
+function changeOperator(range, operator) {
+  if (operator === null) return range;
+  const parsedRange = parseRange(range);
+  if (parsedRange.length !== 1) return null;
+  const parsed = parsedRange[0];
+  if (!parsed) return null;
+  parsed.operator = operator === "" ? void 0 : operator;
+  return stringify(parsed);
+}
+function parseNpmAlias(version) {
+  if (!version.startsWith("npm:")) return null;
+  const target = version.slice("npm:".length);
+  const rangeSeparatorIndex = target.indexOf(
+    "@",
+    target.startsWith("@") ? 1 : 0
+  );
+  if (rangeSeparatorIndex === -1) return { aliasedName: target, range: "*" };
+  return {
+    aliasedName: target.slice(0, rangeSeparatorIndex),
+    range: target.slice(rangeSeparatorIndex + 1) || "*"
+  };
+}
+function getRealVersion(version) {
+  const npmAlias = parseNpmAlias(version);
+  if (npmAlias) return npmAlias.range;
+  if (version.startsWith("workspace:")) {
+    const realVersion = version.slice("workspace:".length);
+    if (realVersion === "~" || realVersion === "^") return "*";
+    return realVersion;
+  }
+  return version;
+}
+
 function checkDuplicateDependencies(reportError, pkg, isPkgLibrary, depType, searchIn, depPkg, onlyWarnsForCheck) {
   const dependencies = depPkg[depType];
   if (!dependencies) return;
@@ -203,24 +261,51 @@ function checkDuplicateDependencies(reportError, pkg, isPkgLibrary, depType, sea
         if (versionValue.startsWith("patch:") || depRange.startsWith("patch:")) {
           return;
         }
-        if (semver.satisfies(versionValue, depRange, {
-          includePrerelease: true
-        }) || semver.intersects(versionValue, depRange, {
-          includePrerelease: true
-        })) {
-          return;
-        }
         if (pkg.resolutions?.[depKey]) {
           return;
         }
         const versionInType = versionsIn[index];
         const dependency = versionInType ? pkg[versionInType][depKey] : void 0;
-        reportError({
-          errorMessage: `Invalid duplicate dependency${dependency ? "" : `"${depKey}"`}`,
-          errorDetails: `"${versions[0].value}" should satisfies "${depRange}" from ${depPkg.name || ""} in ${depType}`,
-          onlyWarns: onlyWarnsForCheck.shouldWarnsFor(depKey),
-          dependency
-        });
+        const reportDuplicate = (errorDetails) => {
+          reportError({
+            errorMessage: `Invalid duplicate dependency${dependency ? "" : `"${depKey}"`}`,
+            errorDetails,
+            onlyWarns: onlyWarnsForCheck.shouldWarnsFor(depKey),
+            dependency
+          });
+        };
+        const versionAlias = parseNpmAlias(versionValue);
+        const depRangeAlias = parseNpmAlias(depRange);
+        if (versionAlias?.aliasedName !== depRangeAlias?.aliasedName) {
+          reportDuplicate(
+            `"${versions[0].value}" and "${depRange}" from ${depPkg.name || ""} in ${depType} install different packages`
+          );
+          return;
+        }
+        const versionRange = versionAlias?.range ?? versionValue;
+        const depRangeRange = depRangeAlias?.range ?? depRange;
+        const unsupportedRange = [versionRange, depRangeRange].find(
+          (range) => semver.validRange(range) === null
+        );
+        if (unsupportedRange !== void 0) {
+          reportError({
+            errorMessage: `Unsupported range for "${depKey}"`,
+            errorDetails: `"${unsupportedRange}" is not a valid semver range, "${versions[0].value}" cannot be compared with "${depRange}" from ${depPkg.name || ""} in ${depType}`,
+            onlyWarns: onlyWarnsForCheck.shouldWarnsFor(depKey),
+            dependency
+          });
+          return;
+        }
+        if (semver.satisfies(versionRange, depRangeRange, {
+          includePrerelease: true
+        }) || semver.intersects(versionRange, depRangeRange, {
+          includePrerelease: true
+        })) {
+          return;
+        }
+        reportDuplicate(
+          `"${versions[0].value}" should satisfies "${depRange}" from ${depPkg.name || ""} in ${depType}`
+        );
       });
     }
   }
@@ -251,55 +336,6 @@ function checkDirectDuplicateDependencies(reportError, pkg, isPackageALibrary, d
     }
   });
   reportNotWarnedForMapping(reportError, onlyWarnsForCheck);
-}
-
-semverUtils.parse;
-const parseRange = semverUtils.parseRange;
-function stringify(semver) {
-  let str = "";
-  if (semver.operator) {
-    str += semver.operator;
-  }
-  str += semver.major || "0";
-  str += ".";
-  str += semver.minor || "0";
-  str += ".";
-  str += semver.patch || "0";
-  if (semver.release) {
-    str += `-${semver.release}`;
-  }
-  if (semver.build) {
-    str += `+${semver.build}`;
-  }
-  return str;
-}
-function getOperator(range) {
-  const parsedRange = parseRange(range);
-  if (parsedRange.length !== 1) return null;
-  return parsedRange[0]?.operator || "";
-}
-function changeOperator(range, operator) {
-  if (operator === null) return range;
-  const parsedRange = parseRange(range);
-  if (parsedRange.length !== 1) return null;
-  const parsed = parsedRange[0];
-  if (!parsed) return null;
-  parsed.operator = operator === "" ? void 0 : operator;
-  return stringify(parsed);
-}
-function getRealVersion(version) {
-  if (version.startsWith("npm:")) {
-    const match = /^npm:@?[^@]+@(.*)$/.exec(version);
-    if (!match) throw new Error(`Invalid version match: ${version}`);
-    const [, realVersion] = match;
-    if (realVersion) return realVersion;
-  }
-  if (version.startsWith("workspace:")) {
-    const realVersion = version.slice("workspace:".length);
-    if (realVersion === "~" || realVersion === "^") return "*";
-    return realVersion;
-  }
-  return version;
 }
 
 const isDevOnlyPeerDependency = (name, additionalNames) => name.startsWith("@types/") || name.endsWith("/types") || (additionalNames?.includes(name) ?? false);

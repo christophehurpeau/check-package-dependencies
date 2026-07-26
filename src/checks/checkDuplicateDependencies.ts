@@ -5,6 +5,7 @@ import type {
   PackageJson,
   ParsedPackageJson,
 } from "../utils/packageTypes.ts";
+import { parseNpmAlias } from "../utils/semverUtils.ts";
 import type { OnlyWarnsForCheck } from "../utils/warnForUtils.ts";
 
 export function checkDuplicateDependencies(
@@ -80,17 +81,6 @@ export function checkDuplicateDependencies(
           return;
         }
 
-        if (
-          semver.satisfies(versionValue, depRange, {
-            includePrerelease: true,
-          }) ||
-          semver.intersects(versionValue, depRange, {
-            includePrerelease: true,
-          })
-        ) {
-          return;
-        }
-
         // Ignore reporting duplicate when there's a resolution for it
         if (pkg.resolutions?.[depKey]) {
           return;
@@ -102,12 +92,57 @@ export function checkDuplicateDependencies(
           ? pkg[versionInType]![depKey]
           : undefined;
 
-        reportError({
-          errorMessage: `Invalid duplicate dependency${dependency ? "" : `"${depKey}"`}`,
-          errorDetails: `"${versions[0]!.value}" should satisfies "${depRange}" from ${depPkg.name || ""} in ${depType}`,
-          onlyWarns: onlyWarnsForCheck.shouldWarnsFor(depKey),
-          dependency,
-        });
+        const reportDuplicate = (errorDetails: string): void => {
+          reportError({
+            errorMessage: `Invalid duplicate dependency${dependency ? "" : `"${depKey}"`}`,
+            errorDetails,
+            onlyWarns: onlyWarnsForCheck.shouldWarnsFor(depKey),
+            dependency,
+          });
+        };
+
+        // https://docs.npmjs.com/cli/commands/npm-install#description
+        // an alias installs another package under "depKey", so both sides must
+        // alias the same package to be the same installed dependency at all.
+        const versionAlias = parseNpmAlias(versionValue);
+        const depRangeAlias = parseNpmAlias(depRange);
+        if (versionAlias?.aliasedName !== depRangeAlias?.aliasedName) {
+          reportDuplicate(
+            `"${versions[0]!.value}" and "${depRange}" from ${depPkg.name || ""} in ${depType} install different packages`,
+          );
+          return;
+        }
+
+        const versionRange = versionAlias?.range ?? versionValue;
+        const depRangeRange = depRangeAlias?.range ?? depRange;
+
+        const unsupportedRange = [versionRange, depRangeRange].find(
+          (range) => semver.validRange(range) === null,
+        );
+        if (unsupportedRange !== undefined) {
+          reportError({
+            errorMessage: `Unsupported range for "${depKey}"`,
+            errorDetails: `"${unsupportedRange}" is not a valid semver range, "${versions[0]!.value}" cannot be compared with "${depRange}" from ${depPkg.name || ""} in ${depType}`,
+            onlyWarns: onlyWarnsForCheck.shouldWarnsFor(depKey),
+            dependency,
+          });
+          return;
+        }
+
+        if (
+          semver.satisfies(versionRange, depRangeRange, {
+            includePrerelease: true,
+          }) ||
+          semver.intersects(versionRange, depRangeRange, {
+            includePrerelease: true,
+          })
+        ) {
+          return;
+        }
+
+        reportDuplicate(
+          `"${versions[0]!.value}" should satisfies "${depRange}" from ${depPkg.name || ""} in ${depType}`,
+        );
       });
     }
   }
