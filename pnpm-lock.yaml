@@ -31,8 +31,8 @@ importers:
         specifier: 65.6.0
         version: 65.6.0(@typescript-eslint/utils@8.62.1(eslint@10.7.0)(typescript@6.0.3))(eslint@10.7.0)(typescript@6.0.3)
       '@pob/rollup-esbuild':
-        specifier: 9.1.3
-        version: 9.1.3(rollup@4.60.4)(typescript@6.0.3)
+        specifier: 9.2.0
+        version: 9.2.0(rollup@4.60.4)(typescript@6.0.3)
       '@pob/root':
         specifier: 24.7.0
         version: 24.7.0
@@ -487,8 +487,8 @@ packages:
       typescript:
         optional: true
 
-  '@pob/rollup-esbuild@9.1.3':
-    resolution: {integrity: sha512-Izx68f0Er4siFjW+PabHCsHdWOgONXNPRzRdzWUy7+vWcFGUOcmibOEkZqIzma0lhwbiup06Gp8M6rYRboHl2A==}
+  '@pob/rollup-esbuild@9.2.0':
+    resolution: {integrity: sha512-eYGzJp4fOia6Lb+PWH7yiujj7fkz+y50Q/ygcdeEhW/TgFHFcyx7wHxghRxld7MqsVsdW2auawPL/l/JuDMi/Q==}
     engines: {node: '>=22.18.0'}
     hasBin: true
     peerDependencies:
@@ -2572,7 +2572,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@pob/rollup-esbuild@9.1.3(rollup@4.60.4)(typescript@6.0.3)':
+  '@pob/rollup-esbuild@9.2.0(rollup@4.60.4)(typescript@6.0.3)':
     dependencies:
       '@pob/rollup': 8.1.2
       '@rollup/plugin-node-resolve': 16.0.3(rollup@4.60.4)
