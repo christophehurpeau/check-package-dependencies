@@ -10,6 +10,8 @@ In a workspace, two packages declaring incompatible versions of the same depende
 
 Every `package.json` of the workspace is compared with all the others: the workspace root with each of its packages, and each package with the root and with the other packages. A conflict is reported on the package whose range has to be raised, in the file declaring it, so that it is reported once and where `--fix` can raise it to the other range. Nothing is reported on the package that already has the higher range.
 
+`dependencies` and `devDependencies` are compared with each other, as a package installed for development and one installed for production are the same installed copy; `peerDependencies` are only compared with `peerDependencies`.
+
 Ranges that cannot be ordered have no range to raise, and are reported without a fix: an npm alias installing another package under the same name, a range that is not valid semver such as a dist tag, and the degenerate ranges no version satisfies. The workspace root is never the package such a conflict is reported on, and between two packages of the workspace it is the one whose name sorts first, so it is still reported exactly once.
 
 Values that do not describe a published range are ignored, as in the other duplicate checks: `latest`, `workspace:`, `file:` and `patch:`, as well as a dependency covered by a `resolutions` entry.
