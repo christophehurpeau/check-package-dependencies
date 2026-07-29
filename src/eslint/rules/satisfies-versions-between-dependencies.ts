@@ -1,18 +1,12 @@
 import { regularDependencyTypes } from "../../checks/checkDirectPeerDependencies.ts";
-import {
-  checkMissingSatisfiesVersions,
-  isVersionSatisfiesRange,
-} from "../../checks/checkSatisfiesVersions.ts";
-import type { RegularDependencyTypes } from "../../utils/packageTypes.ts";
+import { checkMissingSatisfiesVersions } from "../../checks/checkSatisfiesVersions.ts";
+import type { SatisfiesVersionsBetweenDependenciesConfig } from "../../checks/checkSatisfiesVersionsBetweenDependencies.ts";
+import { checkSatisfiesVersionsBetweenDependencies } from "../../checks/checkSatisfiesVersionsBetweenDependencies.ts";
 import type { BaseRuleOptions } from "../create-rule/BaseRuleOptions.ts";
 import { createPackageRule } from "../create-rule/createPackageRule.ts";
 
 interface CheckSatisfiesVersionsBetweenDependenciesOptions extends BaseRuleOptions {
-  dependencies: {
-    name: string;
-    from: string | { name: string; in?: RegularDependencyTypes };
-    to: string | { name: string; in?: RegularDependencyTypes };
-  }[];
+  dependencies: SatisfiesVersionsBetweenDependenciesConfig[];
 }
 
 export const satisfiesVersionsBetweenDependenciesRule =
@@ -71,21 +65,13 @@ export const satisfiesVersionsBetweenDependenciesRule =
           "Require the range of a dependency in one dependency to satisfy the range of the same dependency in another dependency",
         recommended: false,
       },
-      checkPackage: ({
-        pkg,
-        reportError,
-        ruleOptions,
-        getDependencyPackageJson,
-        onlyWarnsForCheck,
-      }) => {
+      checkPackage: ({ pkg, reportError, ruleOptions, onlyWarnsForCheck }) => {
         ruleOptions.dependencies.forEach(({ from }) => {
           checkMissingSatisfiesVersions(
             reportError,
             pkg,
             regularDependencyTypes,
-            {
-              [typeof from === "string" ? from : from.name]: "*",
-            },
+            { [typeof from === "string" ? from : from.name]: "*" },
             onlyWarnsForCheck,
           );
         });
@@ -98,48 +84,10 @@ export const satisfiesVersionsBetweenDependenciesRule =
         onlyWarnsForCheck,
         getDependencyPackageJson,
       }) => {
-        if (!(regularDependencyTypes as string[]).includes(node.fieldName)) {
-          return;
-        }
-
-        ruleOptions.dependencies.forEach(({ name, from, to }) => {
-          const [fromDepName, fromDepIn] =
-            typeof from === "string"
-              ? [from, "dependencies" as const]
-              : [from.name, from.in ?? ("dependencies" as const)];
-
-          if (fromDepName === node.name) {
-            const [fromDepPkg] = getDependencyPackageJson(fromDepName);
-            const fromDepRange = fromDepPkg[fromDepIn]?.[name];
-            if (!fromDepRange) {
-              throw new Error(
-                `Dependency "${fromDepName}" has no dependency "${name}" in "${fromDepIn}".`,
-              );
-            }
-
-            const [toDepName, toDepIn] =
-              typeof to === "string"
-                ? [to, "dependencies" as const]
-                : [to.name, to.in ?? ("dependencies" as const)];
-
-            const [toDepPkg] = getDependencyPackageJson(toDepName);
-            const toDepRange = toDepPkg[toDepIn]?.[name];
-            if (!toDepRange) {
-              throw new Error(
-                `Dependency "${toDepName}" has no dependency "${name}" in "${toDepIn}".`,
-              );
-            }
-
-            if (!isVersionSatisfiesRange(fromDepRange, toDepRange)) {
-              reportError({
-                errorMessage:
-                  "Version not satisfied between dependencies for dependency " +
-                  `"${name}"`,
-                errorDetails: `"${fromDepRange}" from "${fromDepName}" ${fromDepIn} should satisfies "${toDepRange}" from "${toDepName}" ${toDepIn}`,
-                onlyWarns: onlyWarnsForCheck.shouldWarnsFor(node.name),
-              });
-            }
-          }
+        checkSatisfiesVersionsBetweenDependencies(reportError, node, {
+          dependencies: ruleOptions.dependencies,
+          getDependencyPackageJson,
+          onlyWarnsForCheck,
         });
       },
     },

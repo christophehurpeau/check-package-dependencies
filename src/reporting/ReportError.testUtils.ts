@@ -58,7 +58,6 @@ export function assertSingleMessage(
       : {
           ...expected,
           dependency: {
-            changeValue: messages[0].messages[0]?.dependency?.changeValue,
             toString: messages[0].messages[0]?.dependency?.toString,
             locations: messages[0].messages[0]?.dependency?.locations,
             ranges: messages[0].messages[0]?.dependency?.ranges,
@@ -81,13 +80,11 @@ export function assertSeveralMessages(
         return m;
       }
       const dependency = { ...m.dependency };
-      delete dependency.changeValue;
       delete dependency.toString;
       delete dependency.locations;
       delete dependency.ranges;
       const suggestions = m.suggestions?.map((s) => {
         const suggestionDependency = { ...s[0] };
-        delete suggestionDependency.changeValue;
         delete suggestionDependency.toString;
         delete suggestionDependency.locations;
         delete suggestionDependency.ranges;

@@ -1,17 +1,5 @@
 #!/usr/bin/env node
 
-import {
-  createCheckPackage,
-  createCheckPackageWithWorkspaces,
-} from "../dist/index-node.mjs";
+import { main } from "../dist/cli-node.mjs";
 
-const checkPackage = createCheckPackage();
-if (checkPackage.pkg.workspaces) {
-  const checkPackageWithWorkspaces = await createCheckPackageWithWorkspaces();
-  checkPackageWithWorkspaces.checkRecommended();
-  await checkPackageWithWorkspaces.run();
-} else {
-  checkPackage.checkRecommended();
-}
-
-await checkPackage.run();
+await main(process.argv.slice(2));

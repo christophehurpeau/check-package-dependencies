@@ -2,11 +2,12 @@
 
 ## What this project does
 
-`check-package-dependencies` is a Node.js library that validates `package.json` files for dependency issues. It provides:
+`check-package-dependencies` validates `package.json` files for dependency issues. It provides:
 
-- A legacy **programmatic JavaScript API** for running checks as part of a script — `createCheckPackage` for a single package, or `createCheckPackageWithWorkspaces` for a monorepo root (pnpm workspaces)
-- An **ESLint plugin** (`eslint-plugin-check-package-dependencies`) with rules for inline linting
-- A **CLI** (`npx check-package-dependencies`) for quick validation
+- An **ESLint plugin** (`eslint-plugin-check-package-dependencies`) with rules for inline linting — the whole feature set
+- A **CLI** (`npx check-package-dependencies`) that runs the plugin's `recommended` config through ESLint, for a setup-free check
+
+The programmatic API (`createCheckPackage`, `createCheckPackageWithWorkspaces`) was removed in v13.
 
 ## Commands
 
@@ -15,7 +16,7 @@ pnpm build          # compile with rollup + tsc
 pnpm test           # run all tests (uses Node built-in test runner, TZ=UTC)
 pnpm test:coverage  # coverage via c8
 pnpm lint           # format + tsc + eslint
-pnpm checks         # run the repo's own check-package script (scripts/check-package.js)
+pnpm lint:eslint:package.json   # lint the repo's own package.json with the plugin
 pnpm generate:rules-docs        # update the generated parts of the ESLint rules documentation
 pnpm generate:rules-docs:check  # fail if they are out of date (also covered by a test)
 ```
@@ -34,18 +35,15 @@ src/
   reporting/
     ReportError.ts            # ReportError interface
     ReportError.testUtils.ts  # test helpers (createMockReportError, assertSingleMessage, …)
-    cliErrorReporting.ts      # CLI error formatting
+    messages.ts               # message fragments shared by the checks (fromDependency, inDependency)
   utils/                      # semver helpers, package.json parsing, etc.
-    library.ts                # the "library" setting/option: type, detection, resolution
-  check-package.ts            # CheckPackageApi factory (createCheckPackage)
-  check-package-with-workspaces.ts
-  eslint-plugin.ts            # ESLint plugin export
-  index.ts                    # public library entry point
+    library.ts                # the "library" setting: type, detection, resolution
+  cli.ts                      # CLI implementation (main, parseCliArgs, resolvePackageJsonPaths)
+  eslint-plugin.ts            # ESLint plugin export, also the package root export
   test-setup.ts               # Node test runner setup (TypeScript loader)
 bin/
-  check-package-dependencies.mjs   # CLI entry point
+  check-package-dependencies.mjs   # CLI entry point, a shim calling dist/cli-node.mjs
 scripts/
-  check-package.js            # example / self-check script
   generate-rules-docs.js      # generates the rules documentation headers and the README rules table
 documentation/
   rules/                      # one markdown file per ESLint rule
@@ -53,21 +51,13 @@ documentation/
 
 ## Key concepts
 
-### Programmatic API
+### CLI
 
-`createCheckPackage()` returns a fluent `CheckPackageApi`. Checks are chained and evaluated when `.run()` (async) or `.runSync()` is called. Pass `--fix` on the CLI to enable auto-fix.
+`src/cli.ts` drives the plugin through ESLint's own `ESLint` class: it resolves the package.json files to lint (`resolvePackageJsonPaths`: the target directory's, plus every workspace member's, as most rules check the linted file itself), lints them with `overrideConfigFile: true` and `overrideConfig: [configs.recommended]` so the linted project's `eslint.config.js` is irrelevant, then prints an ESLint formatter's output. `eslint` stays an optional peer dependency, dynamically imported with an actionable error when missing.
 
-```js
-import { createCheckPackage } from "check-package-dependencies";
+The module has no side effect: `bin/check-package-dependencies.mjs` calls the exported `main(process.argv.slice(2))`. It is built as its own rollup entry (`dist/cli-node.mjs`), which re-bundles the plugin.
 
-await createCheckPackage()
-  .checkRecommended() // shorthand for the most common checks
-  .run();
-```
-
-`createCheckPackage` accepts the `library` option (see below), which also takes a `(pkg) => boolean` predicate here.
-
-For workspaces, `createCheckPackageWithWorkspaces()` (see `check-package-with-workspaces.ts`) returns a `CheckPackageWithWorkspacesApi` that exposes only `checkRecommended`, `forRoot`, `forEach`, and `for(id, …)`. Its `library` option applies to the workspace members, the root always being checked as a non-library. Its `checkRecommended` runs the root `checkNoDependencies`, the root `checkRecommended`, then iterates each workspace package running their `checkRecommended` plus monorepo-wide duplicate-dependency and subpackage-peer-dependency checks. The corresponding ESLint rules are `no-root-workspace-dependencies` and `consistent-workspace-dependencies`.
+Anything the CLI reports comes from `configs.recommended`, so changing that config changes the CLI.
 
 ### ESLint plugin
 
@@ -94,11 +84,9 @@ Whether a package is published and consumed by other packages, which changes wha
 - `LibrarySetting` is `boolean | "auto" | string[]`, the array being package name patterns (`*` wildcard, `!` exclusion, last match wins).
 - `detectIsLibrary(pkg)` implements `"auto"`, the default: a workspace root or a `private` package is not a library, anything else is.
 - `resolveIsLibrary(setting, pkg)` resolves it **for a given package**, which is what lets a single config classify every package of a workspace.
-- `assertNoLegacyIsLibraryOption(options)` throws for the pre-v12 `isLibrary` option; the ESLint setting of the same name is reported once per `package.json` by `createPackageRule` (deduplicated with a `WeakSet` on the ast node, so enabling ten rules does not repeat it ten times).
+- `legacyIsLibrarySettingMessage` is reported once per `package.json` by `createPackageRule` when the pre-v12 `isLibrary` **setting** is used (deduplicated with a `WeakSet` on the ast node, so enabling ten rules does not repeat it ten times).
 
 Rules receive the resolved boolean as `isLibrary`, resolved for the linted `package.json`. Only `require-pinned-versions` branches on it today, skipping the `dependencies` field for a library; the two `min-range-*` rules deliberately do not, a range whose minimum does not satisfy the development version being wrong either way.
-
-The legacy API mirrors this through `isPkgLibrary` and `shouldHaveExactVersions` in `check-package.ts` — keep both sides in sync.
 
 #### Naming: never "library vs application"
 
@@ -128,17 +116,19 @@ In order of preference:
 3. **The `src/eslint/eslint.testUtils.ts` helpers** when the rule needs to read other `package.json` files — a workspace root, its members, or a dependency's own manifest. `mockFileSystem(files)` replaces the `globSync` / `accessSync` / `readFileSync` calls the rules make with an in-memory set of files, and **throws** on any path it does not know so an unexpected disk read fails loudly. `lintPackageJson` / `lintPackageJsonMessages` / `fixPackageJson` lint one of those files through `Linter.verify`, which never touches the disk. Always `mock.restoreAll()` in an `afterEach`. See `consistent-workspace-dependencies.npm-alias.test.ts` and `require-workspace-protocol.test.ts`.
 4. **A fixture directory** only when the check resolves real packages out of `node_modules`, with the lockfile and the install to back it — mocking that would only assert the mock. `fixtures/invalid-workspace-dependencies` is the example: it commits a `pnpm-lock.yaml` and its test installs it in a `before()` hook.
 
-The mocked filesystem is mounted on the current working directory, because that is what `loadWorkspacePackageJsons` and `findWorkspaceMemberNames` resolve their glob matches against — which is also why the `ESLint`-class fixture tests have to `process.chdir`. `node --test` runs each file in its own process, so mutating `node:fs` with `mock.method` is safe.
+The mocked filesystem is mounted on the current working directory, because the tests declare their files relative to it and `mockFileSystem` resolves them with `path.resolve`. `loadWorkspacePackageJsons` and `findWorkspaceMemberNames` resolve their glob matches against the linted `package.json`, so a test linting `package.json` at the root of the mocked filesystem gets the same paths either way. `node --test` runs each file in its own process, so mutating `node:fs` with `mock.method` is safe.
 
 ### `onlyWarnsFor`
 
-Most checks accept an `onlyWarnsFor` option that downgrades specific errors to warnings. The library tracks which entries were actually used and reports unused `onlyWarnsFor` entries as errors.
+Most rules accept an `onlyWarnsFor` option that downgrades specific errors to warnings. `createPackageRule` tracks which entries were actually used and reports unused `onlyWarnsFor` entries as errors (`checkOnlyWarnsForArray` / `checkOnlyWarnsForMapping`).
+
+A downgraded message is `console.warn`ed by `createPackageRule` instead of going through `context.report`, so it reaches neither ESLint's formatter, nor `--quiet`, nor the exit code.
 
 ## Build outputs
 
 Rollup produces two ESM bundles in `dist/`:
 
-- `dist/index-node.mjs` — programmatic API
-- `dist/eslint-plugin-node.mjs` — ESLint plugin
+- `dist/eslint-plugin-node.mjs` — ESLint plugin, exported both as the package root and as `./eslint-plugin`
+- `dist/cli-node.mjs` — CLI, called by `bin/check-package-dependencies.mjs`
 
 TypeScript declarations are emitted alongside via `tsc -p tsconfig.json`.

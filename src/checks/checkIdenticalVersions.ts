@@ -11,10 +11,7 @@ export function checkIdenticalVersions(
   pkg: ParsedPackageJson,
   type: DependencyTypes,
   deps: Record<string, Partial<Record<DependencyTypes, string[]>> | string[]>,
-  {
-    onlyWarnsForCheck,
-    tryToAutoFix,
-  }: { onlyWarnsForCheck?: OnlyWarnsForCheck; tryToAutoFix?: boolean } = {},
+  { onlyWarnsForCheck }: { onlyWarnsForCheck?: OnlyWarnsForCheck } = {},
 ): void {
   const pkgDependencies = pkg[type] || {};
 
@@ -53,17 +50,13 @@ export function checkIdenticalVersions(
         }
 
         if (value !== version) {
-          if (tryToAutoFix) {
-            depValue.changeValue(version);
-          } else {
-            reportError({
-              errorMessage: `Invalid "${depKeyIdentical}"`,
-              errorDetails: `expecting "${value}" to be "${version}" identical to "${depKey}" in "${type}"`,
-              dependency: depValue,
-              onlyWarns: onlyWarnsForCheck?.shouldWarnsFor(depKey),
-              fixTo: version,
-            });
-          }
+          reportError({
+            errorMessage: `Invalid "${depKeyIdentical}"`,
+            errorDetails: `expecting "${value}" to be "${version}" identical to "${depKey}" in "${type}"`,
+            dependency: depValue,
+            onlyWarns: onlyWarnsForCheck?.shouldWarnsFor(depKey),
+            fixTo: version,
+          });
         }
       });
     });

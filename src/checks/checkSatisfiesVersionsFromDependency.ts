@@ -1,110 +1,129 @@
-import semver from "semver";
-import type { ShouldHaveExactVersions } from "../check-package.ts";
 import type { ReportError } from "../reporting/ReportError.ts";
-import {
-  fromDependency,
-  inDependency,
-} from "../reporting/cliErrorReporting.ts";
+import type { GetDependencyPackageJson } from "../utils/createGetDependencyPackageJson.ts";
+import { getEntries } from "../utils/object.ts";
 import type {
-  DependencyTypes,
+  DependencyValue,
   PackageJson,
   ParsedPackageJson,
+  RegularDependencyTypes,
 } from "../utils/packageTypes.ts";
-import {
-  changeOperator,
-  getOperator,
-  getRealVersion,
-} from "../utils/semverUtils.ts";
 import type { OnlyWarnsForCheck } from "../utils/warnForUtils.ts";
+import { regularDependencyTypes } from "./checkDirectPeerDependencies.ts";
+import {
+  checkMissingSatisfiesVersions,
+  checkSatisfiesVersion,
+} from "./checkSatisfiesVersions.ts";
+
+/**
+ * Which dependencies of the package are expected to satisfy the range declared by
+ * another dependency, keyed by the name of that other dependency.
+ */
+export type SatisfiesVersionsFromDependencyConfig = Record<
+  string,
+  Partial<Record<RegularDependencyTypes, string[]>>
+>;
 
 export interface CheckSatisfiesVersionsFromDependencyOptions {
-  tryToAutoFix?: boolean;
-  shouldHaveExactVersions: ShouldHaveExactVersions;
+  dependencies: SatisfiesVersionsFromDependencyConfig;
+  /** the field of the other dependency's package.json the expected ranges are read from */
+  readRangesFrom: "dependencies" | "devDependencies";
+  getDependencyPackageJson: GetDependencyPackageJson;
   onlyWarnsForCheck?: OnlyWarnsForCheck;
 }
 
-export function checkSatisfiesVersionsFromDependency(
+interface RangeInDependencyParams {
+  depName: string;
+  depPkg: PackageJson;
+  readRangesFrom: "dependencies" | "devDependencies";
+  dependencyName: string;
+}
+
+function getRangeInDependency({
+  depName,
+  depPkg,
+  readRangesFrom,
+  dependencyName,
+}: RangeInDependencyParams): string {
+  const range = depPkg[readRangesFrom]?.[dependencyName];
+  if (!range) {
+    throw new Error(
+      `Dependency "${depName}" has no "${dependencyName}" in "${readRangesFrom}"`,
+    );
+  }
+  return range;
+}
+
+export function checkMissingSatisfiesVersionsFromDependency(
   reportError: ReportError,
   pkg: ParsedPackageJson,
-  type: DependencyTypes,
-  depKeys: string[],
-  depPkg: PackageJson,
-  depType: DependencyTypes,
   {
-    tryToAutoFix,
-    shouldHaveExactVersions,
+    dependencies,
+    readRangesFrom,
+    getDependencyPackageJson,
     onlyWarnsForCheck,
   }: CheckSatisfiesVersionsFromDependencyOptions,
 ): void {
-  const pkgDependencies = pkg[type] || {};
-  const dependencies = depPkg[depType] || {};
+  getEntries(dependencies).forEach(([depName, dependencyNamesByType]) => {
+    const [depPkg] = getDependencyPackageJson(depName);
 
-  depKeys.forEach((depKey) => {
-    const range = dependencies[depKey];
+    regularDependencyTypes.forEach((type) => {
+      const dependencyNames = dependencyNamesByType[type];
+      if (!dependencyNames) return;
 
-    if (!range) {
-      reportError({
-        errorMessage: "Unexpected missing dependency",
-        errorDetails: `config expects "${depKey}" ${inDependency(depPkg, depType)}`,
-        onlyWarns: undefined,
-        autoFixable: undefined,
-      });
+      checkMissingSatisfiesVersions(
+        reportError,
+        pkg,
+        type,
+        Object.fromEntries(
+          dependencyNames.map((dependencyName) => [
+            dependencyName,
+            getRangeInDependency({
+              depName,
+              depPkg,
+              readRangesFrom,
+              dependencyName,
+            }),
+          ]),
+        ),
+        onlyWarnsForCheck,
+      );
+    });
+  });
+}
+
+export function checkDependencySatisfiesVersionFromDependency(
+  reportError: ReportError,
+  dependencyValue: DependencyValue,
+  {
+    dependencies,
+    readRangesFrom,
+    getDependencyPackageJson,
+    onlyWarnsForCheck,
+  }: CheckSatisfiesVersionsFromDependencyOptions,
+): void {
+  if (
+    !(regularDependencyTypes as string[]).includes(dependencyValue.fieldName)
+  ) {
+    return;
+  }
+  const fieldName = dependencyValue.fieldName as RegularDependencyTypes;
+
+  getEntries(dependencies).forEach(([depName, dependencyNamesByType]) => {
+    if (!dependencyNamesByType[fieldName]?.includes(dependencyValue.name)) {
       return;
     }
 
-    const pkgRange = pkgDependencies[depKey];
-
-    const getAutoFixIfExists = (): string | null | undefined => {
-      const existingOperator = pkgRange ? getOperator(pkgRange.value) : null;
-      const expectedOperator = (() => {
-        if (existingOperator !== null) {
-          return existingOperator;
-        }
-        return shouldHaveExactVersions(type) ? "" : null;
-      })();
-
-      return expectedOperator === ""
-        ? semver.minVersion(getRealVersion(range))?.version
-        : changeOperator(getRealVersion(range), expectedOperator);
-    };
-
-    if (!pkgRange) {
-      const fix = getAutoFixIfExists();
-      if (!fix || !tryToAutoFix) {
-        reportError({
-          errorMessage: "Missing dependency",
-          errorDetails: `should satisfies "${range}" ${fromDependency(depPkg, depType)}`,
-          dependency: { name: depKey, fieldName: type },
-          onlyWarns: onlyWarnsForCheck?.shouldWarnsFor(depKey),
-          autoFixable: !!fix,
-        });
-      } else {
-        pkg.change(type, depKey, fix);
-      }
-    } else {
-      const pkgRealRange = getRealVersion(pkgRange.value);
-      // "workspace:*" resolves to the local package's own version; treat as satisfied.
-      if (pkgRealRange === "*") return;
-      const minVersionOfVersion = semver.minVersion(pkgRealRange);
-      if (
-        !minVersionOfVersion ||
-        !semver.satisfies(minVersionOfVersion, getRealVersion(range), {
-          includePrerelease: true,
-        })
-      ) {
-        const fix = getAutoFixIfExists();
-        if (!fix || !tryToAutoFix) {
-          reportError({
-            errorMessage: "Invalid",
-            errorDetails: `"${pkgRange.value}" should satisfies "${range}" ${fromDependency(depPkg, depType)}`,
-            dependency: pkgRange,
-            onlyWarns: onlyWarnsForCheck?.shouldWarnsFor(depKey),
-            autoFixable: !!fix,
-          });
-        } else {
-          pkgRange.changeValue(fix);
-        }
-      }
-    }
+    const [depPkg] = getDependencyPackageJson(depName);
+    checkSatisfiesVersion(
+      reportError,
+      dependencyValue,
+      getRangeInDependency({
+        depName,
+        depPkg,
+        readRangesFrom,
+        dependencyName: dependencyValue.name,
+      }),
+      onlyWarnsForCheck,
+    );
   });
 }

@@ -83,27 +83,3 @@ export function checkMissingSatisfiesVersions(
     }
   });
 }
-
-export function checkSatisfiesVersions(
-  reportError: ReportError,
-  pkg: ParsedPackageJson,
-  type: DependencyTypes,
-  dependenciesRanges: Record<string, string>,
-  onlyWarnsForCheck?: OnlyWarnsForCheck,
-): void {
-  checkMissingSatisfiesVersions(
-    reportError,
-    pkg,
-    type,
-    dependenciesRanges,
-    onlyWarnsForCheck,
-  );
-
-  const pkgDependencies = pkg[type] || {};
-  Object.entries(dependenciesRanges).forEach(([depKey, range]) => {
-    const pkgRange = pkgDependencies[depKey];
-    if (pkgRange) {
-      checkSatisfiesVersion(reportError, pkgRange, range, onlyWarnsForCheck);
-    }
-  });
-}

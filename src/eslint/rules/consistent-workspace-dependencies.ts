@@ -1,21 +1,16 @@
 import path from "node:path";
-import { regularDependencyTypes } from "../../checks/checkDirectPeerDependencies.ts";
 import { checkDuplicateDependencies } from "../../checks/checkDuplicateDependencies.ts";
-import { isPeerDependencyDeclaredInPackage } from "../../checks/checkMonorepoDirectSubpackagePeerDependencies.ts";
-import { checkSatisfiesPeerDependency } from "../../checks/checkPeerDependencies.ts";
+import { checkWorkspaceMemberPeerDependencies } from "../../checks/checkWorkspaceMemberPeerDependencies.ts";
 import type { ReportError } from "../../reporting/ReportError.ts";
-import { getKeys } from "../../utils/object.ts";
+import { getEntries } from "../../utils/object.ts";
 import type {
-  DependencyFieldTypes,
   DependencyTypes,
-  PackageJson,
   ParsedPackageJson,
-  RegularDependencyTypes,
 } from "../../utils/packageTypes.ts";
 import { createPackageRule } from "../create-rule/createPackageRule.ts";
 
 const duplicatesSearchInByDependencyType: Partial<
-  Record<DependencyFieldTypes, DependencyTypes[]>
+  Record<DependencyTypes, DependencyTypes[]>
 > = {
   devDependencies: ["devDependencies", "dependencies"],
   dependencies: ["devDependencies", "dependencies"],
@@ -134,20 +129,24 @@ export const consistentWorkspaceDependenciesRule = createPackageRule(
           ownsUnorderedConflicts: ownsUnorderedConflictsWith(pkg, otherPkg),
         };
 
-        (["devDependencies", "dependencies"] as const).forEach((depType) => {
-          checkDuplicateDependencies({
-            reportError: reportErrorOnce,
-            pkg,
-            isPkgLibrary: isLibrary,
-            depType,
-            searchIn: duplicatesSearchInByDependencyType[depType]!,
-            depPkg: otherPkg.value,
-            onlyWarnsForCheck: onlyWarnsForMappingCheck.createFor(
-              otherPkg.name,
-            ),
-            conflictOwnership,
-          });
-        });
+        getEntries(duplicatesSearchInByDependencyType).forEach(
+          ([depType, searchIn]) => {
+            if (!searchIn) return;
+
+            checkDuplicateDependencies({
+              reportError: reportErrorOnce,
+              pkg,
+              isPkgLibrary: isLibrary,
+              depType,
+              searchIn,
+              depPkg: otherPkg.value,
+              onlyWarnsForCheck: onlyWarnsForMappingCheck.createFor(
+                otherPkg.name,
+              ),
+              conflictOwnership,
+            });
+          },
+        );
       }
 
       if (isWorkspaceRoot(pkg)) return;
@@ -155,49 +154,12 @@ export const consistentWorkspaceDependenciesRule = createPackageRule(
       // checking peer dependencies of this package's own dependencies requires resolving them
       // from this package's directory, since that's where pnpm/npm/yarn actually link them
       // (they may not be hoisted to the monorepo root's node_modules).
-      const rootPkg = getWorkspaceRootPackageJson()!;
-
-      const allDepPkgs: {
-        name: string;
-        type: RegularDependencyTypes;
-        pkg: PackageJson;
-      }[] = [];
-
-      regularDependencyTypes.forEach((depType) => {
-        const dependencies = pkg[depType];
-        if (!dependencies) return;
-        for (const depName of getKeys(dependencies)) {
-          if (rootPkg.devDependencies?.[depName]) {
-            continue; // we already checked this.
-          }
-          const [depPkg] = getDependencyPackageJson(depName);
-          allDepPkgs.push({ name: depName, type: depType, pkg: depPkg });
-        }
+      checkWorkspaceMemberPeerDependencies(reportError, {
+        rootPkg: getWorkspaceRootPackageJson()!,
+        memberPkg: pkg,
+        getDependencyPackageJson,
+        onlyWarnsForMappingCheck,
       });
-
-      for (const { name: depName, type: depType, pkg: depPkg } of allDepPkgs) {
-        if (depPkg.peerDependencies) {
-          for (const [peerDepName, range] of Object.entries(
-            depPkg.peerDependencies,
-          )) {
-            if (isPeerDependencyDeclaredInPackage(pkg, peerDepName)) {
-              continue; // skip as already checked in checkDirectPeerDependencies for the subpackage itself.
-            }
-            checkSatisfiesPeerDependency(
-              reportError,
-              rootPkg,
-              depType,
-              ["devDependencies"],
-              peerDepName,
-              range,
-              depPkg,
-              onlyWarnsForMappingCheck.createFor(
-                `${depName}:peedDepdencies:invalid`,
-              ),
-            );
-          }
-        }
-      }
     },
   },
 );

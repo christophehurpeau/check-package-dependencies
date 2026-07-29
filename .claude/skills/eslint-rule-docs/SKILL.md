@@ -33,6 +33,8 @@ export const someRule = createPackageRule(
 
 `docs.recommended` is validated against `configs.recommended` of `src/eslint-plugin.ts`, the only config enabling rules. A rule that checks a library differently, or only applies to one of the two, is still enabled in `recommended` and gates on the `isLibrary` param itself (resolved from the `library` setting) — that condition belongs in the documentation body, not in a config.
 
+`configs.recommended` is also what the cli (`src/cli.ts`) runs, so adding a rule to it, or removing one from it, changes what `npx check-package-dependencies` reports: say so in the commit message, and add a changelog-worthy note to the README migration section when it is a breaking change for cli users.
+
 ## Workflow
 
 1. Add or update the rule and its `docs` metadata, and update `src/eslint-plugin.ts` if the rule belongs to a config.

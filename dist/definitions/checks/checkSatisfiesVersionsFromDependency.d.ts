@@ -1,11 +1,19 @@
-import type { ShouldHaveExactVersions } from "../check-package.ts";
 import type { ReportError } from "../reporting/ReportError.ts";
-import type { DependencyTypes, PackageJson, ParsedPackageJson } from "../utils/packageTypes.ts";
+import type { GetDependencyPackageJson } from "../utils/createGetDependencyPackageJson.ts";
+import type { DependencyValue, ParsedPackageJson, RegularDependencyTypes } from "../utils/packageTypes.ts";
 import type { OnlyWarnsForCheck } from "../utils/warnForUtils.ts";
+/**
+ * Which dependencies of the package are expected to satisfy the range declared by
+ * another dependency, keyed by the name of that other dependency.
+ */
+export type SatisfiesVersionsFromDependencyConfig = Record<string, Partial<Record<RegularDependencyTypes, string[]>>>;
 export interface CheckSatisfiesVersionsFromDependencyOptions {
-    tryToAutoFix?: boolean;
-    shouldHaveExactVersions: ShouldHaveExactVersions;
+    dependencies: SatisfiesVersionsFromDependencyConfig;
+    /** the field of the other dependency's package.json the expected ranges are read from */
+    readRangesFrom: "dependencies" | "devDependencies";
+    getDependencyPackageJson: GetDependencyPackageJson;
     onlyWarnsForCheck?: OnlyWarnsForCheck;
 }
-export declare function checkSatisfiesVersionsFromDependency(reportError: ReportError, pkg: ParsedPackageJson, type: DependencyTypes, depKeys: string[], depPkg: PackageJson, depType: DependencyTypes, { tryToAutoFix, shouldHaveExactVersions, onlyWarnsForCheck, }: CheckSatisfiesVersionsFromDependencyOptions): void;
+export declare function checkMissingSatisfiesVersionsFromDependency(reportError: ReportError, pkg: ParsedPackageJson, { dependencies, readRangesFrom, getDependencyPackageJson, onlyWarnsForCheck, }: CheckSatisfiesVersionsFromDependencyOptions): void;
+export declare function checkDependencySatisfiesVersionFromDependency(reportError: ReportError, dependencyValue: DependencyValue, { dependencies, readRangesFrom, getDependencyPackageJson, onlyWarnsForCheck, }: CheckSatisfiesVersionsFromDependencyOptions): void;
 //# sourceMappingURL=checkSatisfiesVersionsFromDependency.d.ts.map

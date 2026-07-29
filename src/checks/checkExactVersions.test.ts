@@ -1,16 +1,15 @@
 import assert from "node:assert/strict";
 import { describe, it, mock } from "node:test";
 import {
-  assertDeepEqualIgnoringPrototypes,
   assertNoMessages,
-  assertSeveralMessages,
   assertSingleMessage,
   createMockReportError,
 } from "../reporting/ReportError.testUtils.ts";
 import type { GetDependencyPackageJson } from "../utils/createGetDependencyPackageJson.ts";
+import type { DependencyValue } from "../utils/packageTypes.ts";
 import { parsePkgValue } from "../utils/pkgJsonUtils.ts";
 import { createOnlyWarnsForArrayCheck } from "../utils/warnForUtils.ts";
-import { checkExactVersions } from "./checkExactVersions.ts";
+import { checkExactVersion } from "./checkExactVersions.ts";
 
 const onlyWarnsForConfigName = "checkExactVersions.test.onlyWarnsFor";
 const emptyOnlyWarnsForCheck = createOnlyWarnsForArrayCheck(
@@ -18,35 +17,24 @@ const emptyOnlyWarnsForCheck = createOnlyWarnsForArrayCheck(
   [],
 );
 
-describe("checkExactVersions", () => {
+const dependencyValue = (name: string, value: string): DependencyValue =>
+  parsePkgValue({ name: "test", devDependencies: { [name]: value } })
+    .devDependencies![name]!;
+
+describe("checkExactVersion", () => {
   const { mockReportError, messages } = createMockReportError();
 
-  it("should return no error when all versions are exact", () => {
-    checkExactVersions(
-      mockReportError,
-      parsePkgValue({
-        name: "test",
-        devDependencies: {
-          test: "1.0.0",
-        },
-      }),
-      ["devDependencies"],
-      {
-        onlyWarnsForCheck: emptyOnlyWarnsForCheck,
-      },
-    );
+  it("should return no error when the version is exact", () => {
+    checkExactVersion(mockReportError, dependencyValue("test", "1.0.0"), {
+      onlyWarnsForCheck: emptyOnlyWarnsForCheck,
+    });
     assertNoMessages(messages);
   });
 
-  it("should return an error when one version has a caret range", () => {
-    checkExactVersions(
-      mockReportError,
-      parsePkgValue({ name: "test", devDependencies: { test: "^1.0.0" } }),
-      ["devDependencies"],
-      {
-        onlyWarnsForCheck: emptyOnlyWarnsForCheck,
-      },
-    );
+  it("should return an error when the version has a caret range", () => {
+    checkExactVersion(mockReportError, dependencyValue("test", "^1.0.0"), {
+      onlyWarnsForCheck: emptyOnlyWarnsForCheck,
+    });
     assertSingleMessage(messages, {
       errorMessage: "Unexpected range value",
       errorDetails: 'expecting "^1.0.0" to be exact "1.0.0"',
@@ -60,18 +48,29 @@ describe("checkExactVersions", () => {
     });
   });
 
+  it("should return an error when the version has a tilde range", () => {
+    checkExactVersion(mockReportError, dependencyValue("test", "~1.0.0"), {
+      onlyWarnsForCheck: emptyOnlyWarnsForCheck,
+    });
+    assertSingleMessage(messages, {
+      errorMessage: "Unexpected range value",
+      errorDetails: 'expecting "~1.0.0" to be exact "1.0.0"',
+      errorTarget: "dependencyValue",
+      dependency: {
+        name: "test",
+        fieldName: "devDependencies",
+        value: "~1.0.0",
+      },
+      onlyWarns: false,
+    });
+  });
+
   for (const comparator of ["<", "<=", ">", ">="]) {
-    it(`should return an error when one version has a comparator "${comparator}" range`, () => {
-      checkExactVersions(
+    it(`should return an error when the version has a comparator "${comparator}" range`, () => {
+      checkExactVersion(
         mockReportError,
-        parsePkgValue({
-          name: "test",
-          devDependencies: { test: `${comparator}1.0.0` },
-        }),
-        ["devDependencies"],
-        {
-          onlyWarnsForCheck: emptyOnlyWarnsForCheck,
-        },
+        dependencyValue("test", `${comparator}1.0.0`),
+        { onlyWarnsForCheck: emptyOnlyWarnsForCheck },
       );
       assertSingleMessage(messages, {
         errorMessage: "Unexpected range value",
@@ -87,18 +86,36 @@ describe("checkExactVersions", () => {
     });
   }
 
-  it("should return an warning when one version has a caret range and is in onlyWarnsFor", () => {
-    checkExactVersions(
-      mockReportError,
-      parsePkgValue({ name: "test", devDependencies: { test: "^1.0.0" } }),
-      ["devDependencies"],
-      {
-        onlyWarnsForCheck: createOnlyWarnsForArrayCheck(
-          onlyWarnsForConfigName,
-          ["test"],
-        ),
-      },
-    );
+  const partialRanges: [range: string, exactVersion: string][] = [
+    ["^18", "18.0.0"],
+    ["^18.1", "18.1.0"],
+  ];
+
+  for (const [range, exactVersion] of partialRanges) {
+    it(`should complete the expected version of the partial range "${range}"`, () => {
+      checkExactVersion(mockReportError, dependencyValue("test", range), {
+        onlyWarnsForCheck: emptyOnlyWarnsForCheck,
+      });
+      assertSingleMessage(messages, {
+        errorMessage: "Unexpected range value",
+        errorDetails: `expecting "${range}" to be exact "${exactVersion}"`,
+        errorTarget: "dependencyValue",
+        dependency: {
+          name: "test",
+          fieldName: "devDependencies",
+          value: range,
+        },
+        onlyWarns: false,
+      });
+    });
+  }
+
+  it("should warn instead of erroring when the dependency is in onlyWarnsFor", () => {
+    checkExactVersion(mockReportError, dependencyValue("test", "^1.0.0"), {
+      onlyWarnsForCheck: createOnlyWarnsForArrayCheck(onlyWarnsForConfigName, [
+        "test",
+      ]),
+    });
     assertSingleMessage(messages, {
       errorMessage: "Unexpected range value",
       errorDetails: 'expecting "^1.0.0" to be exact "1.0.0"',
@@ -112,189 +129,11 @@ describe("checkExactVersions", () => {
     });
   });
 
-  it("should return an error when one version has a tilde range", () => {
-    checkExactVersions(
+  it("should support the npm: prefix", () => {
+    checkExactVersion(
       mockReportError,
-      parsePkgValue({ name: "test", devDependencies: { test: "~1.0.0" } }),
-      ["devDependencies"],
-      {
-        onlyWarnsForCheck: emptyOnlyWarnsForCheck,
-      },
-    );
-    assertSingleMessage(messages, {
-      errorMessage: "Unexpected range value",
-      errorDetails: 'expecting "~1.0.0" to be exact "1.0.0"',
-      errorTarget: "dependencyValue",
-      dependency: {
-        name: "test",
-        fieldName: "devDependencies",
-        value: "~1.0.0",
-      },
-      onlyWarns: false,
-    });
-  });
-
-  it("should return multiple errors when multiple versions have range", () => {
-    checkExactVersions(
-      mockReportError,
-      parsePkgValue({
-        name: "test",
-        devDependencies: {
-          test1: "~1.0.0",
-          test2: "~1.0.0",
-          test3: "^18",
-          test4: "^18.1",
-        },
-      }),
-      ["devDependencies"],
-      {
-        onlyWarnsForCheck: emptyOnlyWarnsForCheck,
-      },
-    );
-    assertSeveralMessages(messages, [
-      {
-        errorMessage: "Unexpected range value",
-        errorDetails: 'expecting "~1.0.0" to be exact "1.0.0"',
-        errorTarget: "dependencyValue",
-        dependency: {
-          name: "test1",
-          fieldName: "devDependencies",
-          value: "~1.0.0",
-        },
-        onlyWarns: false,
-      },
-      {
-        errorMessage: "Unexpected range value",
-        errorDetails: 'expecting "~1.0.0" to be exact "1.0.0"',
-        errorTarget: "dependencyValue",
-        dependency: {
-          name: "test2",
-          fieldName: "devDependencies",
-          value: "~1.0.0",
-        },
-        onlyWarns: false,
-      },
-      {
-        errorMessage: "Unexpected range value",
-        errorDetails: 'expecting "^18" to be exact "18.0.0"',
-        errorTarget: "dependencyValue",
-        dependency: {
-          name: "test3",
-          fieldName: "devDependencies",
-          value: "^18",
-        },
-        onlyWarns: false,
-      },
-      {
-        errorMessage: "Unexpected range value",
-        errorDetails: 'expecting "^18.1" to be exact "18.1.0"',
-        errorTarget: "dependencyValue",
-        dependency: {
-          name: "test4",
-          fieldName: "devDependencies",
-          value: "^18.1",
-        },
-        onlyWarns: false,
-      },
-    ]);
-  });
-
-  it("should fix and remove range", () => {
-    const getDependencyPackageJsonMock = mock.fn<GetDependencyPackageJson>(
-      () => [
-        {
-          name: "test1",
-          version: "1.0.1",
-        },
-        "",
-      ],
-    );
-    const pkg = parsePkgValue({
-      name: "test",
-      devDependencies: { test1: "~1.0.0" },
-    });
-    checkExactVersions(mockReportError, pkg, ["devDependencies"], {
-      onlyWarnsForCheck: emptyOnlyWarnsForCheck,
-      tryToAutoFix: true,
-      getDependencyPackageJson: getDependencyPackageJsonMock,
-    });
-    assertNoMessages(messages);
-    assert.ok(getDependencyPackageJsonMock.mock.calls.length > 0);
-    assertDeepEqualIgnoringPrototypes(pkg.value, {
-      name: "test",
-      devDependencies: { test1: "1.0.1" },
-    });
-  });
-
-  it("should error if autofix failed as package does not exists", () => {
-    const getDependencyPackageJsonMock = mock.fn<GetDependencyPackageJson>(
-      () => {
-        throw new Error("Module not found");
-      },
-    );
-    const pkg = parsePkgValue({
-      name: "test",
-      devDependencies: { test1: "~1.0.0" },
-    });
-    checkExactVersions(mockReportError, pkg, ["devDependencies"], {
-      onlyWarnsForCheck: emptyOnlyWarnsForCheck,
-      tryToAutoFix: true,
-      getDependencyPackageJson: getDependencyPackageJsonMock,
-    });
-    assertSingleMessage(messages, {
-      errorMessage: "Unexpected range value",
-      errorDetails:
-        'expecting "~1.0.0" to be exact, autofix failed to resolve "test1"',
-      errorTarget: "dependencyValue",
-      dependency: {
-        name: "test1",
-        fieldName: "devDependencies",
-        value: "~1.0.0",
-      },
-      onlyWarns: false,
-    });
-  });
-
-  it("should error if autofix failed because version doesn't match range", () => {
-    const getDependencyPackageJsonMock = mock.fn<GetDependencyPackageJson>(
-      () => [{ name: "test1", version: "2.0.0" }, ""],
-    );
-    const pkg = parsePkgValue({
-      name: "test",
-      devDependencies: { test1: "~1.0.0" },
-    });
-    checkExactVersions(mockReportError, pkg, ["devDependencies"], {
-      onlyWarnsForCheck: emptyOnlyWarnsForCheck,
-      tryToAutoFix: true,
-      getDependencyPackageJson: getDependencyPackageJsonMock,
-    });
-    assertSingleMessage(messages, {
-      errorMessage: "Unexpected range value",
-      errorDetails:
-        'expecting "~1.0.0" to be exact, autofix failed as resolved version "2.0.0" doesn\'t satisfy "~1.0.0"',
-      errorTarget: "dependencyValue",
-      dependency: {
-        name: "test1",
-        fieldName: "devDependencies",
-        value: "~1.0.0",
-      },
-      onlyWarns: false,
-    });
-  });
-
-  it("should support npm: prefix", () => {
-    checkExactVersions(
-      mockReportError,
-      parsePkgValue({
-        name: "test",
-        devDependencies: {
-          rollupv1: "npm:rollup@^1.0.1",
-        },
-      }),
-      ["devDependencies"],
-      {
-        onlyWarnsForCheck: emptyOnlyWarnsForCheck,
-      },
+      dependencyValue("rollupv1", "npm:rollup@^1.0.1"),
+      { onlyWarnsForCheck: emptyOnlyWarnsForCheck },
     );
     assertSingleMessage(messages, {
       errorMessage: "Unexpected range value",
@@ -309,62 +148,99 @@ describe("checkExactVersions", () => {
     });
   });
 
-  it("should warn when onlyWarnsFor is passed", () => {
-    checkExactVersions(
-      mockReportError,
-      parsePkgValue({
-        name: "test",
-        devDependencies: { test1: "~1.0.0", test2: "~1.0.0" },
-      }),
-      ["devDependencies"],
-      {
-        onlyWarnsForCheck: createOnlyWarnsForArrayCheck(
-          onlyWarnsForConfigName,
-          ["test1"],
-        ),
-      },
-    );
-    assertSeveralMessages(messages, [
-      {
-        errorMessage: "Unexpected range value",
-        errorDetails: 'expecting "~1.0.0" to be exact "1.0.0"',
-        errorTarget: "dependencyValue",
-        dependency: {
-          name: "test1",
-          fieldName: "devDependencies",
-          value: "~1.0.0",
-        },
-        onlyWarns: true,
-      },
-      {
-        errorMessage: "Unexpected range value",
-        errorDetails: 'expecting "~1.0.0" to be exact "1.0.0"',
-        errorTarget: "dependencyValue",
-        dependency: {
-          name: "test2",
-          fieldName: "devDependencies",
-          value: "~1.0.0",
-        },
-        onlyWarns: false,
-      },
+  it("should fix to the installed version when it satisfies the range", () => {
+    const getDependencyPackageJson = mock.fn<GetDependencyPackageJson>(() => [
+      { name: "test1", version: "1.0.1" },
+      "",
     ]);
+
+    checkExactVersion(mockReportError, dependencyValue("test1", "~1.0.0"), {
+      onlyWarnsForCheck: emptyOnlyWarnsForCheck,
+      getDependencyPackageJson,
+    });
+
+    assert.ok(getDependencyPackageJson.mock.calls.length > 0);
+    assertSingleMessage(messages, {
+      errorMessage: "Unexpected range value",
+      errorDetails: 'expecting "~1.0.0" to be exact "1.0.1"',
+      errorTarget: "dependencyValue",
+      dependency: {
+        name: "test1",
+        fieldName: "devDependencies",
+        value: "~1.0.0",
+      },
+      onlyWarns: false,
+      fixTo: "1.0.1",
+    });
   });
 
-  it("should error when onlyWarnsFor is not fully used", () => {
-    checkExactVersions(
-      mockReportError,
-      parsePkgValue({ name: "test" }),
-      ["devDependencies"],
-      {
-        onlyWarnsForCheck: createOnlyWarnsForArrayCheck(
-          onlyWarnsForConfigName,
-          ["testa"],
-        ),
-      },
-    );
+  it("should not offer a fix when the dependency cannot be resolved", () => {
+    checkExactVersion(mockReportError, dependencyValue("test1", "~1.0.0"), {
+      onlyWarnsForCheck: emptyOnlyWarnsForCheck,
+      getDependencyPackageJson: mock.fn<GetDependencyPackageJson>(() => {
+        throw new Error("Module not found");
+      }),
+    });
+
     assertSingleMessage(messages, {
-      errorMessage: `Invalid config in "${onlyWarnsForConfigName}"`,
-      errorDetails: 'no warning was raised for "testa"',
+      errorMessage: "Unexpected range value",
+      errorDetails: 'expecting "~1.0.0" to be exact',
+      errorTarget: "dependencyValue",
+      dependency: {
+        name: "test1",
+        fieldName: "devDependencies",
+        value: "~1.0.0",
+      },
+      onlyWarns: false,
+    });
+  });
+
+  it("should not offer a fix when the installed version does not satisfy the range", () => {
+    checkExactVersion(mockReportError, dependencyValue("test1", "~1.0.0"), {
+      onlyWarnsForCheck: emptyOnlyWarnsForCheck,
+      getDependencyPackageJson: mock.fn<GetDependencyPackageJson>(() => [
+        { name: "test1", version: "2.0.0" },
+        "",
+      ]),
+    });
+
+    assertSingleMessage(messages, {
+      errorMessage: "Unexpected range value",
+      errorDetails: 'expecting "~1.0.0" to be exact',
+      errorTarget: "dependencyValue",
+      dependency: {
+        name: "test1",
+        fieldName: "devDependencies",
+        value: "~1.0.0",
+      },
+      onlyWarns: false,
+    });
+  });
+
+  it("should not resolve the dependency when it is in onlyWarnsFor", () => {
+    const getDependencyPackageJson = mock.fn<GetDependencyPackageJson>(() => [
+      { name: "test1", version: "1.0.1" },
+      "",
+    ]);
+
+    checkExactVersion(mockReportError, dependencyValue("test1", "~1.0.0"), {
+      onlyWarnsForCheck: createOnlyWarnsForArrayCheck(onlyWarnsForConfigName, [
+        "test1",
+      ]),
+      getDependencyPackageJson,
+    });
+
+    assert.equal(getDependencyPackageJson.mock.calls.length, 0);
+    assertSingleMessage(messages, {
+      errorMessage: "Unexpected range value",
+      errorDetails: 'expecting "~1.0.0" to be exact "1.0.0"',
+      errorTarget: "dependencyValue",
+      dependency: {
+        name: "test1",
+        fieldName: "devDependencies",
+        value: "~1.0.0",
+      },
+      onlyWarns: true,
     });
   });
 });

@@ -1,8 +1,5 @@
 import type { ReportError } from "../reporting/ReportError.ts";
-import {
-  fromDependency,
-  inDependency,
-} from "../reporting/cliErrorReporting.ts";
+import { fromDependency, inDependency } from "../reporting/messages.ts";
 import type {
   DependencyTypes,
   PackageJson,

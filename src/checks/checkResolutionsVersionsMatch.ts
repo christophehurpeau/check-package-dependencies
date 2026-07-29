@@ -10,7 +10,6 @@ export function checkResolutionVersionMatch(
   reportError: ReportError,
   pkg: ParsedPackageJson,
   resolutionValue: DependencyValue,
-  { tryToAutoFix }: CheckResolutionsVersionsMatchOptions = {},
 ): void {
   let depName = resolutionValue.name;
   let resolutionDepVersion = resolutionValue.value;
@@ -36,46 +35,25 @@ export function checkResolutionVersionMatch(
         includePrerelease: true,
       })
     ) {
-      if (tryToAutoFix) {
-        range.changeValue(resolutionDepVersion);
-      } else {
-        reportError({
-          errorMessage: `Invalid "${range.value}"`,
-          errorDetails: `expecting "${range.value}" be "${resolutionDepVersion}" from resolutions`,
-          errorTarget: "dependencyValue",
-          dependency: range,
-          // don't autofix because it's probably a mistake either in resolution or in the other dependency and we can't know which one is the right one
-          suggestions: [
-            [
-              resolutionValue,
-              range.value,
-              `Fix resolutions's value to "${range.value}"`,
-            ],
-            [
-              range,
-              resolutionDepVersion,
-              `Fix this value to resolutions's value "${resolutionDepVersion}"`,
-            ],
+      reportError({
+        errorMessage: `Invalid "${range.value}"`,
+        errorDetails: `expecting "${range.value}" be "${resolutionDepVersion}" from resolutions`,
+        errorTarget: "dependencyValue",
+        dependency: range,
+        // don't autofix because it's probably a mistake either in resolution or in the other dependency and we can't know which one is the right one
+        suggestions: [
+          [
+            resolutionValue,
+            range.value,
+            `Fix resolutions's value to "${range.value}"`,
           ],
-        });
-      }
+          [
+            range,
+            resolutionDepVersion,
+            `Fix this value to resolutions's value "${resolutionDepVersion}"`,
+          ],
+        ],
+      });
     }
-  });
-}
-
-export interface CheckResolutionsVersionsMatchOptions {
-  tryToAutoFix?: boolean;
-}
-
-export function checkResolutionsVersionsMatch(
-  reportError: ReportError,
-  pkg: ParsedPackageJson,
-  { tryToAutoFix }: CheckResolutionsVersionsMatchOptions = {},
-): void {
-  const pkgResolutions = pkg.resolutions || {};
-  Object.values(pkgResolutions).forEach((resolutionValue) => {
-    checkResolutionVersionMatch(reportError, pkg, resolutionValue!, {
-      tryToAutoFix,
-    });
   });
 }

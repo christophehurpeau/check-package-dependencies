@@ -212,8 +212,6 @@ export function createPackageRule<
             const targetDependencyValue: Partial<DependencyValue> | undefined =
               details.dependency ?? fallbackDependencyValue;
 
-            targetDependencyValue?.changeValue?.(fixTo);
-
             const targetRange = targetDependencyValue?.ranges?.value;
             if (!targetRange) {
               return null;
@@ -289,7 +287,7 @@ export function createPackageRule<
 
           if (notWarnedFor.length > 0) {
             context.report({
-              message: `${onlyWarnsForMappingCheck.configName}: no warning was raised for ${notWarnedFor
+              message: `${onlyWarnsForCheck.configName}: no warning was raised for ${notWarnedFor
                 .map((depName) => `"${depName}"`)
                 .join(", ")}. You should remove it or check if it is correct.`,
               loc: {
@@ -370,6 +368,8 @@ export function createPackageRule<
 
               const match = fs.globSync(pkgWorkspaces, { cwd: dirname });
               for (const pathMatch of match) {
+                // globSync returns its matches relative to "cwd", so they are resolved
+                // against the workspace root, not against process.cwd()
                 const pkgPath = path.join(dirname, pathMatch, "package.json");
 
                 try {

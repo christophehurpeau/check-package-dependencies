@@ -1,10 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import {
-  assertNoLegacyIsLibraryOption,
-  detectIsLibrary,
-  resolveIsLibrary,
-} from "./library.ts";
+import { detectIsLibrary, resolveIsLibrary } from "./library.ts";
 import { parsePkgValue } from "./pkgJsonUtils.ts";
 
 describe("detectIsLibrary", () => {
@@ -81,23 +77,5 @@ describe("resolveIsLibrary", () => {
     it("should not match anything with only exclusions", () => {
       assert.equal(resolveIsLibrary(["!other"], publishedPkg), false);
     });
-  });
-});
-
-describe("assertNoLegacyIsLibraryOption", () => {
-  it("should throw for the renamed option", () => {
-    assert.throws(
-      () => assertNoLegacyIsLibraryOption({ isLibrary: true }),
-      /The "isLibrary" option was renamed to "library"/,
-    );
-  });
-  it("should throw even when the value is false", () => {
-    assert.throws(() => assertNoLegacyIsLibraryOption({ isLibrary: false }));
-  });
-  it("should accept the renamed option", () => {
-    assert.doesNotThrow(() => assertNoLegacyIsLibraryOption({}));
-    assert.doesNotThrow(() =>
-      assertNoLegacyIsLibraryOption({ library: "auto" }),
-    );
   });
 });

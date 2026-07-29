@@ -1,19 +1,34 @@
 import { describe, it } from "node:test";
 import {
-  assertDeepEqualIgnoringPrototypes,
   assertNoMessages,
   assertSingleMessage,
   createMockReportError,
 } from "../reporting/ReportError.testUtils.ts";
 import type { PackageJson } from "../utils/packageTypes.ts";
 import { parsePkgValue } from "../utils/pkgJsonUtils.ts";
-import { checkMinRangeSatisfies } from "./checkMinRangeSatisfies.ts";
+import { checkDependencyMinRangeSatisfies } from "./checkMinRangeSatisfies.ts";
 
-describe(checkMinRangeSatisfies.name, () => {
+const checkDependencies = (
+  reportError: Parameters<typeof checkDependencyMinRangeSatisfies>[0],
+  pkgContent: PackageJson,
+): void => {
+  const parsedPkg = parsePkgValue({ name: "test", ...pkgContent });
+  const dependencyValue = parsedPkg.dependencies?.test1;
+  if (!dependencyValue) return;
+
+  checkDependencyMinRangeSatisfies(
+    reportError,
+    dependencyValue,
+    parsedPkg,
+    "devDependencies",
+  );
+};
+
+describe("checkDependencyMinRangeSatisfies", () => {
   const { mockReportError, messages } = createMockReportError();
 
-  it("should return no error when no dependencies is set", () => {
-    checkMinRangeSatisfies(mockReportError, parsePkgValue({ name: "test" }));
+  it("should return no error when the compared dependency type is not set", () => {
+    checkDependencies(mockReportError, { dependencies: { test1: "^1.1.0" } });
     assertNoMessages(messages);
   });
 
@@ -79,24 +94,19 @@ describe(checkMinRangeSatisfies.name, () => {
 
     for (const [description, pkgContent] of testCases) {
       it(`should have no error when ${description}`, () => {
-        checkMinRangeSatisfies(
-          mockReportError,
-          parsePkgValue({ name: "test", ...pkgContent }),
-          "dependencies",
-          "devDependencies",
-        );
+        checkDependencies(mockReportError, pkgContent);
         assertNoMessages(messages);
       });
     }
   });
 
-  describe("expect error when not dependency is invalid", () => {
+  describe("expect error when the dependency is invalid", () => {
     const testCases: [
-      string,
-      PackageJson,
-      string,
-      string,
-      PackageJson | undefined,
+      description: string,
+      pkgContent: PackageJson,
+      errorMessage: string,
+      errorDetails: string,
+      fixTo: string,
     ][] = [
       [
         "exact dev dependency is higher than exact dependency",
@@ -106,9 +116,7 @@ describe(checkMinRangeSatisfies.name, () => {
         },
         'Invalid "1.1.0" in "dependencies"',
         '"1.1.0" should satisfies "1.0.0" from "devDependencies"',
-        {
-          dependencies: { test1: "1.0.0" },
-        },
+        "1.0.0",
       ],
       [
         "exact dev dependency is higher than caret range dependency",
@@ -118,9 +126,7 @@ describe(checkMinRangeSatisfies.name, () => {
         },
         'Invalid "^1.0.0" in "dependencies"',
         '"^1.0.0" should satisfies "1.1.0" from "devDependencies"',
-        {
-          dependencies: { test1: "^1.1.0" },
-        },
+        "^1.1.0",
       ],
       [
         "exact dev dependency is lower than caret range dependency",
@@ -130,9 +136,7 @@ describe(checkMinRangeSatisfies.name, () => {
         },
         'Invalid "^1.1.0" in "dependencies"',
         '"^1.1.0" should satisfies "1.0.0" from "devDependencies"',
-        {
-          dependencies: { test1: "^1.0.0" },
-        },
+        "^1.0.0",
       ],
       [
         "exact dev dependency is higher than tilde range dependency",
@@ -142,9 +146,7 @@ describe(checkMinRangeSatisfies.name, () => {
         },
         'Invalid "~1.0.0" in "dependencies"',
         '"~1.0.0" should satisfies "1.1.0" from "devDependencies"',
-        {
-          dependencies: { test1: "~1.1.0" },
-        },
+        "~1.1.0",
       ],
       [
         "exact dev dependency is lower than tilde range dependency",
@@ -154,9 +156,7 @@ describe(checkMinRangeSatisfies.name, () => {
         },
         'Invalid "~1.1.0" in "dependencies"',
         '"~1.1.0" should satisfies "1.0.0" from "devDependencies"',
-        {
-          dependencies: { test1: "~1.0.0" },
-        },
+        "~1.0.0",
       ],
       [
         "exact dev dependency is higher than >= range dependency",
@@ -166,9 +166,7 @@ describe(checkMinRangeSatisfies.name, () => {
         },
         'Invalid ">=1.0.0" in "dependencies"',
         '">=1.0.0" should satisfies "1.1.0" from "devDependencies"',
-        {
-          dependencies: { test1: ">=1.1.0" },
-        },
+        ">=1.1.0",
       ],
       [
         "exact dev dependency is lower than >= range dependency",
@@ -178,53 +176,30 @@ describe(checkMinRangeSatisfies.name, () => {
         },
         'Invalid ">=1.1.0" in "dependencies"',
         '">=1.1.0" should satisfies "1.0.0" from "devDependencies"',
-        {
-          dependencies: { test1: ">=1.0.0" },
-        },
+        ">=1.0.0",
       ],
     ];
 
     for (const [
       description,
       pkgContent,
-      errorTitle,
-      errorInfo,
-      expectedFix,
+      errorMessage,
+      errorDetails,
+      fixTo,
     ] of testCases) {
       it(`should error when ${description}`, () => {
-        checkMinRangeSatisfies(
-          mockReportError,
-          parsePkgValue({ name: "test", ...pkgContent }),
-          "dependencies",
-          "devDependencies",
-        );
+        checkDependencies(mockReportError, pkgContent);
         assertSingleMessage(messages, {
-          errorMessage: errorTitle,
-          errorDetails: errorInfo,
+          errorMessage,
+          errorDetails,
           dependency: {
             name: "test1",
             fieldName: "dependencies",
             value: pkgContent.dependencies?.test1,
           },
-          autoFixable: true,
+          errorTarget: "dependencyValue",
+          fixTo,
         });
-
-        if (expectedFix) {
-          const pkgValue = { name: "test", ...pkgContent };
-          const parsedPkg = parsePkgValue(pkgValue);
-          checkMinRangeSatisfies(
-            mockReportError,
-            parsedPkg,
-            "dependencies",
-            "devDependencies",
-            { tryToAutoFix: true },
-          );
-
-          assertDeepEqualIgnoringPrototypes(parsedPkg.value, {
-            ...pkgValue,
-            ...expectedFix,
-          });
-        }
       });
     }
   });
