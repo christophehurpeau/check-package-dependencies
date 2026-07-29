@@ -25,10 +25,6 @@ export function stringifyPkgJson(pkg: PackageJson): string {
   return `${JSON.stringify(pkg, null, 2)}\n`;
 }
 
-export function writePkgJson(packagePath: string, pkg: PackageJson): void {
-  fs.writeFileSync(packagePath, stringifyPkgJson(pkg));
-}
-
 function getLocationFromOffset(
   packageContent: string,
   offset: number,
@@ -142,10 +138,6 @@ function parseDependencyField(
             name: [propertyNode.offset, nameNode.offset + nameNode.length],
             value: [valueNode.offset, valueNode.offset + valueNode.length],
           },
-          changeValue(newValue: string) {
-            packageValue[fieldName]![name] = newValue;
-            parsedDependency.value = newValue;
-          },
           toString() {
             return `${JSON.stringify(parsedDependency.name)}: ${JSON.stringify(parsedDependency.value)}`;
           },
@@ -181,14 +173,6 @@ export function parsePkg(
         parseDependencyField(json, fieldName, packageContent, value),
       ),
     ),
-    change(type, dependencyName, newValue) {
-      const dependency = this[type]?.[dependencyName];
-      if (dependency) {
-        dependency.changeValue(newValue);
-      } else {
-        value[type] = { ...value[type], [dependencyName]: newValue };
-      }
-    },
   };
 }
 

@@ -29,11 +29,30 @@ I you have any idea, or found bug, please open an issue.
 
 ### Try it with cli
 
-Use npx to try and check `package.json` in current directory:
+Use npx to check the `package.json` of the current directory, and the `package.json` of
+every workspace member when it declares workspaces:
 
 ```bash
 npx check-package-dependencies
 ```
+
+The cli runs the [`recommended` config](#eslint-plugin) through eslint, which it needs
+installed (`npm install --save-dev eslint`). It ignores the eslint configuration of the
+project, so no setup is required, and takes an optional directory:
+
+```bash
+npx check-package-dependencies packages/app
+```
+
+| Option            | Description                                  |
+| :---------------- | :------------------------------------------- |
+| `--fix`           | apply the fixes the rules provide            |
+| `--quiet`         | report errors only, hiding warnings          |
+| `--format <name>` | eslint formatter to use (default: `stylish`) |
+| `-h`, `--help`    | show the usage                               |
+
+To enable other rules, to configure their options, or to lint `package.json` alongside the
+rest of the codebase, use the eslint plugin instead of the cli.
 
 ### ESLint plugin
 
@@ -161,6 +180,25 @@ from. Note that a list replaces the detection entirely: `private` is no longer t
 account, so a private package matching a pattern is a library, and the root is only
 excluded if its name matches no pattern (or is excluded with `!`).
 
+#### Migrating from v12
+
+- The programmatic API is removed: `createCheckPackage`,
+  `createCheckPackageWithWorkspaces` and everything they exported are gone, and the
+  package root now exports the eslint plugin, as `check-package-dependencies/eslint-plugin`
+  already did. Replace a `scripts/check-package.js` calling `checkRecommended()` with
+  `eslint package.json` and the `recommended` config, or with the cli.
+- The cli runs the `recommended` config through eslint instead of its own checks, so it
+  now requires `eslint` to be installed. Compared to the checks it replaces:
+  - [require-workspace-protocol](documentation/rules/require-workspace-protocol.md) is
+    checked, which the programmatic `checkRecommended` never did;
+  - a dependency on a workspace member declared as a plain range is reported by
+    [require-pinned-versions](documentation/rules/require-pinned-versions.md); it was
+    exempted before. Run `--fix` on `require-workspace-protocol` to use the `workspace:`
+    protocol instead;
+  - `allowRangeVersionsInDependencies` has no equivalent: use the `library` setting.
+- The `isLibrary` option no longer throws, as there is no option left to pass — only the
+  `isLibrary` **setting** of the plugin is still reported as renamed to `library`.
+
 #### Migrating from v11
 
 - The `recommended-library` config is removed: use `recommended`, and let `library`
@@ -171,13 +209,10 @@ excluded if its name matches no pattern (or is excluded with `!`).
   are checked now follows `library`.
 - The two `min-range-*` rules are part of `recommended`, and now report whether or not
   the package is a library — they were previously only run for a library.
-- The `isLibrary` setting and the `isLibrary` option of the programmatic API are renamed
-  to `library`, as they accept more than a boolean. Using the old name is reported: as a
-  lint error once per `package.json` for the setting, and as a thrown error for the
-  option.
-- `library` defaults to `"auto"` instead of `false`, in the plugin and in the programmatic
-  API. A published, non-private package is therefore checked as a library
-  now: ranges become allowed in its `dependencies`, and a peer dependency of a
+- The `isLibrary` setting is renamed to `library`, as it accepts more than a boolean.
+  Using the old name is reported as a lint error once per `package.json`.
+- `library` defaults to `"auto"` instead of `false`. A published, non-private package is
+  therefore checked as a library now: ranges become allowed in its `dependencies`, and a peer dependency of a
   `dependencies` entry must be satisfied by its `dependencies` or `peerDependencies`
   rather than by its `devDependencies`. Set `library: false` to keep the previous
   behaviour.
@@ -240,109 +275,3 @@ or a mapping from the dependency causing the error to the dependency names to on
 - Be more confident when automerging [renovate](https://www.whitesourcesoftware.com/free-developer-tools/renovate)'s PR
 
 If something is missing for your need, please open an issue !
-
-### How to use
-
-Create a script, for example `scripts/check-package.js`. Add it in `"scripts"` in your package.json. Run in CI and/or in your husky hooks.
-
-```js
-import { createCheckPackage } from "check-package-dependencies";
-
-await createCheckPackage({
-  // Whether the package is published and consumed by other packages.
-  // "auto" (the default) derives it from the package.json: a workspace root or a
-  // private package is not a library. Also accepts true, false, a list of package
-  // name patterns (["@scope/*", "!@scope/app-*"]) or a (pkg) => boolean predicate.
-  library: "auto",
-})
-  // Check that your package.json contains only exact versions of package, not range.
-  // A library keeps ranges in "dependencies", so only "devDependencies" and
-  // "resolutions" are checked for it.
-  .checkExactVersions({})
-  .checkDirectPeerDependencies({
-    // Allow to only warn for not respected peer dependencies.
-    // Example: { '@babel/cli': ['@babel/core'] }
-    // Only warns for missing "@babel/core" peer dependency asked in "@babel/cli".
-    // You can also use "*" for any library
-    // { '*': ['semver'] }
-    missingOnlyWarnsFor: {},
-    invalidOnlyWarnsFor: {},
-  })
-  // Check that there are no duplicates among your dependencies and your devDependencies.
-  // For example, If you use "@babel/core": "7.0.0" and one of your direct dependency requires "^7.0.1" (in dependencies, not peerDependency)
-  // you will have two versions of @babel/core. This check will display an error that can be changed to a warning.
-  // You will probably need to add warnings for common library where duplicate have low impact,
-  // like type-fest or fast-deep-equal.
-  .checkDirectDuplicateDependencies({
-    onlyWarnsFor: { "*": "type-fest" },
-  })
-  // Check resolutions versions matches versions in devDependencies or dependencies
-  .checkResolutionsVersionsMatch()
-  // Check that all your resolutions are also present in an "resolutionsExplained" field, forcing you to explain why the resolution was necessary
-  .checkResolutionsHasExplanation()
-  // Same as calling .checkExactVersions(), checkDirectPeerDependencies(), checkDirectDuplicateDependencies()
-  // and checkResolutionsHasExplanation(). It's recommended to use it as new recommended features will be added here too.
-  .checkRecommended({
-    peerDependenciesOnlyWarnsFor: [],
-    directDuplicateDependenciesOnlyWarnsFor: ["type-fest"],
-  })
-  // Check that your package.json contains the same version of @babel/core than react-scripts, both in resolutions and devDependencies
-  .checkIdenticalVersionsThanDependency("react-scripts", {
-    resolutions: ["@babel/core"],
-    devDependencies: ["@babel/core"],
-  })
-  // Check that your package.json dependencies specifically satisfies the range set in another dependencies
-  .checkSatisfiesVersionsFromDependency("@pob/eslint-config", {
-    devDependencies: [
-      "@typescript-eslint/eslint-plugin",
-      "@typescript-eslint/parser",
-    ],
-  })
-  // Check that your package.json dependencies have the exact same version that another dependency also present in your package.json
-  // The react-dom version should match react, so this check will ensure it does
-  .checkIdenticalVersions({
-    dependencies: {
-      react: {
-        dependencies: ["react-dom"],
-        devDependencies: ["react-test-renderer"],
-      },
-    },
-  })
-  .run();
-```
-
-```js
-import { createCheckPackage } from "check-package-dependencies";
-
-await createCheckPackage(/* '.' */)
-  // Call .checkExactVersions(), checkDirectPeerDependencies(), checkDirectDuplicateDependencies()
-  // checkResolutionsVersionsMatch() and checkResolutionsHasExplanation()
-  .checkRecommended({})
-  .run();
-```
-
-If you use workspaces:
-
-```js
-import { createCheckPackageWithWorkspaces } from "check-package-dependencies";
-
-await createCheckPackageWithWorkspaces({
-  // Applied to the workspace members, the root is never a library.
-  // Defaults to "auto", so private members are not treated as libraries.
-  library: ["*", "!*-example"],
-})
-  // Call .checkExactVersions(), checkDirectPeerDependencies(), checkDirectDuplicateDependencies()
-  // checkResolutionsVersionsMatch() and checkResolutionsHasExplanation() for root package and workspaces packages, but also
-  // checks your workspaces packages doesn't have different versions than the ones in devDependencies of root packages.
-  .checkRecommended({
-    peerDependenciesOnlyWarnsFor: [],
-    directDuplicateDependenciesOnlyWarnsFor: ["semver", "github-username"],
-  })
-  .forRoot((rootPackageCheck) => {
-    /* rootPackageCheck has the same API presented for single package */
-  })
-  .for("packageName", (pkgCheck) => {
-    /* pkgCheck has the same API presented for single package */
-  })
-  .run();
-```

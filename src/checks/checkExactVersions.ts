@@ -1,20 +1,13 @@
 import semver from "semver";
 import type { ReportError } from "../reporting/ReportError.ts";
-import { reportNotWarnedFor } from "../reporting/cliErrorReporting.ts";
 import type { GetDependencyPackageJson } from "../utils/createGetDependencyPackageJson.ts";
-import type {
-  DependencyTypes,
-  DependencyValue,
-  ParsedPackageJson,
-} from "../utils/packageTypes.ts";
+import type { DependencyValue } from "../utils/packageTypes.ts";
 import { getRealVersion } from "../utils/semverUtils.ts";
-import type { OnlyWarnsFor, OnlyWarnsForCheck } from "../utils/warnForUtils.ts";
+import type { OnlyWarnsForCheck } from "../utils/warnForUtils.ts";
 
 export interface CheckExactVersionsOptions {
   getDependencyPackageJson?: GetDependencyPackageJson;
   onlyWarnsForCheck: OnlyWarnsForCheck;
-  internalExactVersionsIgnore?: OnlyWarnsFor;
-  tryToAutoFix?: boolean;
 }
 
 const isVersionRange = (version: string): boolean =>
@@ -23,116 +16,68 @@ const isVersionRange = (version: string): boolean =>
   version.startsWith(">") ||
   version.startsWith("<");
 
+const getExactVersionFromRange = (version: string): string => {
+  const exactVersion = version.slice(version[1] === "=" ? 2 : 1);
+  const parts = exactVersion.split(".").length;
+  if (parts === 1) return `${exactVersion}.0.0`;
+  if (parts === 2) return `${exactVersion}.0`;
+  return exactVersion;
+};
+
 export function checkExactVersion(
   reportError: ReportError,
   dependencyValue: DependencyValue,
-  {
-    getDependencyPackageJson,
-    onlyWarnsForCheck,
-    internalExactVersionsIgnore,
-    tryToAutoFix = false,
-  }: CheckExactVersionsOptions,
+  { getDependencyPackageJson, onlyWarnsForCheck }: CheckExactVersionsOptions,
 ): void {
   const dependencyName = dependencyValue.name;
   const version = getRealVersion(dependencyValue.value);
 
-  if (isVersionRange(version)) {
-    if (internalExactVersionsIgnore?.includes(dependencyName)) {
-      return;
-    }
-    const shouldOnlyWarn = onlyWarnsForCheck.shouldWarnsFor(dependencyName);
-    if (!shouldOnlyWarn && getDependencyPackageJson) {
-      let resolvedDep;
-      try {
-        [resolvedDep] = getDependencyPackageJson(dependencyName);
-      } catch {
-        resolvedDep = null;
-      }
-      if (!resolvedDep?.version) {
-        reportError({
-          errorMessage: "Unexpected range value",
-          errorDetails: `expecting "${version}" to be exact${
-            tryToAutoFix
-              ? `, autofix failed to resolve "${dependencyName}"`
-              : ""
-          }`,
-          errorTarget: "dependencyValue",
-          dependency: dependencyValue,
-          onlyWarns: shouldOnlyWarn,
-        });
-      } else if (
-        !semver.satisfies(resolvedDep.version, version, {
-          includePrerelease: true,
-        })
-      ) {
-        reportError({
-          errorMessage: "Unexpected range value",
-          errorDetails: `expecting "${version}" to be exact${
-            tryToAutoFix
-              ? `, autofix failed as resolved version "${resolvedDep.version}" doesn't satisfy "${version}"`
-              : ""
-          }`,
-          dependency: dependencyValue,
-          errorTarget: "dependencyValue",
-          onlyWarns: shouldOnlyWarn,
-        });
-      } else if (tryToAutoFix) {
-        dependencyValue.changeValue(resolvedDep.version);
-      } else {
-        reportError({
-          errorMessage: "Unexpected range value",
-          errorDetails: `expecting "${version}" to be exact "${resolvedDep.version}"`,
-          dependency: dependencyValue,
-          errorTarget: "dependencyValue",
-          onlyWarns: shouldOnlyWarn,
-          fixTo: resolvedDep.version,
-        });
-      }
-    } else {
-      let exactVersion = version.slice(version[1] === "=" ? 2 : 1);
-      if (exactVersion.split(".").length < 3) {
-        if (exactVersion.split(".").length === 1) {
-          exactVersion = `${exactVersion}.0.0`;
-        } else {
-          exactVersion = `${exactVersion}.0`;
-        }
-      }
-      reportError({
-        errorMessage: "Unexpected range value",
-        errorDetails: `expecting "${version}" to be exact "${exactVersion}"`,
-        errorTarget: "dependencyValue",
-        dependency: dependencyValue,
-        onlyWarns: shouldOnlyWarn,
-      });
-    }
-  }
-}
+  if (!isVersionRange(version)) return;
 
-export function checkExactVersions(
-  reportError: ReportError,
-  pkg: ParsedPackageJson,
-  types: DependencyTypes[],
-  {
-    getDependencyPackageJson,
-    onlyWarnsForCheck,
-    internalExactVersionsIgnore,
-    tryToAutoFix = false,
-  }: CheckExactVersionsOptions,
-): void {
-  for (const type of types) {
-    const pkgDependencies = pkg[type];
-    if (!pkgDependencies) continue;
+  const shouldOnlyWarn = onlyWarnsForCheck.shouldWarnsFor(dependencyName);
 
-    for (const dependencyValue of Object.values(pkgDependencies)) {
-      if (!dependencyValue) continue;
-      checkExactVersion(reportError, dependencyValue, {
-        getDependencyPackageJson,
-        onlyWarnsForCheck,
-        internalExactVersionsIgnore,
-        tryToAutoFix,
-      });
-    }
+  if (shouldOnlyWarn || !getDependencyPackageJson) {
+    reportError({
+      errorMessage: "Unexpected range value",
+      errorDetails: `expecting "${version}" to be exact "${getExactVersionFromRange(version)}"`,
+      errorTarget: "dependencyValue",
+      dependency: dependencyValue,
+      onlyWarns: shouldOnlyWarn,
+    });
+    return;
   }
 
-  reportNotWarnedFor(reportError, onlyWarnsForCheck);
+  const resolvedDep = (() => {
+    try {
+      const [dep] = getDependencyPackageJson(dependencyName);
+      return dep;
+    } catch {
+      return null;
+    }
+  })();
+
+  if (
+    !resolvedDep?.version ||
+    !semver.satisfies(resolvedDep.version, version, {
+      includePrerelease: true,
+    })
+  ) {
+    reportError({
+      errorMessage: "Unexpected range value",
+      errorDetails: `expecting "${version}" to be exact`,
+      errorTarget: "dependencyValue",
+      dependency: dependencyValue,
+      onlyWarns: shouldOnlyWarn,
+    });
+    return;
+  }
+
+  reportError({
+    errorMessage: "Unexpected range value",
+    errorDetails: `expecting "${version}" to be exact "${resolvedDep.version}"`,
+    errorTarget: "dependencyValue",
+    dependency: dependencyValue,
+    onlyWarns: shouldOnlyWarn,
+    fixTo: resolvedDep.version,
+  });
 }

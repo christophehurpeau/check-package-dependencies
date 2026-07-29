@@ -19,8 +19,6 @@ before(() => {
 const lintFixturePackageJson = async (
   relativePath: string,
 ): Promise<Linter.LintMessage[]> => {
-  const repoCwd = process.cwd();
-  process.chdir(fixtureDirectoryPath);
   const { ESLint } = await import("eslint");
   const eslint = new ESLint({
     cwd: fixtureDirectoryPath,
@@ -37,7 +35,6 @@ const lintFixturePackageJson = async (
   const results = await eslint.lintFiles([
     path.join(fixtureDirectoryPath, relativePath),
   ]);
-  process.chdir(repoCwd);
 
   return results.flatMap((result) => result.messages);
 };

@@ -1,74 +1,98 @@
-import semver from "semver";
-import type { ShouldHaveExactVersions } from "../check-package.ts";
 import type { ReportError } from "../reporting/ReportError.ts";
-import {
-  fromDependency,
-  inDependency,
-} from "../reporting/cliErrorReporting.ts";
-import type { DependencyTypes, PackageJson } from "../utils/packageTypes.ts";
-import { getRealVersion } from "../utils/semverUtils.ts";
+import type { GetDependencyPackageJson } from "../utils/createGetDependencyPackageJson.ts";
+import type {
+  DependencyValue,
+  RegularDependencyTypes,
+} from "../utils/packageTypes.ts";
 import type { OnlyWarnsForCheck } from "../utils/warnForUtils.ts";
+import { regularDependencyTypes } from "./checkDirectPeerDependencies.ts";
+import { isVersionSatisfiesRange } from "./checkSatisfiesVersions.ts";
 
-export interface CheckSatisfiesVersionsFromDependencyOptions {
-  tryToAutoFix?: boolean;
-  shouldHaveExactVersions: ShouldHaveExactVersions;
+/** the dependency a range is read from, and the field it is read in */
+export type SatisfiesVersionsBetweenDependenciesSide =
+  | string
+  | { name: string; in?: RegularDependencyTypes };
+
+export interface SatisfiesVersionsBetweenDependenciesConfig {
+  /** the dependency whose range is compared in both packages */
+  name: string;
+  from: SatisfiesVersionsBetweenDependenciesSide;
+  to: SatisfiesVersionsBetweenDependenciesSide;
+}
+
+export interface CheckSatisfiesVersionsBetweenDependenciesOptions {
+  dependencies: SatisfiesVersionsBetweenDependenciesConfig[];
+  getDependencyPackageJson: GetDependencyPackageJson;
   onlyWarnsForCheck?: OnlyWarnsForCheck;
+}
+
+interface ResolvedSide {
+  depName: string;
+  depType: RegularDependencyTypes;
+  range: string;
+}
+
+interface ResolveSideParams {
+  side: SatisfiesVersionsBetweenDependenciesSide;
+  dependencyName: string;
+  getDependencyPackageJson: GetDependencyPackageJson;
+}
+
+function resolveSide({
+  side,
+  dependencyName,
+  getDependencyPackageJson,
+}: ResolveSideParams): ResolvedSide {
+  const depName = typeof side === "string" ? side : side.name;
+  const depType =
+    typeof side === "string" ? "dependencies" : (side.in ?? "dependencies");
+
+  const [depPkg] = getDependencyPackageJson(depName);
+  const range = depPkg[depType]?.[dependencyName];
+  if (!range) {
+    throw new Error(
+      `Dependency "${depName}" has no dependency "${dependencyName}" in "${depType}"`,
+    );
+  }
+
+  return { depName, depType, range };
 }
 
 export function checkSatisfiesVersionsBetweenDependencies(
   reportError: ReportError,
-  dep1Pkg: PackageJson,
-  dep1Type: DependencyTypes,
-  depKeys: string[],
-  dep2Pkg: PackageJson,
-  dep2Type: DependencyTypes,
+  dependencyValue: DependencyValue,
   {
-    tryToAutoFix,
-    shouldHaveExactVersions,
+    dependencies,
+    getDependencyPackageJson,
     onlyWarnsForCheck,
-  }: CheckSatisfiesVersionsFromDependencyOptions,
+  }: CheckSatisfiesVersionsBetweenDependenciesOptions,
 ): void {
-  const dep1Dependencies = dep1Pkg[dep1Type] || {};
-  const dep2Dendencies = dep2Pkg[dep2Type] || {};
+  if (
+    !(regularDependencyTypes as string[]).includes(dependencyValue.fieldName)
+  ) {
+    return;
+  }
 
-  depKeys.forEach((depKey) => {
-    const dep1Range = dep1Dependencies[depKey];
+  dependencies.forEach(({ name, from, to }) => {
+    const fromName = typeof from === "string" ? from : from.name;
+    if (fromName !== dependencyValue.name) return;
 
-    if (!dep1Range) {
+    const fromSide = resolveSide({
+      side: from,
+      dependencyName: name,
+      getDependencyPackageJson,
+    });
+    const toSide = resolveSide({
+      side: to,
+      dependencyName: name,
+      getDependencyPackageJson,
+    });
+
+    if (!isVersionSatisfiesRange(fromSide.range, toSide.range)) {
       reportError({
-        errorMessage: `Unexpected missing dependency "${depKey}" ${inDependency(dep1Pkg, dep1Type)}`,
-        errorDetails: `config expects "${depKey}"`,
-        onlyWarns: undefined,
-        autoFixable: undefined,
-      });
-      return;
-    }
-
-    const dep2Range = dep2Dendencies[depKey];
-
-    if (!dep2Range) {
-      reportError({
-        errorMessage: `Unexpected missing dependency "${depKey}" ${inDependency(dep2Pkg, dep2Type)}`,
-        errorDetails: `should satisfies "${dep1Range}" ${fromDependency(dep1Pkg, dep1Type)}`,
-        onlyWarns: onlyWarnsForCheck?.shouldWarnsFor(depKey),
-      });
-      return;
-    }
-
-    const dep2RealRange = getRealVersion(dep2Range);
-    // "workspace:*" resolves to the local package's own version; treat as satisfied.
-    if (dep2RealRange === "*") return;
-    const minVersionOfVersion = semver.minVersion(dep2RealRange);
-    if (
-      !minVersionOfVersion ||
-      !semver.satisfies(minVersionOfVersion, getRealVersion(dep1Range), {
-        includePrerelease: true,
-      })
-    ) {
-      reportError({
-        errorMessage: `Invalid "${depKey}" ${inDependency(dep2Pkg, dep2Type)}`,
-        errorDetails: `"${dep2Range}" should satisfies "${dep1Range}" ${fromDependency(dep1Pkg, dep1Type)}`,
-        onlyWarns: onlyWarnsForCheck?.shouldWarnsFor(depKey),
+        errorMessage: `Version not satisfied between dependencies for dependency "${name}"`,
+        errorDetails: `"${fromSide.range}" from "${fromSide.depName}" ${fromSide.depType} should satisfies "${toSide.range}" from "${toSide.depName}" ${toSide.depType}`,
+        onlyWarns: onlyWarnsForCheck?.shouldWarnsFor(dependencyValue.name),
       });
     }
   });

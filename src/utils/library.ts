@@ -12,16 +12,6 @@ const renamedFromIsLibrary =
 export const legacyIsLibrarySettingMessage = `The "isLibrary" setting ${renamedFromIsLibrary}`;
 
 /**
- * The renamed option would otherwise be silently ignored, as the type is only
- * checked when the options are written inline.
- */
-export function assertNoLegacyIsLibraryOption(options: object): void {
-  if ("isLibrary" in options) {
-    throw new Error(`The "isLibrary" option ${renamedFromIsLibrary}`);
-  }
-}
-
-/**
  * Guesses whether a package is a library, ie published and consumed by other
  * packages: a workspace root or a private package is not, anything else is.
  */

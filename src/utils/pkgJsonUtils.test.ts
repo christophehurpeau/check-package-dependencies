@@ -40,7 +40,6 @@ describe("parsePkg", () => {
         value: [90, 97],
       },
       toString: parsedPkg.dependencies?.dep1?.toString,
-      changeValue: parsedPkg.dependencies?.dep1?.changeValue,
     });
   });
 

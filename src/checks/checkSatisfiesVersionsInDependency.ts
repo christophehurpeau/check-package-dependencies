@@ -1,6 +1,6 @@
 import semver from "semver";
 import type { ReportError } from "../reporting/ReportError.ts";
-import { inDependency } from "../reporting/cliErrorReporting.ts";
+import { inDependency } from "../reporting/messages.ts";
 import { getEntries } from "../utils/object.ts";
 import type { DependenciesRanges, PackageJson } from "../utils/packageTypes.ts";
 import { getRealVersion } from "../utils/semverUtils.ts";
