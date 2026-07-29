@@ -84,14 +84,34 @@ Accepted values:
 | `true` / `false`     | Every package checked with this config entry is, or is not, a library.                                                                                        |
 | `string[]`           | Package name patterns: `*` matches any characters, a `!` prefix excludes, and the last matching pattern wins. A package matching no pattern is not a library. |
 
+A single package published to npm needs no setting at all: `"auto"` detects it. Set the
+value explicitly when the detection is wrong for you — a package that is published but
+should still pin every version, or one that is not `private` yet not consumed by anything:
+
 ```js
 export default [
   checkPackageDependenciesPlugin.configs.recommended,
   {
     files: ["package.json"],
     settings: {
+      "check-package-dependencies": { library: false },
+    },
+  },
+];
+```
+
+In a monorepo, use the `**/package.json` glob the configs themselves use, so the setting
+applies to the root and to every member:
+
+```js
+export default [
+  checkPackageDependenciesPlugin.configs.recommended,
+  {
+    files: ["**/package.json"],
+    settings: {
       "check-package-dependencies": {
-        library: ["@scope/*", "!@scope/app-*"],
+        // everything under @scope is published, except the apps and the examples
+        library: ["@scope/*", "!@scope/app-*", "!@scope/*-example"],
       },
     },
   },
@@ -102,6 +122,29 @@ The setting is resolved per package, not per linted file: when linting the `pack
 of a monorepo root, `consistent-workspace-dependencies` resolves it against each
 workspace member. So a list of patterns, or `"auto"`, is what a monorepo mixing published
 and private packages wants — a plain `true` would make the root a library too.
+
+That also means scoping the setting to a member with `files` does not fully work:
+
+```js
+export default [
+  checkPackageDependenciesPlugin.configs.recommended,
+  {
+    files: ["**/package.json"],
+    settings: { "check-package-dependencies": { library: true } },
+  },
+  {
+    // applies when linting packages/app/package.json itself, but the root's
+    // consistent-workspace-dependencies still classifies it with library: true above
+    files: ["packages/app/package.json"],
+    settings: { "check-package-dependencies": { library: false } },
+  },
+];
+```
+
+Prefer a list of patterns, which gives the same answer wherever the package is resolved
+from. Note that a list replaces the detection entirely: `private` is no longer taken into
+account, so a private package matching a pattern is a library, and the root is only
+excluded if its name matches no pattern (or is excluded with `!`).
 
 #### Migrating from v11
 
