@@ -584,10 +584,27 @@ function checkDirectPeerDependencies(reportError, isLibrary, pkg, getDependencyP
   }
 }
 
-function checkDuplicateDependencies(reportError, pkg, isPkgLibrary, depType, searchIn, depPkg, onlyWarnsForCheck) {
+const compareRangeMinimumVersions = (range, otherRange) => {
+  const minVersion = semver.minVersion(range);
+  const otherMinVersion = semver.minVersion(otherRange);
+  if (!minVersion || !otherMinVersion || semver.eq(minVersion, otherMinVersion))
+    return "unordered";
+  return semver.lt(minVersion, otherMinVersion) ? "lower" : "higher";
+};
+function checkDuplicateDependencies({
+  reportError,
+  pkg,
+  isPkgLibrary,
+  depType,
+  searchIn,
+  depPkg,
+  onlyWarnsForCheck,
+  conflictOwnership
+}) {
   const dependencies = depPkg[depType];
   if (!dependencies) return;
   const searchInExisting = searchIn.filter((type) => pkg[type]);
+  const ownsUnorderedConflicts = !conflictOwnership || conflictOwnership.ownsUnorderedConflicts;
   for (const [depKey, depRange] of Object.entries(dependencies)) {
     const versionsIn = searchInExisting.filter((type) => pkg[type][depKey]);
     let allowDuplicated = false;
@@ -629,20 +646,23 @@ function checkDuplicateDependencies(reportError, pkg, isPkgLibrary, depType, sea
         }
         const versionInType = versionsIn[index];
         const dependency = versionInType ? pkg[versionInType][depKey] : void 0;
-        const reportDuplicate = (errorDetails) => {
+        const reportDuplicate = (errorDetails2, fixTo) => {
           reportError({
             errorMessage: `Invalid duplicate dependency${dependency ? "" : `"${depKey}"`}`,
-            errorDetails,
+            errorDetails: errorDetails2,
             onlyWarns: onlyWarnsForCheck.shouldWarnsFor(depKey),
-            dependency
+            dependency,
+            ...fixTo === void 0 ? {} : { fixTo, errorTarget: "dependencyValue" }
           });
         };
         const versionAlias = parseNpmAlias(versionValue);
         const depRangeAlias = parseNpmAlias(depRange);
         if (versionAlias?.aliasedName !== depRangeAlias?.aliasedName) {
-          reportDuplicate(
-            `"${versions[0].value}" and "${depRange}" from ${depPkg.name || ""} in ${depType} install different packages`
-          );
+          if (ownsUnorderedConflicts) {
+            reportDuplicate(
+              `"${versions[0].value}" and "${depRange}" from ${depPkg.name || ""} in ${depType} install different packages`
+            );
+          }
           return;
         }
         const versionRange = versionAlias?.range ?? versionValue;
@@ -651,12 +671,14 @@ function checkDuplicateDependencies(reportError, pkg, isPkgLibrary, depType, sea
           (range) => semver.validRange(range) === null
         );
         if (unsupportedRange !== void 0) {
-          reportError({
-            errorMessage: `Unsupported range for "${depKey}"`,
-            errorDetails: `"${unsupportedRange}" is not a valid semver range, "${versions[0].value}" cannot be compared with "${depRange}" from ${depPkg.name || ""} in ${depType}`,
-            onlyWarns: onlyWarnsForCheck.shouldWarnsFor(depKey),
-            dependency
-          });
+          if (ownsUnorderedConflicts) {
+            reportError({
+              errorMessage: `Unsupported range for "${depKey}"`,
+              errorDetails: `"${unsupportedRange}" is not a valid semver range, "${versions[0].value}" cannot be compared with "${depRange}" from ${depPkg.name || ""} in ${depType}`,
+              onlyWarns: onlyWarnsForCheck.shouldWarnsFor(depKey),
+              dependency
+            });
+          }
           return;
         }
         if (semver.satisfies(versionRange, depRangeRange, {
@@ -666,9 +688,21 @@ function checkDuplicateDependencies(reportError, pkg, isPkgLibrary, depType, sea
         })) {
           return;
         }
-        reportDuplicate(
-          `"${versions[0].value}" should satisfies "${depRange}" from ${depPkg.name || ""} in ${depType}`
+        const errorDetails = `"${versions[0].value}" should satisfies "${depRange}" from ${depPkg.name || ""} in ${depType}`;
+        if (!conflictOwnership) {
+          reportDuplicate(errorDetails);
+          return;
+        }
+        const comparison = compareRangeMinimumVersions(
+          versionRange,
+          depRangeRange
         );
+        if (comparison === "higher") return;
+        if (comparison === "unordered") {
+          if (ownsUnorderedConflicts) reportDuplicate(errorDetails);
+          return;
+        }
+        reportDuplicate(errorDetails, depRange);
       });
     }
   }
@@ -900,6 +934,16 @@ function createPackageRule(ruleName, schema, {
           "onlyWarnsFor",
           options.onlyWarnsFor
         ) : createOnlyWarnsForMappingCheck("onlyWarnsFor", {});
+        const createFix = (fallbackDependencyValue) => (fixer, details, fixTo) => {
+          if (details.errorTarget !== "dependencyValue") return null;
+          const targetDependencyValue = details.dependency ?? fallbackDependencyValue;
+          targetDependencyValue?.changeValue?.(fixTo);
+          const targetRange = targetDependencyValue?.ranges?.value;
+          if (!targetRange) {
+            return null;
+          }
+          return fixer.replaceTextRange(targetRange, JSON.stringify(fixTo));
+        };
         const createReportError = (fix) => (details) => {
           const location = details.dependency && getLocFromDependency(details.dependency, details.errorTarget);
           const fixTo = details.fixTo;
@@ -980,10 +1024,10 @@ function createPackageRule(ruleName, schema, {
               });
             }
             const { parsedPkgJson, getDependencyPackageJson } = node;
-            const loadWorkspacePackageJsons = () => {
+            const loadWorkspaceMemberPackageJsons = (workspaceRootPkg) => {
               const workspacePackagesPaths = [];
-              const dirname = path.dirname(parsedPkgJson.path);
-              const pkgWorkspaces = parsedPkgJson.workspacesPackages;
+              const dirname = path.dirname(workspaceRootPkg.path);
+              const pkgWorkspaces = workspaceRootPkg.workspacesPackages;
               if (!pkgWorkspaces) {
                 throw new Error(
                   "Tried to load workspaces package.json but no workspaces found"
@@ -991,13 +1035,12 @@ function createPackageRule(ruleName, schema, {
               }
               const match = fs.globSync(pkgWorkspaces, { cwd: dirname });
               for (const pathMatch of match) {
-                const subPkgPath = path.relative(process.cwd(), pathMatch);
-                const pkgPath = path.join(subPkgPath, "package.json");
+                const pkgPath = path.join(dirname, pathMatch, "package.json");
                 try {
                   fs.accessSync(pkgPath, constants.R_OK);
                 } catch {
                   console.warn(
-                    `[warn] ${parsedPkgJson.path} workspaces: ignored potential directory, no package.json found: ${pathMatch}`
+                    `[warn] ${workspaceRootPkg.path} workspaces: ignored potential directory, no package.json found: ${pathMatch}`
                   );
                   continue;
                 }
@@ -1016,13 +1059,16 @@ function createPackageRule(ruleName, schema, {
                 }
               });
             };
-            const loadWorkspacePackageJsonsMemoized = /* @__PURE__ */ (() => {
-              let cached = null;
-              return () => {
-                if (cached === null) {
-                  cached = loadWorkspacePackageJsons();
-                }
-                return cached;
+            const loadWorkspaceMemberPackageJsonsMemoized = /* @__PURE__ */ (() => {
+              const cacheByWorkspaceRootPath = /* @__PURE__ */ new Map();
+              return (workspaceRootPkg) => {
+                const cached = cacheByWorkspaceRootPath.get(
+                  workspaceRootPkg.path
+                );
+                if (cached) return cached;
+                const loaded = loadWorkspaceMemberPackageJsons(workspaceRootPkg);
+                cacheByWorkspaceRootPath.set(workspaceRootPkg.path, loaded);
+                return loaded;
               };
             })();
             try {
@@ -1031,19 +1077,18 @@ function createPackageRule(ruleName, schema, {
                   node: parsedPkgJson,
                   pkg: parsedPkgJson,
                   getDependencyPackageJson,
-                  loadWorkspacePackageJsons: loadWorkspacePackageJsonsMemoized,
+                  loadWorkspaceMemberPackageJsons: loadWorkspaceMemberPackageJsonsMemoized,
                   getWorkspaceMemberNames: () => getWorkspaceMemberNames(parsedPkgJson),
                   getWorkspaceRootPackageJson: () => getWorkspaceRootPackageJson(parsedPkgJson),
                   // languageOptions,
                   settings,
                   isLibrary: isLibraryFor(parsedPkgJson),
-                  isLibraryFor,
                   ruleOptions: options,
                   onlyWarnsForCheck,
                   onlyWarnsForMappingCheck,
                   checkOnlyWarnsForArray,
                   checkOnlyWarnsForMapping,
-                  reportError: createReportError()
+                  reportError: createReportError(createFix())
                 });
               }
             } catch (error) {
@@ -1090,39 +1135,7 @@ function createPackageRule(ruleName, schema, {
                 ruleOptions: options,
                 onlyWarnsForCheck,
                 onlyWarnsForMappingCheck,
-                reportError: createReportError((fixer, details, fixTo) => {
-                  const targetDependencyValue = details.dependency || dependencyValue;
-                  if (details.errorTarget !== "dependencyValue") {
-                    throw new Error(
-                      `Invalid or unsupported errorTarget: ${String(details.errorTarget)}`
-                    );
-                  }
-                  targetDependencyValue.changeValue?.(fixTo);
-                  if (!targetDependencyValue.ranges) {
-                    return null;
-                  }
-                  const getTargetRangeFromErrorTarget = (errorTarget) => {
-                    switch (errorTarget) {
-                      case "dependencyValue":
-                        return targetDependencyValue.ranges?.value;
-                      case "dependencyName":
-                        return targetDependencyValue.ranges?.name;
-                      case void 0:
-                      default:
-                        return targetDependencyValue.ranges?.all;
-                    }
-                  };
-                  const targetRange = getTargetRangeFromErrorTarget(
-                    details.errorTarget
-                  );
-                  if (!targetRange) {
-                    return null;
-                  }
-                  return fixer.replaceTextRange(
-                    targetRange,
-                    !details.errorTarget ? dependencyValue.toString() : JSON.stringify(fixTo)
-                  );
-                })
+                reportError: createReportError(createFix(dependencyValue))
               });
             }
           } : {}
@@ -1137,36 +1150,39 @@ const duplicatesSearchInByDependencyType$1 = {
   dependencies: ["devDependencies", "dependencies"],
   peerDependencies: ["peerDependencies"]
 };
-const checkDuplicateInAllDependencies = ({
-  reportError,
-  basePkg,
-  subPkg,
-  isPkgLibrary,
-  onlyWarnsForCheck,
-  alreadyReported
+const isSamePackageJson = (pkg, otherPkg) => path.resolve(pkg.path) === path.resolve(otherPkg.path);
+const isWorkspaceRoot = (pkg) => pkg.workspacesPackages !== void 0;
+const ownsUnorderedConflictsWith = (pkg, otherPkg) => {
+  if (isWorkspaceRoot(otherPkg)) return true;
+  if (isWorkspaceRoot(pkg)) return false;
+  if (pkg.name !== otherPkg.name) return pkg.name < otherPkg.name;
+  return pkg.path < otherPkg.path;
+};
+const getOtherWorkspacePackages = ({
+  pkg,
+  loadWorkspaceMemberPackageJsons,
+  getWorkspaceRootPackageJson
 }) => {
-  ["devDependencies", "dependencies"].forEach((depType) => {
-    const dependencies = basePkg[depType];
-    if (!dependencies || !duplicatesSearchInByDependencyType$1[depType]) return;
-    checkDuplicateDependencies(
-      ({ dependency, errorMessage, ...otherDetails }) => {
-        const message = `${subPkg.name}: ${errorMessage}`;
-        const reportKey = `${message}: ${String(otherDetails.errorDetails)}`;
-        if (alreadyReported.has(reportKey)) return;
-        alreadyReported.add(reportKey);
-        reportError({
-          ...otherDetails,
-          errorMessage: message
-        });
-      },
-      subPkg,
-      isPkgLibrary,
-      depType,
-      duplicatesSearchInByDependencyType$1[depType],
-      basePkg.value,
-      onlyWarnsForCheck
-    );
-  });
+  if (isWorkspaceRoot(pkg)) return loadWorkspaceMemberPackageJsons(pkg);
+  const rootPkg = getWorkspaceRootPackageJson();
+  if (!rootPkg) return void 0;
+  const memberPkgs = loadWorkspaceMemberPackageJsons(rootPkg);
+  if (!memberPkgs.some((memberPkg) => isSamePackageJson(memberPkg, pkg))) {
+    return void 0;
+  }
+  return [
+    rootPkg,
+    ...memberPkgs.filter((memberPkg) => !isSamePackageJson(memberPkg, pkg))
+  ];
+};
+const createReportErrorOnce = (reportError) => {
+  const alreadyReported = /* @__PURE__ */ new Set();
+  return (details) => {
+    const reportKey = `${details.errorMessage}: ${String(details.errorDetails)}`;
+    if (alreadyReported.has(reportKey)) return;
+    alreadyReported.add(reportKey);
+    reportError(details);
+  };
 };
 const consistentWorkspaceDependenciesRule = createPackageRule(
   "consistent-workspace-dependencies",
@@ -1180,57 +1196,53 @@ const consistentWorkspaceDependenciesRule = createPackageRule(
       description: "Enforce consistent dependency versions across the packages of a workspace",
       recommended: true
     },
+    fixable: true,
     checkPackage: ({
       pkg,
       reportError,
-      loadWorkspacePackageJsons,
+      loadWorkspaceMemberPackageJsons,
       getDependencyPackageJson,
       getWorkspaceRootPackageJson,
       onlyWarnsForMappingCheck,
-      isLibraryFor
+      isLibrary
     }) => {
-      if (pkg.workspacesPackages) {
-        const workspacePackageJsons = loadWorkspacePackageJsons();
-        const previousCheckedWorkspaces = [];
-        const alreadyReported = /* @__PURE__ */ new Set();
-        for (const subPkg of workspacePackageJsons) {
-          const onlyWarnsForCheck = onlyWarnsForMappingCheck.createFor(
-            subPkg.name
-          );
-          const isSubPkgLibrary = isLibraryFor(subPkg);
-          checkDuplicateInAllDependencies({
-            reportError,
-            basePkg: pkg,
-            subPkg,
-            isPkgLibrary: isSubPkgLibrary,
-            onlyWarnsForCheck,
-            alreadyReported
+      const otherWorkspacePackages = getOtherWorkspacePackages({
+        pkg,
+        loadWorkspaceMemberPackageJsons,
+        getWorkspaceRootPackageJson
+      });
+      if (!otherWorkspacePackages) return;
+      const reportErrorOnce = createReportErrorOnce(reportError);
+      for (const otherPkg of otherWorkspacePackages) {
+        const conflictOwnership = {
+          ownsUnorderedConflicts: ownsUnorderedConflictsWith(pkg, otherPkg)
+        };
+        ["devDependencies", "dependencies"].forEach((depType) => {
+          checkDuplicateDependencies({
+            reportError: reportErrorOnce,
+            pkg,
+            isPkgLibrary: isLibrary,
+            depType,
+            searchIn: duplicatesSearchInByDependencyType$1[depType],
+            depPkg: otherPkg.value,
+            onlyWarnsForCheck: onlyWarnsForMappingCheck.createFor(
+              otherPkg.name
+            ),
+            conflictOwnership
           });
-          previousCheckedWorkspaces.forEach((previousSubPkg) => {
-            checkDuplicateInAllDependencies({
-              reportError,
-              basePkg: previousSubPkg,
-              subPkg,
-              isPkgLibrary: isSubPkgLibrary,
-              onlyWarnsForCheck,
-              alreadyReported
-            });
-          });
-          previousCheckedWorkspaces.push(subPkg);
-        }
-        return;
+        });
       }
+      if (isWorkspaceRoot(pkg)) return;
       const rootPkg = getWorkspaceRootPackageJson();
-      if (!rootPkg) return;
       const allDepPkgs = [];
       regularDependencyTypes.forEach((depType) => {
         const dependencies = pkg[depType];
         if (!dependencies) return;
         for (const depName of getKeys(dependencies)) {
-          const [depPkg] = getDependencyPackageJson(depName);
           if (rootPkg.devDependencies?.[depName]) {
             continue;
           }
+          const [depPkg] = getDependencyPackageJson(depName);
           allDepPkgs.push({ name: depName, type: depType, pkg: depPkg });
         }
       });
@@ -1373,15 +1385,15 @@ const noDirectDuplicateDependenciesRule = createPackageRule(
         return;
       }
       const [depPkg] = getDependencyPackageJson(node.name);
-      checkDuplicateDependencies(
+      checkDuplicateDependencies({
         reportError,
         pkg,
-        isLibrary,
-        "dependencies",
+        isPkgLibrary: isLibrary,
+        depType: "dependencies",
         searchIn,
         depPkg,
-        onlyWarnsForMappingCheck.createFor(node.name)
-      );
+        onlyWarnsForCheck: onlyWarnsForMappingCheck.createFor(node.name)
+      });
     }
   }
 );

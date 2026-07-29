@@ -52,15 +52,15 @@ export const noDirectDuplicateDependenciesRule =
         }
 
         const [depPkg] = getDependencyPackageJson(node.name);
-        checkDuplicateDependencies(
+        checkDuplicateDependencies({
           reportError,
           pkg,
-          isLibrary,
-          "dependencies",
+          isPkgLibrary: isLibrary,
+          depType: "dependencies",
           searchIn,
           depPkg,
-          onlyWarnsForMappingCheck.createFor(node.name),
-        );
+          onlyWarnsForCheck: onlyWarnsForMappingCheck.createFor(node.name),
+        });
       },
     },
   );

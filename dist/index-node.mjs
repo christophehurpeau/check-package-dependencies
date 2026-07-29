@@ -221,10 +221,27 @@ function getRealVersion(version) {
   return version;
 }
 
-function checkDuplicateDependencies(reportError, pkg, isPkgLibrary, depType, searchIn, depPkg, onlyWarnsForCheck) {
+const compareRangeMinimumVersions = (range, otherRange) => {
+  const minVersion = semver.minVersion(range);
+  const otherMinVersion = semver.minVersion(otherRange);
+  if (!minVersion || !otherMinVersion || semver.eq(minVersion, otherMinVersion))
+    return "unordered";
+  return semver.lt(minVersion, otherMinVersion) ? "lower" : "higher";
+};
+function checkDuplicateDependencies({
+  reportError,
+  pkg,
+  isPkgLibrary,
+  depType,
+  searchIn,
+  depPkg,
+  onlyWarnsForCheck,
+  conflictOwnership
+}) {
   const dependencies = depPkg[depType];
   if (!dependencies) return;
   const searchInExisting = searchIn.filter((type) => pkg[type]);
+  const ownsUnorderedConflicts = !conflictOwnership || conflictOwnership.ownsUnorderedConflicts;
   for (const [depKey, depRange] of Object.entries(dependencies)) {
     const versionsIn = searchInExisting.filter((type) => pkg[type][depKey]);
     let allowDuplicated = false;
@@ -266,20 +283,23 @@ function checkDuplicateDependencies(reportError, pkg, isPkgLibrary, depType, sea
         }
         const versionInType = versionsIn[index];
         const dependency = versionInType ? pkg[versionInType][depKey] : void 0;
-        const reportDuplicate = (errorDetails) => {
+        const reportDuplicate = (errorDetails2, fixTo) => {
           reportError({
             errorMessage: `Invalid duplicate dependency${dependency ? "" : `"${depKey}"`}`,
-            errorDetails,
+            errorDetails: errorDetails2,
             onlyWarns: onlyWarnsForCheck.shouldWarnsFor(depKey),
-            dependency
+            dependency,
+            ...fixTo === void 0 ? {} : { fixTo, errorTarget: "dependencyValue" }
           });
         };
         const versionAlias = parseNpmAlias(versionValue);
         const depRangeAlias = parseNpmAlias(depRange);
         if (versionAlias?.aliasedName !== depRangeAlias?.aliasedName) {
-          reportDuplicate(
-            `"${versions[0].value}" and "${depRange}" from ${depPkg.name || ""} in ${depType} install different packages`
-          );
+          if (ownsUnorderedConflicts) {
+            reportDuplicate(
+              `"${versions[0].value}" and "${depRange}" from ${depPkg.name || ""} in ${depType} install different packages`
+            );
+          }
           return;
         }
         const versionRange = versionAlias?.range ?? versionValue;
@@ -288,12 +308,14 @@ function checkDuplicateDependencies(reportError, pkg, isPkgLibrary, depType, sea
           (range) => semver.validRange(range) === null
         );
         if (unsupportedRange !== void 0) {
-          reportError({
-            errorMessage: `Unsupported range for "${depKey}"`,
-            errorDetails: `"${unsupportedRange}" is not a valid semver range, "${versions[0].value}" cannot be compared with "${depRange}" from ${depPkg.name || ""} in ${depType}`,
-            onlyWarns: onlyWarnsForCheck.shouldWarnsFor(depKey),
-            dependency
-          });
+          if (ownsUnorderedConflicts) {
+            reportError({
+              errorMessage: `Unsupported range for "${depKey}"`,
+              errorDetails: `"${unsupportedRange}" is not a valid semver range, "${versions[0].value}" cannot be compared with "${depRange}" from ${depPkg.name || ""} in ${depType}`,
+              onlyWarns: onlyWarnsForCheck.shouldWarnsFor(depKey),
+              dependency
+            });
+          }
           return;
         }
         if (semver.satisfies(versionRange, depRangeRange, {
@@ -303,9 +325,21 @@ function checkDuplicateDependencies(reportError, pkg, isPkgLibrary, depType, sea
         })) {
           return;
         }
-        reportDuplicate(
-          `"${versions[0].value}" should satisfies "${depRange}" from ${depPkg.name || ""} in ${depType}`
+        const errorDetails = `"${versions[0].value}" should satisfies "${depRange}" from ${depPkg.name || ""} in ${depType}`;
+        if (!conflictOwnership) {
+          reportDuplicate(errorDetails);
+          return;
+        }
+        const comparison = compareRangeMinimumVersions(
+          versionRange,
+          depRangeRange
         );
+        if (comparison === "higher") return;
+        if (comparison === "unordered") {
+          if (ownsUnorderedConflicts) reportDuplicate(errorDetails);
+          return;
+        }
+        reportDuplicate(errorDetails, depRange);
       });
     }
   }
@@ -324,15 +358,15 @@ function checkDirectDuplicateDependencies(reportError, pkg, isPackageALibrary, d
     if (!dependencies) return;
     for (const depName of getKeys(dependencies)) {
       const [depPkg] = getDependencyPackageJson(depName);
-      checkDuplicateDependencies(
+      checkDuplicateDependencies({
         reportError,
         pkg,
-        isPackageALibrary,
+        isPkgLibrary: isPackageALibrary,
         depType,
         searchIn,
         depPkg,
-        onlyWarnsForCheck.createFor(depName)
-      );
+        onlyWarnsForCheck: onlyWarnsForCheck.createFor(depName)
+      });
     }
   });
   reportNotWarnedForMapping(reportError, onlyWarnsForCheck);
@@ -2150,51 +2184,39 @@ function createCheckPackageWithWorkspaces({
           `Monorepo Direct Peer Dependencies for dependencies of "${checkSubPackage.pkg.name}" (${checkSubPackage.pkgPathName})`,
           checkPackage.pkgPathName
         );
-        checkDuplicateDependencies(
-          reportMonorepoDDDError,
-          checkSubPackage.parsedPkg,
-          checkSubPackage.isPkgLibrary,
-          "devDependencies",
-          ["dependencies", "devDependencies"],
-          pkg,
-          monorepoDirectDuplicateDependenciesOnlyWarnsForCheck.createFor(
+        const duplicateDependenciesParams = {
+          reportError: reportMonorepoDDDError,
+          pkg: checkSubPackage.parsedPkg,
+          isPkgLibrary: checkSubPackage.isPkgLibrary,
+          onlyWarnsForCheck: monorepoDirectDuplicateDependenciesOnlyWarnsForCheck.createFor(
             checkSubPackage.pkg.name
           )
-        );
+        };
+        checkDuplicateDependencies({
+          ...duplicateDependenciesParams,
+          depType: "devDependencies",
+          searchIn: ["dependencies", "devDependencies"],
+          depPkg: pkg
+        });
         previousCheckedWorkspaces.forEach((previousCheckSubPackage) => {
-          checkDuplicateDependencies(
-            reportMonorepoDDDError,
-            checkSubPackage.parsedPkg,
-            checkSubPackage.isPkgLibrary,
-            "devDependencies",
-            ["dependencies", "devDependencies"],
-            previousCheckSubPackage.pkg,
-            monorepoDirectDuplicateDependenciesOnlyWarnsForCheck.createFor(
-              checkSubPackage.pkg.name
-            )
-          );
-          checkDuplicateDependencies(
-            reportMonorepoDDDError,
-            checkSubPackage.parsedPkg,
-            checkSubPackage.isPkgLibrary,
-            "dependencies",
-            ["dependencies", "devDependencies"],
-            previousCheckSubPackage.pkg,
-            monorepoDirectDuplicateDependenciesOnlyWarnsForCheck.createFor(
-              checkSubPackage.pkg.name
-            )
-          );
-          checkDuplicateDependencies(
-            reportMonorepoDDDError,
-            checkSubPackage.parsedPkg,
-            checkSubPackage.isPkgLibrary,
-            "peerDependencies",
-            ["peerDependencies"],
-            previousCheckSubPackage.pkg,
-            monorepoDirectDuplicateDependenciesOnlyWarnsForCheck.createFor(
-              checkSubPackage.pkg.name
-            )
-          );
+          checkDuplicateDependencies({
+            ...duplicateDependenciesParams,
+            depType: "devDependencies",
+            searchIn: ["dependencies", "devDependencies"],
+            depPkg: previousCheckSubPackage.pkg
+          });
+          checkDuplicateDependencies({
+            ...duplicateDependenciesParams,
+            depType: "dependencies",
+            searchIn: ["dependencies", "devDependencies"],
+            depPkg: previousCheckSubPackage.pkg
+          });
+          checkDuplicateDependencies({
+            ...duplicateDependenciesParams,
+            depType: "peerDependencies",
+            searchIn: ["peerDependencies"],
+            depPkg: previousCheckSubPackage.pkg
+          });
         });
         checkMonorepoDirectSubpackagePeerDependencies(
           reportMonorepoDPDError,

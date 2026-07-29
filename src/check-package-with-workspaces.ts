@@ -214,53 +214,43 @@ export function createCheckPackageWithWorkspaces({
           checkPackage.pkgPathName,
         );
 
+        const duplicateDependenciesParams = {
+          reportError: reportMonorepoDDDError,
+          pkg: checkSubPackage.parsedPkg,
+          isPkgLibrary: checkSubPackage.isPkgLibrary,
+          onlyWarnsForCheck:
+            monorepoDirectDuplicateDependenciesOnlyWarnsForCheck.createFor(
+              checkSubPackage.pkg.name,
+            ),
+        };
+
         // Root
-        checkDuplicateDependencies(
-          reportMonorepoDDDError,
-          checkSubPackage.parsedPkg,
-          checkSubPackage.isPkgLibrary,
-          "devDependencies",
-          ["dependencies", "devDependencies"],
-          pkg,
-          monorepoDirectDuplicateDependenciesOnlyWarnsForCheck.createFor(
-            checkSubPackage.pkg.name,
-          ),
-        );
+        checkDuplicateDependencies({
+          ...duplicateDependenciesParams,
+          depType: "devDependencies",
+          searchIn: ["dependencies", "devDependencies"],
+          depPkg: pkg,
+        });
         // previous packages
         previousCheckedWorkspaces.forEach((previousCheckSubPackage) => {
-          checkDuplicateDependencies(
-            reportMonorepoDDDError,
-            checkSubPackage.parsedPkg,
-            checkSubPackage.isPkgLibrary,
-            "devDependencies",
-            ["dependencies", "devDependencies"],
-            previousCheckSubPackage.pkg,
-            monorepoDirectDuplicateDependenciesOnlyWarnsForCheck.createFor(
-              checkSubPackage.pkg.name,
-            ),
-          );
-          checkDuplicateDependencies(
-            reportMonorepoDDDError,
-            checkSubPackage.parsedPkg,
-            checkSubPackage.isPkgLibrary,
-            "dependencies",
-            ["dependencies", "devDependencies"],
-            previousCheckSubPackage.pkg,
-            monorepoDirectDuplicateDependenciesOnlyWarnsForCheck.createFor(
-              checkSubPackage.pkg.name,
-            ),
-          );
-          checkDuplicateDependencies(
-            reportMonorepoDDDError,
-            checkSubPackage.parsedPkg,
-            checkSubPackage.isPkgLibrary,
-            "peerDependencies",
-            ["peerDependencies"],
-            previousCheckSubPackage.pkg,
-            monorepoDirectDuplicateDependenciesOnlyWarnsForCheck.createFor(
-              checkSubPackage.pkg.name,
-            ),
-          );
+          checkDuplicateDependencies({
+            ...duplicateDependenciesParams,
+            depType: "devDependencies",
+            searchIn: ["dependencies", "devDependencies"],
+            depPkg: previousCheckSubPackage.pkg,
+          });
+          checkDuplicateDependencies({
+            ...duplicateDependenciesParams,
+            depType: "dependencies",
+            searchIn: ["dependencies", "devDependencies"],
+            depPkg: previousCheckSubPackage.pkg,
+          });
+          checkDuplicateDependencies({
+            ...duplicateDependenciesParams,
+            depType: "peerDependencies",
+            searchIn: ["peerDependencies"],
+            depPkg: previousCheckSubPackage.pkg,
+          });
         });
         checkMonorepoDirectSubpackagePeerDependencies(
           reportMonorepoDPDError,

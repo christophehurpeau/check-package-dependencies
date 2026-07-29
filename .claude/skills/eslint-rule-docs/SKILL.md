@@ -29,7 +29,7 @@ export const someRule = createPackageRule(
 );
 ```
 
-`fixable` and `hasSuggestions` are declared to ESLint: a rule reporting a fix without declaring it throws at lint time, and a rule declaring one it never produces misleads editors. Only the `checkDependencyValue` code path can produce fixes and suggestions — `checkPackage` reports without them, even when the underlying check passes a `fixTo`.
+`fixable` and `hasSuggestions` are declared to ESLint: a rule reporting a fix without declaring it throws at lint time, and a rule declaring one it never produces misleads editors. `checkDependencyValue` fixes the value it is called on. `checkPackage` produces a fix only for an error carrying `errorTarget: "dependencyValue"` and the `dependency` it applies to, as `consistent-workspace-dependencies` does; any other error of that path is reported without a fix even when the underlying check passes a `fixTo`.
 
 `docs.recommended` is validated against `configs.recommended` of `src/eslint-plugin.ts`, the only config enabling rules. A rule that checks a library differently, or only applies to one of the two, is still enabled in `recommended` and gates on the `isLibrary` param itself (resolved from the `library` setting) — that condition belongs in the documentation body, not in a config.
 

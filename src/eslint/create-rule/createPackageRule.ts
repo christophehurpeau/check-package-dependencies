@@ -100,11 +100,12 @@ export function createPackageRule<
       RuleOptions,
       ParsedPackageJson,
       {
-        loadWorkspacePackageJsons: () => ParsedPackageJson[];
+        /** parses the package.json of every workspace member of the given workspace root */
+        loadWorkspaceMemberPackageJsons: (
+          workspaceRootPkg: ParsedPackageJson,
+        ) => ParsedPackageJson[];
         getWorkspaceMemberNames: () => Set<string> | undefined;
         getWorkspaceRootPackageJson: () => ParsedPackageJson | undefined;
-        /** resolves the `library` setting for another package, eg a workspace member */
-        isLibraryFor: (pkg: ParsedPackageJson) => boolean;
         checkOnlyWarnsForArray: (onlyWarnsForCheck: OnlyWarnsForCheck) => void;
         checkOnlyWarnsForMapping: (
           onlyWarnsForMappingCheck: OnlyWarnsForMappingCheck,
@@ -190,6 +191,36 @@ export function createPackageRule<
                 options.onlyWarnsFor,
               )
             : createOnlyWarnsForMappingCheck("onlyWarnsFor", {});
+
+        /**
+         * Applies "fixTo" to the reported dependency, which has to be a dependency of the
+         * linted package.json: an eslint fix can only change the file it is reported in.
+         * `fallbackDependencyValue` is the dependency the rule is visiting, when it has one.
+         *
+         * Only the value of a dependency can be fixed: a report targeting anything else is
+         * left unfixed, the rule only reporting a "fixTo" as information.
+         */
+        const createFix =
+          (fallbackDependencyValue?: DependencyValue) =>
+          (
+            fixer: Rule.RuleFixer,
+            details: ReportErrorDetails,
+            fixTo: string,
+          ): ReturnType<Rule.ReportFixer> => {
+            if (details.errorTarget !== "dependencyValue") return null;
+
+            const targetDependencyValue: Partial<DependencyValue> | undefined =
+              details.dependency ?? fallbackDependencyValue;
+
+            targetDependencyValue?.changeValue?.(fixTo);
+
+            const targetRange = targetDependencyValue?.ranges?.value;
+            if (!targetRange) {
+              return null;
+            }
+
+            return fixer.replaceTextRange(targetRange, JSON.stringify(fixTo));
+          };
 
         const createReportError =
           (
@@ -322,12 +353,14 @@ export function createPackageRule<
             const { parsedPkgJson, getDependencyPackageJson } =
               node as PackageJsonAst;
 
-            const loadWorkspacePackageJsons = (): ParsedPackageJson[] => {
+            const loadWorkspaceMemberPackageJsons = (
+              workspaceRootPkg: ParsedPackageJson,
+            ): ParsedPackageJson[] => {
               const workspacePackagesPaths: string[] = [];
 
-              const dirname = path.dirname(parsedPkgJson.path);
+              const dirname = path.dirname(workspaceRootPkg.path);
 
-              const pkgWorkspaces = parsedPkgJson.workspacesPackages;
+              const pkgWorkspaces = workspaceRootPkg.workspacesPackages;
 
               if (!pkgWorkspaces) {
                 throw new Error(
@@ -337,14 +370,13 @@ export function createPackageRule<
 
               const match = fs.globSync(pkgWorkspaces, { cwd: dirname });
               for (const pathMatch of match) {
-                const subPkgPath = path.relative(process.cwd(), pathMatch);
-                const pkgPath = path.join(subPkgPath, "package.json");
+                const pkgPath = path.join(dirname, pathMatch, "package.json");
 
                 try {
                   fs.accessSync(pkgPath, constants.R_OK);
                 } catch {
                   console.warn(
-                    `[warn] ${parsedPkgJson.path} workspaces: ignored potential directory, no package.json found: ${pathMatch}`,
+                    `[warn] ${workspaceRootPkg.path} workspaces: ignored potential directory, no package.json found: ${pathMatch}`,
                   );
                   continue;
                 }
@@ -366,13 +398,22 @@ export function createPackageRule<
               });
             };
 
-            const loadWorkspacePackageJsonsMemoized = (() => {
-              let cached: ParsedPackageJson[] | null = null;
-              return (): ParsedPackageJson[] => {
-                if (cached === null) {
-                  cached = loadWorkspacePackageJsons();
-                }
-                return cached;
+            const loadWorkspaceMemberPackageJsonsMemoized = (() => {
+              const cacheByWorkspaceRootPath = new Map<
+                string,
+                ParsedPackageJson[]
+              >();
+              return (
+                workspaceRootPkg: ParsedPackageJson,
+              ): ParsedPackageJson[] => {
+                const cached = cacheByWorkspaceRootPath.get(
+                  workspaceRootPkg.path,
+                );
+                if (cached) return cached;
+                const loaded =
+                  loadWorkspaceMemberPackageJsons(workspaceRootPkg);
+                cacheByWorkspaceRootPath.set(workspaceRootPkg.path, loaded);
+                return loaded;
               };
             })();
 
@@ -383,7 +424,8 @@ export function createPackageRule<
                   node: parsedPkgJson,
                   pkg: parsedPkgJson,
                   getDependencyPackageJson,
-                  loadWorkspacePackageJsons: loadWorkspacePackageJsonsMemoized,
+                  loadWorkspaceMemberPackageJsons:
+                    loadWorkspaceMemberPackageJsonsMemoized,
                   getWorkspaceMemberNames: () =>
                     getWorkspaceMemberNames(parsedPkgJson),
                   getWorkspaceRootPackageJson: () =>
@@ -391,13 +433,12 @@ export function createPackageRule<
                   // languageOptions,
                   settings,
                   isLibrary: isLibraryFor(parsedPkgJson),
-                  isLibraryFor,
                   ruleOptions: options,
                   onlyWarnsForCheck,
                   onlyWarnsForMappingCheck,
                   checkOnlyWarnsForArray,
                   checkOnlyWarnsForMapping,
-                  reportError: createReportError(),
+                  reportError: createReportError(createFix()),
                 });
               }
             } catch (error: unknown) {
@@ -452,51 +493,7 @@ export function createPackageRule<
                     ruleOptions: options,
                     onlyWarnsForCheck,
                     onlyWarnsForMappingCheck,
-                    reportError: createReportError((fixer, details, fixTo) => {
-                      const targetDependencyValue: Partial<DependencyValue> =
-                        details.dependency || dependencyValue;
-
-                      if (details.errorTarget !== "dependencyValue") {
-                        throw new Error(
-                          `Invalid or unsupported errorTarget: ${String(details.errorTarget)}`,
-                        );
-                      }
-
-                      targetDependencyValue.changeValue?.(fixTo);
-
-                      if (!targetDependencyValue.ranges) {
-                        return null;
-                      }
-
-                      const getTargetRangeFromErrorTarget = (
-                        errorTarget: ReportErrorDetails["errorTarget"],
-                      ): [number, number] | undefined => {
-                        switch (errorTarget) {
-                          case "dependencyValue":
-                            return targetDependencyValue.ranges?.value;
-                          case "dependencyName":
-                            return targetDependencyValue.ranges?.name;
-                          case undefined:
-                          default:
-                            return targetDependencyValue.ranges?.all;
-                        }
-                      };
-
-                      const targetRange = getTargetRangeFromErrorTarget(
-                        details.errorTarget,
-                      );
-
-                      if (!targetRange) {
-                        return null;
-                      }
-
-                      return fixer.replaceTextRange(
-                        targetRange,
-                        !details.errorTarget
-                          ? dependencyValue.toString()
-                          : JSON.stringify(fixTo),
-                      );
-                    }),
+                    reportError: createReportError(createFix(dependencyValue)),
                   });
                 },
               }

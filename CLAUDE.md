@@ -75,6 +75,8 @@ The plugin defines a custom `package-json` language (see `src/eslint/language.ts
 
 Each rule declares `docs` (description, `recommended`), and `fixable` / `hasSuggestions` when it reports fixes or suggestions. Every rule has a documentation file in `documentation/rules/` and a row in the README rules table — see the `eslint-rule-docs` skill when adding or changing a rule.
 
+A fix can only edit the linted file, so a rule comparing two `package.json` files must report on the file it can fix. `consistent-workspace-dependencies` lints every `package.json` of the workspace and compares it with all the others, each conflict being owned by exactly one of the two packages — the one whose range has to be raised, or for a conflict with no range to raise (invalid range, npm alias of another package) the one `ownsUnorderedConflicts` is true for, never the workspace root. `checkDuplicateDependencies` implements that through its `conflictOwnership` param, which the legacy API leaves unset: having no file to fix, it keeps reporting every conflict it finds.
+
 ESLint configs exported: `base` (language + plugin, no rules enabled) and `recommended` (10 of the 18 rules). There is no library config — see the `library` setting below. The 8 remaining rules (`require-identical-versions*`, `satisfies-versions*`) are opt-in, as they only make sense with options.
 
 #### `meta.languages` and `meta.namespace`
@@ -91,10 +93,10 @@ Whether a package is published and consumed by other packages, which changes wha
 
 - `LibrarySetting` is `boolean | "auto" | string[]`, the array being package name patterns (`*` wildcard, `!` exclusion, last match wins).
 - `detectIsLibrary(pkg)` implements `"auto"`, the default: a workspace root or a `private` package is not a library, anything else is.
-- `resolveIsLibrary(setting, pkg)` resolves it **for a given package**, not for the linted file, which is what lets the root config classify workspace members.
+- `resolveIsLibrary(setting, pkg)` resolves it **for a given package**, which is what lets a single config classify every package of a workspace.
 - `assertNoLegacyIsLibraryOption(options)` throws for the pre-v12 `isLibrary` option; the ESLint setting of the same name is reported once per `package.json` by `createPackageRule` (deduplicated with a `WeakSet` on the ast node, so enabling ten rules does not repeat it ten times).
 
-Rules receive the resolved boolean as `isLibrary`, and `checkPackage` rules also receive `isLibraryFor(pkg)` for other packages — used by `consistent-workspace-dependencies` for each workspace member. Only `require-pinned-versions` branches on it today, skipping the `dependencies` field for a library; the two `min-range-*` rules deliberately do not, a range whose minimum does not satisfy the development version being wrong either way.
+Rules receive the resolved boolean as `isLibrary`, resolved for the linted `package.json`. Only `require-pinned-versions` branches on it today, skipping the `dependencies` field for a library; the two `min-range-*` rules deliberately do not, a range whose minimum does not satisfy the development version being wrong either way.
 
 The legacy API mirrors this through `isPkgLibrary` and `shouldHaveExactVersions` in `check-package.ts` — keep both sides in sync.
 

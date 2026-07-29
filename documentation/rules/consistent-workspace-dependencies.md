@@ -2,16 +2,21 @@
 
 💼 This rule is enabled in the ✅ `recommended` config.
 
+🔧 This rule is automatically fixable by the [`--fix` CLI option](https://eslint.org/docs/latest/use/command-line-interface#--fix).
+
 <!-- end auto-generated rule header -->
 
 In a workspace, two packages declaring incompatible versions of the same dependency get two copies installed, with the same consequences as [no-direct-duplicate-dependencies](no-direct-duplicate-dependencies.md), plus the confusion of a tool behaving differently depending on the package it runs from.
 
-The rule behaves differently depending on the `package.json` being linted:
+Every `package.json` of the workspace is compared with all the others: the workspace root with each of its packages, and each package with the root and with the other packages. A conflict is reported on the package whose range has to be raised, in the file declaring it, so that it is reported once and where `--fix` can raise it to the other range. Nothing is reported on the package that already has the higher range.
 
-- on the **workspace root**, every workspace package is compared with the root and with the workspace packages already checked, reporting dependencies that would be installed twice;
-- on a **workspace package**, the peer dependencies of its own dependencies are checked against the `devDependencies` of the workspace root, which is where a workspace package usually gets them from. The ones already declared by the package itself are left to [require-direct-peer-dependencies](require-direct-peer-dependencies.md).
+Ranges that cannot be ordered have no range to raise, and are reported without a fix: an npm alias installing another package under the same name, a range that is not valid semver such as a dist tag, and the degenerate ranges no version satisfies. The workspace root is never the package such a conflict is reported on, and between two packages of the workspace it is the one whose name sorts first, so it is still reported exactly once.
 
-When run on the workspace root, each workspace package is checked as a library or not by resolving the [`library` setting](../../README.md#settings) against that package, not against the root: with the default `"auto"` a private member is not a library, and a list of package name patterns lets the root config classify the members explicitly.
+Values that do not describe a published range are ignored, as in the other duplicate checks: `latest`, `workspace:`, `file:` and `patch:`, as well as a dependency covered by a `resolutions` entry.
+
+On a workspace package, the rule additionally checks the peer dependencies of its own dependencies against the `devDependencies` of the workspace root, which is where a workspace package usually gets them from. The ones already declared by the package itself are left to [require-direct-peer-dependencies](require-direct-peer-dependencies.md).
+
+Each package is checked as a library or not by resolving the [`library` setting](../../README.md#settings) against itself: with the default `"auto"` a private package is not a library, and a list of package name patterns lets a single config classify every package of the workspace.
 
 ## Fail
 
@@ -27,7 +32,7 @@ Root `package.json`:
 }
 ```
 
-`packages/app/package.json`:
+`packages/app/package.json`, reported and fixable to `6.0.3`:
 
 ```json
 {

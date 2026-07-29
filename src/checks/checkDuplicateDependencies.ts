@@ -8,19 +8,62 @@ import type {
 import { parseNpmAlias } from "../utils/semverUtils.ts";
 import type { OnlyWarnsForCheck } from "../utils/warnForUtils.ts";
 
-export function checkDuplicateDependencies(
-  reportError: ReportError,
-  pkg: ParsedPackageJson,
-  isPkgLibrary: boolean,
-  depType: DependencyTypes,
-  searchIn: DependencyTypes[],
-  depPkg: PackageJson,
-  onlyWarnsForCheck: OnlyWarnsForCheck,
-): void {
+export interface DuplicateConflictOwnership {
+  /**
+   * Conflicts whose two ranges cannot be ordered — an invalid range, npm aliases of
+   * different packages, or equal minimum versions — have no range to raise, so they are
+   * reported on the package this is true for. Exactly one of the two packages owns them.
+   */
+  ownsUnorderedConflicts: boolean;
+}
+
+type RangeComparison = "higher" | "lower" | "unordered";
+
+/** Both ranges are expected to be valid semver ranges. */
+const compareRangeMinimumVersions = (
+  range: string,
+  otherRange: string,
+): RangeComparison => {
+  const minVersion = semver.minVersion(range);
+  const otherMinVersion = semver.minVersion(otherRange);
+  if (!minVersion || !otherMinVersion || semver.eq(minVersion, otherMinVersion))
+    return "unordered";
+  return semver.lt(minVersion, otherMinVersion) ? "lower" : "higher";
+};
+
+export interface CheckDuplicateDependenciesParams {
+  reportError: ReportError;
+  pkg: ParsedPackageJson;
+  isPkgLibrary: boolean;
+  depType: DependencyTypes;
+  searchIn: DependencyTypes[];
+  depPkg: PackageJson;
+  onlyWarnsForCheck: OnlyWarnsForCheck;
+  /**
+   * Set when `depPkg` is another package checked by the same rule, typically another package
+   * of the same workspace. A conflict is then reported only once, on the package whose range
+   * has to be raised, which is also the only package a fix could be applied to.
+   */
+  conflictOwnership?: DuplicateConflictOwnership;
+}
+
+export function checkDuplicateDependencies({
+  reportError,
+  pkg,
+  isPkgLibrary,
+  depType,
+  searchIn,
+  depPkg,
+  onlyWarnsForCheck,
+  conflictOwnership,
+}: CheckDuplicateDependenciesParams): void {
   const dependencies = depPkg[depType];
   if (!dependencies) return;
 
   const searchInExisting = searchIn.filter((type) => pkg[type]);
+
+  const ownsUnorderedConflicts =
+    !conflictOwnership || conflictOwnership.ownsUnorderedConflicts;
 
   for (const [depKey, depRange] of Object.entries(dependencies)) {
     const versionsIn = searchInExisting.filter((type) => pkg[type]![depKey]);
@@ -92,12 +135,18 @@ export function checkDuplicateDependencies(
           ? pkg[versionInType]![depKey]
           : undefined;
 
-        const reportDuplicate = (errorDetails: string): void => {
+        const reportDuplicate = (
+          errorDetails: string,
+          fixTo?: string,
+        ): void => {
           reportError({
             errorMessage: `Invalid duplicate dependency${dependency ? "" : `"${depKey}"`}`,
             errorDetails,
             onlyWarns: onlyWarnsForCheck.shouldWarnsFor(depKey),
             dependency,
+            ...(fixTo === undefined
+              ? {}
+              : { fixTo, errorTarget: "dependencyValue" as const }),
           });
         };
 
@@ -107,9 +156,11 @@ export function checkDuplicateDependencies(
         const versionAlias = parseNpmAlias(versionValue);
         const depRangeAlias = parseNpmAlias(depRange);
         if (versionAlias?.aliasedName !== depRangeAlias?.aliasedName) {
-          reportDuplicate(
-            `"${versions[0]!.value}" and "${depRange}" from ${depPkg.name || ""} in ${depType} install different packages`,
-          );
+          if (ownsUnorderedConflicts) {
+            reportDuplicate(
+              `"${versions[0]!.value}" and "${depRange}" from ${depPkg.name || ""} in ${depType} install different packages`,
+            );
+          }
           return;
         }
 
@@ -120,12 +171,14 @@ export function checkDuplicateDependencies(
           (range) => semver.validRange(range) === null,
         );
         if (unsupportedRange !== undefined) {
-          reportError({
-            errorMessage: `Unsupported range for "${depKey}"`,
-            errorDetails: `"${unsupportedRange}" is not a valid semver range, "${versions[0]!.value}" cannot be compared with "${depRange}" from ${depPkg.name || ""} in ${depType}`,
-            onlyWarns: onlyWarnsForCheck.shouldWarnsFor(depKey),
-            dependency,
-          });
+          if (ownsUnorderedConflicts) {
+            reportError({
+              errorMessage: `Unsupported range for "${depKey}"`,
+              errorDetails: `"${unsupportedRange}" is not a valid semver range, "${versions[0]!.value}" cannot be compared with "${depRange}" from ${depPkg.name || ""} in ${depType}`,
+              onlyWarns: onlyWarnsForCheck.shouldWarnsFor(depKey),
+              dependency,
+            });
+          }
           return;
         }
 
@@ -140,9 +193,24 @@ export function checkDuplicateDependencies(
           return;
         }
 
-        reportDuplicate(
-          `"${versions[0]!.value}" should satisfies "${depRange}" from ${depPkg.name || ""} in ${depType}`,
+        const errorDetails = `"${versions[0]!.value}" should satisfies "${depRange}" from ${depPkg.name || ""} in ${depType}`;
+
+        if (!conflictOwnership) {
+          reportDuplicate(errorDetails);
+          return;
+        }
+
+        const comparison = compareRangeMinimumVersions(
+          versionRange,
+          depRangeRange,
         );
+        // the other package has the lower range: it is the one reporting and fixing it
+        if (comparison === "higher") return;
+        if (comparison === "unordered") {
+          if (ownsUnorderedConflicts) reportDuplicate(errorDetails);
+          return;
+        }
+        reportDuplicate(errorDetails, depRange);
       });
     }
   }

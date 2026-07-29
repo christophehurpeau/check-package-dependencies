@@ -50,11 +50,10 @@ export declare function createPackageRule<RuleOptions extends {
     /** the rule reports errors with editor suggestions */
     hasSuggestions?: boolean;
     checkPackage?: CheckFn<RuleOptions, ParsedPackageJson, {
-        loadWorkspacePackageJsons: () => ParsedPackageJson[];
+        /** parses the package.json of every workspace member of the given workspace root */
+        loadWorkspaceMemberPackageJsons: (workspaceRootPkg: ParsedPackageJson) => ParsedPackageJson[];
         getWorkspaceMemberNames: () => Set<string> | undefined;
         getWorkspaceRootPackageJson: () => ParsedPackageJson | undefined;
-        /** resolves the `library` setting for another package, eg a workspace member */
-        isLibraryFor: (pkg: ParsedPackageJson) => boolean;
         checkOnlyWarnsForArray: (onlyWarnsForCheck: OnlyWarnsForCheck) => void;
         checkOnlyWarnsForMapping: (onlyWarnsForMappingCheck: OnlyWarnsForMappingCheck) => void;
     }>;

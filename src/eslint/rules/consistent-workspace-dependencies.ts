@@ -1,3 +1,4 @@
+import path from "node:path";
 import { regularDependencyTypes } from "../../checks/checkDirectPeerDependencies.ts";
 import { checkDuplicateDependencies } from "../../checks/checkDuplicateDependencies.ts";
 import { isPeerDependencyDeclaredInPackage } from "../../checks/checkMonorepoDirectSubpackagePeerDependencies.ts";
@@ -11,7 +12,6 @@ import type {
   ParsedPackageJson,
   RegularDependencyTypes,
 } from "../../utils/packageTypes.ts";
-import type { OnlyWarnsForCheck } from "../../utils/warnForUtils.ts";
 import { createPackageRule } from "../create-rule/createPackageRule.ts";
 
 const duplicatesSearchInByDependencyType: Partial<
@@ -22,54 +22,79 @@ const duplicatesSearchInByDependencyType: Partial<
   peerDependencies: ["peerDependencies"],
 };
 
-interface CheckDuplicateInAllDependenciesParams {
-  reportError: ReportError;
-  basePkg: ParsedPackageJson;
-  subPkg: ParsedPackageJson;
-  isPkgLibrary: boolean;
-  onlyWarnsForCheck: OnlyWarnsForCheck;
-  /**
-   * Errors about the subpackage alone do not depend on the package it is compared
-   * to, so they would otherwise be reported once per comparison.
-   */
-  alreadyReported: Set<string>;
-}
+const isSamePackageJson = (
+  pkg: ParsedPackageJson,
+  otherPkg: ParsedPackageJson,
+): boolean => path.resolve(pkg.path) === path.resolve(otherPkg.path);
 
-const checkDuplicateInAllDependencies = ({
-  reportError,
-  basePkg,
-  subPkg,
-  isPkgLibrary,
-  onlyWarnsForCheck,
-  alreadyReported,
-}: CheckDuplicateInAllDependenciesParams): void => {
-  (["devDependencies", "dependencies"] as const).forEach((depType) => {
-    const dependencies = basePkg[depType];
-    if (!dependencies || !duplicatesSearchInByDependencyType[depType]) return;
+const isWorkspaceRoot = (pkg: ParsedPackageJson): boolean =>
+  pkg.workspacesPackages !== undefined;
 
-    checkDuplicateDependencies(
-      ({ dependency, errorMessage, ...otherDetails }) => {
-        // hide dependency from error details as it is the dependency of the sub package and we are in the context of the root package
-        const message = `${subPkg.name}: ${errorMessage}`;
-        const reportKey = `${message}: ${String(otherDetails.errorDetails)}`;
-        if (alreadyReported.has(reportKey)) return;
-        alreadyReported.add(reportKey);
-        reportError({
-          ...otherDetails,
-          errorMessage: message,
-        });
-      },
-      subPkg,
-      isPkgLibrary,
-      depType,
-      duplicatesSearchInByDependencyType[depType],
-      basePkg.value,
-      onlyWarnsForCheck,
-    );
-  });
+/**
+ * The linted package.json is compared with every other package of its workspace, and a
+ * conflict is reported on the package whose range has to be raised, so that it is reported
+ * once and where `eslint --fix` can change it. When neither range is higher, the workspace
+ * root is never the one to change, and two members are ordered by name so that the same
+ * package owns the conflict from both sides.
+ */
+const ownsUnorderedConflictsWith = (
+  pkg: ParsedPackageJson,
+  otherPkg: ParsedPackageJson,
+): boolean => {
+  if (isWorkspaceRoot(otherPkg)) return true;
+  if (isWorkspaceRoot(pkg)) return false;
+  if (pkg.name !== otherPkg.name) return pkg.name < otherPkg.name;
+  return pkg.path < otherPkg.path;
 };
 
-// TODO this rule is currently very limited in the way errors are reported. It should be improved.
+interface GetOtherWorkspacePackagesParams {
+  pkg: ParsedPackageJson;
+  loadWorkspaceMemberPackageJsons: (
+    workspaceRootPkg: ParsedPackageJson,
+  ) => ParsedPackageJson[];
+  getWorkspaceRootPackageJson: () => ParsedPackageJson | undefined;
+}
+
+/**
+ * The packages the linted package.json shares its installed dependencies with: the members
+ * of the workspace it is the root of, or the root and the other members of the workspace it
+ * is a member of. `undefined` when it is not part of a workspace.
+ */
+const getOtherWorkspacePackages = ({
+  pkg,
+  loadWorkspaceMemberPackageJsons,
+  getWorkspaceRootPackageJson,
+}: GetOtherWorkspacePackagesParams): ParsedPackageJson[] | undefined => {
+  if (isWorkspaceRoot(pkg)) return loadWorkspaceMemberPackageJsons(pkg);
+
+  const rootPkg = getWorkspaceRootPackageJson();
+  if (!rootPkg) return undefined;
+
+  const memberPkgs = loadWorkspaceMemberPackageJsons(rootPkg);
+  if (!memberPkgs.some((memberPkg) => isSamePackageJson(memberPkg, pkg))) {
+    return undefined;
+  }
+
+  return [
+    rootPkg,
+    ...memberPkgs.filter((memberPkg) => !isSamePackageJson(memberPkg, pkg)),
+  ];
+};
+
+/**
+ * Errors about the linted package alone do not depend on the package it is compared to, so
+ * they would otherwise be reported once per comparison.
+ */
+const createReportErrorOnce = (reportError: ReportError): ReportError => {
+  const alreadyReported = new Set<string>();
+  return (details) => {
+    const reportKey = `${details.errorMessage}: ${String(details.errorDetails)}`;
+    if (alreadyReported.has(reportKey)) return;
+    alreadyReported.add(reportKey);
+    reportError(details);
+  };
+};
+
 export const consistentWorkspaceDependenciesRule = createPackageRule(
   "consistent-workspace-dependencies",
   {
@@ -83,65 +108,54 @@ export const consistentWorkspaceDependenciesRule = createPackageRule(
         "Enforce consistent dependency versions across the packages of a workspace",
       recommended: true,
     },
+    fixable: true,
     checkPackage: ({
       pkg,
       reportError,
-      loadWorkspacePackageJsons,
+      loadWorkspaceMemberPackageJsons,
       getDependencyPackageJson,
       getWorkspaceRootPackageJson,
       onlyWarnsForMappingCheck,
-      isLibraryFor,
+      isLibrary,
     }) => {
-      if (pkg.workspacesPackages) {
-        // running on the monorepo root package.json: duplicate dependencies only need
-        // comparing declared version ranges, so they can be checked from here directly.
-        const workspacePackageJsons = loadWorkspacePackageJsons();
+      const otherWorkspacePackages = getOtherWorkspacePackages({
+        pkg,
+        loadWorkspaceMemberPackageJsons,
+        getWorkspaceRootPackageJson,
+      });
+      if (!otherWorkspacePackages) return;
 
-        const previousCheckedWorkspaces: ParsedPackageJson[] = [];
-        const alreadyReported = new Set<string>();
+      // duplicate dependencies only need comparing declared version ranges, so every other
+      // package of the workspace can be compared from here directly.
+      const reportErrorOnce = createReportErrorOnce(reportError);
 
-        for (const subPkg of workspacePackageJsons) {
-          const onlyWarnsForCheck = onlyWarnsForMappingCheck.createFor(
-            subPkg.name,
-          );
-          // the subpackage is checked here, not the linted root, so the "library"
-          // setting is resolved against the subpackage itself.
-          const isSubPkgLibrary = isLibraryFor(subPkg);
+      for (const otherPkg of otherWorkspacePackages) {
+        const conflictOwnership = {
+          ownsUnorderedConflicts: ownsUnorderedConflictsWith(pkg, otherPkg),
+        };
 
-          // root
-          checkDuplicateInAllDependencies({
-            reportError,
-            basePkg: pkg,
-            subPkg,
-            isPkgLibrary: isSubPkgLibrary,
-            onlyWarnsForCheck,
-            alreadyReported,
+        (["devDependencies", "dependencies"] as const).forEach((depType) => {
+          checkDuplicateDependencies({
+            reportError: reportErrorOnce,
+            pkg,
+            isPkgLibrary: isLibrary,
+            depType,
+            searchIn: duplicatesSearchInByDependencyType[depType]!,
+            depPkg: otherPkg.value,
+            onlyWarnsForCheck: onlyWarnsForMappingCheck.createFor(
+              otherPkg.name,
+            ),
+            conflictOwnership,
           });
-
-          // previous packages
-          previousCheckedWorkspaces.forEach((previousSubPkg) => {
-            checkDuplicateInAllDependencies({
-              reportError,
-              basePkg: previousSubPkg,
-              subPkg,
-              isPkgLibrary: isSubPkgLibrary,
-              onlyWarnsForCheck,
-              alreadyReported,
-            });
-          });
-
-          // add to previous checked workspaces
-          previousCheckedWorkspaces.push(subPkg);
-        }
-        return;
+        });
       }
 
-      // running on a workspace member's own package.json: checking peer dependencies of
-      // this package's own dependencies requires resolving them from this package's
-      // directory, since that's where pnpm/npm/yarn actually link them (they may not be
-      // hoisted to the monorepo root's node_modules).
-      const rootPkg = getWorkspaceRootPackageJson();
-      if (!rootPkg) return;
+      if (isWorkspaceRoot(pkg)) return;
+
+      // checking peer dependencies of this package's own dependencies requires resolving them
+      // from this package's directory, since that's where pnpm/npm/yarn actually link them
+      // (they may not be hoisted to the monorepo root's node_modules).
+      const rootPkg = getWorkspaceRootPackageJson()!;
 
       const allDepPkgs: {
         name: string;
@@ -153,10 +167,10 @@ export const consistentWorkspaceDependenciesRule = createPackageRule(
         const dependencies = pkg[depType];
         if (!dependencies) return;
         for (const depName of getKeys(dependencies)) {
-          const [depPkg] = getDependencyPackageJson(depName);
           if (rootPkg.devDependencies?.[depName]) {
             continue; // we already checked this.
           }
+          const [depPkg] = getDependencyPackageJson(depName);
           allDepPkgs.push({ name: depName, type: depType, pkg: depPkg });
         }
       });

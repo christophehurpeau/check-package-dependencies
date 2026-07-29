@@ -28,16 +28,18 @@ const files = {
   },
 };
 
-const lintRoot = (settings: Record<string, unknown>): string[] =>
-  lintPackageJsonMessages("package.json", files, {
-    settings,
-    rules: { "consistent-workspace-dependencies": "error" },
-  });
+const lintMember = (
+  memberDirectoryName: string,
+  settings: Record<string, unknown>,
+): string[] =>
+  lintPackageJsonMessages(
+    `packages/${memberDirectoryName}/package.json`,
+    files,
+    { settings, rules: { "consistent-workspace-dependencies": "error" } },
+  );
 
-const duplicateMessageFor = (memberName: string): string =>
-  `${memberName}: Invalid "semver" present in devDependencies and dependencies: please place it only in dependencies`;
-
-const autoDetectedMessages = [duplicateMessageFor("private-member")];
+const duplicateMessage =
+  'Invalid "semver" present in devDependencies and dependencies: please place it only in dependencies';
 
 describe("consistent-workspace-dependencies library setting of the workspace members", () => {
   afterEach(() => {
@@ -45,25 +47,35 @@ describe("consistent-workspace-dependencies library setting of the workspace mem
   });
 
   it("should detect it for each member when there is no setting", () => {
-    deepEqual(lintRoot({}), autoDetectedMessages);
+    deepEqual(lintMember("library-member", {}), []);
+    deepEqual(lintMember("private-member", {}), [duplicateMessage]);
   });
 
   it('should detect it for each member with "auto"', () => {
-    deepEqual(lintRoot({ library: "auto" }), autoDetectedMessages);
+    deepEqual(lintMember("library-member", { library: "auto" }), []);
+    deepEqual(lintMember("private-member", { library: "auto" }), [
+      duplicateMessage,
+    ]);
   });
 
   it("should apply true to every member", () => {
-    deepEqual(lintRoot({ library: true }), []);
+    deepEqual(lintMember("library-member", { library: true }), []);
+    deepEqual(lintMember("private-member", { library: true }), []);
   });
 
   it("should apply false to every member", () => {
-    deepEqual(lintRoot({ library: false }), [
-      duplicateMessageFor("library-member"),
-      duplicateMessageFor("private-member"),
+    deepEqual(lintMember("library-member", { library: false }), [
+      duplicateMessage,
+    ]);
+    deepEqual(lintMember("private-member", { library: false }), [
+      duplicateMessage,
     ]);
   });
 
   it("should apply a list of package name patterns to the members", () => {
-    deepEqual(lintRoot({ library: ["library-*"] }), autoDetectedMessages);
+    deepEqual(lintMember("library-member", { library: ["library-*"] }), []);
+    deepEqual(lintMember("private-member", { library: ["library-*"] }), [
+      duplicateMessage,
+    ]);
   });
 });

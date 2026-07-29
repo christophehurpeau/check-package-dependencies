@@ -59,7 +59,7 @@ To enable a rule that is not part of a config, or to change its options, add it 
 export default [
   checkPackageDependenciesPlugin.configs.recommended,
   {
-    files: ["package.json"],
+    files: ["**/package.json"],
     rules: {
       "check-package-dependencies/satisfies-versions": [
         "error",
@@ -107,7 +107,7 @@ should still pin every version, or one that is not `private` yet not consumed by
 export default [
   checkPackageDependenciesPlugin.configs.recommended,
   {
-    files: ["package.json"],
+    files: ["**/package.json"],
     settings: {
       "check-package-dependencies": { library: false },
     },
@@ -133,10 +133,10 @@ export default [
 ];
 ```
 
-The setting is resolved per package, not per linted file: when linting the `package.json`
-of a monorepo root, `consistent-workspace-dependencies` resolves it against each
-workspace member. So a list of patterns, or `"auto"`, is what a monorepo mixing published
-and private packages wants — a plain `true` would make the root a library too.
+The setting is resolved against the `package.json` being linted, so in a monorepo it has
+to hold for every package the config applies to: a list of patterns, or `"auto"`, is what
+a monorepo mixing published and private packages wants — a plain `true` would make the
+root a library too.
 
 That also means scoping the setting to a member with `files` does not fully work:
 
@@ -193,7 +193,7 @@ depending on the `library` setting: see each rule’s page.
 
 | Name                                                                                                                                            | Description                                                                                                           | 💼  | 🔧  | 💡  |
 | :---------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------- | :-- | :-- | :-- |
-| [consistent-workspace-dependencies](documentation/rules/consistent-workspace-dependencies.md)                                                   | Enforce consistent dependency versions across the packages of a workspace                                             | ✅  |     |     |
+| [consistent-workspace-dependencies](documentation/rules/consistent-workspace-dependencies.md)                                                   | Enforce consistent dependency versions across the packages of a workspace                                             | ✅  | 🔧  |     |
 | [min-range-dependencies-satisfies-dev-dependencies](documentation/rules/min-range-dependencies-satisfies-dev-dependencies.md)                   | Enforce the minimum of a `dependencies` range to satisfy the version in `devDependencies`                             | ✅  | 🔧  |     |
 | [min-range-peer-dependencies-satisfies-dependencies](documentation/rules/min-range-peer-dependencies-satisfies-dependencies.md)                 | Enforce the minimum of a `peerDependencies` range to satisfy the version in `dependencies`                            | ✅  | 🔧  |     |
 | [no-direct-duplicate-dependencies](documentation/rules/no-direct-duplicate-dependencies.md)                                                     | Disallow dependencies that will be installed twice because a direct dependency requires an incompatible range         | ✅  |     |     |
