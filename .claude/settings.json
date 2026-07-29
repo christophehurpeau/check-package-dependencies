@@ -32,7 +32,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "pob-claude-run-lint-staged"
+            "command": "./node_modules/.bin/pob-claude-run-lint-staged"
           }
         ]
       }
