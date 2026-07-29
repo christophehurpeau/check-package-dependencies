@@ -303,6 +303,9 @@ class PackageJsonSourceCode extends TextSourceCodeBase {
   }
 }
 
+const pluginNamespace = "check-package-dependencies";
+const packageJsonLanguageName = "package-json";
+const packageJsonLanguageId = `${pluginNamespace}/${packageJsonLanguageName}`;
 const PackageJSONLanguage = {
   fileType: "text",
   lineStart: 1,
@@ -855,6 +858,7 @@ function createPackageRule(ruleName, schema, {
     [ruleName]: {
       meta: {
         type: "problem",
+        languages: [packageJsonLanguageId],
         docs: {
           description: docs.description,
           recommended: docs.recommended,
@@ -866,7 +870,7 @@ function createPackageRule(ruleName, schema, {
       },
       create(context) {
         const options = context.options[0] ?? {};
-        const settings = context.settings["check-package-dependencies"] ?? {};
+        const settings = context.settings[pluginNamespace] ?? {};
         const isLibraryFor = (pkg) => resolveIsLibrary(settings.library, pkg);
         const getWorkspaceMemberNames = /* @__PURE__ */ (() => {
           let cached;
@@ -2537,8 +2541,12 @@ const rules = {
 };
 
 const checkPackagePlugin = {
+  meta: {
+    name: "eslint-plugin-check-package-dependencies",
+    namespace: pluginNamespace
+  },
   languages: {
-    "package-json": PackageJSONLanguage
+    [packageJsonLanguageName]: PackageJSONLanguage
   },
   rules: {
     ...rules
@@ -2546,12 +2554,12 @@ const checkPackagePlugin = {
   configs: {
     base: {
       files: ["**/package.json"],
-      language: "check-package-dependencies/package-json",
+      language: packageJsonLanguageId,
       plugins: {}
     },
     recommended: {
       files: ["**/package.json"],
-      language: "check-package-dependencies/package-json",
+      language: packageJsonLanguageId,
       plugins: {},
       rules: {
         "check-package-dependencies/require-pinned-versions": "error",
@@ -2569,10 +2577,10 @@ const checkPackagePlugin = {
   }
 };
 checkPackagePlugin.configs.base.plugins = {
-  "check-package-dependencies": checkPackagePlugin
+  [pluginNamespace]: checkPackagePlugin
 };
 checkPackagePlugin.configs.recommended.plugins = {
-  "check-package-dependencies": checkPackagePlugin
+  [pluginNamespace]: checkPackagePlugin
 };
 
 export { checkPackagePlugin as default };

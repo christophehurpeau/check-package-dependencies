@@ -17,6 +17,18 @@ import type {
 import { parsePkg } from "../utils/pkgJsonUtils.ts";
 import { PackageJsonSourceCode } from "./source-code.ts";
 
+/**
+ * The namespace the plugin is meant to be registered under. Declared as the plugin's
+ * `meta.namespace` so eslint still resolves {@link packageJsonLanguageId} when a config
+ * registers the plugin under another key.
+ */
+export const pluginNamespace = "check-package-dependencies";
+
+export const packageJsonLanguageName = "package-json";
+
+/** the `language` a config has to set to lint `package.json` files with this plugin */
+export const packageJsonLanguageId = `${pluginNamespace}/${packageJsonLanguageName}`;
+
 export interface PackageJsonAst {
   type: "Package";
   parsedPkgJson: ParsedPackageJson;

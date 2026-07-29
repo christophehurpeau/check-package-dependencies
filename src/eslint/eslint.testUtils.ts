@@ -3,8 +3,7 @@ import path from "node:path";
 import { mock } from "node:test";
 import { Linter } from "eslint";
 import eslintPlugin from "../eslint-plugin.ts";
-
-const pluginName = "check-package-dependencies";
+import { packageJsonLanguageId, pluginNamespace } from "./language.ts";
 
 /** a file of the mocked filesystem, an object being stringified as a package.json would be */
 export type MockedFileContent = object | string;
@@ -120,12 +119,12 @@ const createConfig = ({
 }: LintPackageJsonOptions): Linter.Config[] => [
   {
     files: ["**/package.json"],
-    plugins: { [pluginName]: eslintPlugin },
-    language: `${pluginName}/package-json`,
-    settings: { [pluginName]: settings },
+    plugins: { [pluginNamespace]: eslintPlugin },
+    language: packageJsonLanguageId,
+    settings: { [pluginNamespace]: settings },
     rules: Object.fromEntries(
       Object.entries(rules).map(([ruleName, entry]) => [
-        `${pluginName}/${ruleName}`,
+        `${pluginNamespace}/${ruleName}`,
         entry,
       ]),
     ),

@@ -32,6 +32,7 @@ import {
   findWorkspaceRootPackageJson,
 } from "../../utils/workspaceMembers.ts";
 import type { DependencyValueAst, PackageJsonAst } from "../language.ts";
+import { packageJsonLanguageId, pluginNamespace } from "../language.ts";
 
 export const onlyWarnsForArraySchema = {
   type: "array",
@@ -121,6 +122,7 @@ export function createPackageRule<
     [ruleName]: {
       meta: {
         type: "problem",
+        languages: [packageJsonLanguageId],
         docs: {
           description: docs.description,
           recommended: docs.recommended,
@@ -135,7 +137,7 @@ export function createPackageRule<
         // const languageOptions =
         //   context.languageOptions as CheckPackageDependenciesLanguageOptions;
         const options = (context.options[0] ?? {}) as RuleOptions;
-        const settings = (context.settings["check-package-dependencies"] ??
+        const settings = (context.settings[pluginNamespace] ??
           {}) as CheckPackageDependenciesSettings;
 
         const isLibraryFor = (pkg: ParsedPackageJson): boolean =>

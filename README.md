@@ -70,6 +70,21 @@ export default [
 ];
 ```
 
+Every rule declares the `package-json` language it supports through [`meta.languages`](https://eslint.org/docs/latest/extend/custom-rules#rule-structure), so ESLint reports a `rule-unsupported-language` error instead of silently doing nothing when a rule is enabled on a config entry that lints something else. Registering the plugin under another name keeps working, the plugin declaring `check-package-dependencies` as its `meta.namespace`:
+
+```js
+export default [
+  {
+    files: ["package.json"],
+    plugins: { pkg: checkPackageDependenciesPlugin },
+    language: "pkg/package-json",
+    rules: { "pkg/require-pinned-versions": "error" },
+    // the settings key is the plugin namespace, whatever name the plugin is registered under
+    settings: { "check-package-dependencies": { library: false } },
+  },
+];
+```
+
 #### Settings
 
 | Setting   | Default  | Description                                                                                                                                                                                                      |

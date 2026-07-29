@@ -1,6 +1,15 @@
 import type { Language } from "@eslint/core";
 import type { GetDependencyPackageJson } from "../utils/createGetDependencyPackageJson.ts";
 import type { DependencyTypes, DependencyValue, ParsedPackageJson } from "../utils/packageTypes.ts";
+/**
+ * The namespace the plugin is meant to be registered under. Declared as the plugin's
+ * `meta.namespace` so eslint still resolves {@link packageJsonLanguageId} when a config
+ * registers the plugin under another key.
+ */
+export declare const pluginNamespace = "check-package-dependencies";
+export declare const packageJsonLanguageName = "package-json";
+/** the `language` a config has to set to lint `package.json` files with this plugin */
+export declare const packageJsonLanguageId = "check-package-dependencies/package-json";
 export interface PackageJsonAst {
     type: "Package";
     parsedPkgJson: ParsedPackageJson;

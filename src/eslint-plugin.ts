@@ -1,10 +1,19 @@
 import type { ESLint } from "eslint";
-import { PackageJSONLanguage } from "./eslint/language.ts";
+import {
+  PackageJSONLanguage,
+  packageJsonLanguageId,
+  packageJsonLanguageName,
+  pluginNamespace,
+} from "./eslint/language.ts";
 import packageRules from "./eslint/rules.ts";
 
 const checkPackagePlugin = {
+  meta: {
+    name: "eslint-plugin-check-package-dependencies",
+    namespace: pluginNamespace,
+  },
   languages: {
-    "package-json": PackageJSONLanguage,
+    [packageJsonLanguageName]: PackageJSONLanguage,
   },
   rules: {
     ...packageRules,
@@ -12,12 +21,12 @@ const checkPackagePlugin = {
   configs: {
     base: {
       files: ["**/package.json"],
-      language: "check-package-dependencies/package-json",
+      language: packageJsonLanguageId,
       plugins: {},
     },
     recommended: {
       files: ["**/package.json"],
-      language: "check-package-dependencies/package-json",
+      language: packageJsonLanguageId,
       plugins: {},
       rules: {
         "check-package-dependencies/require-pinned-versions": "error",
@@ -38,11 +47,11 @@ const checkPackagePlugin = {
 } satisfies ESLint.Plugin;
 
 checkPackagePlugin.configs.base.plugins = {
-  "check-package-dependencies": checkPackagePlugin,
+  [pluginNamespace]: checkPackagePlugin,
 };
 
 checkPackagePlugin.configs.recommended.plugins = {
-  "check-package-dependencies": checkPackagePlugin,
+  [pluginNamespace]: checkPackagePlugin,
 };
 
 export default checkPackagePlugin;

@@ -1,4 +1,8 @@
 declare const checkPackagePlugin: {
+    meta: {
+        name: string;
+        namespace: string;
+    };
     languages: {
         "package-json": import("@eslint/core").Language<{
             LangOptions: import("@eslint/core").LanguageOptions;

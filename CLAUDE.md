@@ -77,6 +77,14 @@ Each rule declares `docs` (description, `recommended`), and `fixable` / `hasSugg
 
 ESLint configs exported: `base` (language + plugin, no rules enabled) and `recommended` (10 of the 18 rules). There is no library config — see the `library` setting below. The 8 remaining rules (`require-identical-versions*`, `satisfies-versions*`) are opt-in, as they only make sense with options.
 
+#### `meta.languages` and `meta.namespace`
+
+`createPackageRule` sets `meta.languages: ["check-package-dependencies/package-json"]` on every rule, so ESLint throws `rule-unsupported-language` when one is enabled on a config entry linting another language, rather than the rule silently never running.
+
+ESLint matches that entry against the plugin key the config's `language` comes from, plus the language plugin's `meta.namespace`. A config free to register the plugin under any key — `src/eslint/eslint.testUtils.ts`, the fixture tests, a user's `eslint.config.js` — only keeps working because the plugin declares `meta.namespace: "check-package-dependencies"`. Never drop it. The one case it cannot cover is a third-party plugin re-exporting `PackageJSONLanguage` under its own name: `meta.languages` has no cross-plugin wildcard, only `"*"` and `"plugin/*"`.
+
+`pluginNamespace`, `packageJsonLanguageName` and `packageJsonLanguageId` in `src/eslint/language.ts` are the single source for those strings — including the `settings` key, which is the namespace and not the plugin key the config chose.
+
 ### `library` setting
 
 Whether a package is published and consumed by other packages, which changes what is expected of its `dependencies` and `peerDependencies`. `src/utils/library.ts` holds it:
