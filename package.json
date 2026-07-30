@@ -81,7 +81,7 @@
     "typescript": "npm:@typescript/typescript6@6.0.2"
   },
   "peerDependencies": {
-    "eslint": "^10.6.0"
+    "eslint": "^10.8.0"
   },
   "peerDependenciesMeta": {
     "eslint": {
