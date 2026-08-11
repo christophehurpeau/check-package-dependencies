@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [13.0.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v12.2.0...v13.0.0) (2026-08-11)
+
+### ⚠ BREAKING CHANGES
+
+* - the programmatic api is removed, and the cli requires eslint to be installed. It also now runs `require-workspace-protocol` and reports a; workspace dependency declared as a plain range.; ; Co-Authored-By: Claude Opus 5 <noreply@anthropic.com> (f35765e142714d1550cd62139aad1151ebdf181b)
+
+### Features
+
+* **consistent-workspace-dependencies:** report each conflict on the package to raise
+* **deps:** update dependency eslint to ^10.8.0 ([#890](https://github.com/christophehurpeau/check-package-dependencies/issues/890))
+
+### Bug Fixes
+
+* update command path for lint-staged hook in settings
+
+### Code Refactoring
+
+* drop the legacy programmatic api, run the cli through eslint ([#900](https://github.com/christophehurpeau/check-package-dependencies/issues/900))
+
 ## [12.2.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v12.1.0...v12.2.0) (2026-07-29)
 
 ### Features
