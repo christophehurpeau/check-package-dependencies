@@ -34,8 +34,8 @@ importers:
         specifier: 10.0.0
         version: 10.0.0(@typescript/typescript6@6.0.2)(rollup@4.60.4)
       '@pob/root':
-        specifier: 27.2.1
-        version: 27.2.1(@typescript-eslint/utils@8.65.0(@typescript/typescript6@6.0.2)(eslint@10.8.0))(@typescript/typescript6@6.0.2)(eslint@10.8.0)
+        specifier: 27.5.0
+        version: 27.5.0
       '@types/node':
         specifier: 24.10.4
         version: 24.10.4
@@ -506,18 +506,13 @@ packages:
     engines: {node: '>=22.18.0'}
     hasBin: true
 
-  '@pob/root@27.2.1':
-    resolution: {integrity: sha512-2i+TJUAXm9LMIDkwyNd11n2rI/zVEREzUl2wo+qdM+kkJBYviGLC/3HXpjD01XsNWAH3l112ppdlUG0gUIN5ig==}
+  '@pob/root@27.5.0':
+    resolution: {integrity: sha512-vBuxzz+0Iw36Y3GRJWtBIcbx7tKOUDlC6SNN4+44JVHcF5O3nFnbBHR19BfYtYP2yMAmJZSFnUQXURuxxavV4w==}
     engines: {node: '>=22.18.0'}
     hasBin: true
-    peerDependencies:
-      eslint: ^10.6.0
-    peerDependenciesMeta:
-      eslint:
-        optional: true
 
-  '@pob/version@6.0.0':
-    resolution: {integrity: sha512-I+DNN6tIZf2VcmaATA+vIXQTFmpkVeDVm1MzWCsI9XCiNA0wDN3j09t+B+iYvLuSYMfQbFNEnwyw2B/CbnXlKQ==}
+  '@pob/version@6.0.1':
+    resolution: {integrity: sha512-kgQkLnPOTGWTQ+DRc4DGKZcNVa9Mux+5MgrkIZcbJnqyZIm7eoo/kvR+8uBBAoAFblgnCeJqdFWEIrcLIEYylg==}
     engines: {node: '>=24.14.1'}
     hasBin: true
 
@@ -1819,8 +1814,8 @@ packages:
   linkify-it@5.0.2:
     resolution: {integrity: sha512-ONTm2jCMAVZjgQa/Fy1kScXsuOoF5NPTsoFBdE1KVIZ2vAh/r9+Bqo+0jINCBYnavTPQZz38QzFTme79ENoN3Q==}
 
-  lint-staged@17.2.0:
-    resolution: {integrity: sha512-FchGnFe4i4B1C/a35SPU9bNGPEHSC1+1iV0plLjzBmKVe9klZrlRfSgK6Cw4VeHyqOXbJUXP0vON61uRftNQ0A==}
+  lint-staged@17.3.0:
+    resolution: {integrity: sha512-woZS3vNe3UKqBaLPvbLOtKRY4tLANpWQhom12MGWqC8Mh1lCOO+WgSwmX2amjJAqTY9BkXYW87fCUH5H9Ph6xw==}
     engines: {node: '>=22.22.1'}
     hasBin: true
 
@@ -1983,8 +1978,8 @@ packages:
     resolution: {integrity: sha512-Nc3IT5yHzflTfbjgqWcCPpo7DaKy4FnpB0l/zCAW0Tc7jxAiuqSxHasntB3D7887LSrA93kDJ9IXovxJYxyLCA==}
     engines: {node: '>=4'}
 
-  pob-dependencies@27.1.1:
-    resolution: {integrity: sha512-tv+1jATlUJ/DziMxMhNBi5jAOV0GQXokprJdkJUyh0XLx+5qfrkQW+JnoY4F4dnbthoNr1AzO2oqIneDYddrhQ==}
+  pob-dependencies@27.4.0:
+    resolution: {integrity: sha512-43+PlHaOR7f7cRycx6hhylxrVvb+/I3JJpsRLCKK+lt2iSZG/W2QUX8fIIAmevA/U26GGuCUtlT1FoffBme9WA==}
     engines: {node: '>=22.18.0'}
 
   possible-typed-array-names@1.1.0:
@@ -2650,33 +2645,26 @@ snapshots:
     dependencies:
       rollup: 4.60.4
 
-  '@pob/root@27.2.1(@typescript-eslint/utils@8.65.0(@typescript/typescript6@6.0.2)(eslint@10.8.0))(@typescript/typescript6@6.0.2)(eslint@10.8.0)':
+  '@pob/root@27.5.0':
     dependencies:
       '@commitlint/format': 21.0.1
       '@commitlint/lint': 21.0.2
       '@commitlint/types': 21.0.1
-      '@pob/eslint-config': 67.1.1(@typescript-eslint/utils@8.65.0(@typescript/typescript6@6.0.2)(eslint@10.8.0))(@typescript/typescript6@6.0.2)(eslint@10.8.0)
-      '@pob/version': 6.0.0
+      '@pob/version': 6.0.1
       conventional-changelog-conventionalcommits: 9.3.1
       conventional-changelog-writer: 8.4.0
       conventional-commits-parser: 6.4.0
       json5: 2.2.3
-      lint-staged: 17.2.0
+      lint-staged: 17.3.0
       oxfmt: 0.54.0
       picomatch: 4.0.5
-      pob-dependencies: 27.1.1
+      pob-dependencies: 27.4.0
       semver: 7.8.5
-    optionalDependencies:
-      eslint: 10.8.0
     transitivePeerDependencies:
-      - '@typescript-eslint/utils'
-      - eslint-import-resolver-node
-      - supports-color
       - svelte
-      - typescript
       - vite-plus
 
-  '@pob/version@6.0.0':
+  '@pob/version@6.0.1':
     dependencies:
       commander: 14.0.3
       conventional-changelog-conventionalcommits: 9.3.1
@@ -4044,7 +4032,7 @@ snapshots:
     dependencies:
       uc.micro: 2.1.0
 
-  lint-staged@17.2.0:
+  lint-staged@17.3.0:
     dependencies:
       picomatch: 4.0.5
       string-argv: 0.3.2
@@ -4225,7 +4213,7 @@ snapshots:
 
   pluralize@8.0.0: {}
 
-  pob-dependencies@27.1.1: {}
+  pob-dependencies@27.4.0: {}
 
   possible-typed-array-names@1.1.0: {}
 

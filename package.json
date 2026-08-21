@@ -71,7 +71,7 @@
     "@eslint/core": "1.2.1",
     "@pob/eslint-config": "67.1.1",
     "@pob/rollup-esbuild": "10.0.0",
-    "@pob/root": "27.2.1",
+    "@pob/root": "27.5.0",
     "@types/node": "24.10.4",
     "@types/semver": "7.8.0",
     "@types/semver-utils": "1.1.3",
