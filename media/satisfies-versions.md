@@ -34,12 +34,17 @@ A dependency configured but absent from the `package.json` is reported as missin
 
 ## Options
 
-| Name                   | Type                     | Default | Description                                  |
-| :--------------------- | :----------------------- | :------ | :------------------------------------------- |
-| `dependencies`         | `Record<string, string>` | `{}`    | Ranges to satisfy in `dependencies`.         |
-| `devDependencies`      | `Record<string, string>` | `{}`    | Ranges to satisfy in `devDependencies`.      |
-| `optionalDependencies` | `Record<string, string>` | `{}`    | Ranges to satisfy in `optionalDependencies`. |
-| `onlyWarnsFor`         | `string[]`               | `[]`    | Dependency names to only warn for.           |
+| Name                   | Type                    | Default | Description                                                                        |
+| :--------------------- | :---------------------- | :------ | :--------------------------------------------------------------------------------- |
+| `dependencies`         | `Record<string, Range>` | `{}`    | Ranges to satisfy in `dependencies`.                                               |
+| `devDependencies`      | `Record<string, Range>` | `{}`    | Ranges to satisfy in `devDependencies`.                                            |
+| `optionalDependencies` | `Record<string, Range>` | `{}`    | Ranges to satisfy in `optionalDependencies`.                                       |
+| `onlyWarnsFor`         | `OnlyWarnsFor`          | `[]`    | Dependency names to only warn for.                                                 |
+| `comment`              | `string`                | —       | Explanation of what this rule is enabled for, appended to the messages it reports. |
+
+`Range` is either a range, or `{ range, comment }` where `comment` explains what that entry is configured for and replaces the rule `comment` in the messages it produces.
+
+`OnlyWarnsFor` is a list of dependency names, each optionally written as `{ name, comment }` — see [`onlyWarnsFor`](../../README.md#onlywarnsfor).
 
 At least one of `dependencies` and `devDependencies` has to be configured.
 

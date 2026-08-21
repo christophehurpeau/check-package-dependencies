@@ -40,4 +40,6 @@ The fix rewrites the `peerDependencies` range, keeping its operator. Ranges equa
 
 ## Options
 
-This rule has no options.
+| Name      | Type     | Default | Description                                                                        |
+| :-------- | :------- | :------ | :--------------------------------------------------------------------------------- |
+| `comment` | `string` | —       | Explanation of what this rule is enabled for, appended to the messages it reports. |

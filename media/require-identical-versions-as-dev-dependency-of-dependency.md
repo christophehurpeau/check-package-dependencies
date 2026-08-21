@@ -41,9 +41,12 @@ With `@pob/eslint-config` having `"eslint": "10.7.0"` in its `devDependencies`:
 | Name                      | Type                       | Default | Description                                                                                |
 | :------------------------ | :------------------------- | :------ | :----------------------------------------------------------------------------------------- |
 | `dependencies` (required) | `Record<string, DepGroup>` | —       | Maps a dependency name to the fields of your `package.json` to check against its versions. |
-| `onlyWarnsFor`            | `string[]`                 | `[]`    | Dependency names to only warn for.                                                         |
+| `onlyWarnsFor`            | `OnlyWarnsFor`             | `[]`    | Dependency names to only warn for.                                                         |
+| `comment`                 | `string`                   | —       | Explanation of what this rule is enabled for, appended to the messages it reports.         |
 
-`DepGroup` maps `dependencies`, `devDependencies` and `resolutions` to the list of dependency names to check in each of them.
+`DepGroup` maps `dependencies`, `devDependencies` and `resolutions` to the list of dependency names to check in each of them. Each entry also accepts a `comment` explaining what it is configured for, which replaces the rule `comment` in the messages that entry produces.
+
+`OnlyWarnsFor` is a list of dependency names, each optionally written as `{ name, comment }` — see [`onlyWarnsFor`](../../README.md#onlywarnsfor).
 
 ```js
 "check-package-dependencies/require-identical-versions-as-dev-dependency-of-dependency": [

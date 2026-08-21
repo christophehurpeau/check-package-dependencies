@@ -40,9 +40,12 @@ With `some-lib` depending on `"semver": "^7.8.0"`:
 
 ## Options
 
-| Name           | Type                       | Default | Description                                                                                    |
-| :------------- | :------------------------- | :------ | :--------------------------------------------------------------------------------------------- |
-| `onlyWarnsFor` | `Record<string, string[]>` | `{}`    | Maps the dependency causing the duplicate (or `"*"`) to the duplicated names to only warn for. |
+| Name           | Type                           | Default | Description                                                                                    |
+| :------------- | :----------------------------- | :------ | :--------------------------------------------------------------------------------------------- |
+| `onlyWarnsFor` | `Record<string, OnlyWarnsFor>` | `{}`    | Maps the dependency causing the duplicate (or `"*"`) to the duplicated names to only warn for. |
+| `comment`      | `string`                       | —       | Explanation of what this rule is enabled for, appended to the messages it reports.             |
+
+`OnlyWarnsFor` is a list of dependency names, each optionally written as `{ name, comment }` — see [`onlyWarnsFor`](../../README.md#onlywarnsfor).
 
 ```js
 "check-package-dependencies/no-direct-duplicate-dependencies": [

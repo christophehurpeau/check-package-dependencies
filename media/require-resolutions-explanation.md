@@ -42,4 +42,6 @@ A resolution overrides the version resolved by the package manager. It is usuall
 
 ## Options
 
-This rule has no options.
+| Name      | Type     | Default | Description                                                                        |
+| :-------- | :------- | :------ | :--------------------------------------------------------------------------------- |
+| `comment` | `string` | —       | Explanation of what this rule is enabled for, appended to the messages it reports. |

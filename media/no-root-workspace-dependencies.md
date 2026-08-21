@@ -34,4 +34,6 @@ The rule only applies to a `package.json` declaring workspaces (`workspaces` fie
 
 ## Options
 
-This rule has no options.
+| Name      | Type     | Default | Description                                                                        |
+| :-------- | :------- | :------ | :--------------------------------------------------------------------------------- |
+| `comment` | `string` | —       | Explanation of what this rule is enabled for, appended to the messages it reports. |
