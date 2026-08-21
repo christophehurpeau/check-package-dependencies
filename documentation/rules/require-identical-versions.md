@@ -34,14 +34,17 @@ An error is also reported when the reference dependency is missing, or when one 
 
 ## Options
 
-| Name              | Type                        | Default | Description                                         |
-| :---------------- | :-------------------------- | :------ | :-------------------------------------------------- |
-| `dependencies`    | `Record<string, DepConfig>` | `{}`    | Reference dependencies read from `dependencies`.    |
-| `devDependencies` | `Record<string, DepConfig>` | `{}`    | Reference dependencies read from `devDependencies`. |
-| `resolutions`     | `Record<string, DepConfig>` | `{}`    | Reference dependencies read from `resolutions`.     |
-| `onlyWarnsFor`    | `string[]`                  | `[]`    | Reference dependency names to only warn for.        |
+| Name              | Type                        | Default | Description                                                                        |
+| :---------------- | :-------------------------- | :------ | :--------------------------------------------------------------------------------- |
+| `dependencies`    | `Record<string, DepConfig>` | `{}`    | Reference dependencies read from `dependencies`.                                   |
+| `devDependencies` | `Record<string, DepConfig>` | `{}`    | Reference dependencies read from `devDependencies`.                                |
+| `resolutions`     | `Record<string, DepConfig>` | `{}`    | Reference dependencies read from `resolutions`.                                    |
+| `onlyWarnsFor`    | `OnlyWarnsFor`              | `[]`    | Reference dependency names to only warn for.                                       |
+| `comment`         | `string`                    | —       | Explanation of what this rule is enabled for, appended to the messages it reports. |
 
-`DepConfig` is either an array of dependency names — looked up in the same field as the reference dependency — or an object mapping `dependencies`, `devDependencies` and `resolutions` to the names to check in each of them.
+`DepConfig` is either an array of dependency names — looked up in the same field as the reference dependency — or an object mapping `dependencies`, `devDependencies` and `resolutions` to the names to check in each of them. Only the object form accepts a `comment` explaining what the entry is configured for, which replaces the rule `comment` in the messages that entry produces.
+
+`OnlyWarnsFor` is a list of dependency names, each optionally written as `{ name, comment }` — see [`onlyWarnsFor`](../../README.md#onlywarnsfor).
 
 ```js
 "check-package-dependencies/require-identical-versions": [

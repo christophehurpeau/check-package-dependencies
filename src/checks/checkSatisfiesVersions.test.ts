@@ -103,3 +103,45 @@ describe("checkMissingSatisfiesVersions", () => {
     });
   });
 });
+
+describe("commented ranges", () => {
+  const { mockReportError, messages } = createMockReportError();
+
+  it("should report the comment of the configured range", () => {
+    const parsedPkg = parsePkgValue({
+      name: "test",
+      devDependencies: { test: "1.0.0" },
+    });
+    checkSatisfiesVersion(mockReportError, parsedPkg.devDependencies!.test!, {
+      range: "^2.0.0",
+      comment: "2.x fixes a data loss",
+    });
+    assertSingleMessage(messages, {
+      errorMessage: "Invalid",
+      errorDetails: '"1.0.0" should satisfies "^2.0.0"',
+      dependency: {
+        name: "test",
+        fieldName: "devDependencies",
+        value: "1.0.0",
+      },
+      onlyWarns: undefined,
+      comment: "2.x fixes a data loss",
+    });
+  });
+
+  it("should report the comment of a missing dependency", () => {
+    checkMissingSatisfiesVersions(
+      mockReportError,
+      parsePkgValue({ name: "test" }),
+      "devDependencies",
+      { test: { range: "^2.0.0", comment: "needed by the build" } },
+    );
+    assertSingleMessage(messages, {
+      errorMessage: 'Missing "test" in "devDependencies"',
+      errorDetails: 'should satisfies "^2.0.0"',
+      dependency: { name: "test", fieldName: "devDependencies" },
+      onlyWarns: undefined,
+      comment: "needed by the build",
+    });
+  });
+});

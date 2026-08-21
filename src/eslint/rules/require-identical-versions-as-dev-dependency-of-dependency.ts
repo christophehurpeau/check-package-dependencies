@@ -1,10 +1,14 @@
 import { checkIdenticalVersionsThanDependency } from "../../checks/checkIdenticalVersionsThanDependency.ts";
+import type { Commented } from "../../utils/comments.ts";
 import type { BaseRuleOptions } from "../create-rule/BaseRuleOptions.ts";
-import { createPackageRule } from "../create-rule/createPackageRule.ts";
+import {
+  createPackageRule,
+  onlyWarnsForArraySchema,
+} from "../create-rule/createPackageRule.ts";
 import { depGroupSchema } from "./require-identical-versions-as-dependency.ts";
 
 type DestTypes = "dependencies" | "devDependencies" | "resolutions";
-type DepRecord = Partial<Record<DestTypes, string[]>>;
+type DepRecord = Commented & Partial<Record<DestTypes, string[]>>;
 
 interface Options extends BaseRuleOptions {
   dependencies: Record<string, DepRecord>;
@@ -17,7 +21,7 @@ export const requireIdenticalVersionsAsDevDependencyOfDependencyRule =
       type: "object",
       properties: {
         dependencies: depGroupSchema,
-        onlyWarnsFor: { type: "array", items: { type: "string" } },
+        onlyWarnsFor: onlyWarnsForArraySchema,
       },
       required: ["dependencies"],
       additionalProperties: false,
@@ -54,7 +58,7 @@ export const requireIdenticalVersionsAsDevDependencyOfDependencyRule =
                   depKeys,
                   depPkg,
                   depPkg.devDependencies,
-                  onlyWarnsForCheck,
+                  { onlyWarnsForCheck, comment: targets.comment },
                 );
               }
             });

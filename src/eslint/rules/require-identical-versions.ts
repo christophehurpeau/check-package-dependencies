@@ -1,10 +1,13 @@
+import type { IdenticalVersionsDepConfig } from "../../checks/checkIdenticalVersions.ts";
 import { checkIdenticalVersions } from "../../checks/checkIdenticalVersions.ts";
-import type { DependencyTypes } from "../../utils/packageTypes.ts";
+import { commentSchema } from "../../utils/comments.ts";
 import type { BaseRuleOptions } from "../create-rule/BaseRuleOptions.ts";
-import { createPackageRule } from "../create-rule/createPackageRule.ts";
+import {
+  createPackageRule,
+  onlyWarnsForArraySchema,
+} from "../create-rule/createPackageRule.ts";
 
 type SourceType = "dependencies" | "devDependencies" | "resolutions";
-type DepConfig = Partial<Record<DependencyTypes, string[]>> | string[];
 
 const depRecordSchema: object = {
   type: "object",
@@ -18,6 +21,7 @@ const depRecordSchema: object = {
             resolutions: { type: "array", items: { type: "string" } },
             dependencies: { type: "array", items: { type: "string" } },
             devDependencies: { type: "array", items: { type: "string" } },
+            comment: commentSchema,
           },
           additionalProperties: false,
         },
@@ -27,9 +31,9 @@ const depRecordSchema: object = {
 } satisfies object;
 
 interface Options extends BaseRuleOptions {
-  resolutions?: Record<string, DepConfig>;
-  dependencies?: Record<string, DepConfig>;
-  devDependencies?: Record<string, DepConfig>;
+  resolutions?: Record<string, IdenticalVersionsDepConfig>;
+  dependencies?: Record<string, IdenticalVersionsDepConfig>;
+  devDependencies?: Record<string, IdenticalVersionsDepConfig>;
 }
 
 const sourceTypes: SourceType[] = [
@@ -46,7 +50,7 @@ export const requireIdenticalVersionsRule = createPackageRule<Options>(
       resolutions: depRecordSchema,
       dependencies: depRecordSchema,
       devDependencies: depRecordSchema,
-      onlyWarnsFor: { type: "array", items: { type: "string" } },
+      onlyWarnsFor: onlyWarnsForArraySchema,
     },
     additionalProperties: false,
   },

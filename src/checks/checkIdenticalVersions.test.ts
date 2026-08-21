@@ -124,3 +124,55 @@ describe("checkIdenticalVersions", () => {
     });
   });
 });
+
+describe("commented entries", () => {
+  const { mockReportError, messages } = createMockReportError();
+
+  it("should not read the comment as a dependency type", () => {
+    checkIdenticalVersions(
+      mockReportError,
+      parsePkgValue({
+        name: "test",
+        devDependencies: { react: "1.0.0", "react-dom": "1.0.0" },
+      }),
+      "devDependencies",
+      {
+        react: {
+          devDependencies: ["react-dom"],
+          comment: "react-dom breaks when it drifts",
+        },
+      },
+    );
+    assertNoMessages(messages);
+  });
+
+  it("should report the comment of the entry", () => {
+    checkIdenticalVersions(
+      mockReportError,
+      parsePkgValue({
+        name: "test",
+        devDependencies: { react: "1.0.0", "react-dom": "1.0.1" },
+      }),
+      "devDependencies",
+      {
+        react: {
+          devDependencies: ["react-dom"],
+          comment: "react-dom breaks when it drifts",
+        },
+      },
+    );
+    assertSingleMessage(messages, {
+      errorMessage: 'Invalid "react-dom"',
+      errorDetails:
+        'expecting "1.0.1" to be "1.0.0" identical to "react" in "devDependencies"',
+      dependency: {
+        name: "react-dom",
+        fieldName: "devDependencies",
+        value: "1.0.1",
+      },
+      onlyWarns: undefined,
+      comment: "react-dom breaks when it drifts",
+      fixTo: "1.0.0",
+    });
+  });
+});

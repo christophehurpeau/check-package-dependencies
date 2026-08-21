@@ -44,9 +44,12 @@ With `some-lib` depending on `"semver": "^7.8.0"` and not depending on `lodash`:
 
 ## Options
 
-| Name                      | Type                                 | Default | Description                                                                |
-| :------------------------ | :----------------------------------- | :------ | :------------------------------------------------------------------------- |
-| `dependencies` (required) | `Record<string, DependenciesRanges>` | —       | Maps a dependency name to the ranges its own dependencies have to satisfy. |
-| `onlyWarnsFor`            | `string[]`                           | `[]`    | Dependency names to only warn for.                                         |
+| Name                      | Type                                 | Default | Description                                                                        |
+| :------------------------ | :----------------------------------- | :------ | :--------------------------------------------------------------------------------- |
+| `dependencies` (required) | `Record<string, DependenciesRanges>` | —       | Maps a dependency name to the ranges its own dependencies have to satisfy.         |
+| `onlyWarnsFor`            | `OnlyWarnsFor`                       | `[]`    | Dependency names to only warn for.                                                 |
+| `comment`                 | `string`                             | —       | Explanation of what this rule is enabled for, appended to the messages it reports. |
 
-`DependenciesRanges` maps `dependencies`, `devDependencies`, `peerDependencies`, `optionalDependencies` and `resolutions` to a record of dependency name to range, or `null` to require the dependency to be absent.
+`DependenciesRanges` maps `dependencies`, `devDependencies`, `peerDependencies`, `optionalDependencies` and `resolutions` to a record of dependency name to range, or `null` to require the dependency to be absent. It also accepts a `comment` explaining what the entry is configured for, which replaces the rule `comment` in the messages that entry produces.
+
+`OnlyWarnsFor` is a list of dependency names, each optionally written as `{ name, comment }` — see [`onlyWarnsFor`](../../README.md#onlywarnsfor).

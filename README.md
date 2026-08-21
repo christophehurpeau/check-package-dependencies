@@ -265,6 +265,55 @@ or a mapping from the dependency causing the error to the dependency names to on
 "check-package-dependencies/no-direct-duplicate-dependencies": ["error", { onlyWarnsFor: { "*": ["type-fest"] } }]
 ```
 
+Any entry can be written as `{ name, comment }` instead of a bare name, to explain why the
+exception exists:
+
+```js
+"check-package-dependencies/require-pinned-versions": [
+  "error",
+  {
+    onlyWarnsFor: [
+      { name: "type-fest", comment: "types only, a range cannot break the build" },
+    ],
+  },
+]
+```
+
+#### `comment`
+
+Every rule accepts a `comment`, explaining what it is enabled for. It is appended to every
+message the rule reports, so the reason reaches whoever reads the lint output rather than
+only whoever opens the config:
+
+```js
+"check-package-dependencies/require-resolutions-explanation": [
+  "error",
+  { comment: "our resolutions outlive the reason we added them" },
+]
+```
+
+The rules configured with a list of dependencies accept one per entry too, which replaces
+the rule `comment` in the messages that entry produces — see each rule's page for where it
+goes:
+
+```js
+"check-package-dependencies/satisfies-versions": [
+  "error",
+  {
+    comment: "ranges decided with the platform team",
+    devDependencies: {
+      eslint: { range: "^10.0.0", comment: "the plugin api changed in 10" },
+    },
+  },
+]
+```
+
+reports:
+
+```
+error  devDependencies > eslint: Invalid: "9.0.0" should satisfies "^10.0.0" (the plugin api changed in 10)
+```
+
 ### Uses Cases
 
 - Check devDependencies are exact versions

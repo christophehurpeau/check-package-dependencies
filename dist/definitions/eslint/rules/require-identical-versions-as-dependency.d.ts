@@ -22,6 +22,9 @@ declare const depGroupSchema: {
                         readonly type: "string";
                     };
                 };
+                readonly comment: {
+                    readonly type: "string";
+                };
             };
             readonly additionalProperties: false;
         };

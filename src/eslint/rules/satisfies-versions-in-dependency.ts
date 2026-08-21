@@ -1,10 +1,15 @@
 import { checkSatisfiesVersionsInDependency } from "../../checks/checkSatisfiesVersionsInDependency.ts";
+import type { Commented } from "../../utils/comments.ts";
+import { commentSchema } from "../../utils/comments.ts";
 import type { DependenciesRanges } from "../../utils/packageTypes.ts";
 import type { BaseRuleOptions } from "../create-rule/BaseRuleOptions.ts";
-import { createPackageRule } from "../create-rule/createPackageRule.ts";
+import {
+  createPackageRule,
+  onlyWarnsForArraySchema,
+} from "../create-rule/createPackageRule.ts";
 
 interface Options extends BaseRuleOptions {
-  dependencies: Record<string, DependenciesRanges>;
+  dependencies: Record<string, Commented & DependenciesRanges>;
 }
 
 const depTypeRangesSchema: object = {
@@ -30,12 +35,13 @@ export const satisfiesVersionsInDependencyRule = createPackageRule<Options>(
               devDependencies: depTypeRangesSchema,
               peerDependencies: depTypeRangesSchema,
               optionalDependencies: depTypeRangesSchema,
+              comment: commentSchema,
             },
             additionalProperties: false,
           },
         },
       },
-      onlyWarnsFor: { type: "array", items: { type: "string" } },
+      onlyWarnsFor: onlyWarnsForArraySchema,
     },
     required: ["dependencies"],
     additionalProperties: false,

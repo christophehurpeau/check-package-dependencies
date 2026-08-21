@@ -1,4 +1,5 @@
 import type { ReportError } from "../reporting/ReportError.ts";
+import type { Commented } from "../utils/comments.ts";
 import type { GetDependencyPackageJson } from "../utils/createGetDependencyPackageJson.ts";
 import type { DependencyValue, RegularDependencyTypes } from "../utils/packageTypes.ts";
 import type { OnlyWarnsForCheck } from "../utils/warnForUtils.ts";
@@ -7,7 +8,7 @@ export type SatisfiesVersionsBetweenDependenciesSide = string | {
     name: string;
     in?: RegularDependencyTypes;
 };
-export interface SatisfiesVersionsBetweenDependenciesConfig {
+export interface SatisfiesVersionsBetweenDependenciesConfig extends Commented {
     /** the dependency whose range is compared in both packages */
     name: string;
     from: SatisfiesVersionsBetweenDependenciesSide;

@@ -1,10 +1,12 @@
 import type { ReportError } from "../reporting/ReportError.ts";
+import type { Commented } from "../utils/comments.ts";
 import type { GetDependencyPackageJson } from "../utils/createGetDependencyPackageJson.ts";
 import type {
   DependencyValue,
   RegularDependencyTypes,
 } from "../utils/packageTypes.ts";
 import type { OnlyWarnsForCheck } from "../utils/warnForUtils.ts";
+import { warnDetails } from "../utils/warnForUtils.ts";
 import { regularDependencyTypes } from "./checkDirectPeerDependencies.ts";
 import { isVersionSatisfiesRange } from "./checkSatisfiesVersions.ts";
 
@@ -13,7 +15,7 @@ export type SatisfiesVersionsBetweenDependenciesSide =
   | string
   | { name: string; in?: RegularDependencyTypes };
 
-export interface SatisfiesVersionsBetweenDependenciesConfig {
+export interface SatisfiesVersionsBetweenDependenciesConfig extends Commented {
   /** the dependency whose range is compared in both packages */
   name: string;
   from: SatisfiesVersionsBetweenDependenciesSide;
@@ -73,7 +75,7 @@ export function checkSatisfiesVersionsBetweenDependencies(
     return;
   }
 
-  dependencies.forEach(({ name, from, to }) => {
+  dependencies.forEach(({ name, from, to, comment }) => {
     const fromName = typeof from === "string" ? from : from.name;
     if (fromName !== dependencyValue.name) return;
 
@@ -92,7 +94,8 @@ export function checkSatisfiesVersionsBetweenDependencies(
       reportError({
         errorMessage: `Version not satisfied between dependencies for dependency "${name}"`,
         errorDetails: `"${fromSide.range}" from "${fromSide.depName}" ${fromSide.depType} should satisfies "${toSide.range}" from "${toSide.depName}" ${toSide.depType}`,
-        onlyWarns: onlyWarnsForCheck?.shouldWarnsFor(dependencyValue.name),
+        ...warnDetails(onlyWarnsForCheck, dependencyValue.name),
+        ...(comment !== undefined && { comment }),
       });
     }
   });

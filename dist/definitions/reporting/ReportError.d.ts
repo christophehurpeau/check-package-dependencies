@@ -5,6 +5,8 @@ export interface ReportErrorDetails {
     errorTarget?: "dependencyName" | "dependencyValue";
     dependency?: Omit<Partial<DependencyValue>, "name"> & Pick<DependencyValue, "name">;
     onlyWarns?: boolean;
+    /** explanation configured for the rule or the entry this error comes from */
+    comment?: string;
     fixTo?: string;
     suggestions?: [
         dependencyValue: Omit<Partial<DependencyValue>, "name"> & Pick<DependencyValue, "name">,

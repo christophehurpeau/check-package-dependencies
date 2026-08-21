@@ -2,6 +2,7 @@ import { regularDependencyTypes } from "../../checks/checkDirectPeerDependencies
 import { checkMissingSatisfiesVersions } from "../../checks/checkSatisfiesVersions.ts";
 import type { SatisfiesVersionsBetweenDependenciesConfig } from "../../checks/checkSatisfiesVersionsBetweenDependencies.ts";
 import { checkSatisfiesVersionsBetweenDependencies } from "../../checks/checkSatisfiesVersionsBetweenDependencies.ts";
+import { commentSchema } from "../../utils/comments.ts";
 import type { BaseRuleOptions } from "../create-rule/BaseRuleOptions.ts";
 import { createPackageRule } from "../create-rule/createPackageRule.ts";
 
@@ -49,14 +50,14 @@ export const satisfiesVersionsBetweenDependenciesRule =
                   },
                 ],
               },
+              comment: commentSchema,
             },
             required: ["name", "from", "to"],
             additionalProperties: false,
           },
-          additionalProperties: false,
         },
-        required: ["dependencies"],
       },
+      required: ["dependencies"],
       additionalProperties: false,
     },
     {
@@ -66,12 +67,17 @@ export const satisfiesVersionsBetweenDependenciesRule =
         recommended: false,
       },
       checkPackage: ({ pkg, reportError, ruleOptions, onlyWarnsForCheck }) => {
-        ruleOptions.dependencies.forEach(({ from }) => {
+        ruleOptions.dependencies.forEach(({ from, comment }) => {
           checkMissingSatisfiesVersions(
             reportError,
             pkg,
             regularDependencyTypes,
-            { [typeof from === "string" ? from : from.name]: "*" },
+            {
+              [typeof from === "string" ? from : from.name]: {
+                range: "*",
+                comment,
+              },
+            },
             onlyWarnsForCheck,
           );
         });

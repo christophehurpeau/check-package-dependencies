@@ -47,11 +47,14 @@ With `@babel/cli` declaring `"@babel/core": "^7.0.0"` as a peer dependency:
 
 ## Options
 
-| Name                           | Type                       | Default | Description                                                                                                                             |
-| :----------------------------- | :------------------------- | :------ | :-------------------------------------------------------------------------------------------------------------------------------------- |
-| `onlyWarnsFor`                 | `Record<string, string[]>` | `{}`    | Maps the dependency requiring the peer dependency (or `"*"`) to the peer dependency names to only warn for when the version is invalid. |
-| `onlyWarnsForMissing`          | `Record<string, string[]>` | `{}`    | Same, for missing peer dependencies.                                                                                                    |
-| `allowedPeerInDevDependencies` | `string[]`                 | `[]`    | Peer dependency names allowed in `devDependencies` even for a library, in addition to the built-in `@types/*` and `*/types` packages.   |
+| Name                           | Type                           | Default | Description                                                                                                                             |
+| :----------------------------- | :----------------------------- | :------ | :-------------------------------------------------------------------------------------------------------------------------------------- |
+| `onlyWarnsFor`                 | `Record<string, OnlyWarnsFor>` | `{}`    | Maps the dependency requiring the peer dependency (or `"*"`) to the peer dependency names to only warn for when the version is invalid. |
+| `onlyWarnsForMissing`          | `Record<string, OnlyWarnsFor>` | `{}`    | Same, for missing peer dependencies.                                                                                                    |
+| `allowedPeerInDevDependencies` | `string[]`                     | `[]`    | Peer dependency names allowed in `devDependencies` even for a library, in addition to the built-in `@types/*` and `*/types` packages.   |
+| `comment`                      | `string`                       | —       | Explanation of what this rule is enabled for, appended to the messages it reports.                                                      |
+
+`OnlyWarnsFor` is a list of dependency names, each optionally written as `{ name, comment }` — see [`onlyWarnsFor`](../../README.md#onlywarnsfor).
 
 ```js
 "check-package-dependencies/require-direct-peer-dependencies": [

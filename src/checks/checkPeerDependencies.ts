@@ -8,6 +8,7 @@ import type {
 } from "../utils/packageTypes.ts";
 import { getRealVersion } from "../utils/semverUtils.ts";
 import type { OnlyWarnsForCheck } from "../utils/warnForUtils.ts";
+import { warnDetails } from "../utils/warnForUtils.ts";
 
 const isDevOnlyPeerDependency = (
   name: string,
@@ -55,7 +56,7 @@ export function checkSatisfiesPeerDependency(
         dependency: allowedPeerIn[index]
           ? (pkg[allowedPeerIn[index]]?.[peerDepName] ?? undefined)
           : undefined,
-        onlyWarns: invalidOnlyWarnsForCheck.shouldWarnsFor(peerDepName),
+        ...warnDetails(invalidOnlyWarnsForCheck, peerDepName),
       });
     }
   });
@@ -137,7 +138,7 @@ export function checkPeerDependencies(
         errorMessage: `Missing "${peerDepName}" peer dependency ${fromDependency(depPkg, type)}`,
         errorDetails: `it should satisfies "${range}" and be in ${allowedPeerInForDep.join(" or ")}${additionalDetails}`,
         dependency: { name: peerDepName },
-        onlyWarns: missingOnlyWarnsForCheck.shouldWarnsFor(peerDepName),
+        ...warnDetails(missingOnlyWarnsForCheck, peerDepName),
       });
     } else {
       checkSatisfiesPeerDependency(

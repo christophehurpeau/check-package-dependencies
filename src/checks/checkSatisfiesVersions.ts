@@ -1,5 +1,7 @@
 import semver from "semver";
 import type { ReportError } from "../reporting/ReportError.ts";
+import type { CommentedRange } from "../utils/comments.ts";
+import { resolveCommentedRange } from "../utils/comments.ts";
 import type {
   DependencyTypes,
   DependencyValue,
@@ -7,6 +9,7 @@ import type {
 } from "../utils/packageTypes.ts";
 import { getRealVersion } from "../utils/semverUtils.ts";
 import type { OnlyWarnsForCheck } from "../utils/warnForUtils.ts";
+import { warnDetails } from "../utils/warnForUtils.ts";
 
 export function isVersionSatisfiesRange(
   version: string,
@@ -29,9 +32,11 @@ export function isVersionSatisfiesRange(
 export function checkSatisfiesVersion(
   reportError: ReportError,
   dependencyValue: DependencyValue,
-  range: string,
+  rangeConfig: CommentedRange,
   onlyWarnsForCheck?: OnlyWarnsForCheck,
 ): void {
+  const { range, comment } = resolveCommentedRange(rangeConfig);
+
   if (!isVersionSatisfiesRange(dependencyValue.value, range)) {
     const maxSatisfying = semver.maxSatisfying(
       [dependencyValue.value, range],
@@ -43,7 +48,8 @@ export function checkSatisfiesVersion(
       errorMessage: "Invalid",
       errorDetails: `"${dependencyValue.value}" should satisfies "${range}"`,
       dependency: dependencyValue,
-      onlyWarns: onlyWarnsForCheck?.shouldWarnsFor(dependencyValue.name),
+      ...warnDetails(onlyWarnsForCheck, dependencyValue.name),
+      ...(comment !== undefined && { comment }),
       ...(maxSatisfying && {
         suggestions: [
           [dependencyValue, maxSatisfying, `Use version ${maxSatisfying}`],
@@ -57,12 +63,13 @@ export function checkMissingSatisfiesVersions(
   reportError: ReportError,
   pkg: ParsedPackageJson,
   acceptedTypes: DependencyTypes | DependencyTypes[],
-  dependenciesRanges: Record<string, string>,
+  dependenciesRanges: Record<string, CommentedRange>,
   onlyWarnsForCheck?: OnlyWarnsForCheck,
 ): void {
   const types = Array.isArray(acceptedTypes) ? acceptedTypes : [acceptedTypes];
 
-  Object.entries(dependenciesRanges).forEach(([name, range]) => {
+  Object.entries(dependenciesRanges).forEach(([name, rangeConfig]) => {
+    const { range, comment } = resolveCommentedRange(rangeConfig);
     let found = false;
     for (const type of types) {
       const pkgDependency = pkg.value[type]?.[name];
@@ -78,7 +85,8 @@ export function checkMissingSatisfiesVersions(
         errorDetails: `should satisfies "${range}"`,
         dependency:
           types.length === 1 ? { name, fieldName: types[0] } : { name },
-        onlyWarns: onlyWarnsForCheck?.shouldWarnsFor(name),
+        ...warnDetails(onlyWarnsForCheck, name),
+        ...(comment !== undefined && { comment }),
       });
     }
   });

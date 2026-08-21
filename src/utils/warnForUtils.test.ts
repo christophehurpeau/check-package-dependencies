@@ -3,6 +3,7 @@ import { describe, test } from "node:test";
 import {
   createOnlyWarnsForArrayCheck,
   createOnlyWarnsForMappingCheck,
+  warnDetails,
 } from "./warnForUtils.ts";
 
 describe("createOnlyWarnsForArrayCheck", () => {
@@ -230,5 +231,51 @@ describe("createOnlyWarnsForMappingCheck", () => {
       test: ["5", "6", "a", "b"],
       "*": ["7"],
     });
+  });
+});
+
+describe("commented entries", () => {
+  test("array entry comment", () => {
+    const onlyWarnsForCheck = createOnlyWarnsForArrayCheck("test", [
+      "1",
+      { name: "2", comment: "waiting for the v3 migration" },
+    ]);
+    assert.deepEqual(onlyWarnsForCheck.getNotWarnedFor(), ["1", "2"]);
+    assert.equal(onlyWarnsForCheck.getCommentFor("1"), undefined);
+    assert.equal(
+      onlyWarnsForCheck.getCommentFor("2"),
+      "waiting for the v3 migration",
+    );
+    assert.equal(onlyWarnsForCheck.shouldWarnsFor("2"), true);
+    assert.deepEqual(onlyWarnsForCheck.getNotWarnedFor(), ["1"]);
+  });
+
+  test("mapping entry comment", () => {
+    const onlyWarnsForMappingCheck = createOnlyWarnsForMappingCheck("test", {
+      dep: [{ name: "1", comment: "dep pins it" }],
+      "*": [{ name: "2", comment: "everyone pins it" }],
+    });
+    const onlyWarnsForCheckDep = onlyWarnsForMappingCheck.createFor("dep");
+    assert.equal(onlyWarnsForCheckDep.getCommentFor("1"), "dep pins it");
+    assert.equal(onlyWarnsForCheckDep.getCommentFor("2"), "everyone pins it");
+    assert.equal(onlyWarnsForCheckDep.getCommentFor("3"), undefined);
+    assert.equal(onlyWarnsForCheckDep.shouldWarnsFor("1"), true);
+    assert.deepEqual(onlyWarnsForMappingCheck.getNotWarnedFor(), {
+      "*": ["2"],
+    });
+  });
+
+  test("warnDetails", () => {
+    const onlyWarnsForCheck = createOnlyWarnsForArrayCheck("test", [
+      { name: "1", comment: "why" },
+      "2",
+    ]);
+    assert.deepEqual(warnDetails(onlyWarnsForCheck, "1"), {
+      onlyWarns: true,
+      comment: "why",
+    });
+    assert.deepEqual(warnDetails(onlyWarnsForCheck, "2"), { onlyWarns: true });
+    assert.deepEqual(warnDetails(onlyWarnsForCheck, "3"), { onlyWarns: false });
+    assert.deepEqual(warnDetails(undefined, "1"), { onlyWarns: undefined });
   });
 });

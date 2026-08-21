@@ -1,11 +1,13 @@
 import type { ReportError } from "../reporting/ReportError.ts";
 import { fromDependency, inDependency } from "../reporting/messages.ts";
+import type { Commented } from "../utils/comments.ts";
 import type {
   DependencyTypes,
   PackageJson,
   ParsedPackageJson,
 } from "../utils/packageTypes.ts";
 import type { OnlyWarnsForCheck } from "../utils/warnForUtils.ts";
+import { warnDetails } from "../utils/warnForUtils.ts";
 
 export function checkIdenticalVersionsThanDependency(
   reportError: ReportError,
@@ -14,7 +16,10 @@ export function checkIdenticalVersionsThanDependency(
   depKeys: string[],
   depPkg: PackageJson,
   dependencies: PackageJson[DependencyTypes] = {},
-  onlyWarnsForCheck?: OnlyWarnsForCheck,
+  {
+    onlyWarnsForCheck,
+    comment,
+  }: Commented & { onlyWarnsForCheck?: OnlyWarnsForCheck } = {},
 ): void {
   const pkgDependencies = pkg[type] || {};
 
@@ -26,6 +31,7 @@ export function checkIdenticalVersionsThanDependency(
       reportError({
         errorMessage: `Unexpected missing dependency "${depKey}" ${inDependency(depPkg)}`,
         errorDetails: `config expects "${depKey}" to be present`,
+        ...(comment !== undefined && { comment }),
       });
       return;
     }
@@ -35,6 +41,7 @@ export function checkIdenticalVersionsThanDependency(
         errorMessage: `Unexpected range dependency "${depKey}" ${inDependency(depPkg)}`,
         errorDetails:
           "perhaps use checkSatisfiesVersionsFromDependency() instead",
+        ...(comment !== undefined && { comment }),
       });
       return;
     }
@@ -46,7 +53,8 @@ export function checkIdenticalVersionsThanDependency(
         errorMessage: `Missing "${depKey}"`,
         errorDetails: `expecting to be "${version}"`,
         dependency: { name: depKey, fieldName: type },
-        onlyWarns: onlyWarnsForCheck?.shouldWarnsFor(depKey),
+        ...warnDetails(onlyWarnsForCheck, depKey),
+        ...(comment !== undefined && { comment }),
       });
       return;
     }
@@ -56,7 +64,8 @@ export function checkIdenticalVersionsThanDependency(
         errorMessage: `Invalid "${value}"`,
         errorDetails: `expecting "${value}" to be "${version}" ${fromDependency(depPkg)}`,
         dependency: depValue,
-        onlyWarns: onlyWarnsForCheck?.shouldWarnsFor(depKey),
+        ...warnDetails(onlyWarnsForCheck, depKey),
+        ...(comment !== undefined && { comment }),
       });
     }
   });

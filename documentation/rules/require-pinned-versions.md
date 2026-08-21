@@ -42,9 +42,12 @@ The fix replaces the range with the version currently installed in `node_modules
 
 ## Options
 
-| Name           | Type       | Default | Description                        |
-| :------------- | :--------- | :------ | :--------------------------------- |
-| `onlyWarnsFor` | `string[]` | `[]`    | Dependency names to only warn for. |
+| Name           | Type           | Default | Description                                                                        |
+| :------------- | :------------- | :------ | :--------------------------------------------------------------------------------- |
+| `onlyWarnsFor` | `OnlyWarnsFor` | `[]`    | Dependency names to only warn for.                                                 |
+| `comment`      | `string`       | —       | Explanation of what this rule is enabled for, appended to the messages it reports. |
+
+`OnlyWarnsFor` is a list of dependency names, each optionally written as `{ name, comment }` — see [`onlyWarnsFor`](../../README.md#onlywarnsfor).
 
 ```js
 "check-package-dependencies/require-pinned-versions": [

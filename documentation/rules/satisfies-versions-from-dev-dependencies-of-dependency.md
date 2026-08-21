@@ -43,8 +43,9 @@ With `@pob/eslint-config` having `"eslint": "^10.6.0"` in its `devDependencies`:
 | Name                      | Type                       | Default | Description                                                                                                            |
 | :------------------------ | :------------------------- | :------ | :--------------------------------------------------------------------------------------------------------------------- |
 | `dependencies` (required) | `Record<string, DepGroup>` | —       | Maps a dependency name to the fields of your `package.json` in which to check the dependencies it declares ranges for. |
+| `comment`                 | `string`                   | —       | Explanation of what this rule is enabled for, appended to the messages it reports.                                     |
 
-`DepGroup` maps `dependencies`, `devDependencies` and `optionalDependencies` to the list of dependency names to check in each of them.
+`DepGroup` maps `dependencies`, `devDependencies` and `optionalDependencies` to the list of dependency names to check in each of them. Each entry also accepts a `comment` explaining what it is configured for, which replaces the rule `comment` in the messages that entry produces.
 
 ```js
 "check-package-dependencies/satisfies-versions-from-dev-dependencies-of-dependency": [

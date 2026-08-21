@@ -6,6 +6,7 @@ import type {
   ReportError,
   ReportErrorDetails,
 } from "../../reporting/ReportError.ts";
+import { commentSchema } from "../../utils/comments.ts";
 import type { GetDependencyPackageJson } from "../../utils/createGetDependencyPackageJson.ts";
 import type { LibrarySetting } from "../../utils/library.ts";
 import {
@@ -34,9 +35,20 @@ import {
 import type { DependencyValueAst, PackageJsonAst } from "../language.ts";
 import { packageJsonLanguageId, pluginNamespace } from "../language.ts";
 
+const onlyWarnsForEntrySchema: object = {
+  oneOf: [
+    { type: "string" },
+    {
+      type: "object",
+      properties: { name: { type: "string" }, comment: commentSchema },
+      required: ["name"],
+      additionalProperties: false,
+    },
+  ],
+};
 export const onlyWarnsForArraySchema = {
   type: "array",
-  items: { type: "string" },
+  items: onlyWarnsForEntrySchema,
 } as const;
 export const onlyWarnsForMappingSchema = {
   type: "object",
@@ -80,7 +92,7 @@ type CheckFn<RuleOptions, Node, T = Record<never, never>> = (
 ) => void;
 
 export function createPackageRule<
-  RuleOptions extends { onlyWarnsFor?: OnlyWarnsFor },
+  RuleOptions extends { onlyWarnsFor?: OnlyWarnsFor; comment?: string },
 >(
   ruleName: string,
   schema: NonNullable<NonNullable<Rule.RuleModule["meta"]>["schema"]>,
@@ -119,6 +131,16 @@ export function createPackageRule<
     >;
   },
 ): Record<string, Rule.RuleModule> {
+  // every rule accepts a "comment" explaining what it is enabled for, and every rule
+  // schema sets "additionalProperties: false", so it has to be declared on each of them
+  const schemaWithComment =
+    schema && "properties" in schema
+      ? {
+          ...schema,
+          properties: { ...schema.properties, comment: commentSchema },
+        }
+      : schema;
+
   return {
     [ruleName]: {
       meta: {
@@ -131,7 +153,7 @@ export function createPackageRule<
         },
         fixable: fixable ? "code" : undefined,
         hasSuggestions,
-        schema: schema ? [schema] : undefined,
+        schema: schemaWithComment ? [schemaWithComment] : undefined,
       },
 
       create(context) {
@@ -238,10 +260,14 @@ export function createPackageRule<
             const dependencyInfo = details.dependency
               ? `${details.dependency.fieldName ? `${details.dependency.fieldName} > ` : ""}${details.dependency.name}: `
               : "";
+            // the explanation of the configured entry the error comes from is more
+            // specific than the one of the whole rule
+            const comment = details.comment ?? options.comment;
             const message =
               dependencyInfo +
               details.errorMessage +
-              (details.errorDetails ? `: ${details.errorDetails}` : "");
+              (details.errorDetails ? `: ${details.errorDetails}` : "") +
+              (comment ? ` (${comment})` : "");
             if (isWarn) {
               const locationString = location
                 ? `:${location.start.line}:${location.start.column}`
@@ -280,6 +306,15 @@ export function createPackageRule<
             }
           };
 
+        /** `"dep"`, or `"dep" (why the exception was added)` when it has a comment */
+        const describeNotWarnedFor = (
+          onlyWarnsForCheck: OnlyWarnsForCheck,
+          depName: string,
+        ): string => {
+          const comment = onlyWarnsForCheck.getCommentFor(depName);
+          return `"${depName}"${comment ? ` (${comment})` : ""}`;
+        };
+
         const checkOnlyWarnsForArray = (
           onlyWarnsForCheck: OnlyWarnsForCheck,
         ): void => {
@@ -288,7 +323,9 @@ export function createPackageRule<
           if (notWarnedFor.length > 0) {
             context.report({
               message: `${onlyWarnsForCheck.configName}: no warning was raised for ${notWarnedFor
-                .map((depName) => `"${depName}"`)
+                .map((depName) =>
+                  describeNotWarnedFor(onlyWarnsForCheck, depName),
+                )
                 .join(", ")}. You should remove it or check if it is correct.`,
               loc: {
                 start: { line: 1, column: 1 },
@@ -305,9 +342,11 @@ export function createPackageRule<
             onlyWarnsForMappingCheck.getNotWarnedFor();
           getEntries(notWarnedForMapping).forEach(
             ([depNameOrStar, notWarnedFor]) => {
+              const entryCheck =
+                onlyWarnsForMappingCheck.createFor(depNameOrStar);
               context.report({
                 message: `${onlyWarnsForMappingCheck.configName}: no warning was raised for "${depNameOrStar}" > ${notWarnedFor
-                  .map((depName) => `"${depName}"`)
+                  .map((depName) => describeNotWarnedFor(entryCheck, depName))
                   .join(", ")}`,
                 loc: {
                   start: { line: 1, column: 1 },

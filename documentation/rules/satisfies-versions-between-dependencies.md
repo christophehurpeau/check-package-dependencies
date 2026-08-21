@@ -29,17 +29,19 @@ With `eslint` and `@eslint/plugin-kit` both depending on a compatible range of `
 
 ## Options
 
-| Name                      | Type      | Default | Description             |
-| :------------------------ | :-------- | :------ | :---------------------- |
-| `dependencies` (required) | `Check[]` | —       | The comparisons to run. |
+| Name                      | Type      | Default | Description                                                                        |
+| :------------------------ | :-------- | :------ | :--------------------------------------------------------------------------------- |
+| `dependencies` (required) | `Check[]` | —       | The comparisons to run.                                                            |
+| `comment`                 | `string`  | —       | Explanation of what this rule is enabled for, appended to the messages it reports. |
 
 Each `Check` has:
 
-| Name   | Type                                                                                             | Description                                                                                          |
-| :----- | :----------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------- |
-| `name` | `string`                                                                                         | The dependency whose ranges are compared.                                                            |
-| `from` | `string \| { name: string, in?: "dependencies" \| "devDependencies" \| "optionalDependencies" }` | The dependency declaring the range that must satisfy the other one. `in` defaults to `dependencies`. |
-| `to`   | `string \| { name: string, in?: "dependencies" \| "devDependencies" \| "optionalDependencies" }` | The dependency declaring the range to satisfy. `in` defaults to `dependencies`.                      |
+| Name      | Type                                                                                             | Description                                                                                                |
+| :-------- | :----------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------- |
+| `name`    | `string`                                                                                         | The dependency whose ranges are compared.                                                                  |
+| `from`    | `string \| { name: string, in?: "dependencies" \| "devDependencies" \| "optionalDependencies" }` | The dependency declaring the range that must satisfy the other one. `in` defaults to `dependencies`.       |
+| `to`      | `string \| { name: string, in?: "dependencies" \| "devDependencies" \| "optionalDependencies" }` | The dependency declaring the range to satisfy. `in` defaults to `dependencies`.                            |
+| `comment` | `string`                                                                                         | What the comparison is configured for, appended to the messages it produces instead of the rule `comment`. |
 
 ```js
 "check-package-dependencies/satisfies-versions-between-dependencies": [

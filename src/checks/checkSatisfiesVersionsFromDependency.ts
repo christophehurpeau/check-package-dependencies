@@ -1,4 +1,5 @@
 import type { ReportError } from "../reporting/ReportError.ts";
+import type { Commented } from "../utils/comments.ts";
 import type { GetDependencyPackageJson } from "../utils/createGetDependencyPackageJson.ts";
 import { getEntries } from "../utils/object.ts";
 import type {
@@ -20,7 +21,7 @@ import {
  */
 export type SatisfiesVersionsFromDependencyConfig = Record<
   string,
-  Partial<Record<RegularDependencyTypes, string[]>>
+  Commented & Partial<Record<RegularDependencyTypes, string[]>>
 >;
 
 export interface CheckSatisfiesVersionsFromDependencyOptions {
@@ -77,12 +78,15 @@ export function checkMissingSatisfiesVersionsFromDependency(
         Object.fromEntries(
           dependencyNames.map((dependencyName) => [
             dependencyName,
-            getRangeInDependency({
-              depName,
-              depPkg,
-              readRangesFrom,
-              dependencyName,
-            }),
+            {
+              range: getRangeInDependency({
+                depName,
+                depPkg,
+                readRangesFrom,
+                dependencyName,
+              }),
+              comment: dependencyNamesByType.comment,
+            },
           ]),
         ),
         onlyWarnsForCheck,
@@ -117,12 +121,15 @@ export function checkDependencySatisfiesVersionFromDependency(
     checkSatisfiesVersion(
       reportError,
       dependencyValue,
-      getRangeInDependency({
-        depName,
-        depPkg,
-        readRangesFrom,
-        dependencyName: dependencyValue.name,
-      }),
+      {
+        range: getRangeInDependency({
+          depName,
+          depPkg,
+          readRangesFrom,
+          dependencyName: dependencyValue.name,
+        }),
+        comment: dependencyNamesByType.comment,
+      },
       onlyWarnsForCheck,
     );
   });

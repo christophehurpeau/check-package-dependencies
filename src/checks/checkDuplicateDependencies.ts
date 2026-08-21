@@ -7,6 +7,7 @@ import type {
 } from "../utils/packageTypes.ts";
 import { parseNpmAlias } from "../utils/semverUtils.ts";
 import type { OnlyWarnsForCheck } from "../utils/warnForUtils.ts";
+import { warnDetails } from "../utils/warnForUtils.ts";
 
 export interface DuplicateConflictOwnership {
   /**
@@ -142,7 +143,7 @@ export function checkDuplicateDependencies({
           reportError({
             errorMessage: `Invalid duplicate dependency${dependency ? "" : `"${depKey}"`}`,
             errorDetails,
-            onlyWarns: onlyWarnsForCheck.shouldWarnsFor(depKey),
+            ...warnDetails(onlyWarnsForCheck, depKey),
             dependency,
             ...(fixTo === undefined
               ? {}
@@ -175,7 +176,7 @@ export function checkDuplicateDependencies({
             reportError({
               errorMessage: `Unsupported range for "${depKey}"`,
               errorDetails: `"${unsupportedRange}" is not a valid semver range, "${versions[0]!.value}" cannot be compared with "${depRange}" from ${depPkg.name || ""} in ${depType}`,
-              onlyWarns: onlyWarnsForCheck.shouldWarnsFor(depKey),
+              ...warnDetails(onlyWarnsForCheck, depKey),
               dependency,
             });
           }

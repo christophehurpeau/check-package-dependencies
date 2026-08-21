@@ -4,6 +4,7 @@ import type { GetDependencyPackageJson } from "../utils/createGetDependencyPacka
 import type { DependencyValue } from "../utils/packageTypes.ts";
 import { getRealVersion } from "../utils/semverUtils.ts";
 import type { OnlyWarnsForCheck } from "../utils/warnForUtils.ts";
+import { warnDetails } from "../utils/warnForUtils.ts";
 
 export interface CheckExactVersionsOptions {
   getDependencyPackageJson?: GetDependencyPackageJson;
@@ -34,7 +35,8 @@ export function checkExactVersion(
 
   if (!isVersionRange(version)) return;
 
-  const shouldOnlyWarn = onlyWarnsForCheck.shouldWarnsFor(dependencyName);
+  const warn = warnDetails(onlyWarnsForCheck, dependencyName);
+  const shouldOnlyWarn = warn.onlyWarns === true;
 
   if (shouldOnlyWarn || !getDependencyPackageJson) {
     reportError({
@@ -42,7 +44,7 @@ export function checkExactVersion(
       errorDetails: `expecting "${version}" to be exact "${getExactVersionFromRange(version)}"`,
       errorTarget: "dependencyValue",
       dependency: dependencyValue,
-      onlyWarns: shouldOnlyWarn,
+      ...warn,
     });
     return;
   }
@@ -67,7 +69,7 @@ export function checkExactVersion(
       errorDetails: `expecting "${version}" to be exact`,
       errorTarget: "dependencyValue",
       dependency: dependencyValue,
-      onlyWarns: shouldOnlyWarn,
+      ...warn,
     });
     return;
   }
@@ -77,7 +79,7 @@ export function checkExactVersion(
     errorDetails: `expecting "${version}" to be exact "${resolvedDep.version}"`,
     errorTarget: "dependencyValue",
     dependency: dependencyValue,
-    onlyWarns: shouldOnlyWarn,
+    ...warn,
     fixTo: resolvedDep.version,
   });
 }

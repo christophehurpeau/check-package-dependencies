@@ -6,18 +6,14 @@ import type { DependencyValue, ParsedPackageJson } from "../../utils/packageType
 import type { OnlyWarnsFor, OnlyWarnsForCheck, OnlyWarnsForMappingCheck } from "../../utils/warnForUtils.ts";
 export declare const onlyWarnsForArraySchema: {
     readonly type: "array";
-    readonly items: {
-        readonly type: "string";
-    };
+    readonly items: object;
 };
 export declare const onlyWarnsForMappingSchema: {
     readonly type: "object";
     readonly patternProperties: {
         readonly "^.*$": {
             readonly type: "array";
-            readonly items: {
-                readonly type: "string";
-            };
+            readonly items: object;
         };
     };
 };
@@ -43,6 +39,7 @@ type CheckFn<RuleOptions, Node, T = Record<never, never>> = (params: T & {
 }) => void;
 export declare function createPackageRule<RuleOptions extends {
     onlyWarnsFor?: OnlyWarnsFor;
+    comment?: string;
 }>(ruleName: string, schema: NonNullable<NonNullable<Rule.RuleModule["meta"]>["schema"]>, { docs, fixable, hasSuggestions, checkPackage, checkDependencyValue, }: {
     docs: PackageRuleDocs;
     /** the rule reports errors with a fix applied by "eslint --fix" */

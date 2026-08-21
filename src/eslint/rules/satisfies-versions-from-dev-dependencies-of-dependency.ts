@@ -3,6 +3,7 @@ import {
   checkDependencySatisfiesVersionFromDependency,
   checkMissingSatisfiesVersionsFromDependency,
 } from "../../checks/checkSatisfiesVersionsFromDependency.ts";
+import { commentSchema } from "../../utils/comments.ts";
 import type { BaseRuleOptions } from "../create-rule/BaseRuleOptions.ts";
 import { createPackageRule } from "../create-rule/createPackageRule.ts";
 
@@ -37,6 +38,7 @@ export const satisfiesVersionsFromDevDependenciesOfDependencyRule =
                   items: { type: "string" },
                   optional: true,
                 },
+                comment: commentSchema,
               },
               additionalProperties: false,
             },
