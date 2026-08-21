@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [13.1.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v13.0.0...v13.1.0) (2026-08-21)
+
+### Features
+
+* add comment
+
 ## [13.0.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v12.2.0...v13.0.0) (2026-08-11)
 
 ### ⚠ BREAKING CHANGES
