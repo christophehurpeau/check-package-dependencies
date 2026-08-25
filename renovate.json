@@ -1,5 +1,14 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:js-lib", "github>christophehurpeau/renovate-presets"],
-  "ignorePaths": ["fixtures/**"]
+  "ignorePaths": ["fixtures/**"],
+  "packageRules": [
+    {
+      "description": "Keep the widest possible range for semver, only bump it for a breaking change",
+      "matchDepTypes": ["dependencies"],
+      "matchPackageNames": ["semver"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "enabled": false
+    }
+  ]
 }
