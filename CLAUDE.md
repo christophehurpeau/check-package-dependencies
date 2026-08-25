@@ -94,6 +94,14 @@ The setting is a single boolean question, "is this package a library", and its f
 
 In documentation, comments and messages, say "a library" and "a package that is not a library", or use the setting values directly — the rule documentation tables are headed `library: false` / `library: true` for that reason.
 
+### `potentialDirectories` setting
+
+`"off" | "warn" | "error"`, named after eslint's own severities, default `"warn"`, held in `src/utils/potentialDirectories.ts`. It only drives the diagnostic `createPackageRule` emits when a `workspaces` glob matches a directory holding no `package.json` — never the messages `onlyWarnsFor` downgrades. The directory is skipped either way. `"warn"` keeps the `console.warn`, `"error"` goes through `context.report` on the linted `package.json`, so it reaches the formatter and the exit code, attributed to whichever rule loaded the workspace members (`consistent-workspace-dependencies` today).
+
+eslint does not validate `settings`, so an unknown value is reported as a lint error once per `package.json` (same `WeakSet` dedup as `legacyIsLibrarySettingMessage`) and falls back to `"warn"` — otherwise a typo would silently keep the logs.
+
+The cli exposes it as `--potential-directories <level>`, validated in `parseCliArgs` and passed as an extra `settings` config entry appended to `overrideConfig`. Since the members are loaded per linted `package.json`, a monorepo repeats the message once per package it lints, which is what `"off"` is for.
+
 ### Test utilities
 
 Tests use Node's built-in `node:test` / `node:assert/strict`. The shared helpers in `src/reporting/ReportError.testUtils.ts` provide:

@@ -19,6 +19,12 @@ import type {
   ParsedPackageJson,
 } from "../../utils/packageTypes.ts";
 import { parsePkg } from "../../utils/pkgJsonUtils.ts";
+import type { PotentialDirectoriesSetting } from "../../utils/potentialDirectories.ts";
+import {
+  invalidPotentialDirectoriesSettingMessage,
+  isPotentialDirectoriesSetting,
+  resolvePotentialDirectoriesSetting,
+} from "../../utils/potentialDirectories.ts";
 import type {
   OnlyWarnsFor,
   OnlyWarnsForCheck,
@@ -61,10 +67,19 @@ export const onlyWarnsForMappingSchema = {
 
 interface CheckPackageDependenciesSettings {
   library?: LibrarySetting;
+  /**
+   * How a workspaces glob matching a directory that holds no package.json is reported.
+   * Only that diagnostic is concerned, not the messages downgraded to warnings by
+   * "onlyWarnsFor".
+   */
+  potentialDirectories?: PotentialDirectoriesSetting;
 }
 
 /** the package.json ast nodes the legacy "isLibrary" setting was already reported for */
 const legacySettingReportedFor = new WeakSet<object>();
+
+/** the package.json ast nodes an invalid "potentialDirectories" setting was already reported for */
+const invalidPotentialDirectoriesSettingReportedFor = new WeakSet<object>();
 
 const documentationUrlBase =
   "https://github.com/christophehurpeau/check-package-dependencies/blob/main/documentation/rules";
@@ -357,6 +372,33 @@ export function createPackageRule<
           );
         };
 
+        /**
+         * A `workspaces` glob of `workspaceRootPkg` matched `pathMatch`, which holds no
+         * package.json: it is skipped either way, the setting only decides how loudly.
+         */
+        const reportPotentialDirectory = (
+          workspaceRootPkg: ParsedPackageJson,
+          pathMatch: string,
+        ): void => {
+          const setting = resolvePotentialDirectoriesSetting(
+            settings.potentialDirectories,
+          );
+          if (setting === "off") return;
+
+          const message = `${workspaceRootPkg.path} workspaces: ignored potential directory, no package.json found: ${pathMatch}`;
+          if (setting === "warn") {
+            console.warn(`[warn] ${message}`);
+          } else {
+            context.report({
+              message,
+              loc: {
+                start: { line: 1, column: 1 },
+                end: { line: 1, column: 1 },
+              },
+            });
+          }
+        };
+
         return {
           Package(node: any) {
             // Only run on package.json files
@@ -380,6 +422,25 @@ export function createPackageRule<
               legacySettingReportedFor.add(node as object);
               context.report({
                 message: legacyIsLibrarySettingMessage,
+                loc: {
+                  start: { line: 1, column: 1 },
+                  end: { line: 1, column: 1 },
+                },
+              });
+            }
+
+            // eslint does not validate settings, so an unknown value would otherwise
+            // silently fall back to the default
+            if (
+              settings.potentialDirectories !== undefined &&
+              !isPotentialDirectoriesSetting(settings.potentialDirectories) &&
+              !invalidPotentialDirectoriesSettingReportedFor.has(node as object)
+            ) {
+              invalidPotentialDirectoriesSettingReportedFor.add(node as object);
+              context.report({
+                message: invalidPotentialDirectoriesSettingMessage(
+                  settings.potentialDirectories,
+                ),
                 loc: {
                   start: { line: 1, column: 1 },
                   end: { line: 1, column: 1 },
@@ -414,9 +475,7 @@ export function createPackageRule<
                 try {
                   fs.accessSync(pkgPath, constants.R_OK);
                 } catch {
-                  console.warn(
-                    `[warn] ${workspaceRootPkg.path} workspaces: ignored potential directory, no package.json found: ${pathMatch}`,
-                  );
+                  reportPotentialDirectory(workspaceRootPkg, pathMatch);
                   continue;
                 }
 

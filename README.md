@@ -44,12 +44,13 @@ project, so no setup is required, and takes an optional directory:
 npx check-package-dependencies packages/app
 ```
 
-| Option            | Description                                  |
-| :---------------- | :------------------------------------------- |
-| `--fix`           | apply the fixes the rules provide            |
-| `--quiet`         | report errors only, hiding warnings          |
-| `--format <name>` | eslint formatter to use (default: `stylish`) |
-| `-h`, `--help`    | show the usage                               |
+| Option                            | Description                                                                                                             |
+| :-------------------------------- | :---------------------------------------------------------------------------------------------------------------------- |
+| `--fix`                           | apply the fixes the rules provide                                                                                       |
+| `--quiet`                         | report errors only, hiding warnings                                                                                     |
+| `--format <name>`                 | eslint formatter to use (default: `stylish`)                                                                            |
+| `--potential-directories <level>` | how a workspaces glob matching a directory that holds no `package.json` is reported: `off`, `warn` (default) or `error` |
+| `-h`, `--help`                    | show the usage                                                                                                          |
 
 To enable other rules, to configure their options, or to lint `package.json` alongside the
 rest of the codebase, use the eslint plugin instead of the cli.
@@ -106,9 +107,12 @@ export default [
 
 #### Settings
 
-| Setting   | Default  | Description                                                                                                                                                                                                      |
-| :-------- | :------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `library` | `"auto"` | Whether a package is published and consumed by other packages. A library keeps ranges in `dependencies` and can satisfy a peer dependency with its own `peerDependencies`; any other package pins every version. |
+| Setting                | Default  | Description                                                                                                                                                                                                      |
+| :--------------------- | :------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `library`              | `"auto"` | Whether a package is published and consumed by other packages. A library keeps ranges in `dependencies` and can satisfy a peer dependency with its own `peerDependencies`; any other package pins every version. |
+| `potentialDirectories` | `"warn"` | How a `workspaces` glob matching a directory that holds no `package.json` is reported.                                                                                                                           |
+
+##### `library`
 
 Accepted values:
 
@@ -179,6 +183,33 @@ Prefer a list of patterns, which gives the same answer wherever the package is r
 from. Note that a list replaces the detection entirely: `private` is no longer taken into
 account, so a private package matching a pattern is a library, and the root is only
 excluded if its name matches no pattern (or is excluded with `!`).
+
+##### `potentialDirectories`
+
+A `workspaces` glob such as `packages/*` also matches directories that are not a package.
+Such a directory is always skipped; the setting only decides how it is reported:
+
+| Value                | Meaning                                                                                                   |
+| :------------------- | :-------------------------------------------------------------------------------------------------------- |
+| `"warn"` _(default)_ | Logged with `console.warn`, so it reaches neither the eslint formatter, nor `--quiet`, nor the exit code. |
+| `"off"`              | Not reported at all.                                                                                      |
+| `"error"`            | Reported as a lint error on the linted `package.json`, by the rule that loaded the workspace members.     |
+
+The workspace members are loaded for every linted `package.json`, so a monorepo repeats the
+message once per package it lints. Use `"off"` when a glob is knowingly wider than the
+packages it matches, or `"error"` to make a stray directory fail the lint:
+
+```js
+export default [
+  checkPackageDependenciesPlugin.configs.recommended,
+  {
+    files: ["**/package.json"],
+    settings: {
+      "check-package-dependencies": { potentialDirectories: "off" },
+    },
+  },
+];
+```
 
 #### Migrating from v12
 

@@ -3,6 +3,7 @@ import type { ReportError } from "../../reporting/ReportError.ts";
 import type { GetDependencyPackageJson } from "../../utils/createGetDependencyPackageJson.ts";
 import type { LibrarySetting } from "../../utils/library.ts";
 import type { DependencyValue, ParsedPackageJson } from "../../utils/packageTypes.ts";
+import type { PotentialDirectoriesSetting } from "../../utils/potentialDirectories.ts";
 import type { OnlyWarnsFor, OnlyWarnsForCheck, OnlyWarnsForMappingCheck } from "../../utils/warnForUtils.ts";
 export declare const onlyWarnsForArraySchema: {
     readonly type: "array";
@@ -19,6 +20,12 @@ export declare const onlyWarnsForMappingSchema: {
 };
 interface CheckPackageDependenciesSettings {
     library?: LibrarySetting;
+    /**
+     * How a workspaces glob matching a directory that holds no package.json is reported.
+     * Only that diagnostic is concerned, not the messages downgraded to warnings by
+     * "onlyWarnsFor".
+     */
+    potentialDirectories?: PotentialDirectoriesSetting;
 }
 export interface PackageRuleDocs {
     description: string;

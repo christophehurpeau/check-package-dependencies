@@ -1,9 +1,11 @@
 import type { ESLint as ESLintNamespace } from "eslint";
+import type { PotentialDirectoriesSetting } from "./utils/potentialDirectories.ts";
 export interface CliOptions {
     directory: string;
     fix: boolean;
     quiet: boolean;
     format: string;
+    potentialDirectories: PotentialDirectoriesSetting;
     help: boolean;
 }
 export declare function parseCliArgs(argv: string[]): CliOptions;

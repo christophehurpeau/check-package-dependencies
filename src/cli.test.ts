@@ -11,6 +11,7 @@ describe("parseCliArgs", () => {
       fix: false,
       quiet: false,
       format: "stylish",
+      potentialDirectories: "warn",
       help: false,
     });
   });
@@ -23,12 +24,30 @@ describe("parseCliArgs", () => {
   });
 
   it("should parse the options", () => {
-    assert.deepEqual(parseCliArgs(["--fix", "--quiet", "--format", "json"]), {
-      directory: process.cwd(),
-      fix: true,
-      quiet: true,
-      format: "json",
-      help: false,
+    assert.deepEqual(
+      parseCliArgs([
+        "--fix",
+        "--quiet",
+        "--format",
+        "json",
+        "--potential-directories",
+        "off",
+      ]),
+      {
+        directory: process.cwd(),
+        fix: true,
+        quiet: true,
+        format: "json",
+        potentialDirectories: "off",
+        help: false,
+      },
+    );
+  });
+
+  it("should throw for an invalid --potential-directories value", () => {
+    assert.throws(() => parseCliArgs(["--potential-directories", "disable"]), {
+      message:
+        'Invalid --potential-directories value "disable", expected "off", "warn" or "error"',
     });
   });
 

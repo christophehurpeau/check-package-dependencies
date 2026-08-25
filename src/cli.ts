@@ -3,9 +3,16 @@ import fs, { constants } from "node:fs";
 import path from "node:path";
 import { parseArgs } from "node:util";
 import type { ESLint as ESLintNamespace } from "eslint";
+import { pluginNamespace } from "./eslint/language.ts";
 import checkPackagePlugin from "./eslint-plugin.ts";
 import { readPkgJson } from "./utils/pkgJsonUtils.ts";
 import { resolveWorkspacesPackagesGlobs } from "./utils/pnpmWorkspaceYaml.ts";
+import type { PotentialDirectoriesSetting } from "./utils/potentialDirectories.ts";
+import {
+  defaultPotentialDirectoriesSetting,
+  expectedPotentialDirectoriesSettings,
+  isPotentialDirectoriesSetting,
+} from "./utils/potentialDirectories.ts";
 
 const usage = `Usage: check-package-dependencies [directory] [options]
 
@@ -17,6 +24,10 @@ Options:
   --fix              apply the fixes the rules provide
   --quiet            report errors only, hiding warnings
   --format <name>    eslint formatter to use (default: "stylish")
+  --potential-directories <level>
+                     how a workspaces glob matching a directory that holds no
+                     package.json is reported: "off", "warn" (default) or
+                     "error"
   -h, --help         show this help
 `;
 
@@ -25,6 +36,7 @@ export interface CliOptions {
   fix: boolean;
   quiet: boolean;
   format: string;
+  potentialDirectories: PotentialDirectoriesSetting;
   help: boolean;
 }
 
@@ -36,6 +48,10 @@ export function parseCliArgs(argv: string[]): CliOptions {
       fix: { type: "boolean", default: false },
       quiet: { type: "boolean", default: false },
       format: { type: "string", default: "stylish" },
+      "potential-directories": {
+        type: "string",
+        default: defaultPotentialDirectoriesSetting,
+      },
       help: { type: "boolean", short: "h", default: false },
     },
   });
@@ -46,11 +62,19 @@ export function parseCliArgs(argv: string[]): CliOptions {
     );
   }
 
+  const potentialDirectories = values["potential-directories"];
+  if (!isPotentialDirectoriesSetting(potentialDirectories)) {
+    throw new Error(
+      `Invalid --potential-directories value "${potentialDirectories}", expected ${expectedPotentialDirectoriesSettings}`,
+    );
+  }
+
   return {
     directory: path.resolve(positionals[0] ?? "."),
     fix: values.fix,
     quiet: values.quiet,
     format: values.format,
+    potentialDirectories,
     help: values.help,
   };
 }
@@ -144,7 +168,17 @@ export async function main(argv: string[]): Promise<void> {
     cwd: options.directory,
     // the config of the linted project is irrelevant here, only the recommended one applies
     overrideConfigFile: true,
-    overrideConfig: [checkPackagePlugin.configs.recommended],
+    overrideConfig: [
+      checkPackagePlugin.configs.recommended,
+      {
+        files: ["**/package.json"],
+        settings: {
+          [pluginNamespace]: {
+            potentialDirectories: options.potentialDirectories,
+          },
+        },
+      },
+    ],
     // the paths are resolved by resolvePackageJsonPaths, never ignore or expand them
     ignore: false,
     globInputPaths: false,

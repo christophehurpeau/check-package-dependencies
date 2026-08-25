@@ -877,6 +877,17 @@ function resolveIsLibrary(setting, pkg) {
   return setting;
 }
 
+const defaultPotentialDirectoriesSetting = "warn";
+const potentialDirectoriesSettings = /* @__PURE__ */ new Set(["off", "warn", "error"]);
+const expectedPotentialDirectoriesSettings = `"off", "warn" or "error"`;
+function isPotentialDirectoriesSetting(value) {
+  return typeof value === "string" && potentialDirectoriesSettings.has(value);
+}
+function resolvePotentialDirectoriesSetting(value) {
+  return isPotentialDirectoriesSetting(value) ? value : defaultPotentialDirectoriesSetting;
+}
+const invalidPotentialDirectoriesSettingMessage = (value) => `Invalid "potentialDirectories" setting: received ${JSON.stringify(value)}, expected ${expectedPotentialDirectoriesSettings}.`;
+
 const readPackageJsonSafe = (packageJsonPath) => {
   try {
     return JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
@@ -937,6 +948,7 @@ const onlyWarnsForMappingSchema = {
   }
 };
 const legacySettingReportedFor = /* @__PURE__ */ new WeakSet();
+const invalidPotentialDirectoriesSettingReportedFor = /* @__PURE__ */ new WeakSet();
 const documentationUrlBase = "https://github.com/christophehurpeau/check-package-dependencies/blob/main/documentation/rules";
 function createPackageRule(ruleName, schema, {
   docs,
@@ -1070,6 +1082,24 @@ function createPackageRule(ruleName, schema, {
             }
           );
         };
+        const reportPotentialDirectory = (workspaceRootPkg, pathMatch) => {
+          const setting = resolvePotentialDirectoriesSetting(
+            settings.potentialDirectories
+          );
+          if (setting === "off") return;
+          const message = `${workspaceRootPkg.path} workspaces: ignored potential directory, no package.json found: ${pathMatch}`;
+          if (setting === "warn") {
+            console.warn(`[warn] ${message}`);
+          } else {
+            context.report({
+              message,
+              loc: {
+                start: { line: 1, column: 1 },
+                end: { line: 1, column: 1 }
+              }
+            });
+          }
+        };
         return {
           Package(node) {
             if (!context.filename.endsWith("/package.json")) {
@@ -1085,6 +1115,18 @@ function createPackageRule(ruleName, schema, {
               legacySettingReportedFor.add(node);
               context.report({
                 message: legacyIsLibrarySettingMessage,
+                loc: {
+                  start: { line: 1, column: 1 },
+                  end: { line: 1, column: 1 }
+                }
+              });
+            }
+            if (settings.potentialDirectories !== void 0 && !isPotentialDirectoriesSetting(settings.potentialDirectories) && !invalidPotentialDirectoriesSettingReportedFor.has(node)) {
+              invalidPotentialDirectoriesSettingReportedFor.add(node);
+              context.report({
+                message: invalidPotentialDirectoriesSettingMessage(
+                  settings.potentialDirectories
+                ),
                 loc: {
                   start: { line: 1, column: 1 },
                   end: { line: 1, column: 1 }
@@ -1107,9 +1149,7 @@ function createPackageRule(ruleName, schema, {
                 try {
                   fs.accessSync(pkgPath, constants.R_OK);
                 } catch {
-                  console.warn(
-                    `[warn] ${workspaceRootPkg.path} workspaces: ignored potential directory, no package.json found: ${pathMatch}`
-                  );
+                  reportPotentialDirectory(workspaceRootPkg, pathMatch);
                   continue;
                 }
                 workspacePackagesPaths.push(pkgPath);
