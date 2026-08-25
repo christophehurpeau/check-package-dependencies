@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [13.2.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v13.1.0...v13.2.0) (2026-08-25)
+
+### Features
+
+* add potentialDirectories setting to control the workspaces glob log
+
 ## [13.1.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v13.0.0...v13.1.0) (2026-08-21)
 
 ### Features
