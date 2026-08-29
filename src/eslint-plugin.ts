@@ -41,6 +41,7 @@ const checkPackagePlugin = {
           "error",
         "check-package-dependencies/min-range-peer-dependencies-satisfies-dependencies":
           "error",
+        "check-package-dependencies/report-warns": "warn",
       },
     },
   },

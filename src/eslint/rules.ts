@@ -3,6 +3,7 @@ import { minRangeDependenciesSatisfiesDevDependenciesRule } from "./rules/min-ra
 import { minRangePeerDependenciesSatisfiesDependenciesRule } from "./rules/min-range-peer-dependencies-satisfies-dependencies.ts";
 import { noDirectDuplicateDependenciesRule } from "./rules/no-direct-duplicate-dependencies.ts";
 import { noRootWorkspaceDependenciesRule } from "./rules/no-root-workspace-dependencies.ts";
+import { reportWarnsRule } from "./rules/report-warns.ts";
 import { requireDirectPeerDependenciesRule } from "./rules/require-direct-peer-dependencies.ts";
 import { requireIdenticalVersionsAsDependencyRule } from "./rules/require-identical-versions-as-dependency.ts";
 import { requireIdenticalVersionsAsDevDependencyOfDependencyRule } from "./rules/require-identical-versions-as-dev-dependency-of-dependency.ts";
@@ -36,6 +37,7 @@ const rules = {
   ...satisfiesVersionsBetweenDependenciesRule,
   ...consistentWorkspaceDependenciesRule,
   ...requireWorkspaceProtocolRule,
+  ...reportWarnsRule,
 };
 
 export default rules;

@@ -40,6 +40,7 @@ import {
 } from "../../utils/workspaceMembers.ts";
 import type { DependencyValueAst, PackageJsonAst } from "../language.ts";
 import { packageJsonLanguageId, pluginNamespace } from "../language.ts";
+import { addOnlyWarnsForWarning } from "./onlyWarnsForWarnings.ts";
 
 const onlyWarnsForEntrySchema: object = {
   oneOf: [
@@ -81,7 +82,7 @@ const legacySettingReportedFor = new WeakSet<object>();
 /** the package.json ast nodes an invalid "potentialDirectories" setting was already reported for */
 const invalidPotentialDirectoriesSettingReportedFor = new WeakSet<object>();
 
-const documentationUrlBase =
+export const documentationUrlBase =
   "https://github.com/christophehurpeau/check-package-dependencies/blob/main/documentation/rules";
 
 export interface PackageRuleDocs {
@@ -284,6 +285,12 @@ export function createPackageRule<
               (details.errorDetails ? `: ${details.errorDetails}` : "") +
               (comment ? ` (${comment})` : "");
             if (isWarn) {
+              addOnlyWarnsForWarning(context.sourceCode.ast, {
+                message,
+                ruleName,
+                loc: location,
+              });
+              // superseded by the "report-warns" rule, kept only until it is validated
               const locationString = location
                 ? `:${location.start.line}:${location.start.column}`
                 : "";

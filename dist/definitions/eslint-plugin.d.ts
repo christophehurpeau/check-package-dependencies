@@ -12,7 +12,21 @@ declare const checkPackagePlugin: {
         }>;
     };
     rules: {
-        [x: string]: import("eslint").Rule.RuleModule;
+        "report-warns": {
+            meta: {
+                type: "problem";
+                languages: string[];
+                docs: {
+                    description: string;
+                    recommended: boolean;
+                    url: string;
+                };
+                schema: never[];
+            };
+            create(context: import("eslint").Rule.RuleContext): {
+                "Package:exit"(): void;
+            };
+        };
     };
     configs: {
         base: {
@@ -35,6 +49,7 @@ declare const checkPackagePlugin: {
                 "check-package-dependencies/require-workspace-protocol": "error";
                 "check-package-dependencies/min-range-dependencies-satisfies-dev-dependencies": "error";
                 "check-package-dependencies/min-range-peer-dependencies-satisfies-dependencies": "error";
+                "check-package-dependencies/report-warns": "warn";
             };
         };
     };

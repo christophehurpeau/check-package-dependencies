@@ -264,6 +264,7 @@ depending on the `library` setting: see each rule’s page.
 | [min-range-peer-dependencies-satisfies-dependencies](documentation/rules/min-range-peer-dependencies-satisfies-dependencies.md)                 | Enforce the minimum of a `peerDependencies` range to satisfy the version in `dependencies`                            | ✅  | 🔧  |     |
 | [no-direct-duplicate-dependencies](documentation/rules/no-direct-duplicate-dependencies.md)                                                     | Disallow dependencies that will be installed twice because a direct dependency requires an incompatible range         | ✅  |     |     |
 | [no-root-workspace-dependencies](documentation/rules/no-root-workspace-dependencies.md)                                                         | Disallow `dependencies` in the root package.json of a workspace                                                       | ✅  |     |     |
+| [report-warns](documentation/rules/report-warns.md)                                                                                             | Report the errors the other rules downgraded to warnings with their `onlyWarnsFor` option                             | ✅  |     |     |
 | [require-direct-peer-dependencies](documentation/rules/require-direct-peer-dependencies.md)                                                     | Require peer dependencies of direct dependencies to be present and satisfied                                          | ✅  |     |     |
 | [require-identical-versions](documentation/rules/require-identical-versions.md)                                                                 | Require configured dependencies to have the same version as another dependency of the same package.json               |     |     |     |
 | [require-identical-versions-as-dependency](documentation/rules/require-identical-versions-as-dependency.md)                                     | Require configured dependencies to have the same version as the one in the `dependencies` of another dependency       |     |     |     |
@@ -282,7 +283,7 @@ depending on the `library` setting: see each rule’s page.
 
 #### `onlyWarnsFor`
 
-Most rules accept an `onlyWarnsFor` option that downgrades errors to warnings, printed in the console instead of being reported to ESLint. Entries that never matched an error are reported as errors, so the list stays up to date.
+Most rules accept an `onlyWarnsFor` option that downgrades errors to warnings, reported by the [report-warns](documentation/rules/report-warns.md) rule — enabled in `recommended` — as a rule cannot report on behalf of another one. They are also still printed in the console, until that rule has proven itself. Entries that never matched an error are reported as errors, so the list stays up to date.
 
 Depending on the rule, `onlyWarnsFor` is either an array of dependency names:
 
