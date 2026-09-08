@@ -67,7 +67,7 @@ Each rule declares `docs` (description, `recommended`), and `fixable` / `hasSugg
 
 A fix can only edit the linted file, so a rule comparing two `package.json` files must report on the file it can fix. `consistent-workspace-dependencies` lints every `package.json` of the workspace and compares it with all the others, each conflict being owned by exactly one of the two packages — the one whose range has to be raised, or for a conflict with no range to raise (invalid range, npm alias of another package) the one `ownsUnorderedConflicts` is true for, never the workspace root. `checkDuplicateDependencies` implements that through its `conflictOwnership` param, which the legacy API leaves unset: having no file to fix, it keeps reporting every conflict it finds.
 
-ESLint configs exported: `base` (language + plugin, no rules enabled) and `recommended` (10 of the 18 rules). There is no library config — see the `library` setting below. The 8 remaining rules (`require-identical-versions*`, `satisfies-versions*`) are opt-in, as they only make sense with options.
+ESLint configs exported: `base` (language + plugin, no rules enabled) and `recommended` (11 of the 19 rules, `report-warns` at `"warn"` and the rest at `"error"`). There is no library config — see the `library` setting below. The 8 remaining rules (`require-identical-versions*`, `satisfies-versions*`) are opt-in, as they only make sense with options.
 
 #### `meta.languages` and `meta.namespace`
 
@@ -130,7 +130,9 @@ The mocked filesystem is mounted on the current working directory, because the t
 
 Most rules accept an `onlyWarnsFor` option that downgrades specific errors to warnings. `createPackageRule` tracks which entries were actually used and reports unused `onlyWarnsFor` entries as errors (`checkOnlyWarnsForArray` / `checkOnlyWarnsForMapping`).
 
-A downgraded message is `console.warn`ed by `createPackageRule` instead of going through `context.report`, so it reaches neither ESLint's formatter, nor `--quiet`, nor the exit code.
+A rule cannot report on behalf of another rule, so a downgraded message is collected by `createPackageRule` in the store of `src/eslint/create-rule/onlyWarnsForWarnings.ts` — a `WeakMap` keyed on the `Package` ast node — and reported by the `report-warns` rule (`"warn"` in `recommended`) on `Package:exit`, which the traversal runs after every `Package` and `DependencyValue` visit whatever order ESLint ran the rules in. It therefore reaches the formatter, `--quiet` and `--max-warnings`, but not the exit code, and it carries no fix or suggestion so `--fix` never rewrites a deliberately downgraded dependency. Disabling `report-warns` silences downgraded messages entirely.
+
+`createPackageRule` also still `console.warn`s each downgraded message, transitionally, until `report-warns` has proven itself; both the `console.warn` and the tests asserting on it (`warn-message.test.ts`, `comment.test.ts`, one case of `report-warns.test.ts`) go away together.
 
 ## Build outputs
 

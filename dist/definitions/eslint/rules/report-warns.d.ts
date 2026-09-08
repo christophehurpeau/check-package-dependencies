@@ -1,4 +1,5 @@
-declare const rules: {
+import type { Rule } from "eslint";
+export declare const reportWarnsRule: {
     "report-warns": {
         meta: {
             type: "problem";
@@ -10,10 +11,9 @@ declare const rules: {
             };
             schema: never[];
         };
-        create(context: import("eslint").Rule.RuleContext): {
+        create(context: Rule.RuleContext): {
             "Package:exit"(): void;
         };
     };
 };
-export default rules;
-//# sourceMappingURL=rules.d.ts.map
+//# sourceMappingURL=report-warns.d.ts.map

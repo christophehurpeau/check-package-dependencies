@@ -27,6 +27,7 @@ interface CheckPackageDependenciesSettings {
      */
     potentialDirectories?: PotentialDirectoriesSetting;
 }
+export declare const documentationUrlBase = "https://github.com/christophehurpeau/check-package-dependencies/blob/main/documentation/rules";
 export interface PackageRuleDocs {
     description: string;
     /** enabled in the "recommended" config */

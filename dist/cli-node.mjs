@@ -927,6 +927,19 @@ const findWorkspaceRootPackageJson = (startDirname) => {
   return readAndParsePkgJson(root.packageJsonPath);
 };
 
+const warningsByPackageAst = /* @__PURE__ */ new WeakMap();
+function addOnlyWarnsForWarning(packageAst, warning) {
+  const warnings = warningsByPackageAst.get(packageAst);
+  if (warnings) {
+    warnings.push(warning);
+  } else {
+    warningsByPackageAst.set(packageAst, [warning]);
+  }
+}
+function getOnlyWarnsForWarnings(packageAst) {
+  return warningsByPackageAst.get(packageAst) ?? [];
+}
+
 const onlyWarnsForEntrySchema = {
   oneOf: [
     { type: "string" },
@@ -1026,6 +1039,11 @@ function createPackageRule(ruleName, schema, {
           const comment = details.comment ?? options.comment;
           const message = dependencyInfo + details.errorMessage + (details.errorDetails ? `: ${details.errorDetails}` : "") + (comment ? ` (${comment})` : "");
           if (isWarn) {
+            addOnlyWarnsForWarning(context.sourceCode.ast, {
+              message,
+              ruleName,
+              loc: location
+            });
             const locationString = location ? `:${location.start.line}:${location.start.column}` : "";
             console.warn(
               `[warn] ${context.filename}${locationString} ${message} - ${ruleName}`
@@ -1504,6 +1522,42 @@ const noRootWorkspaceDependenciesRule = createPackageRule(
     }
   }
 );
+
+const ruleName = "report-warns";
+const startOfFile = {
+  start: { line: 1, column: 1 },
+  end: { line: 1, column: 1 }
+};
+const reportWarnsRule = {
+  [ruleName]: {
+    meta: {
+      type: "problem",
+      languages: [packageJsonLanguageId],
+      docs: {
+        description: "Report the errors the other rules downgraded to warnings with their `onlyWarnsFor` option",
+        recommended: true,
+        url: `${documentationUrlBase}/${ruleName}.md`
+      },
+      schema: []
+    },
+    create(context) {
+      return {
+        // the traversal visits "Package" and every "DependencyValue" before this, so every
+        // rule downgrading an error has already collected it, whatever order eslint ran them in
+        "Package:exit"() {
+          for (const warning of getOnlyWarnsForWarnings(
+            context.sourceCode.ast
+          )) {
+            context.report({
+              message: `${warning.message} - ${warning.ruleName}`,
+              loc: warning.loc ?? startOfFile
+            });
+          }
+        }
+      };
+    }
+  }
+};
 
 const requireDirectPeerDependenciesRule = createPackageRule(
   "require-direct-peer-dependencies",
@@ -2679,7 +2733,8 @@ const rules = {
   ...satisfiesVersionsInDependencyRule,
   ...satisfiesVersionsBetweenDependenciesRule,
   ...consistentWorkspaceDependenciesRule,
-  ...requireWorkspaceProtocolRule
+  ...requireWorkspaceProtocolRule,
+  ...reportWarnsRule
 };
 
 const checkPackagePlugin = {
@@ -2713,7 +2768,8 @@ const checkPackagePlugin = {
         "check-package-dependencies/consistent-workspace-dependencies": "error",
         "check-package-dependencies/require-workspace-protocol": "error",
         "check-package-dependencies/min-range-dependencies-satisfies-dev-dependencies": "error",
-        "check-package-dependencies/min-range-peer-dependencies-satisfies-dependencies": "error"
+        "check-package-dependencies/min-range-peer-dependencies-satisfies-dependencies": "error",
+        "check-package-dependencies/report-warns": "warn"
       }
     }
   }
