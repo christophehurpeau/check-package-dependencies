@@ -1,2 +1,0 @@
-export declare const satisfiesVersionsFromDevDependenciesOfDependencyRule: Record<string, import("eslint").Rule.RuleModule>;
-//# sourceMappingURL=satisfies-versions-from-dev-dependencies-of-dependency.d.ts.map

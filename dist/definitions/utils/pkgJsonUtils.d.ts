@@ -1,9 +1,0 @@
-import type { PackageJson, ParsedPackageJson } from "./packageTypes.ts";
-export declare function readPkgJson(packagePath: string): PackageJson;
-export declare function stringifyPkgJson(pkg: PackageJson): string;
-export declare function parsePkg(packageContent: string, packagePath: string): ParsedPackageJson;
-export declare function parsePkgValue(pkg: unknown, packagePath?: string): ParsedPackageJson;
-export declare function readAndParsePkgJson(packagePath: string): ParsedPackageJson;
-/** @internal */
-export declare function internalLoadPackageJsonFromNodeModules(pkgDepName: string, pkgDirname: string): [path: string, pkg: PackageJson];
-//# sourceMappingURL=pkgJsonUtils.d.ts.map

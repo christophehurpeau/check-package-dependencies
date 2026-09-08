@@ -48,6 +48,9 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Build
+        run: pnpm run build
+
       - name: New version (dry run)
         if: github.ref == 'refs/heads/main' && inputs.dry-run
         run: pnpm exec pob-version --dry-run

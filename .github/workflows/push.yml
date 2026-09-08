@@ -59,6 +59,6 @@ jobs:
         with:
           fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./docs/coverage.lcov
+          files: ./generated-docs/coverage.lcov
           disable_search: true
         if: startsWith(matrix.node-version, '24.') && github.actor != 'dependabot[bot]'

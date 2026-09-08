@@ -4,7 +4,7 @@
       "enable": true
     },
     "lib": {
-      "documentation": true,
+      "documentation": false,
       "testing": {
         "codecov": true,
         "runner": "node"
