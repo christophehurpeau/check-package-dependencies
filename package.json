@@ -47,9 +47,10 @@
     "format:check": "oxfmt --check .",
     "generate:rules-docs": "node scripts/generate-rules-docs.js",
     "generate:rules-docs:check": "node scripts/generate-rules-docs.js --check",
-    "lint": "pnpm run format && tsc && pnpm run lint:eslint",
+    "lint": "pnpm run format && pnpm run lint:oxlint && tsc && pnpm run lint:eslint",
     "lint:eslint": "eslint --quiet .",
     "lint:eslint:package.json": "eslint --quiet package.json",
+    "lint:oxlint": "oxlint --quiet",
     "prepare": "pob-root-postinstall",
     "test": "TZ=UTC node --import ./src/test-setup.ts --test 'src/**/*.test.ts'",
     "test:coverage": "TZ=UTC node --import ./src/test-setup.ts --test --experimental-test-coverage --test-coverage-include=\"src/**/*.ts\" 'src/**/*.test.ts'",
@@ -67,8 +68,8 @@
   },
   "devDependencies": {
     "@eslint/core": "1.2.1",
-    "@pob/eslint-config": "67.1.1",
-    "@pob/rollup-esbuild": "10.0.0",
+    "@pob/eslint-config": "67.12.0",
+    "@pob/rollup-esbuild": "10.2.0",
     "@pob/root": "27.15.0",
     "@types/node": "24.10.4",
     "@types/semver": "7.8.0",
@@ -89,6 +90,13 @@
     "extends": [
       "@pob/root/commitlint-config"
     ]
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "^12.0.0",
+      "onFail": "ignore"
+    }
   },
   "engines": {
     "node": ">=22.18.0"
