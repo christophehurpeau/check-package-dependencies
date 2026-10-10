@@ -14,9 +14,7 @@ Every rule of `src/eslint/rules/` has a documentation file in `documentation/rul
 ```ts
 export const someRule = createPackageRule(
   "some-rule",
-  {
-    /* JSON schema of the options */
-  },
+  {/* JSON schema of the options */},
   {
     docs: {
       description: "Require something", // sentence case, no trailing dot, backticks around package.json fields

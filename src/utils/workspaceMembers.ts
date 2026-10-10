@@ -8,7 +8,7 @@ const readPackageJsonSafe = (
   packageJsonPath: string,
 ): PackageJson | undefined => {
   try {
-    // eslint-disable-next-line unicorn/prefer-json-parse-buffer -- JSON.parse's TS types require a string
+    // oxlint-disable-next-line unicorn-js/prefer-json-parse-buffer -- JSON.parse's TS types require a string
     return JSON.parse(fs.readFileSync(packageJsonPath, "utf8")) as PackageJson;
   } catch {
     return undefined;
@@ -28,7 +28,7 @@ interface WorkspaceRootLocation {
 const findWorkspaceRootLocation = (
   startDirname: string,
 ): WorkspaceRootLocation | undefined => {
-  for (let dirname = startDirname; ; ) {
+  for (let dirname = startDirname; ;) {
     const packageJsonPath = path.join(dirname, "package.json");
     const pkgValue = readPackageJsonSafe(packageJsonPath);
     if (pkgValue) {
