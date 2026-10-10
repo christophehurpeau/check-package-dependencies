@@ -2,7 +2,10 @@ import pobConfig from "@pob/eslint-config";
 import checkPackagePlugin from "./dist/eslint-plugin-node.mjs";
 
 export default [
-  ...pobConfig.configs.node,
+  // the published plugin pob's config brings would clash with the one built from this repository
+  ...pobConfig.configs.node.filter(
+    (config) => !config.plugins?.["check-package-dependencies"],
+  ),
   checkPackagePlugin.configs.recommended,
   {
     ignores: ["vite.config.ts", "fixtures/**/package.json"],
