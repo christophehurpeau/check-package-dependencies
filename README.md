@@ -14,6 +14,11 @@
   <a href="https://codecov.io/gh/christophehurpeau/check-package-dependencies"><img src="https://img.shields.io/codecov/c/github/christophehurpeau/check-package-dependencies/main.svg?style=flat-square"></a>
 </p>
 
+### Support
+
+If check-package-dependencies is useful to you, you can [support my work on Patreon](https://www.patreon.com/christophehurpeau).
+Your support helps me dedicate more time to maintaining and improving my open source projects.
+
 ### Install
 
 ```sh
