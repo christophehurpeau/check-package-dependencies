@@ -31,8 +31,8 @@ importers:
         specifier: 67.1.1
         version: 67.1.1(@typescript-eslint/utils@8.65.0(@typescript/typescript6@6.0.2)(eslint@10.8.1))(@typescript/typescript6@6.0.2)(eslint@10.8.1)
       '@pob/rollup-esbuild':
-        specifier: 10.2.0
-        version: 10.2.0(@typescript/typescript6@6.0.2)
+        specifier: 11.1.0
+        version: 11.1.0(@typescript/typescript6@6.0.2)
       '@pob/root':
         specifier: 27.2.1
         version: 27.2.1(@typescript-eslint/utils@8.65.0(@typescript/typescript6@6.0.2)(eslint@10.8.1))(@typescript/typescript6@6.0.2)(eslint@10.8.1)
@@ -484,15 +484,19 @@ packages:
       typescript:
         optional: true
 
-  '@pob/rollup-esbuild@10.2.0':
-    resolution: {integrity: sha512-W3GGrdQVO/TGMuw7wAuvK/8+03BtfrzhSFg7/JaEIfC/ipvkpNotLQycFdFjqkoHNldhuywuE/73783KXR3wsQ==}
+  '@pob/rollup-esbuild@11.1.0':
+    resolution: {integrity: sha512-pPZRQlW8nSwHqwp4jARVYeuJBWb02V/vUqN0gJldAE8j/4pdtDeKn+i5vPCRjbnj1MdS4pEGgZAnAuSdgj/UgA==}
     engines: {node: '>=22.18.0'}
     hasBin: true
     peerDependencies:
+      rollup: 4.60.4
       typescript: ^4.0.3 || ^5.0.0 || ^6.0.0 || ^7.0.0
+    peerDependenciesMeta:
+      rollup:
+        optional: true
 
-  '@pob/rollup@8.3.0':
-    resolution: {integrity: sha512-EkIcxwnlrsYgDIJnDN8rW3m8Mp+oPaXCky+dNy/n0TP2rbVy37E5PP7FMh15/t3nSwQDpVn3EQev9k+vdUMGmw==}
+  '@pob/rollup@8.4.0':
+    resolution: {integrity: sha512-o7wjgNK4tUFklJ/dRnSBB+Qsl/htOy3kvCdrOgGZQrvi9JOYXBIZlWgheLBlcV4Ks8fIcv9Pzr0pH95ig0plAQ==}
     engines: {node: '>=22.18.0'}
     hasBin: true
 
@@ -2558,9 +2562,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@pob/rollup-esbuild@10.2.0(@typescript/typescript6@6.0.2)':
+  '@pob/rollup-esbuild@11.1.0(@typescript/typescript6@6.0.2)':
     dependencies:
-      '@pob/rollup': 8.3.0
+      '@pob/rollup': 8.4.0
       '@rollup/plugin-node-resolve': 16.0.3(rollup@4.60.4)
       '@rollup/plugin-replace': 6.0.3(rollup@4.60.4)
       '@rollup/plugin-run': 3.1.0(rollup@4.60.4)
@@ -2572,7 +2576,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@pob/rollup@8.3.0':
+  '@pob/rollup@8.4.0':
     dependencies:
       rollup: 4.60.4
 
