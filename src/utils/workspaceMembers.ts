@@ -28,7 +28,7 @@ interface WorkspaceRootLocation {
 const findWorkspaceRootLocation = (
   startDirname: string,
 ): WorkspaceRootLocation | undefined => {
-  for (let dirname = startDirname; ; ) {
+  for (let dirname = startDirname; ;) {
     const packageJsonPath = path.join(dirname, "package.json");
     const pkgValue = readPackageJsonSafe(packageJsonPath);
     if (pkgValue) {
