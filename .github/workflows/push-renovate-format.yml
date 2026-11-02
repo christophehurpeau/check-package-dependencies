@@ -1,15 +1,18 @@
-name: Run Build on renovate update related to build
+name: Run format on renovate update
 
 on:
   push:
     branches:
-      - "renovate/rollup-**"
+      - "renovate/oxfmt-**"
+      - "renovate/major-oxfmt"
+      - "renovate/prettier-**"
+      - "renovate/major-prettier"
 
 permissions:
   contents: write
 
 jobs:
-  run-rollup-build:
+  run-format:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -18,8 +21,6 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v6
-        with:
-          version: 11
 
       - uses: actions/setup-node@v7
         with:
@@ -28,8 +29,8 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run Build
-        run: pnpm exec build
+      - name: Run format
+        run: pnpm run format
 
       - name: Check for added or modified files
         id: git-check-modified
@@ -41,5 +42,5 @@ jobs:
           git add .
           git -c user.name="Christophe Hurpeau" \
             -c user.email="christophehurpeau@users.noreply.github.com" \
-            commit -m "build: update dist" --author="github-actions[bot] <actions@github.com>"
+            commit -m "style: format" --author="github-actions[bot] <actions@github.com>"
           git push --no-verify

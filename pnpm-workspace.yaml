@@ -5,6 +5,7 @@ dedupePeerDependents: true
 minimumReleaseAge: 4320
 minimumReleaseAgeExclude:
   - "@pob/*"
+  - pob
   - pob-dependencies
   - check-package-dependencies
   - alouette
