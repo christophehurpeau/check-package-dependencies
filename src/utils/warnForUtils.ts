@@ -5,7 +5,7 @@ import { getEntries } from "./object.ts";
 export type OnlyWarnsForEntry = string | (Commented & { name: string });
 export type OnlyWarnsFor = OnlyWarnsForEntry[];
 export type OnlyWarnsForDependencyMapping = Record<
-  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
+  // oxlint-disable-next-line typescript/no-redundant-type-constituents
   string | "*",
   OnlyWarnsFor | undefined
 >;

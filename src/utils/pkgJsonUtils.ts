@@ -12,7 +12,7 @@ import type {
 import { resolveWorkspacesPackagesGlobs } from "./pnpmWorkspaceYaml.ts";
 
 if (typeof findPackageJSON !== "function") {
-  // eslint-disable-next-line unicorn/prefer-type-error
+  // oxlint-disable-next-line unicorn/prefer-type-error
   throw new Error("check-package-dependencies requires node >= 22.14.0");
 }
 

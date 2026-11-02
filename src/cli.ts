@@ -1,4 +1,4 @@
-/* eslint-disable no-console */
+/* oxlint-disable no-console */
 import fs, { constants } from "node:fs";
 import path from "node:path";
 import { parseArgs } from "node:util";
@@ -121,9 +121,10 @@ const parseCliArgsOrFail = (argv: string[]): CliOptions | undefined => {
   try {
     return parseCliArgs(argv);
   } catch (error) {
-    return failWith(
+    failWith(
       `${error instanceof Error ? error.message : String(error)}\n\n${usage}`,
     );
+    return;
   }
 };
 
@@ -132,9 +133,10 @@ const loadESLint = async (): Promise<typeof ESLintNamespace | undefined> => {
     const eslintModule = await import("eslint");
     return eslintModule.ESLint;
   } catch {
-    return failWith(
+    failWith(
       'check-package-dependencies requires "eslint" to be installed to run its cli:\n\n  npm install --save-dev eslint\n',
     );
+    return;
   }
 };
 
@@ -145,7 +147,8 @@ const resolvePackageJsonPathsOrFail = (
     return resolvePackageJsonPaths(directory);
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
-    return failWith(`No package.json found in "${directory}"`);
+    failWith(`No package.json found in "${directory}"`);
+    return;
   }
 };
 
