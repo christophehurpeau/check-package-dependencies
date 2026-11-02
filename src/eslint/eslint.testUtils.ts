@@ -80,7 +80,17 @@ export function mockFileSystem(files: MockedFiles): void {
     return content;
   };
 
-  mock.method(fs, "readFileSync", readFile);
+  // eslint loads its own modules lazily (ajv since 10.12): those reads are not the rules' reads
+  const readFileSync = fs.readFileSync;
+  const nodeModulesSegment = `${path.sep}node_modules${path.sep}`;
+  mock.method(
+    fs,
+    "readFileSync",
+    (...args: Parameters<typeof fs.readFileSync>) =>
+      String(args[0]).includes(nodeModulesSegment)
+        ? readFileSync(...args)
+        : readFile(args[0] as fs.PathLike),
+  );
   mock.method(fs, "accessSync", (target: fs.PathLike) => {
     readFile(target);
   });
