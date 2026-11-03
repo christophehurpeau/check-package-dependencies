@@ -28,8 +28,8 @@ importers:
         specifier: 1.2.1
         version: 1.2.1
       '@pob/eslint-config':
-        specifier: 68.0.0
-        version: 68.0.0(@typescript-eslint/utils@8.63.0(@typescript/typescript6@6.0.2)(eslint@10.14.0))(@typescript/typescript6@6.0.2)(eslint@10.14.0)
+        specifier: 68.1.0
+        version: 68.1.0(@typescript-eslint/utils@8.63.0(@typescript/typescript6@6.0.2)(eslint@10.14.0))(@typescript/typescript6@6.0.2)(eslint@10.14.0)
       '@pob/rollup-esbuild':
         specifier: 11.1.0
         version: 11.1.0(@typescript/typescript6@6.0.2)
@@ -625,8 +625,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@pob/eslint-config@68.0.0':
-    resolution: {integrity: sha512-pGv8kCnNAmBoaouw93KAyBNUQ3c1TyJkys5WNOCi1EwF6MG/akJcB+0eMUkFhWYyld7ATxIFnG7JgSrN3fkiMA==}
+  '@pob/eslint-config@68.1.0':
+    resolution: {integrity: sha512-VxXsXIRwcEieJOjxJ6wC2FfdtV+AsJHKk9Yo1fawGbHDe8s3tepiem9QRbtI1RN08jcMEN/JqpMSnXD2JMPV5A==}
     engines: {node: '>=22.18.0'}
     peerDependencies:
       eslint: ^10.8.0
@@ -2262,7 +2262,7 @@ snapshots:
   '@oxlint/binding-win32-x64-msvc@1.85.0':
     optional: true
 
-  '@pob/eslint-config@68.0.0(@typescript-eslint/utils@8.63.0(@typescript/typescript6@6.0.2)(eslint@10.14.0))(@typescript/typescript6@6.0.2)(eslint@10.14.0)':
+  '@pob/eslint-config@68.1.0(@typescript-eslint/utils@8.63.0(@typescript/typescript6@6.0.2)(eslint@10.14.0))(@typescript/typescript6@6.0.2)(eslint@10.14.0)':
     dependencies:
       '@eslint/json': 2.1.1
       '@pob/eslint-plugin': 67.0.0(@typescript/typescript6@6.0.2)(eslint@10.14.0)
