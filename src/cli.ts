@@ -1,4 +1,4 @@
-/* eslint-disable no-console */
+/* oxlint-disable no-console */
 import fs, { constants } from "node:fs";
 import path from "node:path";
 import { parseArgs } from "node:util";

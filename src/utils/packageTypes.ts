@@ -37,7 +37,6 @@ export interface DependencyValue {
   toString: () => string;
 }
 
-// eslint-disable-next-line @typescript-eslint/sort-type-constituents
 export type ParsedPackageJson = {
   readonly name: string;
   readonly path: string;

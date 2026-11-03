@@ -9,7 +9,7 @@ export const defaultPotentialDirectoriesSetting: PotentialDirectoriesSetting =
 
 const potentialDirectoriesSettings = new Set<string>(["off", "warn", "error"]);
 
-export const expectedPotentialDirectoriesSettings = `"off", "warn" or "error"`;
+export const expectedPotentialDirectoriesSettings = '"off", "warn" or "error"';
 
 export function isPotentialDirectoriesSetting(
   value: unknown,

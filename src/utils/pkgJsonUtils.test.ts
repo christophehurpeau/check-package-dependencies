@@ -1,7 +1,30 @@
 import { strict as assert } from "node:assert";
+import module, { syncBuiltinESMExports } from "node:module";
 import { describe, it } from "node:test";
 import type { ParsedPackageJson } from "./packageTypes.ts";
 import { parsePkg } from "./pkgJsonUtils.ts";
+
+describe("node version requirement", () => {
+  it("should throw when node:module has no findPackageJSON", async () => {
+    // oxlint-disable-next-line node-js/no-unsupported-features/node-builtins
+    const { findPackageJSON } = module;
+    Object.assign(module, { findPackageJSON: undefined });
+    syncBuiltinESMExports();
+    try {
+      // the query bypasses the module cache, so the module evaluates again
+      const freshModuleUrl = new URL(
+        "./pkgJsonUtils.ts?without-find-package-json",
+        import.meta.url,
+      ).href;
+      await assert.rejects(import(freshModuleUrl), {
+        message: "check-package-dependencies requires node >= 22.14.0",
+      });
+    } finally {
+      Object.assign(module, { findPackageJSON });
+      syncBuiltinESMExports();
+    }
+  });
+});
 
 describe("parsePkg", () => {
   const validPackageJson = `{

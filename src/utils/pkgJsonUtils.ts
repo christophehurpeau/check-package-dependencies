@@ -1,6 +1,6 @@
 // the default import keeps "fs.readFileSync" mockable, which the tests rely on
 import fs from "node:fs";
-// eslint-disable-next-line n/no-unsupported-features/node-builtins
+// oxlint-disable-next-line node-js/no-unsupported-features/node-builtins
 import { findPackageJSON } from "node:module";
 import type { ParseError } from "jsonc-parser";
 import { findNodeAtLocation, getNodeValue, parseTree } from "jsonc-parser";
@@ -12,12 +12,12 @@ import type {
 import { resolveWorkspacesPackagesGlobs } from "./pnpmWorkspaceYaml.ts";
 
 if (typeof findPackageJSON !== "function") {
-  // eslint-disable-next-line unicorn/prefer-type-error
+  // oxlint-disable-next-line unicorn/prefer-type-error
   throw new Error("check-package-dependencies requires node >= 22.14.0");
 }
 
 export function readPkgJson(packagePath: string): PackageJson {
-  // eslint-disable-next-line unicorn/prefer-json-parse-buffer -- JSON.parse's TS types require a string
+  // oxlint-disable-next-line unicorn-js/prefer-json-parse-buffer -- JSON.parse's TS types require a string
   return JSON.parse(fs.readFileSync(packagePath, "utf8")) as PackageJson;
 }
 

@@ -2,9 +2,10 @@ allowBuilds:
   esbuild: true
   unrs-resolver: true
 dedupePeerDependents: true
-minimumReleaseAge: 4320
+minimumReleaseAge: 3600
 minimumReleaseAgeExclude:
   - "@pob/*"
+  - pob
   - pob-dependencies
   - check-package-dependencies
   - alouette
