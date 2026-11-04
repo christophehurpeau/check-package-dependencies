@@ -17,7 +17,6 @@ if (typeof findPackageJSON !== "function") {
 }
 
 export function readPkgJson(packagePath: string): PackageJson {
-  // oxlint-disable-next-line unicorn-js/prefer-json-parse-buffer -- JSON.parse's TS types require a string
   return JSON.parse(fs.readFileSync(packagePath, "utf8")) as PackageJson;
 }
 
