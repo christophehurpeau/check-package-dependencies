@@ -34,8 +34,8 @@ importers:
         specifier: 11.4.0
         version: 11.4.0(@typescript/typescript6@6.0.2)
       '@pob/root':
-        specifier: 28.6.0
-        version: 28.6.0
+        specifier: 28.6.1
+        version: 28.6.1
       '@types/node':
         specifier: 24.10.4
         version: 24.10.4
@@ -668,8 +668,8 @@ packages:
     engines: {node: ^22.23.4 || ^24.22.1 || >=26.13.0}
     hasBin: true
 
-  '@pob/root@28.6.0':
-    resolution: {integrity: sha512-gxzNAwWVs4wGWUq7HAfXSOkOp04irITVAz2cMFpMIjt0WjA9RvTwYyvgrRDopU5ub5uxTmnQw5Q2dZCcO0CfKA==}
+  '@pob/root@28.6.1':
+    resolution: {integrity: sha512-Baq1/jyf390TFTrjfcslP6+YEWMlSZrFBxg/4PLEDb8Qb/M9MxRr9DZyXo00/Rl2FRLnpeknavqmqQoa5pzZ1A==}
     engines: {node: ^22.18.0 || >=24.14.1}
     hasBin: true
 
@@ -2479,7 +2479,7 @@ snapshots:
     dependencies:
       rollup: 4.67.3
 
-  '@pob/root@28.6.0':
+  '@pob/root@28.6.1':
     dependencies:
       '@commitlint/format': 21.2.3
       '@commitlint/lint': 21.2.4
