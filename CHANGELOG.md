@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [13.3.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v13.2.0...v13.3.0) (2026-11-06)
+
+### Features
+
+* **deps:** update dependency eslint to v10.14.0 ([#903](https://github.com/christophehurpeau/check-package-dependencies/issues/903))
+* report onlyWarnsFor downgrades through the "report-warns" rule ([#908](https://github.com/christophehurpeau/check-package-dependencies/issues/908))
+
+### Bug Fixes
+
+* **deps:** update browserslist, brace-expansion and handlebars to patched versions ([#910](https://github.com/christophehurpeau/check-package-dependencies/issues/910))
+* **deps:** update dependency @eslint/plugin-kit to ^0.7.3 ([#906](https://github.com/christophehurpeau/check-package-dependencies/issues/906))
+* **deps:** update vulnerable packages in test fixture lockfiles ([#911](https://github.com/christophehurpeau/check-package-dependencies/issues/911))
+* support non-semver specifiers such as link: in version checks
+
 ## [13.2.0](https://github.com/christophehurpeau/check-package-dependencies/compare/v13.1.0...v13.2.0) (2026-08-25)
 
 ### Features
