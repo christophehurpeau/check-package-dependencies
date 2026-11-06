@@ -1,3 +1,4 @@
+import path from "node:path";
 import semver from "semver";
 import type { ReportError } from "../reporting/ReportError.ts";
 import type {
@@ -5,7 +6,11 @@ import type {
   PackageJson,
   ParsedPackageJson,
 } from "../utils/packageTypes.ts";
-import { parseNpmAlias } from "../utils/semverUtils.ts";
+import {
+  isDistTag,
+  isSemverRange,
+  parseNpmAlias,
+} from "../utils/semverUtils.ts";
 import type { OnlyWarnsForCheck } from "../utils/warnForUtils.ts";
 import { warnDetails } from "../utils/warnForUtils.ts";
 
@@ -27,9 +32,31 @@ const compareRangeMinimumVersions = (
 ): RangeComparison => {
   const minVersion = semver.minVersion(range);
   const otherMinVersion = semver.minVersion(otherRange);
-  if (!minVersion || !otherMinVersion || semver.eq(minVersion, otherMinVersion))
+  if (
+    !minVersion ||
+    !otherMinVersion ||
+    semver.eq(minVersion, otherMinVersion)
+  ) {
     return "unordered";
+  }
   return semver.lt(minVersion, otherMinVersion) ? "lower" : "higher";
+};
+
+const localPathProtocols = ["link:", "portal:"];
+
+/**
+ * A `link:` or `portal:` path is relative to the package.json declaring it, so the same
+ * directory is written differently by two packages at different depths of a workspace.
+ */
+const resolveLocalPathSpecifier = (
+  spec: string,
+  packageJsonPath: string,
+): string => {
+  const protocol = localPathProtocols.find((localPathProtocol) =>
+    spec.startsWith(localPathProtocol),
+  );
+  if (!protocol) return spec;
+  return `${protocol}${path.resolve(path.dirname(packageJsonPath), spec.slice(protocol.length))}`;
 };
 
 export interface CheckDuplicateDependenciesParams {
@@ -39,6 +66,8 @@ export interface CheckDuplicateDependenciesParams {
   depType: DependencyTypes;
   searchIn: DependencyTypes[];
   depPkg: PackageJson;
+  /** The path of `depPkg`'s package.json, which its `link:` and `portal:` paths are relative to. */
+  depPkgPath: string;
   onlyWarnsForCheck: OnlyWarnsForCheck;
   /**
    * Set when `depPkg` is another package checked by the same rule, typically another package
@@ -55,6 +84,7 @@ export function checkDuplicateDependencies({
   depType,
   searchIn,
   depPkg,
+  depPkgPath,
   onlyWarnsForCheck,
   conflictOwnership,
 }: CheckDuplicateDependenciesParams): void {
@@ -168,14 +198,31 @@ export function checkDuplicateDependencies({
         const versionRange = versionAlias?.range ?? versionValue;
         const depRangeRange = depRangeAlias?.range ?? depRange;
 
-        const unsupportedRange = [versionRange, depRangeRange].find(
-          (range) => semver.validRange(range) === null,
+        const unsupportedSpecs = [versionRange, depRangeRange].filter(
+          (range) => !isSemverRange(range),
         );
+        const unsupportedRange = unsupportedSpecs[0];
         if (unsupportedRange !== undefined) {
-          if (ownsUnorderedConflicts) {
+          // a specifier that is not a semver range (link:, portal:, a git or url
+          // specifier...) can only be compared by equality
+          if (
+            resolveLocalPathSpecifier(versionRange, pkg.path) ===
+            resolveLocalPathSpecifier(depRangeRange, depPkgPath)
+          ) {
+            return;
+          }
+          if (!ownsUnorderedConflicts) return;
+          if (unsupportedSpecs.every((spec) => isDistTag(spec))) {
             reportError({
               errorMessage: `Unsupported range for "${depKey}"`,
               errorDetails: `"${unsupportedRange}" is not a valid semver range, "${versions[0]!.value}" cannot be compared with "${depRange}" from ${depPkg.name || ""} in ${depType}`,
+              ...warnDetails(onlyWarnsForCheck, depKey),
+              dependency,
+            });
+          } else {
+            reportError({
+              errorMessage: `Inconsistent non-semver dependency "${depKey}"`,
+              errorDetails: `"${versions[0]!.value}" and "${depRange}" from ${depPkg.name || ""} in ${depType} do not resolve to the same source, a specifier that is not a semver range only matching an identical one`,
               ...warnDetails(onlyWarnsForCheck, depKey),
               dependency,
             });

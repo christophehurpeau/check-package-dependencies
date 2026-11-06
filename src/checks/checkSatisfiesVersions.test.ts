@@ -35,6 +35,20 @@ describe("checkSatisfiesVersion", () => {
     assertNoMessages(messages);
   });
 
+  it("should report a link: specifier instead of throwing", () => {
+    check("link:../test", "^1.0.0");
+    assertSingleMessage(messages, {
+      errorMessage: "Invalid",
+      errorDetails: '"link:../test" should satisfies "^1.0.0"',
+      onlyWarns: undefined,
+      dependency: {
+        name: "test",
+        fieldName: "devDependencies",
+        value: "link:../test",
+      },
+    });
+  });
+
   it("should return an error when the range is not satisfied", () => {
     check("1.0.0", "^2.0.0");
     assertSingleMessage(messages, {

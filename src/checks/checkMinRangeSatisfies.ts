@@ -6,7 +6,7 @@ import type {
   DependencyValue,
   ParsedPackageJson,
 } from "../utils/packageTypes.ts";
-import { getRealVersion } from "../utils/semverUtils.ts";
+import { getRealVersion, isSemverRange } from "../utils/semverUtils.ts";
 
 export function checkDependencyMinRangeSatisfies(
   reportError: ReportError,
@@ -25,6 +25,9 @@ export function checkDependencyMinRangeSatisfies(
 
   const range2 = getRealVersion(depRange2.value);
   if (range2 === "*") return;
+
+  // link:, git, url... specifiers have no minimum version to compare
+  if (!isSemverRange(range1) || !isSemverRange(range2)) return;
 
   const minDepRange1 = semver.minVersion(range1)?.version || range1;
 

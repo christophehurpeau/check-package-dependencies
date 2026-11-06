@@ -1,3 +1,4 @@
+import semver from "semver";
 import type { SemVer } from "semver-utils";
 import semverUtils from "semver-utils";
 
@@ -89,4 +90,38 @@ export function getRealVersion(version: string): string {
   }
 
   return version;
+}
+
+/**
+ * Whether a dependency specifier is a semver range. Anything else — `link:`, `portal:`,
+ * `file:`, a git or url specifier, a dist-tag — cannot be ordered or intersected, and the
+ * `semver` functions that parse a range (`minVersion`, `intersects`) throw on it.
+ */
+export function isSemverRange(spec: string): boolean {
+  return semver.validRange(spec) !== null;
+}
+
+/** A dist-tag such as `next` or `latest`: an identifier with no protocol, path or version. */
+export function isDistTag(spec: string): boolean {
+  return /^[a-z][\w.-]*$/i.test(spec) && !isSemverRange(spec);
+}
+
+/** `semver.minVersion` for a specifier that may not be a range: null instead of a throw. */
+export function minVersionOrNull(spec: string): semver.SemVer | null {
+  return isSemverRange(spec) ? semver.minVersion(spec) : null;
+}
+
+/**
+ * `semver.intersects` for specifiers that may not be ranges. A specifier that is not a
+ * semver range can only be compared by equality, so two of them intersect when they are
+ * the same string, and one of them against a range never does.
+ */
+export function specsIntersect(
+  spec: string,
+  otherSpec: string,
+  options?: semver.RangeOptions,
+): boolean {
+  if (spec === otherSpec) return true;
+  if (!isSemverRange(spec) || !isSemverRange(otherSpec)) return false;
+  return semver.intersects(spec, otherSpec, options);
 }

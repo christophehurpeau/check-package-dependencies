@@ -3,7 +3,11 @@ import { describe, it } from "node:test";
 import {
   changeOperator,
   getRealVersion,
+  isDistTag,
+  isSemverRange,
+  minVersionOrNull,
   parseNpmAlias,
+  specsIntersect,
 } from "./semverUtils.ts";
 
 describe("changeOperator", () => {
@@ -75,5 +79,43 @@ describe("parseNpmAlias", () => {
       aliasedName: "@scope/pkg",
       range: "*",
     });
+  });
+});
+
+describe("non-semver specifiers", () => {
+  it("isSemverRange should only accept semver ranges", () => {
+    assert.equal(isSemverRange("^1.0.0"), true);
+    assert.equal(isSemverRange("*"), true);
+    assert.equal(isSemverRange("link:../sdk"), false);
+    assert.equal(isSemverRange("next"), false);
+  });
+
+  it("isDistTag should only accept bare tags", () => {
+    assert.equal(isDistTag("next"), true);
+    assert.equal(isDistTag("latest"), true);
+    assert.equal(isDistTag("^1.0.0"), false);
+    assert.equal(isDistTag("link:../sdk"), false);
+    assert.equal(isDistTag("owner/repo"), false);
+  });
+
+  it("minVersionOrNull should not throw", () => {
+    assert.equal(minVersionOrNull("^1.2.0")?.version, "1.2.0");
+    assert.equal(minVersionOrNull("link:../sdk"), null);
+  });
+
+  it("specsIntersect should compare non-semver specifiers by equality", () => {
+    assert.equal(specsIntersect("^1.0.0", "~1.2.0"), true);
+    assert.equal(specsIntersect("^1.0.0", "^2.0.0"), false);
+    assert.equal(specsIntersect("link:../sdk", "link:../sdk"), true);
+    assert.equal(specsIntersect("link:../sdk", "link:../other"), false);
+    assert.equal(specsIntersect("link:../sdk", "^1.0.0"), false);
+  });
+
+  it("specsIntersect should pass the range options to semver", () => {
+    assert.equal(specsIntersect("1.0.0-beta.1", "<1.0.0"), false);
+    assert.equal(
+      specsIntersect("1.0.0-beta.1", "<1.0.0", { includePrerelease: true }),
+      true,
+    );
   });
 });

@@ -6,7 +6,11 @@ import type {
   PackageJson,
   ParsedPackageJson,
 } from "../utils/packageTypes.ts";
-import { getRealVersion } from "../utils/semverUtils.ts";
+import {
+  getRealVersion,
+  isSemverRange,
+  specsIntersect,
+} from "../utils/semverUtils.ts";
 import type { OnlyWarnsForCheck } from "../utils/warnForUtils.ts";
 import { warnDetails } from "../utils/warnForUtils.ts";
 
@@ -41,6 +45,9 @@ export function checkSatisfiesPeerDependency(
     if (version === "*" || version.startsWith("patch:")) {
       return;
     }
+
+    // link:, git, url... specifiers have no version to compare with the peer range
+    if (!isSemverRange(version)) return;
 
     const minVersionOfVersion = semver.minVersion(version);
     if (
@@ -115,7 +122,7 @@ export function checkPeerDependencies(
       if (providedDependenciesForDepName.length > 0) {
         if (
           providedDependenciesForDepName.every(([, depRange]) =>
-            semver.intersects(range, getRealVersion(depRange)),
+            specsIntersect(range, getRealVersion(depRange)),
           )
         ) {
           if (process.env.REPORT_PROVIDED_PEER_DEPENDENCIES) {

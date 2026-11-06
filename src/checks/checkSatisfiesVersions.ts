@@ -7,7 +7,7 @@ import type {
   DependencyValue,
   ParsedPackageJson,
 } from "../utils/packageTypes.ts";
-import { getRealVersion } from "../utils/semverUtils.ts";
+import { getRealVersion, minVersionOrNull } from "../utils/semverUtils.ts";
 import type { OnlyWarnsForCheck } from "../utils/warnForUtils.ts";
 import { warnDetails } from "../utils/warnForUtils.ts";
 
@@ -20,7 +20,7 @@ export function isVersionSatisfiesRange(
   // package's own version; there is nothing to range-check, treat as satisfied.
   if (realVersion === "*") return true;
 
-  const minVersionOfVersion = semver.minVersion(realVersion);
+  const minVersionOfVersion = minVersionOrNull(realVersion);
   return (
     !!minVersionOfVersion &&
     semver.satisfies(minVersionOfVersion, getRealVersion(range), {

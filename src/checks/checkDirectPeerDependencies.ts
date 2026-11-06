@@ -1,4 +1,3 @@
-import semver from "semver";
 import type { ReportError } from "../reporting/ReportError.ts";
 import type { GetDependencyPackageJson } from "../utils/createGetDependencyPackageJson.ts";
 import { getKeys } from "../utils/object.ts";
@@ -8,7 +7,7 @@ import type {
   ParsedPackageJson,
   RegularDependencyTypes,
 } from "../utils/packageTypes.ts";
-import { getRealVersion } from "../utils/semverUtils.ts";
+import { getRealVersion, specsIntersect } from "../utils/semverUtils.ts";
 import type { OnlyWarnsForMappingCheck } from "../utils/warnForUtils.ts";
 import { checkPeerDependencies } from "./checkPeerDependencies.ts";
 
@@ -69,7 +68,7 @@ export function checkDirectPeerDependencies(
         type: depType,
         pkg: depPkg,
         hasDirectMatchingPeerDependency: pkg.peerDependencies?.[depName]
-          ? semver.intersects(
+          ? specsIntersect(
               getRealVersion(dependencies[depName]!.value),
               getRealVersion(pkg.peerDependencies[depName].value),
             )

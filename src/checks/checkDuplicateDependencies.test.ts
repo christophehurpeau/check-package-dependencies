@@ -1,6 +1,7 @@
 import { describe, it } from "node:test";
 import {
   assertNoMessages,
+  assertSeveralMessages,
   assertSingleMessage,
   createMockReportError,
 } from "../reporting/ReportError.testUtils.ts";
@@ -26,6 +27,7 @@ describe("checkDuplicateDependencies", () => {
         name: "some-lib-using-rollup",
         dependencies: { rollup: "^2.0.0" },
       },
+      depPkgPath: "other-package/package.json",
       onlyWarnsForCheck: createOnlyWarnsForArrayCheck("test", []),
     });
 
@@ -51,6 +53,7 @@ describe("checkDuplicateDependencies", () => {
         name: "some-lib-using-rollup",
         dependencies: { rollup: "^1.0.0" },
       },
+      depPkgPath: "other-package/package.json",
       onlyWarnsForCheck: createOnlyWarnsForArrayCheck("test", []),
     });
 
@@ -80,6 +83,7 @@ describe("checkDuplicateDependencies", () => {
         name: "some-lib-using-rollup",
         dependencies: { rollup: "^2.0.0" },
       },
+      depPkgPath: "other-package/package.json",
       onlyWarnsForCheck: createOnlyWarnsForArrayCheck("test", []),
     });
 
@@ -113,6 +117,7 @@ describe("checkDuplicateDependencies", () => {
         name: "some-lib-using-rollup",
         dependencies: { rollup: "^1.0.0-beta.0" },
       },
+      depPkgPath: "other-package/package.json",
       onlyWarnsForCheck: createOnlyWarnsForArrayCheck("test", []),
     });
 
@@ -136,6 +141,7 @@ describe("checkDuplicateDependencies", () => {
         name: "some-lib-using-rollup",
         dependencies: { rollup: "^2.0.0" },
       },
+      depPkgPath: "other-package/package.json",
       onlyWarnsForCheck: createOnlyWarnsForArrayCheck("test", ["rollup"]),
     });
 
@@ -169,6 +175,7 @@ describe("checkDuplicateDependencies", () => {
         name: "some-lib-using-rollup",
         peerDependencies: { rollup: "^1.0.0" },
       },
+      depPkgPath: "other-package/package.json",
       onlyWarnsForCheck: createOnlyWarnsForArrayCheck("test", []),
     });
 
@@ -192,6 +199,7 @@ describe("checkDuplicateDependencies", () => {
         name: "some-lib-using-rollup",
         peerDependencies: { rollup: "^2.0.0" },
       },
+      depPkgPath: "other-package/package.json",
       onlyWarnsForCheck: createOnlyWarnsForArrayCheck("test", []),
     });
 
@@ -225,6 +233,7 @@ describe("checkDuplicateDependencies", () => {
         name: "some-lib-using-typescript",
         dependencies: { typescript: "npm:@typescript/typescript6@^6.0.0" },
       },
+      depPkgPath: "other-package/package.json",
       onlyWarnsForCheck: createOnlyWarnsForArrayCheck("test", []),
     });
 
@@ -248,6 +257,7 @@ describe("checkDuplicateDependencies", () => {
         name: "some-lib-using-typescript",
         dependencies: { typescript: "npm:@typescript/typescript6@^7.0.0" },
       },
+      depPkgPath: "other-package/package.json",
       onlyWarnsForCheck: createOnlyWarnsForArrayCheck("test", []),
     });
 
@@ -281,6 +291,7 @@ describe("checkDuplicateDependencies", () => {
         name: "some-lib-using-typescript",
         dependencies: { typescript: "^5.0.0" },
       },
+      depPkgPath: "other-package/package.json",
       onlyWarnsForCheck: createOnlyWarnsForArrayCheck("test", []),
     });
 
@@ -314,6 +325,7 @@ describe("checkDuplicateDependencies", () => {
         name: "some-lib-using-typescript",
         dependencies: { typescript: "npm:other-typescript@1.0.0" },
       },
+      depPkgPath: "other-package/package.json",
       onlyWarnsForCheck: createOnlyWarnsForArrayCheck("test", []),
     });
 
@@ -347,6 +359,7 @@ describe("checkDuplicateDependencies", () => {
         name: "some-lib-using-rollup",
         dependencies: { rollup: "^2.0.0" },
       },
+      depPkgPath: "other-package/package.json",
       onlyWarnsForCheck: createOnlyWarnsForArrayCheck("test", []),
     });
 
@@ -380,6 +393,7 @@ describe("checkDuplicateDependencies", () => {
         name: "some-lib-using-typescript",
         dependencies: { typescript: "npm:@typescript/typescript6@next" },
       },
+      depPkgPath: "other-package/package.json",
       onlyWarnsForCheck: createOnlyWarnsForArrayCheck("test", []),
     });
 
@@ -413,6 +427,7 @@ describe("checkDuplicateDependencies", () => {
         name: "some-lib-using-rollup",
         dependencies: { rollup: "latest" },
       },
+      depPkgPath: "other-package/package.json",
       onlyWarnsForCheck: createOnlyWarnsForArrayCheck("test", []),
     });
     assertNoMessages(messages);
@@ -428,19 +443,26 @@ describe("checkDuplicateDependencies with conflictOwnership", () => {
     /** the range of the other package it is compared with */
     depRange: string;
     ownsUnorderedConflicts?: boolean;
+    pkgPath?: string;
+    depPkgPath?: string;
   }
 
   const checkWithOwnership = ({
     version,
     depRange,
     ownsUnorderedConflicts = true,
+    pkgPath = "packages/checked-package/package.json",
+    depPkgPath = "packages/other-package/package.json",
   }: CheckWithOwnershipParams): void => {
     checkDuplicateDependencies({
       reportError: mockReportError,
-      pkg: parsePkgValue({
-        name: "checked-package",
-        devDependencies: { rollup: version },
-      }),
+      pkg: parsePkgValue(
+        {
+          name: "checked-package",
+          devDependencies: { rollup: version },
+        },
+        pkgPath,
+      ),
       isPkgLibrary: false,
       depType: "devDependencies",
       searchIn: ["devDependencies"],
@@ -448,6 +470,7 @@ describe("checkDuplicateDependencies with conflictOwnership", () => {
         name: "other-package",
         devDependencies: { rollup: depRange },
       },
+      depPkgPath,
       onlyWarnsForCheck: createOnlyWarnsForArrayCheck("test", []),
       conflictOwnership: { ownsUnorderedConflicts },
     });
@@ -566,5 +589,142 @@ describe("checkDuplicateDependencies with conflictOwnership", () => {
     });
 
     assertNoMessages(messages);
+  });
+
+  describe("non-semver specifiers", () => {
+    const link = "link:../../../reviewflow/packages/sdk";
+
+    it("should not report identical link: specifiers", () => {
+      checkWithOwnership({ version: link, depRange: link });
+      checkWithOwnership({
+        version: link,
+        depRange: link,
+        ownsUnorderedConflicts: false,
+      });
+
+      assertNoMessages(messages);
+    });
+
+    for (const spec of [
+      "portal:../sdk",
+      "git+https://github.com/owner/repo.git#v1.0.0",
+      "github:owner/repo#main",
+      "owner/repo",
+      "https://example.com/sdk.tgz",
+    ]) {
+      it(`should not report the identical specifier ${spec}`, () => {
+        checkWithOwnership({ version: spec, depRange: spec });
+
+        assertNoMessages(messages);
+      });
+    }
+
+    it("should not report link: paths to the same directory from different depths", () => {
+      checkWithOwnership({
+        version: "link:../../../sdk",
+        depRange: "link:../sdk",
+        depPkgPath: "package.json",
+      });
+      checkWithOwnership({
+        version: "portal:../../../sdk",
+        depRange: "portal:../sdk",
+        depPkgPath: "package.json",
+      });
+
+      assertNoMessages(messages);
+    });
+
+    it("should report identical link: strings pointing to different directories", () => {
+      checkWithOwnership({
+        version: "link:../sdk",
+        depRange: "link:../sdk",
+        depPkgPath: "package.json",
+      });
+
+      assertSingleMessage(messages, {
+        errorMessage: 'Inconsistent non-semver dependency "rollup"',
+        errorDetails:
+          '"link:../sdk" and "link:../sdk" from other-package in devDependencies do not resolve to the same source, a specifier that is not a semver range only matching an identical one',
+        onlyWarns: false,
+        dependency: {
+          name: "rollup",
+          fieldName: "devDependencies",
+          value: "link:../sdk",
+        },
+      });
+    });
+
+    it("should report differing link: paths", () => {
+      checkWithOwnership({
+        version: "link:../sdk",
+        depRange: "link:../../sdk",
+      });
+
+      assertSingleMessage(messages, {
+        errorMessage: 'Inconsistent non-semver dependency "rollup"',
+        errorDetails:
+          '"link:../sdk" and "link:../../sdk" from other-package in devDependencies do not resolve to the same source, a specifier that is not a semver range only matching an identical one',
+        onlyWarns: false,
+        dependency: {
+          name: "rollup",
+          fieldName: "devDependencies",
+          value: "link:../sdk",
+        },
+      });
+    });
+
+    it("should report a link: specifier against a semver range, on either side", () => {
+      checkWithOwnership({ version: "link:../sdk", depRange: "^2.0.0" });
+      checkWithOwnership({ version: "^2.0.0", depRange: "link:../sdk" });
+
+      assertSeveralMessages(
+        messages,
+        ["link:../sdk", "^2.0.0"].map((value, index) => ({
+          errorMessage: 'Inconsistent non-semver dependency "rollup"',
+          errorDetails: `"${value}" and "${index === 0 ? "^2.0.0" : "link:../sdk"}" from other-package in devDependencies do not resolve to the same source, a specifier that is not a semver range only matching an identical one`,
+          onlyWarns: false,
+          dependency: {
+            name: "rollup",
+            fieldName: "devDependencies",
+            value,
+          },
+        })),
+      );
+    });
+
+    it("should report a link: specifier against a git specifier", () => {
+      checkWithOwnership({
+        version: "link:../sdk",
+        depRange: "github:owner/repo",
+      });
+
+      assertSingleMessage(messages, {
+        errorMessage: 'Inconsistent non-semver dependency "rollup"',
+        errorDetails:
+          '"link:../sdk" and "github:owner/repo" from other-package in devDependencies do not resolve to the same source, a specifier that is not a semver range only matching an identical one',
+        onlyWarns: false,
+        dependency: {
+          name: "rollup",
+          fieldName: "devDependencies",
+          value: "link:../sdk",
+        },
+      });
+    });
+
+    it("should not report a differing link: when it does not own unordered conflicts", () => {
+      checkWithOwnership({
+        version: "link:../sdk",
+        depRange: "^2.0.0",
+        ownsUnorderedConflicts: false,
+      });
+
+      assertNoMessages(messages);
+    });
+
+    it("should not report identical dist-tags", () => {
+      checkWithOwnership({ version: "next", depRange: "next" });
+
+      assertNoMessages(messages);
+    });
   });
 });

@@ -140,6 +140,7 @@ export const consistentWorkspaceDependenciesRule = createPackageRule(
               depType,
               searchIn,
               depPkg: otherPkg.value,
+              depPkgPath: otherPkg.path,
               onlyWarnsForCheck: onlyWarnsForMappingCheck.createFor(
                 otherPkg.name,
               ),

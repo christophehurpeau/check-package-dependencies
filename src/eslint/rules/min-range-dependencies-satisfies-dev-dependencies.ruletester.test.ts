@@ -19,6 +19,18 @@ tester.run(
         code: `${JSON.stringify(
           {
             name: "test",
+            dependencies: { foo: "link:../foo" },
+            devDependencies: { foo: "link:../foo" },
+          },
+          null,
+          2,
+        )}\n`,
+        filename: "/tmp/package.json",
+      },
+      {
+        code: `${JSON.stringify(
+          {
+            name: "test",
             dependencies: { foo: "^2.0.0" },
             devDependencies: { foo: "^2.0.0" },
           },

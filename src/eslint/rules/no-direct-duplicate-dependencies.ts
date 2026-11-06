@@ -51,7 +51,7 @@ export const noDirectDuplicateDependenciesRule =
           return;
         }
 
-        const [depPkg] = getDependencyPackageJson(node.name);
+        const [depPkg, depPkgPath] = getDependencyPackageJson(node.name);
         checkDuplicateDependencies({
           reportError,
           pkg,
@@ -59,6 +59,7 @@ export const noDirectDuplicateDependenciesRule =
           depType: "dependencies",
           searchIn,
           depPkg,
+          depPkgPath,
           onlyWarnsForCheck: onlyWarnsForMappingCheck.createFor(node.name),
         });
       },

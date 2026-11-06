@@ -10,7 +10,7 @@ The rule reads the `dependencies` of each of your direct dependencies and compar
 
 While doing so, it also reports the checked dependencies declared in both `dependencies` and `devDependencies`, unless the package is a library (`library` setting) and the two values differ, which is the intended way to declare a range for consumers and an exact version for development.
 
-Values using `latest`, `file:`, `workspace:` or `patch:`, and dependencies having an entry in `resolutions`, are ignored.
+Values using `latest`, `file:`, `workspace:` or `patch:`, and dependencies having an entry in `resolutions`, are ignored. Other specifiers that are not semver ranges, such as `link:`, `portal:`, git or url specifiers, are only consistent with an identical one, `link:` and `portal:` paths being resolved from the directory of the `package.json` declaring them.
 
 ## Fail
 

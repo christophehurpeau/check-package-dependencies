@@ -5,7 +5,7 @@ import type { Commented } from "../utils/comments.ts";
 import { omitComment } from "../utils/comments.ts";
 import { getEntries } from "../utils/object.ts";
 import type { DependenciesRanges, PackageJson } from "../utils/packageTypes.ts";
-import { getRealVersion } from "../utils/semverUtils.ts";
+import { getRealVersion, specsIntersect } from "../utils/semverUtils.ts";
 
 export function checkSatisfiesVersionsInDependency(
   reportError: ReportError,
@@ -58,12 +58,10 @@ export function checkSatisfiesVersionsInDependency(
             includePrerelease: true,
           },
         ) &&
-        !semver.intersects(
+        !specsIntersect(
           getRealVersion(dependencies[dependencyName]),
           dependencyRange,
-          {
-            includePrerelease: true,
-          },
+          { includePrerelease: true },
         )
       ) {
         reportError({

@@ -16,6 +16,8 @@ Ranges that cannot be ordered have no range to raise, and are reported without a
 
 Values that do not describe a published range are ignored, as in the other duplicate checks: `latest`, `workspace:`, `file:` and `patch:`, as well as a dependency covered by a `resolutions` entry.
 
+Other specifiers that are not semver ranges, such as `link:`, `portal:`, git or url specifiers, can only be compared by equality: two packages declaring the same one are consistent, and anything else is reported without a fix. `link:` and `portal:` paths are resolved from the directory of the `package.json` declaring them, so `link:../sdk` in the root and `link:../../../sdk` in `packages/app` are the same directory.
+
 On a workspace package, the rule additionally checks the peer dependencies of its own dependencies against the `devDependencies` of the workspace root, which is where a workspace package usually gets them from. The ones already declared by the package itself are left to [require-direct-peer-dependencies](require-direct-peer-dependencies.md).
 
 Each package is checked as a library or not by resolving the [`library` setting](../../README.md#settings) against itself: with the default `"auto"` a private package is not a library, and a list of package name patterns lets a single config classify every package of the workspace.
