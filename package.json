@@ -70,7 +70,7 @@
   "devDependencies": {
     "@eslint/core": "1.2.1",
     "@pob/eslint-config": "68.4.0",
-    "@pob/rollup-esbuild": "11.4.0",
+    "@pob/rollup-esbuild": "11.5.0",
     "@pob/root": "28.7.0",
     "@types/node": "24.10.4",
     "@types/semver": "7.8.0",
