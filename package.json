@@ -69,15 +69,15 @@
   },
   "devDependencies": {
     "@eslint/core": "1.2.1",
-    "@pob/eslint-config": "68.4.0",
-    "@pob/rollup-esbuild": "11.4.0",
-    "@pob/root": "28.7.0",
+    "@pob/eslint-config": "68.5.0",
+    "@pob/rollup-esbuild": "11.5.0",
+    "@pob/root": "28.8.0",
     "@types/node": "24.10.4",
     "@types/semver": "7.8.0",
     "@types/semver-utils": "1.1.3",
     "@typescript/native": "npm:typescript@7.0.2",
     "eslint": "10.14.0",
-    "tsrs": "0.20.1-ts7.1.0-beta",
+    "tsrs": "0.24.0-ts7.1.0-beta",
     "typescript": "npm:@typescript/typescript6@6.0.2"
   },
   "peerDependencies": {
