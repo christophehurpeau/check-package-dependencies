@@ -65,7 +65,7 @@
     "jsonc-parser": "^3.3.1",
     "semver": "^7.0.0",
     "semver-utils": "^1.1.4",
-    "type-fest": "^4.37.0 || ^5.1.0"
+    "type-fest": "^4.37.0 || ^5.1.0 || ^6.0.0"
   },
   "devDependencies": {
     "@eslint/core": "1.2.1",
